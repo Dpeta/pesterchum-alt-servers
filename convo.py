@@ -373,7 +373,7 @@ class PesterText(QtGui.QTextEdit):
                         verb = window.theme["convo/text/idle"]
                         idlemsg = me.idlemsg(systemColor, verb)
                         parent.textArea.append(convertTags(idlemsg))
-                        window.chatlog.log(parent.title(), idlemsg)
+                        window.chatlog.log(chum.handle, idlemsg)
                         parent.messageSent.emit("PESTERCHUM:IDLE", parent.title())
                 self.lastmsg = datetime.now()
                 window.chatlog.log(chum.handle, lexmsg)
