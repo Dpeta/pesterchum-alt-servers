@@ -1,5 +1,5 @@
 import os, sys, re, ostools
-from PyQt5 import QtWidgets, QtCore
+from PyQt4 import QtGui, QtCore
 
 class ScriptQuirks(object):
     def __init__(self):
@@ -66,7 +66,7 @@ class ScriptQuirks(object):
                     continue
             except Exception, e:
                 print "Error loading %s: %s (in quirks.py)" % (os.path.basename(name), e)
-                msgbox = QtWidgets.QMessageBox()
+                msgbox = QtGui.QMessageBox()
                 msgbox.setWindowTitle("Error!")
                 msgbox.setText("Error loading %s: %s (in quirks.py)" % (os.path.basename(filename), e))
                 msgbox.exec_()

@@ -1,4 +1,4 @@
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt4 import QtGui, QtCore
 from datetime import timedelta
 
 class mysteryTime(timedelta):
@@ -41,7 +41,7 @@ class PesterIcon(QtGui.QIcon):
             except IndexError:
                 return None
 
-class RightClickList(QtWidgets.QListWidget):
+class RightClickList(QtGui.QListWidget):
     def contextMenuEvent(self, event):
         #fuckin Qt
         if event.reason() == QtGui.QContextMenuEvent.Mouse:
@@ -53,7 +53,7 @@ class RightClickList(QtWidgets.QListWidget):
     def getOptionsMenu(self):
         return self.optionsMenu
 
-class RightClickTree(QtWidgets.QTreeWidget):
+class RightClickTree(QtGui.QTreeWidget):
     def contextMenuEvent(self, event):
         if event.reason() == QtGui.QContextMenuEvent.Mouse:
             listing = self.itemAt(event.pos())
@@ -64,37 +64,41 @@ class RightClickTree(QtWidgets.QTreeWidget):
     def getOptionsMenu(self):
         return self.optionsMenu
 
-class MultiTextDialog(QtWidgets.QDialog):
+class MultiTextDialog(QtGui.QDialog):
     def __init__(self, title, parent, *queries):
-        QtWidgets.QDialog.__init__(self, parent)
+        QtGui.QDialog.__init__(self, parent)
         self.setWindowTitle(title)
         if len(queries) == 0:
             return
         self.inputs = {}
-        layout_1 = QtWidgets.QHBoxLayout()
+        layout_1 = QtGui.QHBoxLayout()
         for d in queries:
             label = d["label"]
             inputname = d["inputname"]
             value = d.get("value", "")
-            l = QtWidgets.QLabel(label, self)
+            l = QtGui.QLabel(label, self)
             layout_1.addWidget(l)
-            self.inputs[inputname] = QtWidgets.QLineEdit(value, self)
+            self.inputs[inputname] = QtGui.QLineEdit(value, self)
             layout_1.addWidget(self.inputs[inputname])
-        self.ok = QtWidgets.QPushButton("OK", self, clicked=self.accept)
+        self.ok = QtGui.QPushButton("OK", self)
         self.ok.setDefault(True)
-        self.cancel = QtWidgets.QPushButton("CANCEL", self, clicked=self.reject)
-        layout_ok = QtWidgets.QHBoxLayout()
+        self.connect(self.ok, QtCore.SIGNAL('clicked()'),
+                     self, QtCore.SLOT('accept()'))
+        self.cancel = QtGui.QPushButton("CANCEL", self)
+        self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
+                     self, QtCore.SLOT('reject()'))
+        layout_ok = QtGui.QHBoxLayout()
         layout_ok.addWidget(self.cancel)
         layout_ok.addWidget(self.ok)
 
-        layout_0 = QtWidgets.QVBoxLayout()
+        layout_0 = QtGui.QVBoxLayout()
         layout_0.addLayout(layout_1)
         layout_0.addLayout(layout_ok)
 
         self.setLayout(layout_0)
     def getText(self):
         r = self.exec_()
-        if r == QtWidgets.QDialog.Accepted:
+        if r == QtGui.QDialog.Accepted:
             retval = {}
             for (name, widget) in self.inputs.iteritems():
                 retval[name] = unicode(widget.text())
@@ -102,9 +106,9 @@ class MultiTextDialog(QtWidgets.QDialog):
         else:
             return None
 
-class MovingWindow(QtWidgets.QFrame):
+class MovingWindow(QtGui.QFrame):
     def __init__(self, *x, **y):
-        QtWidgets.QFrame.__init__(self, *x, **y)
+        QtGui.QFrame.__init__(self, *x, **y)
         self.moving = None
         self.moveupdate = 0
     def mouseMoveEvent(self, event):
@@ -127,9 +131,9 @@ class NoneSound(object):
     def play(self): pass
     def set_volume(self, v): pass
 
-class WMButton(QtWidgets.QPushButton):
+class WMButton(QtGui.QPushButton):
     def __init__(self, icon, parent=None):
-        QtWidgets.QPushButton.__init__(self, icon, "", parent)
+        QtGui.QPushButton.__init__(self, icon, "", parent)
         self.setIconSize(icon.realsize())
         self.resize(icon.realsize())
         self.setFlat(True)

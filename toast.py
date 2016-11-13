@@ -2,7 +2,7 @@ import inspect
 import threading
 import time, os
 import ostools
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt4 import QtGui, QtCore
 
 try:
     import pynotify
@@ -10,12 +10,11 @@ except:
     pynotify = None
 
 class DefaultToast(object):
-    def __init__(self, parent, **kwds):
-        super(DefaultToast, self).__init__(parent, **kwds)
-        self.machine = kwds.get('machine')
-        self.title   = kwds.get('title')
-        self.msg     = kwds.get('msg')
-        self.icon    = kwds.get('icon')
+    def __init__(self, machine, title, msg, icon):
+        self.machine = machine
+        self.title   = title
+        self.msg     = msg
+        self.icon    = icon
     def show(self):
         print self.title, self.msg, self.icon
         self.done()
@@ -177,9 +176,9 @@ class ToastMachine(object):
                 self.showNext()
 
 
-class PesterToast(QtWidgets.QWidget, DefaultToast):
+class PesterToast(QtGui.QWidget, DefaultToast):
     def __init__(self, machine, title, msg, icon, time=3000, parent=None):
-        super(PesterToast, self).__init__(self, parent, machine=machine, title=title, msg=msg, icon=icon)
+        QtGui.QWidget.__init__(self, parent)
 
         self.machine = machine
         self.time = time
@@ -190,31 +189,33 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
             self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.X11BypassWindowManagerHint | QtCore.Qt.ToolTip)
 
         self.m_animation = QtCore.QParallelAnimationGroup()
-        anim = QtCore.QPropertyAnimation(self, finished=self.reverseTrigger)
+        anim = QtCore.QPropertyAnimation(self)
         anim.setTargetObject(self)
         self.m_animation.addAnimation(anim)
         anim.setEasingCurve(QtCore.QEasingCurve.OutBounce)
         anim.setDuration(1000)
+        self.connect(anim, QtCore.SIGNAL('finished()'),
+                     self, QtCore.SLOT('reverseTrigger()'))
 
         self.m_animation.setDirection(QtCore.QAnimationGroup.Forward)
 
-        self.title = QtWidgets.QLabel(title, self)
-        self.msg = QtWidgets.QLabel(msg, self)
+        self.title = QtGui.QLabel(title, self)
+        self.msg = QtGui.QLabel(msg, self)
         self.content = msg
         if icon:
-            self.icon = QtWidgets.QLabel("")
+            self.icon = QtGui.QLabel("")
             self.icon.setPixmap(QtGui.QPixmap(icon).scaledToWidth(30))
         else:
-            self.icon = QtWidgets.QLabel("")
+            self.icon = QtGui.QLabel("")
             self.icon.setPixmap(QtGui.QPixmap(30, 30))
             self.icon.pixmap().fill(QtGui.QColor(0,0,0,0))
 
-        layout_0 = QtWidgets.QVBoxLayout()
+        layout_0 = QtGui.QVBoxLayout()
         layout_0.setMargin(0)
         layout_0.setContentsMargins(0, 0, 0, 0)
 
         if self.icon:
-            layout_1 = QtWidgets.QGridLayout()
+            layout_1 = QtGui.QGridLayout()
             layout_1.addWidget(self.icon, 0,0, 1,1)
             layout_1.addWidget(self.title, 0,1, 1,7)
             layout_1.setAlignment(self.msg, QtCore.Qt.AlignTop)
@@ -239,11 +240,12 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
 
         self.msg.setText(PesterToast.wrapText(self.msg.font(), unicode(self.msg.text()), self.parent().theme["toasts/width"], self.parent().theme["toasts/content/style"]))
 
-        p = QtWidgets.QApplication.desktop().availableGeometry(self).bottomRight()
-        o = QtWidgets.QApplication.desktop().screenGeometry(self).bottomRight()
+        p = QtGui.QApplication.desktop().availableGeometry(self).bottomRight()
+        o = QtGui.QApplication.desktop().screenGeometry(self).bottomRight()
         anim.setStartValue(p.y() - o.y())
         anim.setEndValue(100)
-        anim.valueChanged.connect(self.updateBottomLeftAnimation)
+        self.connect(anim, QtCore.SIGNAL('valueChanged(QVariant)'),
+                     self, QtCore.SLOT('updateBottomLeftAnimation(QVariant)'))
 
         self.byebye = False
 
@@ -253,7 +255,7 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
 
     @QtCore.pyqtSlot()
     def done(self):
-        QtWidgets.QWidget.hide(self)
+        QtGui.QWidget.hide(self)
         t = self.machine.toasts[0]
         if t.title == unicode(self.title.text()) and \
            t.msg == unicode(self.content):
@@ -275,17 +277,19 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
             anim = self.m_animation.animationAt(0)
             self.m_animation.setDirection(QtCore.QAnimationGroup.Backward)
             anim.setEasingCurve(QtCore.QEasingCurve.InCubic)
-            anim.finished.disconnect(self.reverseTrigger)
-            anim.finished.connect(self.done)
+            self.disconnect(anim, QtCore.SIGNAL('finished()'),
+                            self, QtCore.SLOT('reverseTrigger()'))
+            self.connect(anim, QtCore.SIGNAL('finished()'),
+                         self, QtCore.SLOT('done()'))
             self.m_animation.start()
 
     @QtCore.pyqtSlot(QtCore.QVariant)
     def updateBottomLeftAnimation(self, value):
-        p = QtWidgets.QApplication.desktop().availableGeometry(self).bottomRight()
+        p = QtGui.QApplication.desktop().availableGeometry(self).bottomRight()
         val = float(self.height())/100
         self.move(p.x()-self.width(), p.y() - (value.toInt()[0] * val) +1)
         self.layout().setSpacing(0)
-        QtWidgets.QWidget.show(self)
+        QtGui.QWidget.show(self)
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.RightButton:
@@ -393,6 +397,7 @@ class PesterToastMachine(ToastMachine, QtCore.QObject):
         pass
         #~ self.timer = QtCore.QTimer(self)
         #~ self.timer.setInterval(1000)
-        #~ self.timer.timeout.connect(self.showNext)
+        #~ self.connect(self.timer, QtCore.SIGNAL('timeout()'),
+                     #~ self, QtCore.SLOT('showNext()'))
         #~ if self.on:
             #~ self.timer.start()

@@ -3,7 +3,7 @@ import random
 import ostools
 from copy import copy
 from datetime import timedelta
-from PyQt5 import QtGui
+from PyQt4 import QtGui
 
 from generic import mysteryTime
 from quirks import ScriptQuirks

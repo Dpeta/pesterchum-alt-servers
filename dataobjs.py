@@ -1,4 +1,4 @@
-from PyQt5 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 from datetime import *
 import re
 import random

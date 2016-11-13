@@ -4,7 +4,7 @@ try:
 except ImportError:
     lua = None
 from quirks import ScriptQuirks
-from PyQt5 import QtWidgets
+from PyQt4 import QtGui, QtCore
 
 class LuaQuirks(ScriptQuirks):
     def loadModule(self, name, filename):
@@ -52,7 +52,7 @@ class LuaQuirks(ScriptQuirks):
                     raise Exception
             except:
                 print "Quirk malformed: %s" % (name)
-                msgbox = QtWidgets.QMessageBox()
+                msgbox = QtGui.QMessageBox()
                 msgbox.setWindowTitle("Error!")
                 msgbox.setText("Quirk malformed: %s" % (name))
                 msgbox.exec_()

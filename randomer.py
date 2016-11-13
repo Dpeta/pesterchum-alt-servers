@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtCore
+from PyQt4 import QtGui, QtCore
 
 RANDNICK = "randomEncounter"
 
@@ -58,7 +58,8 @@ class RandomHandler(QtCore.QObject):
                 pass
         elif code == "!":
             if l[1] == "x":
-                msgbox = QtWidgets.QMessageBox()
+                from PyQt4 import QtGui
+                msgbox = QtGui.QMessageBox()
                 msgbox.setText("Unable to fetch you a random encounter!")
                 msgbox.setInformativeText("Try again later :(")
                 msgbox.exec_()

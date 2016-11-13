@@ -93,7 +93,6 @@ class CommandHandler(object):
     def run(self, command, *args):
         """ finds and runs a command """
         logging.debug("processCommand %s(%s)" % (command, args))
-        logging.info("processCommand %s(%s)" % (command, args))
 
         try:
             f = self.get(command)

@@ -7,7 +7,7 @@ import codecs
 import platform
 from datetime import *
 from time import strftime, time
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt4 import QtGui, QtCore
 
 import ostools
 from mood import Mood
@@ -57,7 +57,7 @@ class PesterLog(object):
                 try:
                     fp = codecs.open("%s/%s/%s/%s/%s.%s.txt" % (self.logpath, self.handle, handle, format, handle, time), encoding='utf-8', mode='a')
                 except IOError:
-                    errmsg = QtWidgets.QMessageBox(self)
+                    errmsg = QtGui.QMessageBox(self)
                     errmsg.setText("Warning: Pesterchum could not open the log file for %s!" % (handle))
                     errmsg.setInformativeText("Your log for %s will not be saved because something went wrong. We suggest restarting Pesterchum. Sorry :(" % (handle))
                     errmsg.show()

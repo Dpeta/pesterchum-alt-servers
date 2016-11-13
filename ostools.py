@@ -1,6 +1,6 @@
 import os, sys
 import platform
-from PyQt5.QtCore import QStandardPaths
+from PyQt4.QtGui import QDesktopServices
 
 def isOSX():
     return sys.platform == "darwin"
@@ -30,13 +30,12 @@ def getDataDir():
     # Temporary fix for non-ascii usernames
     # If username has non-ascii characters, just store userdata
     # in the Pesterchum install directory (like before)
-    # TODO: fix error if standardLocations is not what we expect
     try:
         if isOSX():
-            return os.path.join(unicode(QStandardPaths.standardLocations(QStandardPaths.DataLocation)[0]), "Pesterchum/")
+            return os.path.join(unicode(QDesktopServices.storageLocation(QDesktopServices.DataLocation)), "Pesterchum/")
         elif isLinux():
-            return os.path.join(unicode(QStandardPaths.standardLocations(QStandardPaths.HomeLocation)[0]), ".pesterchum/")
+            return os.path.join(unicode(QDesktopServices.storageLocation(QDesktopServices.HomeLocation)), ".pesterchum/")
         else:
-            return os.path.join(unicode(QStandardPaths.standardLocations(QStandardPaths.DataLocation)[0]), "pesterchum/")
+            return os.path.join(unicode(QDesktopServices.storageLocation(QDesktopServices.DataLocation)), "pesterchum/")
     except UnicodeDecodeError:
         return ''
