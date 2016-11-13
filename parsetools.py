@@ -199,7 +199,10 @@ def lexMessage(string):
     lexlist = [(mecmd, _mecmdre),
                (colorBegin, _ctag_begin), (colorBegin, _gtag_begin),
                (colorEnd, _ctag_end),
-               (formatBegin, _format_begin), (formatEnd, _format_end),
+               # karxi: Disabled this for now. No common versions of Pesterchum
+               # actually use it, save for Chumdroid...which shouldn't.
+               # When I change out parsers, I might add it back in.
+               ##(formatBegin, _format_begin), (formatEnd, _format_end),
                (imagelink, _imgre),
                (hyperlink, _urlre), (hyperlink_lazy, _url2re),
                (memolex, _memore),
