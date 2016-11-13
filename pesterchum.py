@@ -2000,11 +2000,18 @@ class PesterWindow(MovingWindow):
             sysColor = QtGui.QColor(self.theme["convo/systemMsgColor"])
             verb = self.theme["convo/text/idle"]
             for (h, convo) in self.convos.iteritems():
+                # karxi: There's an irritating issue here involving a lack of
+                # consideration for case-sensitivity.
+                # This fix is a little sloppy, and I need to look into what it
+                # might affect, but I've been using it for months and haven't
+                # noticed any issues....
+                handle = convo.chum.handle
+                # karxi: Now we just use 'handle' instead of 'h'.
                 if convo.chumopen:
                     msg = self.profile().idlemsg(sysColor, verb)
                     convo.textArea.append(convertTags(msg))
-                    self.chatlog.log(h, msg)
-                    self.sendMessage.emit("PESTERCHUM:IDLE", h)
+                    self.chatlog.log(handle, msg)
+                    self.sendMessage.emit("PESTERCHUM:IDLE", handle)
         else:
             self.setAway.emit(False)
             self.randhandler.setIdle(False)
