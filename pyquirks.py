@@ -12,20 +12,20 @@ class PythonQuirks(ScriptQuirks):
     def modHas(self, module, attr):
         if attr == 'commands':
             variables = vars(module)
-            for name, obj in variables.items():
+            for name, obj in variables.iteritems():
                 if self.modHas(obj, 'command'):
                     return True
         return hasattr(module, attr)
 
     def register(self, module):
         variables = vars(module)
-        for name, obj in variables.items():
+        for name, obj in variables.iteritems():
             if self.modHas(obj, 'command'):
                 try:
-                    if not isinstance(obj("test"), str):
+                    if not isinstance(obj("test"), basestring):
                         raise Exception
                 except:
-                    print("Quirk malformed: %s" % (obj.command))
+                    print "Quirk malformed: %s" % (obj.command)
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setWindowTitle("Error!")
                     msgbox.setText("Quirk malformed: %s" % (obj.command))

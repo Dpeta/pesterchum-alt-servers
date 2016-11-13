@@ -14,10 +14,10 @@ class PesterQuirkItem(QtWidgets.QTreeWidgetItem):
         parent = None
         QtWidgets.QTreeWidgetItem.__init__(self, parent)
         self.quirk = quirk
-        self.setText(0, str(quirk))
+        self.setText(0, unicode(quirk))
     def update(self, quirk):
         self.quirk = quirk
-        self.setText(0, str(quirk))
+        self.setText(0, unicode(quirk))
     def __lt__(self, quirkitem):
         """Sets the order of quirks if auto-sorted by Qt. Obsolete now."""
         if self.quirk.type == "prefix":
@@ -163,7 +163,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
         if not self.addgroupdialog:
             (gname, ok) = QtWidgets.QInputDialog.getText(self, "Add Group", "Enter a name for the new quirk group:")
             if ok:
-                gname = str(gname)
+                gname = unicode(gname)
                 if re.search("[^A-Za-z0-9_\s]", gname) is not None:
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
@@ -242,7 +242,7 @@ class QuirkTesterWindow(QtWidgets.QDialog):
         pass
     @QtCore.pyqtSlot()
     def sentMessage(self):
-        text = str(self.textInput.text())
+        text = unicode(self.textInput.text())
         if text == "" or text[0:11] == "PESTERCHUM:":
             return
         self.history.add(text)
@@ -251,7 +251,7 @@ class QuirkTesterWindow(QtWidgets.QDialog):
         if type(lexmsg[0]) is not mecmd:
             try:
                 lexmsg = quirks.apply(lexmsg)
-            except Exception as e:
+            except Exception, e:
                 msgbox = QtWidgets.QMessageBox()
                 msgbox.setText("Whoa there! There seems to be a problem.")
                 msgbox.setInformativeText("A quirk seems to be having a problem. (Possibly you're trying to capture a non-existant group?)\n\
@@ -266,7 +266,7 @@ class QuirkTesterWindow(QtWidgets.QDialog):
             text = convertTags(serverMsg, "ctag")
         self.textInput.setText("")
     def addMessage(self, msg, me=True):
-        if type(msg) in [str]:
+        if type(msg) in [str, unicode]:
             lexmsg = lexMessage(msg)
         else:
             lexmsg = msg
@@ -527,7 +527,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         self.current.setText(str(value)+"%")
     @QtCore.pyqtSlot()
     def addRandomString(self):
-        text = str(self.replaceinput.text())
+        text = unicode(self.replaceinput.text())
         item = QtWidgets.QListWidgetItem(text, self.replacelist)
         self.replaceinput.setText("")
         self.replaceinput.setFocus()
@@ -543,7 +543,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
     def reloadQuirkFuncSlot(self):
         from parsetools import reloadQuirkFunctions, quirkloader
         reloadQuirkFunctions()
-        funcs = [q+"()" for q in list(quirkloader.quirks.keys())]
+        funcs = [q+"()" for q in quirkloader.quirks.keys()]
         funcs.sort()
         self.funclist.clear()
         self.funclist.addItems(funcs)
@@ -656,16 +656,16 @@ class PesterChooseQuirks(QtWidgets.QDialog):
         vdict["type"] = types[self.quirkadd.pages.currentIndex()-1]
         page = self.quirkadd.pages.currentWidget().layout()
         if vdict["type"] in ("prefix","suffix"):
-            vdict["value"] = str(page.itemAt(1).layout().itemAt(1).widget().text())
+            vdict["value"] = unicode(page.itemAt(1).layout().itemAt(1).widget().text())
         elif vdict["type"] == "replace":
-            vdict["from"] = str(page.itemAt(1).layout().itemAt(1).widget().text())
-            vdict["to"] = str(page.itemAt(2).layout().itemAt(1).widget().text())
+            vdict["from"] = unicode(page.itemAt(1).layout().itemAt(1).widget().text())
+            vdict["to"] = unicode(page.itemAt(2).layout().itemAt(1).widget().text())
         elif vdict["type"] == "regexp":
-            vdict["from"] = str(page.itemAt(2).layout().itemAt(1).layout().itemAt(1).widget().text())
-            vdict["to"] = str(page.itemAt(2).layout().itemAt(2).layout().itemAt(1).widget().text())
+            vdict["from"] = unicode(page.itemAt(2).layout().itemAt(1).layout().itemAt(1).widget().text())
+            vdict["to"] = unicode(page.itemAt(2).layout().itemAt(2).layout().itemAt(1).widget().text())
         elif vdict["type"] == "random":
-            vdict["from"] = str(self.quirkadd.regexp.text())
-            randomlist = [str(self.quirkadd.replacelist.item(i).text())
+            vdict["from"] = unicode(self.quirkadd.regexp.text())
+            randomlist = [unicode(self.quirkadd.replacelist.item(i).text())
                           for i in range(0,self.quirkadd.replacelist.count())]
             vdict["randomlist"] = randomlist
         elif vdict["type"] == "spelling":
@@ -674,7 +674,7 @@ class PesterChooseQuirks(QtWidgets.QDialog):
         if vdict["type"] in ("regexp", "random"):
             try:
                 re.compile(vdict["from"])
-            except re.error as e:
+            except re.error, e:
                 quirkWarning = QtWidgets.QMessageBox(self)
                 quirkWarning.setText("Not a valid regular expression!")
                 quirkWarning.setInformativeText("H3R3S WHY DUMP4SS: %s" % (e))
@@ -809,7 +809,7 @@ class PesterChooseProfile(QtWidgets.QDialog):
     @QtCore.pyqtSlot()
     def validateProfile(self):
         if not self.profileBox or self.profileBox.currentIndex() == 0:
-            handle = str(self.chumHandle.text())
+            handle = unicode(self.chumHandle.text())
             if not PesterProfile.checkLength(handle):
                 self.errorMsg.setText("PROFILE HANDLE IS TOO LONG")
                 return
@@ -821,7 +821,7 @@ class PesterChooseProfile(QtWidgets.QDialog):
     @QtCore.pyqtSlot()
     def deleteProfile(self):
         if self.profileBox and self.profileBox.currentIndex() > 0:
-            handle = str(self.profileBox.currentText())
+            handle = unicode(self.profileBox.currentText())
             if handle == self.parent.profile().handle:
                 problem = QtWidgets.QMessageBox()
                 problem.setStyleSheet(self.theme["main/defaultwindow/style"])
@@ -898,7 +898,7 @@ class PesterMentions(QtWidgets.QDialog):
             return
         try:
             re.compile(pdict["value"])
-        except re.error as e:
+        except re.error, e:
             quirkWarning = QtWidgets.QMessageBox(self)
             quirkWarning.setText("Not a valid regular expression!")
             quirkWarning.setInformativeText("H3R3S WHY DUMP4SS: %s" % (e))
@@ -1482,8 +1482,8 @@ class PesterUserlist(QtWidgets.QDialog):
         self.userarea.sortItems()
     @QtCore.pyqtSlot('QString', 'QString', 'QString')
     def updateUserPresent(self, handle, channel, update):
-        h = str(handle)
-        c = str(channel)
+        h = unicode(handle)
+        c = unicode(channel)
         if update == "quit":
             self.delUser(h)
         elif update == "left" and c == "#pesterchum":

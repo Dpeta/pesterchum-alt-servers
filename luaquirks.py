@@ -18,7 +18,7 @@ class LuaQuirks(ScriptQuirks):
         try:
             return lua.require(name)
         except Error as e:
-            print(e)
+            print e
             return None
         finally:
             os.chdir(CurrentDir)
@@ -48,10 +48,10 @@ class LuaQuirks(ScriptQuirks):
         for name in module.commands:
             CommandWrapper = Wrapper(module,name)
             try:
-                if not isinstance(CommandWrapper("test"), str):
+                if not isinstance(CommandWrapper("test"), basestring):
                     raise Exception
             except:
-                print("Quirk malformed: %s" % (name))
+                print "Quirk malformed: %s" % (name)
                 msgbox = QtWidgets.QMessageBox()
                 msgbox.setWindowTitle("Error!")
                 msgbox.setText("Quirk malformed: %s" % (name))

@@ -34,20 +34,19 @@ class MSPAChecker(QtWidgets.QWidget):
                 raise
             if os.path.exists("status_old.pkl"):
                 os.remove("status_old.pkl")
-        except Exception as e:
-            print(e)
+        except Exception, e:
+            print e
             msg = QtWidgets.QMessageBox(self)
             msg.setText("Problems writing save file.")
             msg.show()
 
     @QtCore.pyqtSlot()
     def check_site_wrapper(self):
-        return # turn off MSPA check; python3 doesnt like it
         if not self.mainwindow.config.checkMSPA():
             return
         if self.lock:
             return
-        print("Checking MSPA updates...")
+        print "Checking MSPA updates..."
         s = threading.Thread(target=self.check_site)
         s.start()
 
@@ -89,7 +88,7 @@ class MSPAChecker(QtWidgets.QWidget):
 
     @QtCore.pyqtSlot()
     def visit_site(self):
-        print(self.status['last_visited']['link'])
+        print self.status['last_visited']['link']
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(self.status['last_visited']['link'], QtCore.QUrl.TolerantMode))
         if self.status['last_seen']['pubdate'] > self.status['last_visited']['pubdate']:
             #Visited for the first time. Untrip the icon and remember that we saw it.

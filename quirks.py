@@ -20,7 +20,7 @@ class ScriptQuirks(object):
         self.last = self.quirks.copy()
         self.quirks.clear()
         for script in self.scripts:
-            print(script.getExtension())
+            print script.getExtension()
             script.load()
             #print script.quirks
             for q in script.quirks:
@@ -31,9 +31,9 @@ class ScriptQuirks(object):
                     del self.quirks[k]
         #print self.quirks
         if self.quirks:
-            print('Registered quirks:', '(), '.join(self.quirks) + "()")
+            print 'Registered quirks:', '(), '.join(self.quirks) + "()"
         else:
-            print("Warning: Couldn't find any script quirks")
+            print "Warning: Couldn't find any script quirks"
 
     def add(self, script):
         self.scripts.append(script)
@@ -64,8 +64,8 @@ class ScriptQuirks(object):
                 module = self.loadModule(name, filename)
                 if module is None:
                     continue
-            except Exception as e:
-                print("Error loading %s: %s (in quirks.py)" % (os.path.basename(name), e))
+            except Exception, e:
+                print "Error loading %s: %s (in quirks.py)" % (os.path.basename(name), e)
                 msgbox = QtWidgets.QMessageBox()
                 msgbox.setWindowTitle("Error!")
                 msgbox.setText("Error loading %s: %s (in quirks.py)" % (os.path.basename(filename), e))

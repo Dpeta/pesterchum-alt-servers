@@ -21,7 +21,7 @@ class MyHandler(DefaultCommandHandler):
         match = re.match('\!say (.*)', msg)
         if match:
             to_say = match.group(1).strip()
-            print(('Saying, "%s"' % to_say))
+            print('Saying, "%s"' % to_say)
             helpers.msg(self.client, chan, to_say)
 
 
@@ -37,7 +37,7 @@ def main():
     conn = cli.connect()
 
     while True:
-        next(conn)      ## python 2
+        conn.next()      ## python 2
 	# next(conn)     ## python 3
 
 

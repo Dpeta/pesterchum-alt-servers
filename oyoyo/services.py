@@ -1,5 +1,5 @@
 import sys
-from .helpers import msg
+from helpers import msg
 
 # NickServ basic functions
 _nickservfuncs = (
@@ -103,7 +103,7 @@ def _addServ(serv, funcs, prefix=""):
         if prefix:
             cmd_name = prefix.upper() + " " + cmd_name
         def f(cli, *args):
-            print(cmd_name, " ".join(args))
+            print cmd_name, " ".join(args)
             #cli.send(cmd_name, serv.name, *args)
         return f
     for t in funcs:

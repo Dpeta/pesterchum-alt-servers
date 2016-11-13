@@ -1,4 +1,4 @@
-import urllib.request, urllib.parse, urllib.error
+import urllib
 import re
 import time
 try:
@@ -67,31 +67,31 @@ def lexVersion(short=False):
 
 # Naughty I know, but it lets me grab it from the bash script.
 if __name__ == "__main__":
-    print(lexVersion())
+    print lexVersion()
 
 def verStrToNum(ver):
     w = re.match("(\d+\.?\d+)\.(\d+)-?([A-Za-z]{0,2})\.?(\d*):(\S+)", ver)
     if not w:
-        print("Update check Failure: 3"); return
+        print "Update check Failure: 3"; return
     full = ver[:ver.find(":")]
     return full,w.group(1),w.group(2),w.group(3),w.group(4),w.group(5)
 
 def updateCheck(q):
     time.sleep(3)
-    data = urllib.parse.urlencode({"type" : USER_TYPE, "os" : OS_TYPE, "install" : INSTALL_TYPE})
+    data = urllib.urlencode({"type" : USER_TYPE, "os" : OS_TYPE, "install" : INSTALL_TYPE})
     try:
-        f = urllib.request.urlopen("http://distantsphere.com/pesterchum.php?" + data)
+        f = urllib.urlopen("http://distantsphere.com/pesterchum.php?" + data)
     except:
-        print("Update check Failure: 1"); return q.put((False,1))
+        print "Update check Failure: 1"; return q.put((False,1))
     newest = f.read()
     f.close()
     if not newest or newest[0] == "<":
-        print("Update check Failure: 2"); return q.put((False,2))
+        print "Update check Failure: 2"; return q.put((False,2))
     try:
         (full, major, minor, status, revision, url) = verStrToNum(newest)
     except TypeError:
         return q.put((False,3))
-    print(full)
+    print full
     if major <= _pcMajor:
         if minor <= _pcMinor:
             if status:
@@ -102,7 +102,7 @@ def updateCheck(q):
                 if not _pcStatus:
                     if revision <= _pcRevision:
                         return q.put((False,0))
-    print("A new version of Pesterchum is avaliable!")
+    print "A new version of Pesterchum is avaliable!"
     q.put((full,url))
 
 
@@ -128,9 +128,9 @@ def copyUpdate(path):
 def updateExtract(url, extension):
     if extension:
         fn = "update" + extension
-        urllib.request.urlretrieve(url, fn)
+        urllib.urlretrieve(url, fn)
     else:
-        fn = urllib.request.urlretrieve(url)[0]
+        fn = urllib.urlretrieve(url)[0]
         if tarfile and tarfile.is_tarfile(fn):
             extension = ".tar.gz"
         elif zipfile.is_zipfile(fn):
@@ -144,17 +144,17 @@ def updateExtract(url, extension):
             except:
                 pass
 
-    print(url, fn, extension)
+    print url, fn, extension
 
     if extension == ".exe":
         pass
     elif extension == ".zip" or extension.startswith(".tar"):
         if extension == ".zip":
             from zipfile import is_zipfile as is_updatefile, ZipFile as openupdate
-            print("Opening .zip")
+            print "Opening .zip"
         elif tarfile and extension.startswith(".tar"):
             from tarfile import is_tarfile as is_updatefile, open as openupdate
-            print("Opening .tar")
+            print "Opening .tar"
         else:
             return
 

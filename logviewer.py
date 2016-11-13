@@ -33,7 +33,7 @@ class PesterLogHighlighter(QtGui.QSyntaxHighlighter):
         self.hilightstyle.setForeground(QtGui.QBrush(QtCore.Qt.black))
     def highlightBlock(self, text):
         for i in range(0, len(text)-(len(self.searchTerm)-1)):
-            if str(text[i:i+len(self.searchTerm)]).lower() == str(self.searchTerm).lower():
+            if unicode(text[i:i+len(self.searchTerm)]).lower() == unicode(self.searchTerm).lower():
                 self.setFormat(i, len(self.searchTerm), self.hilightstyle)
 
 class PesterLogUserSelect(QtWidgets.QDialog):
@@ -162,7 +162,7 @@ class PesterLogViewer(QtWidgets.QDialog):
             self.textArea = PesterLogText(theme, self.parent)
             self.textArea.setReadOnly(True)
             self.textArea.setFixedWidth(600)
-            if "convo/scrollbar" in theme:
+            if theme.has_key("convo/scrollbar"):
                 self.textArea.setStyleSheet("QTextEdit { width:500px; %s } QScrollBar:vertical { %s } QScrollBar::handle:vertical { %s } QScrollBar::add-line:vertical { %s } QScrollBar::sub-line:vertical { %s } QScrollBar:up-arrow:vertical { %s } QScrollBar:down-arrow:vertical { %s }" % (theme["convo/textarea/style"], theme["convo/scrollbar/style"], theme["convo/scrollbar/handle"], theme["convo/scrollbar/downarrow"], theme["convo/scrollbar/uparrow"], theme["convo/scrollbar/uarrowstyle"], theme["convo/scrollbar/darrowstyle"] ))
             else:
                 self.textArea.setStyleSheet("QTextEdit { width:500px; %s }" % (theme["convo/textarea/style"]))
@@ -174,7 +174,7 @@ class PesterLogViewer(QtWidgets.QDialog):
             self.tree.optionsMenu = QtWidgets.QMenu(self)
             self.tree.setFixedSize(260, 300)
             self.tree.header().hide()
-            if "convo/scrollbar" in theme:
+            if theme.has_key("convo/scrollbar"):
                 self.tree.setStyleSheet("QTreeWidget { %s } QScrollBar:vertical { %s } QScrollBar::handle:vertical { %s } QScrollBar::add-line:vertical { %s } QScrollBar::sub-line:vertical { %s } QScrollBar:up-arrow:vertical { %s } QScrollBar:down-arrow:vertical { %s }" % (theme["convo/textarea/style"], theme["convo/scrollbar/style"], theme["convo/scrollbar/handle"], theme["convo/scrollbar/downarrow"], theme["convo/scrollbar/uparrow"], theme["convo/scrollbar/uarrowstyle"], theme["convo/scrollbar/darrowstyle"] ))
             else:
                 self.tree.setStyleSheet("%s" % (theme["convo/textarea/style"]))
@@ -250,7 +250,7 @@ class PesterLogViewer(QtWidgets.QDialog):
         textCur = self.textArea.textCursor()
         textCur.movePosition(1)
         self.textArea.setTextCursor(textCur)
-        self.instructions.setText("Pesterlog with " +self.chum+ " on " + self.fileToTime(str(fname)))
+        self.instructions.setText("Pesterlog with " +self.chum+ " on " + self.fileToTime(unicode(fname)))
 
     def logSearch(self, search):
         self.hilight.searchTerm = search
@@ -277,7 +277,7 @@ class PesterLogText(PesterText):
             if url[0] == "#" and url != "#pesterchum":
                 self.parent().parent.showMemos(url[1:])
             elif url[0] == "@":
-                handle = str(url[1:])
+                handle = unicode(url[1:])
                 self.parent().parent.newConversation(handle)
             else:
                 QtGui.QDesktopServices.openUrl(QtCore.QUrl(url, QtCore.QUrl.TolerantMode))

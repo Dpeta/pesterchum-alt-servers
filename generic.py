@@ -8,8 +8,6 @@ class mysteryTime(timedelta):
         return (type(other) is mysteryTime)
     def __neq__(self, other):
         return (type(other) is not mysteryTime)
-    def __hash__(self):
-        return 0
 
 class CaseInsensitiveDict(dict):
     def __setitem__(self, key, value):
@@ -19,7 +17,7 @@ class CaseInsensitiveDict(dict):
     def __contains__(self, key):
         return super(CaseInsensitiveDict, self).__contains__(key.lower())
     def has_key(self, key):
-        return key.lower() in super(CaseInsensitiveDict, self)
+        return super(CaseInsensitiveDict, self).has_key(key.lower())
     def __delitem__(self, key):
         super(CaseInsensitiveDict, self).__delitem__(key.lower())
 
@@ -30,7 +28,7 @@ class PesterList(list):
 class PesterIcon(QtGui.QIcon):
     def __init__(self, *x):
         QtGui.QIcon.__init__(self, x[0])
-        if type(x[0]) in [str]:
+        if type(x[0]) in [str, unicode]:
             self.icon_pixmap = QtGui.QPixmap(x[0])
         else:
             self.icon_pixmap = None
@@ -98,8 +96,8 @@ class MultiTextDialog(QtWidgets.QDialog):
         r = self.exec_()
         if r == QtWidgets.QDialog.Accepted:
             retval = {}
-            for (name, widget) in self.inputs.items():
-                retval[name] = str(widget.text())
+            for (name, widget) in self.inputs.iteritems():
+                retval[name] = unicode(widget.text())
             return retval
         else:
             return None
@@ -127,7 +125,7 @@ class MovingWindow(QtWidgets.QFrame):
 
 class NoneSound(object):
     def play(self): pass
-    def setVolume(self, v): pass
+    def set_volume(self, v): pass
 
 class WMButton(QtWidgets.QPushButton):
     def __init__(self, icon, parent=None):

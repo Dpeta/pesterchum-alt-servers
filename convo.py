@@ -1,7 +1,7 @@
 from string import Template
 import re
 import platform
-import http.client, urllib.request, urllib.parse, urllib.error
+import httplib, urllib
 from time import strftime
 from copy import copy
 from datetime import datetime, timedelta
@@ -77,7 +77,7 @@ class PesterTabWindow(QtWidgets.QFrame):
         mods = event.modifiers()
         if ((mods & QtCore.Qt.ControlModifier) and
             keypress == QtCore.Qt.Key_Tab):
-            handles = list(self.convos.keys())
+            handles = self.convos.keys()
             waiting = self.mainwindow.waitingMessages.waitingHandles()
             waitinghandles = list(set(handles) & set(waiting))
             if len(waitinghandles) > 0:
@@ -114,7 +114,7 @@ class PesterTabWindow(QtWidgets.QFrame):
         i = self.tabs.tabAt(self.mapFromGlobal(QtGui.QCursor.pos()))
         if i == -1:
               i = self.tabs.currentIndex()
-        handle = str(self.tabs.tabText(i))
+        handle = unicode(self.tabs.tabText(i))
         self.clearNewMessage(handle)
     def convoHasFocus(self, handle):
         i = self.tabIndices[handle]
@@ -151,19 +151,19 @@ class PesterTabWindow(QtWidgets.QFrame):
             self.tabs.setTabIcon(tabi, c.icon())
         currenttabi = self.tabs.currentIndex()
         if currenttabi >= 0:
-            currentHandle = str(self.tabs.tabText(self.tabs.currentIndex()))
+            currentHandle = unicode(self.tabs.tabText(self.tabs.currentIndex()))
             self.setWindowIcon(self.convos[currentHandle].icon())
         self.defaultTabTextColor = self.getTabTextColor()
 
     @QtCore.pyqtSlot(int)
     def tabClose(self, i):
-        handle = str(self.tabs.tabText(i))
+        handle = unicode(self.tabs.tabText(i))
         self.mainwindow.waitingMessages.messageAnswered(handle)
         convo = self.convos[handle]
         del self.convos[handle]
         del self.tabIndices[handle]
         self.tabs.removeTab(i)
-        for (h, j) in self.tabIndices.items():
+        for (h, j) in self.tabIndices.iteritems():
             if j > i:
                 self.tabIndices[h] = j-1
         self.layout.removeWidget(convo)
@@ -173,7 +173,7 @@ class PesterTabWindow(QtWidgets.QFrame):
             return
         if self.currentConvo == convo:
             currenti = self.tabs.currentIndex()
-            currenth = str(self.tabs.tabText(currenti))
+            currenth = unicode(self.tabs.tabText(currenti))
             self.currentConvo = self.convos[currenth]
         self.currentConvo.raiseChat()
 
@@ -184,7 +184,7 @@ class PesterTabWindow(QtWidgets.QFrame):
         if self.changedTab:
             self.changedTab = False
             return
-        handle = str(self.tabs.tabText(i))
+        handle = unicode(self.tabs.tabText(i))
         convo = self.convos[handle]
         if self.currentConvo:
             self.layout.removeWidget(self.currentConvo)
@@ -219,7 +219,7 @@ class PesterMovie(QtGui.QMovie):
         if text.mainwindow.config.animations():
             movie = self
             url = text.urls[movie].toString()
-            html = str(text.toHtml())
+            html = unicode(text.toHtml())
             if html.find(url) != -1:
                 if text.hasTabs:
                     i = text.tabobject.tabIndices[text.parent().title()]
@@ -265,13 +265,13 @@ class PesterText(QtWidgets.QTextEdit):
     def animateChanged(self, animate):
         if animate:
             for m in self.urls:
-                html = str(self.toHtml())
+                html = unicode(self.toHtml())
                 if html.find(self.urls[m].toString()) != -1:
                     if m.frameCount() > 1:
                         m.start()
         else:
             for m in self.urls:
-                html = str(self.toHtml())
+                html = unicode(self.toHtml())
                 if html.find(self.urls[m].toString()) != -1:
                     if m.frameCount() > 1:
                         m.stop()
@@ -280,7 +280,7 @@ class PesterText(QtWidgets.QTextEdit):
     def textReady(self, ready):
         self.textSelected = ready
     def initTheme(self, theme):
-        if "convo/scrollbar" in theme:
+        if theme.has_key("convo/scrollbar"):
             self.setStyleSheet("QTextEdit { %s } QScrollBar:vertical { %s } QScrollBar::handle:vertical { %s } QScrollBar::add-line:vertical { %s } QScrollBar::sub-line:vertical { %s } QScrollBar:up-arrow:vertical { %s } QScrollBar:down-arrow:vertical { %s }" % (theme["convo/textarea/style"], theme["convo/scrollbar/style"], theme["convo/scrollbar/handle"], theme["convo/scrollbar/downarrow"], theme["convo/scrollbar/uparrow"], theme["convo/scrollbar/uarrowstyle"], theme["convo/scrollbar/darrowstyle"] ))
         else:
             self.setStyleSheet("QTextEdit { %s }" % (theme["convo/textarea/style"]))
@@ -393,7 +393,7 @@ class PesterText(QtWidgets.QTextEdit):
                 if url[0] == "#" and url != "#pesterchum":
                     self.parent().mainwindow.showMemos(url[1:])
                 elif url[0] == "@":
-                    handle = str(url[1:])
+                    handle = unicode(url[1:])
                     self.parent().mainwindow.newConversation(handle)
                 else:
                     if event.modifiers() == QtCore.Qt.ControlModifier:
@@ -435,12 +435,12 @@ class PesterText(QtWidgets.QTextEdit):
         layout.addWidget(cancelbutton)
         self.sending.setLayout(layout)
         self.sending.show()
-        params = urllib.parse.urlencode({'quote': logdata, 'do': "add"})
+        params = urllib.urlencode({'quote': logdata, 'do': "add"})
         headers = {"Content-type": "application/x-www-form-urlencoded",
                    "Accept": "text/plain"}
         try:
             pass
-            hconn = http.client.HTTPConnection('qdb.pesterchum.net', 80,
+            hconn = httplib.HTTPConnection('qdb.pesterchum.net', 80,
                                            timeout=15)
             hconn.request("POST", "/index.php", params, headers)
             response = hconn.getresponse()
@@ -449,7 +449,7 @@ class PesterText(QtWidgets.QTextEdit):
             else:
                 self.sending.sendinglabel.setText("F41L3D: %s %s" % (response.status, response.reason))
             hconn.close()
-        except Exception as e:
+        except Exception, e:
             self.sending.sendinglabel.setText("F41L3D: %s" % (e))
         del self.sending
 
@@ -465,7 +465,7 @@ class PesterInput(QtWidgets.QLineEdit):
         QtWidgets.QLineEdit.focusInEvent(self, event)
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Up:
-            text = str(self.text())
+            text = unicode(self.text())
             next = self.parent().history.next(text)
             if next is not None:
                 self.setText(next)
@@ -596,7 +596,7 @@ class PesterConvo(QtWidgets.QFrame):
     def updateColor(self, color):
         self.chum.color = color
     def addMessage(self, msg, me=True):
-        if type(msg) is str:
+        if type(msg) in [str, unicode]:
             lexmsg = lexMessage(msg)
         else:
             lexmsg = msg
@@ -696,7 +696,7 @@ class PesterConvo(QtWidgets.QFrame):
 
     @QtCore.pyqtSlot()
     def sentMessage(self):
-        text = str(self.textInput.text())
+        text = unicode(self.textInput.text())
         if text == "" or text[0:11] == "PESTERCHUM:":
             return
         oocDetected = oocre.match(text.strip())
