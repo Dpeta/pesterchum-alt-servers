@@ -257,6 +257,48 @@ def convertTags(lexed, format="html"):
 
     return escaped
 
+def _max_msg_len(mask=None, target=None):
+    # karxi: Copied from another file of mine, and modified to work with
+    # Pesterchum.
+    # Note that this effectively assumes the worst when not provided the
+    # information it needs to get an accurate read, so later on, it'll need to
+    # be given a nick and the user's hostmask, as well as where the message is
+    # being sent.
+    # It effectively has to construct the message that'll be sent in advance.
+    limit = 512
+
+    # Start subtracting
+    # ':', " PRIVMSG ", ' ', ':', \r\n
+    limit -= 14
+
+    if mask is not None:
+        # Since this will be included in what we send
+        limit -= len(str(mask))
+    else:
+        # Since we should always be able to fetch this
+        # karxi: ... Which we can't, right now, unlike in the old script.
+        # TODO: Resolve this issue, give it the necessary information.
+        nick = None
+        # If we CAN'T, stick with a length of 30, since that seems to be
+        # the average maximum nowadays
+        limit -= len(nick) if nick is not None else 30
+        # '!', '@'
+        limit -= 2
+        # Maximum ident length
+        limit -= 10
+        # Maximum (?) host length
+        limit -= 63				# RFC 2812
+    # The target is the place this is getting sent to - a channel or a nick
+    if target is not None:
+        limit -= len(target)
+    else:
+        # Normally I'd assume about 60...just to be safe.
+        # However, the current (2016-11-13) Pesterchum limit for memo name
+        # length is 32, so I'll bump it to 40 for some built-in leeway.
+        limit -= 40
+
+    return limit
+
 def splitMessage(msg, format="ctag"):
     """Splits message if it is too long."""
     # split long text lines
@@ -283,7 +325,7 @@ def splitMessage(msg, format="ctag"):
                 pass
         # yeah normally i'd do binary search but im lazy
         msglen = len(convertTags(okmsg, format)) + 4*(len(cbegintags))
-        if msglen > 400:
+        if msglen > _max_msg_len():
             okmsg.pop()
             if type(o) is colorBegin:
                 cbegintags.pop()
