@@ -3075,5 +3075,7 @@ Click this message to never see this again.")
         self.showLoading(self.widget)
         sys.exit(self.app.exec_())
 
-pesterchum = MainProgram()
-pesterchum.run()
+if __name__ == "__main__":
+    # We're being run as a script - not being imported.
+    pesterchum = MainProgram()
+    pesterchum.run()
