@@ -12,6 +12,9 @@ from dataobjs import PesterProfile, PesterHistory
 from generic import PesterIcon
 from parsetools import convertTags, lexMessage, splitMessage, mecmd, colorBegin, colorEnd, \
     img2smiley, smiledict, oocre
+import parsetools
+
+import pnc.lexercon as lexercon
 
 class PesterTabWindow(QtGui.QFrame):
     def __init__(self, mainwindow, parent=None, convo="convo"):
@@ -721,36 +724,12 @@ class PesterConvo(QtGui.QFrame):
 
     @QtCore.pyqtSlot()
     def sentMessage(self):
+        # Offloaded to another function, like its sisters.
+        # Fetch the raw text from the input box.
+        text = self.textInput.text()
         text = unicode(self.textInput.text())
-        if text == "" or text[0:11] == "PESTERCHUM:":
-            return
-        oocDetected = oocre.match(text.strip())
-        if self.ooc and not oocDetected:
-            text = "(( %s ))" % (text)
-        self.history.add(text)
-        quirks = self.mainwindow.userprofile.quirks
-        lexmsg = lexMessage(text)
-        if type(lexmsg[0]) is not mecmd and self.applyquirks and not (self.ooc or oocDetected):
-            try:
-                lexmsg = quirks.apply(lexmsg)
-            except:
-                msgbox = QtGui.QMessageBox()
-                msgbox.setText("Whoa there! There seems to be a problem.")
-                msgbox.setInformativeText("A quirk seems to be having a problem. (Possibly you're trying to capture a non-existant group?)")
-                msgbox.exec_()
-                return
-        lexmsgs = splitMessage(lexmsg)
 
-        for lm in lexmsgs:
-            serverMsg = copy(lm)
-            self.addMessage(lm, True)
-            # if ceased, rebegin
-            if hasattr(self, 'chumopen') and not self.chumopen:
-                self.mainwindow.newConvoStarted.emit(QtCore.QString(self.title()), True)
-                self.setChumOpen(True)
-            text = convertTags(serverMsg, "ctag")
-            self.messageSent.emit(text, self.title())
-        self.textInput.setText("")
+        return parsetools.kxhandleInput(self, text, flavor="convo")
 
     @QtCore.pyqtSlot()
     def addThisChum(self):

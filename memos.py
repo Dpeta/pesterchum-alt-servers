@@ -10,6 +10,7 @@ from generic import PesterIcon, RightClickList, mysteryTime
 from convo import PesterConvo, PesterInput, PesterText, PesterTabWindow
 from parsetools import convertTags, addTimeInitial, timeProtocol, \
     lexMessage, colorBegin, colorEnd, mecmd, smiledict, oocre
+import parsetools
 from logviewer import PesterLogViewer
 
 def delta2txt(d, format="pc"):
@@ -805,36 +806,9 @@ class PesterMemo(PesterConvo):
     @QtCore.pyqtSlot()
     def sentMessage(self):
         text = unicode(self.textInput.text())
-        if text == "" or text[0:11] == "PESTERCHUM:":
-            return
-        oocDetected = oocre.match(text.strip())
-        if self.ooc and not oocDetected:
-            text = "(( %s ))" % (text)
-        self.history.add(text)
-        if self.time.getTime() == None:
-            self.sendtime()
-        grammar = self.time.getGrammar()
-        quirks = self.mainwindow.userprofile.quirks
-        lexmsg = lexMessage(text)
-        if type(lexmsg[0]) is not mecmd:
-            if self.applyquirks and not (self.ooc or oocDetected):
-                lexmsg = quirks.apply(lexmsg)
-            initials = self.mainwindow.profile().initials()
-            colorcmd = self.mainwindow.profile().colorcmd()
-            clientMsg = [colorBegin("<c=%s>" % (colorcmd), colorcmd),
-                         "%s%s%s: " % (grammar.pcf, initials, grammar.number)] + lexmsg + [colorEnd("</c>")]
-            # account for TC's parsing error
-            serverMsg = [colorBegin("<c=%s>" % (colorcmd), colorcmd),
-                         "%s: " % (initials)] + lexmsg + [colorEnd("</c>"), " "]
-        else:
-            clientMsg = copy(lexmsg)
-            serverMsg = copy(lexmsg)
-
-        self.addMessage(clientMsg, True)
-        serverText = convertTags(serverMsg, "ctag")
-        self.messageSent.emit(serverText, self.title())
-
-        self.textInput.setText("")
+        
+        return parsetools.kxhandleInput(self, text, flavor="memos")
+        
     @QtCore.pyqtSlot(QtCore.QString)
     def namesUpdated(self, channel):
         c = unicode(channel)

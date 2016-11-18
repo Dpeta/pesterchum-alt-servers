@@ -7,6 +7,8 @@ from dataobjs import pesterQuirk, PesterProfile
 from memos import TimeSlider, TimeInput
 from version import _pcVersion
 
+import parsetools
+
 _datadir = ostools.getDataDir()
 
 class PesterQuirkItem(QtGui.QTreeWidgetItem):
@@ -245,28 +247,9 @@ class QuirkTesterWindow(QtGui.QDialog):
     @QtCore.pyqtSlot()
     def sentMessage(self):
         text = unicode(self.textInput.text())
-        if text == "" or text[0:11] == "PESTERCHUM:":
-            return
-        self.history.add(text)
-        quirks = pesterQuirks(self.parent().testquirks())
-        lexmsg = lexMessage(text)
-        if type(lexmsg[0]) is not mecmd:
-            try:
-                lexmsg = quirks.apply(lexmsg)
-            except Exception, e:
-                msgbox = QtGui.QMessageBox()
-                msgbox.setText("Whoa there! There seems to be a problem.")
-                msgbox.setInformativeText("A quirk seems to be having a problem. (Possibly you're trying to capture a non-existant group?)\n\
-                %s" % e)
-                msgbox.exec_()
-                return
-        lexmsgs = splitMessage(lexmsg)
 
-        for lm in lexmsgs:
-            serverMsg = copy(lm)
-            self.addMessage(lm, True)
-            text = convertTags(serverMsg, "ctag")
-        self.textInput.setText("")
+        return parsetools.kxhandleInput(self, text, "menus")
+
     def addMessage(self, msg, me=True):
         if type(msg) in [str, unicode]:
             lexmsg = lexMessage(msg)
