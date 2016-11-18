@@ -26,6 +26,16 @@ Features
 * Don't make new windows be all in your face and shit
 * Hide offline friends per group
 
+* Implement new Lexer for the sake of everyone's sanity
+* Redo PESTERCHUM: processing/redo whole msg received processing chain
+* Redo text processing in general
+* Redo quirk processing (use pieces from Textsub if needed)
+* LET PEOPLE TURN OFF HONKING - people already rename the soundfile and such to do this manually
+* Make CTRL+PGUP/PGDN switch memo/pester tabs
+* Redo OOC detection/make it less inconsistent (require matching braces)
+
+* SOONER OR LATER: Redo internal chum storage, centralize data into widely accessible manager objects, etc.
+
 Bugs
 ----
 * weird memo time bug
@@ -38,6 +48,9 @@ Bugs
 * Chums not appearing on chumroll when initals are the same? (bS)
 * Recognize IRC 471, 473, 474 and 475
 * memo links aren't case sensitive
+
+* Mentions occasionally don't work (e.g. in /me)
+* Character times aren't 'forgotten' on Part
 
 Windows Bugs
 ------------
