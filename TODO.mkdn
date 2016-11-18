@@ -35,6 +35,7 @@ Features
 * Redo OOC detection/make it less inconsistent (require matching braces)
 
 * SOONER OR LATER: Redo internal chum storage, centralize data into widely accessible manager objects, etc.
+* Also: Overhaul settings storage. Bring it more in line with the system Textsub used (if feeling masochistic), but simpler.
 
 Bugs
 ----
