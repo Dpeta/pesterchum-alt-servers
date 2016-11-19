@@ -26,7 +26,7 @@ _memore = re.compile(r"(\s|^)(#[A-Za-z0-9_]+)")
 _handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
 _imgre = re.compile(r"""(?i)<img src=['"](\S+)['"]\s*/>""")
 _mecmdre = re.compile(r"^(/me|PESTERCHUM:ME)(\S*)")
-_oocre = re.compile(r"([\[(])\1.*([\])])\2")
+_oocre = re.compile(r"([\[(\{])\1.*([\])\}])\2")
 _format_begin = re.compile(r'(?i)<([ibu])>')
 _format_end = re.compile(r'(?i)</([ibu])>')
 _honk = re.compile(r"(?i)\bhonk\b")
@@ -602,6 +602,34 @@ def splitMessage(msg, format="ctag"):
         output.append(working)
     return output
 
+def _is_ooc(msg, strict=True):
+    """Check if a line is OOC. Note that Pesterchum *is* kind enough to strip
+    trailing spaces for us, even in the older versions, but we don't do that in
+    this function. (It's handled by the calling one.)"""
+    # Define the matching braces.
+    braces = (
+            ('(', ')'),
+            ('[', ']'),
+            ('{', '}')
+            )
+
+    oocDetected = _oocre.match(msg)
+    # Somewhat-improved matching.
+    if oocDetected:
+        if not strict:
+            # The regex matched and we're supposed to be lazy. We're done here.
+            return True
+        # We have a match....
+        ooc1, ooc2 = oocDetected.group(1, 2)
+        # Make sure the appropriate braces are used.
+        mbraces = map(
+                lambda br: ooc1 == br[0] and ooc2 == br[1],
+                braces)
+        if any(mbraces):
+            # If any of those passes matched, we're good to go; it's OOC.
+            return True
+    return False
+
 def kxhandleInput(ctx, text=None, flavor=None):
     """The function that user input that should be sent to the server is routed
     through. Handles lexing, splitting, and quirk application."""
@@ -618,35 +646,39 @@ def kxhandleInput(ctx, text=None, flavor=None):
         text = unicode(ctx.textInput.text())
 
     # Preprocessing stuff.
-    if text == "" or text.startswith("PESTERCHUM:"):
+    msg = text.strip()
+    if msg == "" or msg.startswith("PESTERCHUM:"):
         # We don't allow users to send system messages. There's also no
         # point if they haven't entered anything.
-        # TODO: Consider accounting for the single-space bug, 'beloved'
-        # though it is.
         return
 
     # Add the *raw* text to our history.
     ctx.history.add(text)
-    
+
+    oocDetected = _is_ooc(msg, strict=True)
+
     if flavor != "menus":
-        # Check if the line is OOC. Note that Pesterchum *is* kind enough to strip
-        # trailing spaces for us, even in the older versions.
-        oocDetected = _oocre.match(text.strip())
+        # Determine if we should be OOC.
         is_ooc = ctx.ooc or oocDetected
-        if ctx.ooc and not oocDetected:
+        # Determine if the line actually *is* OOC.
+        if is_ooc and not oocDetected:
             # If we're supposed to be OOC, apply it artificially.
-            text = "(( %s ))" % (text)
+            msg = u"(( {} ))".format(msg)
         # Also, quirk stuff.
         should_quirk = ctx.applyquirks
     else:
         # 'menus' means a quirk tester window, which doesn't have an OOC
-        # variable.
+        # variable, so we assume it's not OOC.
+        # It also invariably has quirks enabled, so there's no setting for
+        # that.
         is_ooc = False
         should_quirk = True
-    is_action = text.startswith("/me")
+
+    # I'm pretty sure that putting a space before a /me *should* break the
+    # /me, but in practice, that's not the case.
+    is_action = msg.startswith("/me")
     
     # Begin message processing.
-    msg = text
     # We use 'text' despite its lack of processing because it's simpler.
     if should_quirk and not (is_action or is_ooc):
         # Fetch the quirks we'll have to apply.
@@ -670,7 +702,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
     # Debug output.
     print msg
     # karxi: We have a list...but I'm not sure if we ever get anything else, so
-    # best to play it safe. I  may remove this during later refactoring.
+    # best to play it safe. I may remove this during later refactoring.
     if isinstance(msg, list):
         for i, m in enumerate(msg):
             if isinstance(m, lexercon.Chunk):
@@ -679,7 +711,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
                 # an object type I provided - just so I could pluck them out
                 # later.
                 msg[i] = m.convert(format="ctag")
-        msg = ''.join(msg)
+        msg = u''.join(msg)
 
     # Quirks have been applied. Lex the messages (finally).
     msg = kxlexMsg(msg)
