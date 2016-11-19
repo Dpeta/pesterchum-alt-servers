@@ -1672,11 +1672,14 @@ class PesterWindow(MovingWindow):
         sounds = [self.alarm, self.memosound, self.namesound, self.ceasesound,
                 self.honksound]
         for sound in sounds:
-            if pygame and pygame.mixer and \
-                    isinstance(sound, pygame.mixer.sound):
-                        sound.set_volume(vol)
-            else:
-                sound.setVolume(vol)
+            try:
+                if pygame and pygame.mixer and \
+                        isinstance(sound, pygame.mixer.sound):
+                            sound.set_volume(vol)
+                else:
+                    sound.setVolume(vol)
+            except Exception as err:
+                print "Couldn't set volumme: {}".format(err)
 
     def changeTheme(self, theme):
         # check theme
