@@ -11,7 +11,7 @@ from mood import Mood
 from dataobjs import PesterProfile, PesterHistory
 from generic import PesterIcon
 from parsetools import convertTags, lexMessage, splitMessage, mecmd, colorBegin, colorEnd, \
-    img2smiley, smiledict, oocre
+    img2smiley, smiledict
 import parsetools
 
 import pnc.lexercon as lexercon

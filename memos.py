@@ -9,7 +9,7 @@ from dataobjs import PesterProfile, PesterHistory
 from generic import PesterIcon, RightClickList, mysteryTime
 from convo import PesterConvo, PesterInput, PesterText, PesterTabWindow
 from parsetools import convertTags, addTimeInitial, timeProtocol, \
-    lexMessage, colorBegin, colorEnd, mecmd, smiledict, oocre
+    lexMessage, colorBegin, colorEnd, mecmd, smiledict
 import parsetools
 from logviewer import PesterLogViewer
 

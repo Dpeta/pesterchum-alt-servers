@@ -7,8 +7,6 @@ from dataobjs import pesterQuirk, PesterProfile
 from memos import TimeSlider, TimeInput
 from version import _pcVersion
 
-import parsetools
-
 _datadir = ostools.getDataDir()
 
 class PesterQuirkItem(QtGui.QTreeWidgetItem):
@@ -213,6 +211,7 @@ class PesterQuirkList(QtGui.QTreeWidget):
 from copy import copy
 from convo import PesterInput, PesterText
 from parsetools import convertTags, lexMessage, splitMessage, mecmd, colorBegin, colorEnd, img2smiley, smiledict
+import parsetools
 from dataobjs import pesterQuirks, PesterHistory
 class QuirkTesterWindow(QtGui.QDialog):
     def __init__(self, parent):

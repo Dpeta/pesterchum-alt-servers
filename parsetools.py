@@ -26,7 +26,7 @@ _memore = re.compile(r"(\s|^)(#[A-Za-z0-9_]+)")
 _handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
 _imgre = re.compile(r"""(?i)<img src=['"](\S+)['"]\s*/>""")
 _mecmdre = re.compile(r"^(/me|PESTERCHUM:ME)(\S*)")
-oocre = re.compile(r"[\[(][\[(].*[\])][\])]")
+_oocre = re.compile(r"([\[(])\1.*([\])])\2")
 _format_begin = re.compile(r'(?i)<([ibu])>')
 _format_end = re.compile(r'(?i)</([ibu])>')
 _honk = re.compile(r"(?i)\bhonk\b")
@@ -463,9 +463,9 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
             # ...
             # ON SECOND THOUGHT: The lexer balances for us, so let's just use
             # that for now. I can split up the function for this later.
-            working = ''.join(kxpclexer.list_convert(working))
+            working = u''.join(kxpclexer.list_convert(working))
             working = kxpclexer.lex(working)
-            working = ''.join(kxpclexer.list_convert(working))
+            working = u''.join(kxpclexer.list_convert(working))
             # TODO: Is that lazy? Yes. This is a modification made to test if
             # it'll work, *not* if it'll be efficient.
 
@@ -518,7 +518,7 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
     else:
         # Once we're finally out of things to add, we're, well...out.
         # So add working to the result one last time.
-        working = ''.join(kxpclexer.list_convert(working))
+        working = u''.join(kxpclexer.list_convert(working))
         output.append(working)
 
     # We're...done?
@@ -631,7 +631,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
     if flavor != "menus":
         # Check if the line is OOC. Note that Pesterchum *is* kind enough to strip
         # trailing spaces for us, even in the older versions.
-        oocDetected = oocre.match(text.strip())
+        oocDetected = _oocre.match(text.strip())
         is_ooc = ctx.ooc or oocDetected
         if ctx.ooc and not oocDetected:
             # If we're supposed to be OOC, apply it artificially.
@@ -752,7 +752,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
         serverMsg = copy(lm)
 
         # Memo-specific processing.
-        if flavor == "memos" and not (is_action or is_ooc):
+        if flavor == "memos" and not is_action:
             # Quirks were already applied, so get the prefix/postfix stuff
             # ready.
             # We fetched the information outside of the loop, so just

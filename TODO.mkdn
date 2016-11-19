@@ -32,10 +32,12 @@ Features
 * Redo quirk processing (use pieces from Textsub if needed)
 * LET PEOPLE TURN OFF HONKING - people already rename the soundfile and such to do this manually
 * Make CTRL+PGUP/PGDN switch memo/pester tabs
-* Redo OOC detection/make it less inconsistent (require matching braces)
+* Set up a simple function to display a traceback instead of silently moving on!
 
 * SOONER OR LATER: Redo internal chum storage, centralize data into widely accessible manager objects, etc.
 * Also: Overhaul settings storage. Bring it more in line with the system Textsub used (if feeling masochistic), but simpler.
+* Overhaul debugging
+* Make a console to display debug info without requiring us to run from console
 
 Bugs
 ----
@@ -52,6 +54,9 @@ Bugs
 
 * Mentions occasionally don't work (e.g. in /me)
 * Character times aren't 'forgotten' on Part
+* +c is not properly recognized on join, nor does it stop someone from reenabling their quirk (let ops and above ignore it)
+* Chumlist handles groups pretty badly (no using the same name as a handle, for example? Needs an errormessage at least)
+* PESTERCHUM: messages are sent to things like NickServ
 
 Windows Bugs
 ------------
