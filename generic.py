@@ -128,8 +128,10 @@ class MovingWindow(QtGui.QFrame):
             self.moving = None
 
 class NoneSound(object):
+    def __init__(self, *args, **kwargs):
+        pass
     def play(self): pass
-    def set_volume(self, v): pass
+    def setVolume(self, v): pass
 
 class WMButton(QtGui.QPushButton):
     def __init__(self, icon, parent=None):

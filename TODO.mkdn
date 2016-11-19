@@ -38,6 +38,7 @@ Features
 * Also: Overhaul settings storage. Bring it more in line with the system Textsub used (if feeling masochistic), but simpler.
 * Overhaul debugging
 * Make a console to display debug info without requiring us to run from console
+* Debug generic.py's CaseInsensitiveDict/replace it with mine
 
 Bugs
 ----
