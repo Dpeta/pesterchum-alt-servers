@@ -1672,8 +1672,9 @@ class PesterWindow(MovingWindow):
         sounds = [self.alarm, self.memosound, self.namesound, self.ceasesound,
                 self.honksound]
         for sound in sounds:
-            if pygame and pygame.mixer:
-                sound.set_volume(vol)
+            if pygame and pygame.mixer and \
+                    isinstance(sound, pygame.mixer.sound):
+                        sound.set_volume(vol)
             else:
                 sound.setVolume(vol)
 
