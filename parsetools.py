@@ -219,12 +219,12 @@ kxpclexer = lexercon.Pesterchum()
 
 def kxlexMsg(string):
     # Do a bit of sanitization.
+    msg = unicode(string)
     # TODO: Let people paste line-by-line normally.
-    msg = string.replace('\n', ' ').replace('\r', ' ')
+    msg = msg.replace('\n', ' ').replace('\r', ' ')
     # Something the original doesn't seem to have accounted for.
     # Replace tabs with 4 spaces.
     msg = msg.replace('\t', ' ' * 4)
-    msg = unicode(string)
     # Begin lexing.
     msg = kxpclexer.lex(msg)
     # ...and that's it for this.
@@ -518,8 +518,10 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
     else:
         # Once we're finally out of things to add, we're, well...out.
         # So add working to the result one last time.
-        working = u''.join(kxpclexer.list_convert(working))
-        output.append(working)
+        working = kxpclexer.list_convert(working)
+        if len(working) > 0:
+            working = u''.join(working)
+            output.append(working)
 
     # We're...done?
     return output
