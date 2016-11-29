@@ -707,7 +707,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
         # thunk. We have to repr() this, as such.
         print repr(msg)
     except Exception as err:
-        print "(Couldn't print processed message: {!s}").format(err)
+        print "(Couldn't print processed message: {!s})".format(err)
     # karxi: We have a list...but I'm not sure if we ever get anything else, so
     # best to play it safe. I may remove this during later refactoring.
     if isinstance(msg, list):
