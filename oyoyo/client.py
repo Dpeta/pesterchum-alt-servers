@@ -204,7 +204,7 @@ class IRCClient:
                 logging.info('error: closing socket')
                 self.socket.close()
             raise se
-        except Exception, e:
+        except Exception as e:
             logging.debug("other exception: %s" % e)
             raise e
         else:
@@ -270,7 +270,7 @@ class IRCApp:
                 
                 try:
                     clientdesc.con.next()
-                except Exception, e:
+                except Exception as e:
                     logging.error('client error %s' % e)
                     logging.error(traceback.format_exc())
                     if clientdesc.autoreconnect:

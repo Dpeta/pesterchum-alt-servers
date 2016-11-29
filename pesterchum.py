@@ -15,19 +15,21 @@ reqmissing = []
 optmissing = []
 try:
     from PyQt4 import QtGui, QtCore
-except ImportError, e:
+except ImportError as e:
     module = str(e)
     if module.startswith("No module named ") or \
        module.startswith("cannot import name "):
         reqmissing.append(module[module.rfind(" ")+1:])
     else: print e
+    del module
 try:
     import pygame
-except ImportError, e:
+except ImportError as e:
     pygame = None
     module = str(e)
     if module[:16] == "No module named ": optmissing.append(module[16:])
     else: print e
+    del module
 if reqmissing:
     print "ERROR: The following modules are required for Pesterchum to run and are missing on your system:"
     for m in reqmissing: print "* "+m
@@ -1022,10 +1024,10 @@ class PesterWindow(MovingWindow):
 
         try:
             themeChecker(self.theme)
-        except ThemeException, (inst):
-            print "Caught: "+inst.parameter
+        except ThemeException as inst:
+            print "Caught: " + inst.parameter
             themeWarning = QtGui.QMessageBox(self)
-            themeWarning.setText("Theme Error: %s" % (inst))
+            themeWarning.setText("Theme Error: %s" % inst)
             themeWarning.exec_()
             self.theme = pesterTheme("pesterchum")
 
@@ -1679,15 +1681,15 @@ class PesterWindow(MovingWindow):
                 else:
                     sound.setVolume(vol)
             except Exception as err:
-                print "Couldn't set volumme: {}".format(err)
+                print "Couldn't set volume: {}".format(err)
 
     def changeTheme(self, theme):
         # check theme
         try:
             themeChecker(theme)
-        except ThemeException, (inst):
+        except ThemeException as inst:
             themeWarning = QtGui.QMessageBox(self)
-            themeWarning.setText("Theme Error: %s" % (inst))
+            themeWarning.setText("Theme Error: %s" % inst)
             themeWarning.exec_()
             theme = pesterTheme("pesterchum")
             return
@@ -2521,7 +2523,7 @@ class PesterWindow(MovingWindow):
                 newmodes = self.optionmenu.modechange.text()
                 if newmodes:
                     self.setChannelMode.emit(self.profile().handle, newmodes, "")
-        except Exception, e:
+        except Exception as e:
             logging.error(e)
         finally:
             self.optionmenu = None
@@ -2560,7 +2562,7 @@ class PesterWindow(MovingWindow):
         if override or themename != self.theme.name:
             try:
                 self.changeTheme(pesterTheme(themename))
-            except ValueError, e:
+            except ValueError as e:
                 themeWarning = QtGui.QMessageBox(self)
                 themeWarning.setText("Theme Error: %s" % (e))
                 themeWarning.exec_()

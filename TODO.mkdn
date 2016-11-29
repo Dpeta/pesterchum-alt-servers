@@ -39,6 +39,32 @@ Features
 * Overhaul debugging
 * Make a console to display debug info without requiring us to run from console
 * Debug generic.py's CaseInsensitiveDict/replace it with mine
+* Overhaul messaging so Chan/Nick/Memo Servs all use the same code (and lexer)
+* Implement MemoServ support
+* Add support for displaying more verbose information (e.g. Cease messages which tell you more than the abbreviation of who left)
+* Make Pesterchum recognize conventional /mes so they aren't invisible
+* Fix NickServ auto-login things
+* Fix memo autojoin
+* Tell user when NickServ handles are going to expire
+* Tell user when old handles have D/C'd? Offer autoghost support?!
+
+* Add more comprehensive status support - IDLE, DND, INVISIBLE for now - or at least add similar functionality.
+* SEPARATE FUNCTIONALITY from CONNECTED STATE!! This is a huge problem! Being shunted off our nick closes windows and breaks things! Just D/C and reconnect?
+	* It'd probably be best to give an option to either CHANGE NICKS or DISCONNECT upon nick collision...? But, then how would we GHOST?
+	* Maybe GHOSTing should use auto-identify to ensure- no, that doesn't work, because we can't ident into a specified nick without being ON it. Need GD's help to fix....
+
+* Separate Pesterchum system handling from window handling. Dicts should be stored and maintained via dicts - even a refined version of what I used for textsub.
+	* Doing it this way means I can fix the case in/sensitivity issue, too.
+
+* Finish creating the sound wrapper. Just make it check what the type of sound needed is upon creation, and instantiate a private class based off of that.
+	* There is basically no good way to do this without moving to Qt5. I might try that myself later, but that's a long-term goal.
+* Toggle individual tab flash / alert sounds (from the same right-click memo that lets us toggle OOC)
+* Make it possible to test quirk things and such without connecting? This'd be hard to separate out, but useful.
+
+Debugging
+----
+* Make small, simplistic windows that allow the viewing of internal variables pertaining to things like set quirks, users present, etc.
+* Make a window that can be used to interface with the script directly - a simple Python console.
 
 Bugs
 ----
@@ -58,6 +84,8 @@ Bugs
 * +c is not properly recognized on join, nor does it stop someone from reenabling their quirk (let ops and above ignore it)
 * Chumlist handles groups pretty badly (no using the same name as a handle, for example? Needs an errormessage at least)
 * PESTERCHUM: messages are sent to things like NickServ
+* Log folder/file names are not case-sensitive, so they break on non-Windows systems
+* Capitalized /me's don't render (should forcibly lowercase them)
 
 Windows Bugs
 ------------

@@ -97,9 +97,8 @@ class userConfig(object):
         self.NEWCONVO = 8
         self.INITIALS  = 16
         self.filename = _datadir+"pesterchum.js"
-        fp = open(self.filename)
-        self.config = json.load(fp)
-        fp.close()
+        with open(self.filename) as fp:
+            self.config = json.load(fp)
         if self.config.has_key("defaultprofile"):
             self.userprofile = userProfile(self.config["defaultprofile"])
         else:
@@ -110,28 +109,21 @@ class userConfig(object):
         if not os.path.exists(self.logpath):
             os.makedirs(self.logpath)
         try:
-            fp = open("%s/groups.js" % (self.logpath), 'r')
-            self.groups = json.load(fp)
-            fp.close()
-        except IOError:
+            with open("%s/groups.js" % (self.logpath), 'r') as fp:
+                self.groups = json.load(fp)
+        except (IOError, ValueError):
             self.groups = {}
-            fp = open("%s/groups.js" % (self.logpath), 'w')
-            json.dump(self.groups, fp)
-            fp.close()
-        except ValueError:
-            self.groups = {}
-            fp = open("%s/groups.js" % (self.logpath), 'w')
-            json.dump(self.groups, fp)
-            fp.close()
+            with open("%s/groups.js" % (self.logpath), 'w') as fp:
+                json.dump(self.groups, fp)
 
     def chums(self):
         if not self.config.has_key('chums'):
             self.set("chums", [])
         return self.config.get('chums', [])
     def setChums(self, newchums):
-        fp = open(self.filename) # what if we have two clients open??
-        newconfig = json.load(fp)
-        fp.close()
+        with open(self.filename) as fp:
+            # what if we have two clients open??
+            newconfig = json.load(fp)
         oldchums = newconfig['chums']
         # Time to merge these two! :OOO
         for c in list(set(oldchums) - set(newchums)):
@@ -225,9 +217,9 @@ class userConfig(object):
         return self.config.get('ghostchum', False)
     def addChum(self, chum):
         if chum.handle not in self.chums():
-            fp = open(self.filename) # what if we have two clients open??
-            newconfig = json.load(fp)
-            fp.close()
+            with open(self.filename) as fp:
+                # what if we have two clients open??
+                newconfig = json.load(fp)
             newchums = newconfig['chums'] + [chum.handle]
             self.set("chums", newchums)
     def removeChum(self, chum):
@@ -285,11 +277,10 @@ class userConfig(object):
         self.groups['groups'] = groups
         try:
             jsonoutput = json.dumps(self.groups)
-        except ValueError, e:
+        except ValueError as e:
             raise e
-        fp = open("%s/groups.js" % (self.logpath), 'w')
-        fp.write(jsonoutput)
-        fp.close()
+        with open("%s/groups.js" % (self.logpath), 'w') as fp:
+            fp.write(jsonoutput)
 
     def server(self):
         if hasattr(self.parent, 'serverOverride'):
@@ -319,11 +310,10 @@ class userConfig(object):
         self.config[item] = setting
         try:
             jsonoutput = json.dumps(self.config)
-        except ValueError, e:
+        except ValueError as e:
             raise e
-        fp = open(self.filename, 'w')
-        fp.write(jsonoutput)
-        fp.close()
+        with open(self.filename, 'w') as fp:
+            fp.write(jsonoutput)
     def availableThemes(self):
         themes = []
         # Load user themes.
@@ -372,12 +362,11 @@ class userProfile(object):
                 self.mentions = []
             self.autojoins = []
         else:
-            fp = open("%s/%s.js" % (self.profiledir, user))
-            self.userprofile = json.load(fp)
-            fp.close()
+            with open("%s/%s.js" % (self.profiledir, user)) as fp:
+                self.userprofile = json.load(fp)
             try:
                 self.theme = pesterTheme(self.userprofile["theme"])
-            except ValueError, e:
+            except ValueError:
                 self.theme = pesterTheme("pesterchum")
             self.lastmood = self.userprofile.get('lastmood', self.theme["main/defaultmood"])
             self.chat = PesterProfile(self.userprofile["handle"],
@@ -402,7 +391,7 @@ class userProfile(object):
         try:
             with open(_datadir+"passwd.js") as fp:
                 self.passwd = json.load(fp)
-        except Exception, e:
+        except:
             self.passwd = {}
         self.autoidentify = False
         self.nickservpass = ""
@@ -479,11 +468,10 @@ class userProfile(object):
             return
         try:
             jsonoutput = json.dumps(self.userprofile)
-        except ValueError, e:
+        except ValueError as e:
             raise e
-        fp = open("%s/%s.js" % (self.profiledir, handle), 'w')
-        fp.write(jsonoutput)
-        fp.close()
+        with open("%s/%s.js" % (self.profiledir, handle), 'w') as fp:
+            fp.write(jsonoutput)
     def saveNickServPass(self):
         # remove profiles with no passwords
         for h,t in self.passwd.items():
@@ -491,7 +479,7 @@ class userProfile(object):
                 del self.passwd[h]
         try:
             jsonoutput = json.dumps(self.passwd, indent=4)
-        except ValueError, e:
+        except ValueError as e:
             raise e
         with open(_datadir+"passwd.js", 'w') as fp:
             fp.write(jsonoutput)
@@ -511,19 +499,13 @@ class PesterProfileDB(dict):
         if not os.path.exists(self.logpath):
             os.makedirs(self.logpath)
         try:
-            fp = open("%s/chums.js" % (self.logpath), 'r')
-            chumdict = json.load(fp)
-            fp.close()
-        except IOError:
+            with open("%s/chums.js" % (self.logpath), 'r') as fp:
+                chumdict = json.load(fp)
+        except (IOError, ValueError):
+            # karxi: This code feels awfully familiar....
             chumdict = {}
-            fp = open("%s/chums.js" % (self.logpath), 'w')
-            json.dump(chumdict, fp)
-            fp.close()
-        except ValueError:
-            chumdict = {}
-            fp = open("%s/chums.js" % (self.logpath), 'w')
-            json.dump(chumdict, fp)
-            fp.close()
+            with open("%s/chums.js" % (self.logpath), 'w') as fp:
+                json.dump(chumdict, fp)
 
         u = []
         for (handle, c) in chumdict.iteritems():
@@ -542,11 +524,10 @@ class PesterProfileDB(dict):
 
     def save(self):
         try:
-            fp = open("%s/chums.js" % (self.logpath), 'w')
-            chumdict = dict([p.plaindict() for p in self.itervalues()])
-            json.dump(chumdict, fp)
-            fp.close()
-        except Exception, e:
+            with open("%s/chums.js" % (self.logpath), 'w') as fp:
+                chumdict = dict([p.plaindict() for p in self.itervalues()])
+                json.dump(chumdict, fp)
+        except Exception as e:
             raise e
     def getColor(self, handle, default=None):
         if not self.has_key(handle):
@@ -598,9 +579,8 @@ class pesterTheme(dict):
 
         self.name = name
         try:
-            fp = open(self.path+"/style.js")
-            theme = json.load(fp, object_hook=self.pathHook)
-            fp.close()
+            with open(self.path+"/style.js") as fp:
+                theme = json.load(fp, object_hook=self.pathHook)
         except IOError:
             theme = json.loads("{}")
         self.update(theme)
@@ -612,7 +592,7 @@ class pesterTheme(dict):
         keys = key.split("/")
         try:
             v = dict.__getitem__(self, keys.pop(0))
-        except KeyError, e:
+        except KeyError as e:
                 if hasattr(self, 'inheritedTheme'):
                     return self.inheritedTheme[key]
                 if hasattr(self, 'defaultTheme'):
@@ -622,7 +602,7 @@ class pesterTheme(dict):
         for k in keys:
             try:
                 v = v[k]
-            except KeyError, e:
+            except KeyError as e:
                 if hasattr(self, 'inheritedTheme'):
                     return self.inheritedTheme[key]
                 if hasattr(self, 'defaultTheme'):

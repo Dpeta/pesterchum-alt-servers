@@ -252,6 +252,12 @@ class Pesterchum(Lexer):
     _ctag_end = re.compile(r"</c>", flags=re.I)
     _mecmdre = re.compile(r"^(/me|PESTERCHUM:ME)(\S*)")
 
+    # TODO: At some point, this needs to have support for setting up
+    # optimization controls - so ctags will be rendered down into things like
+    # "<c=#FAF>" instead of "<c=#FFAAFF>".
+    # I'd make this the default, but I'd like to retain *some* compatibility
+    # with Chumdroid's faulty implementation...or at least have the option to.
+
     def lex(self, string):
         lexlist = [
                     ##(mecmd, self._mecmdre),

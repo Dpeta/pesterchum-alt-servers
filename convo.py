@@ -462,7 +462,7 @@ class PesterText(QtGui.QTextEdit):
             else:
                 self.sending.sendinglabel.setText("F41L3D: %s %s" % (response.status, response.reason))
             hconn.close()
-        except Exception, e:
+        except Exception as e:
             self.sending.sendinglabel.setText("F41L3D: %s" % (e))
         del self.sending
 

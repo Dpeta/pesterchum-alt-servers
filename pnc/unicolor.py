@@ -37,27 +37,6 @@ class Color(object):
     # TODO: color_for_name()
     # TODO: Split __init__, partly using __new__, so the former just has to do
     # conversions
-    ##def __new__(cls, *args, **kwargs):
-    ##  nargs = len(args)
-    ##  if nargs > 0: arg = args[0]
-    ##  if (nargs == 1
-    ##      and isinstance(arg, basestr) and not arg.startswith('#')
-    ##      ):
-    ##      # Try to look up the color name
-    ##      name = arg.lower()
-    ##      try:
-    ##          color = _svg_colors[name]
-    ##      except LookupError:
-    ##          # We don't have a color with that name
-    ##          raise ValueError("No color with name '%s' found" % name)
-    ##      else:
-    ##          # Hand over a copy of the color we found
-    ##          return cls(color)
-    ##  else:
-    ##      return super(Color, cls).__new__(cls)
-    ##  inst = super(Color, cls).__new__(cls)
-    ##  inst.ccode = ''
-    ##  nargs = len(args)
     def __init__(self, *args, **kwargs):
         self.ccode = ''
         self.closest_name = self.name = None
@@ -284,37 +263,47 @@ class Color(object):
     def hexstr_to_rgb(cls, hexstr):
         hexstr = cls.sanitize_hex(hexstr)
         hexstr = hexstr.lstrip('#')
-        # This is ugly, but the purpose is simple and it's accomplished in a
-        # single line...it just runs through the string, picking two characters
-        # at a time and converting them from hex values to ints.
-        result = tuple(int(hexstr[i:i+2], 16) for i in range(len(hexstr))[::2])
+        if len(hexstr) == 3:
+            # NOTE: This will presently never happen, due to the way
+            # sanitize_hex works.
+            # We have something like '#FEF', which means '#FFEEFF'. Expand it
+            # first.
+            # Multiplying each element by 17 expands it. Dividing it does the
+            # opposite.
+            result = tuple( (int(h, 16) * 17) for h in hexstr )
+        else:
+            # This is ugly, but the purpose is simple and it's accomplished in
+            # a single line...it just runs through the string, picking two
+            # characters at a time and converting them from hex values to ints.
+            result = tuple(
+                    int(hexstr[i:i+2], 16) for i in range(0, len(hexstr), 2)
+                    )
         return result
-        ##working = collections.deque(hexstr)
-        ##result = []
-        ### The alternative to doing it this way would be to use an int-driven
-        ### 'for' loop, or similar which might be preferable
-        ##while working:
-        ##  # Fetch the next two args and convert them to an int
-        ##  i = int(working.popleft() + working.popleft(), 16)
-        ##  result.append(i)
 
 
     @staticmethod
-    def rgb_to_hexstr(red, green, blue):
+    def rgb_to_hexstr(red, green, blue, compress=False):
         rgb = [red, green, blue]
         rgb = map(abs, rgb)
-        # Preemptively add the '#' to our result
-        result = ['#']
+        result = []
         for c in rgb:
-            ### Convert to hex, stripping the leading "0x" that Python adds
-            ##c = hex(c).lstrip("0x", 1)
-            ### Add a '0' in front if it's just a single digit
-            ##c = ('0' + c)[-2:]
             c = "%02X" % c
             # Append to our result
             result.append(c)
+        if compress:
+            # Try to compress this down from six characters to three.
+            # Basically the same thing as reduce_hexstr. Might make it use that
+            # later.
+            for h in result:
+                if h[0] != h[1]:
+                    # We can't compress this; alas.
+                    # Break out so we don't go to the 'else' segment.
+                    break
+            else:
+                # All of our codes were doubles; compress them all down.
+                result = [h[0] for h in result]
         # Join and return the result
-        return ''.join(result)
+        return '#' + ''.join(result)
 
     # These next two are from http://www.easyrgb.com/index.php?X=MATH
     @staticmethod
@@ -355,37 +344,46 @@ class Color(object):
 
     @staticmethod
     def reduce_hexstr(hexstr):
+        """Attempt to reduce a six-character hexadecimal color code down to a
+        four-character one."""
         orig = hexstr
         hexstr = hexstr.lstrip('#')
-        lhexstr = hexstr.lower()
         strlen = len(hexstr)
-        working = ['#']
-        for i in range(strlen)[::2]:
-            if lhexstr[i] == lhexstr[i+1]:
-                # The two characters fetched are the same, so we can reduce
-                working.append(hexstr[i])
-            else:
-                # The two characters differ, so we can't actually reduce this
-                # string at all; just return the original
+        h = hexstr.upper()
+        for i in range(0, strlen, 2):
+            if h[i] != h[i+1]:
+                # We found a match that wouldn't work; give back the old value.
                 return orig
-        # If we got here, we successfully reduced
-        return ''.join(working)
+        else:
+            # All of these can be reduced; do so and return.
+            return '#' + hexstr[::2]
 
 
     @staticmethod
     def sanitize_hex(hexstr):
+        orig = hexstr
         hexstr = hexstr.upper()
         # We don't need the leading hash mark for now
         hexstr = hexstr.lstrip('#')
         strlen = len(hexstr)
         if strlen == 6:
-            return '#' + hexstr
+            # We just need to test this for validity. Fall through to the end.
+            pass
         elif strlen == 3:
             # We have a short (CSS style) code; duplicate all of the characters
             hexstr = [c + c for c in hexstr]
             hexstr = ''.join(hexstr)
-            return '#' + hexstr
-        # Should probably error out, but that can wait until later
+        else:
+            raise ValueError(
+                    "Invalid hexadecimal value provided: %s" % orig
+                    )
+        try:
+            # Make sure it works/is readable (no invalid characters).
+            int(hexstr, 16)
+        except ValueError:
+            raise ValueError(
+                    "Invalid hexadecimal value provided: %s" % orig
+                    )
         return '#' + hexstr
 
     def to_cielab_tuple(self):

@@ -224,7 +224,7 @@ try:
                 print "Invalid input, try again"
 except KeyboardInterrupt:
     print ""
-except Exception, e:
+except Exception as e:
     error = -1
 finally:
     if error == -1:

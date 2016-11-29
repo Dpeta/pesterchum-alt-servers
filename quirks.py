@@ -64,7 +64,7 @@ class ScriptQuirks(object):
                 module = self.loadModule(name, filename)
                 if module is None:
                     continue
-            except Exception, e:
+            except Exception as e:
                 print "Error loading %s: %s (in quirks.py)" % (os.path.basename(name), e)
                 msgbox = QtGui.QMessageBox()
                 msgbox.setWindowTitle("Error!")

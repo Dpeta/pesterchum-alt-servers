@@ -220,7 +220,8 @@ kxpclexer = lexercon.Pesterchum()
 def kxlexMsg(string):
     # Do a bit of sanitization.
     msg = unicode(string)
-    # TODO: Let people paste line-by-line normally.
+    # TODO: Let people paste line-by-line normally. Maybe have a mass-paste
+    # right-click option?
     msg = msg.replace('\n', ' ').replace('\r', ' ')
     # Something the original doesn't seem to have accounted for.
     # Replace tabs with 4 spaces.
@@ -340,12 +341,22 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
     
     Keep in mind that there's a little bit of magic involved in this at the
     moment; some unsafe assumptions are made."""
+
+    # NOTE: Keep in mind that lexercon CTag objects convert to "r,g,b" format.
+    # This means that they're usually going to be fairly long.
+    # Support for changing this will probably be added later, but it won't work
+    # properly with Chumdroid...I'll probably have to leave it as an actual
+    # config option that's applied to the parser.
+
     # Procedure: Lex. Convert for lengths as we go, keep starting tag
     # length as we go too. Split whenever we hit the limit, add the tags to
     # the start of the next line (or just keep a running line length
     # total), and continue.
     # N.B.: Keep the end tag length too. (+4 for each.)
     # Copy the list so we can't break anything.
+    # TODO: There's presently an issue where certain combinations of color
+    # codes end up being added as a separate, empty line. This is a bug, of
+    # course, and should be looked into.
     lexed = list(lexed)
     working = []
     output = []
@@ -479,7 +490,7 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
             if text_preproc:
                 # If we got here, it means we overflowed due to text - which
                 # means we also split and added it to working. There's no
-                # reason to continue and add it twice.
+                # reason to go on and add it twice.
                 # This could be handled with an elif chain, but eh.
                 continue
             # If we got here, it means we haven't done anything with 'msg' yet,
@@ -640,7 +651,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
     # files for the original sentMessage variants.
 
     if flavor is None:
-        return ValueError("A flavor is needed to determine suitable logic!")
+        raise ValueError("A flavor is needed to determine suitable logic!")
 
     if text is None:
         # Fetch the raw text from the input box.

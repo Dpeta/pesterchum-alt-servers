@@ -36,7 +36,7 @@ class MSPAChecker(QtGui.QWidget):
                 raise
             if os.path.exists("status_old.pkl"):
                 os.remove("status_old.pkl")
-        except Exception, e:
+        except Exception as e:
             print e
             msg = QtGui.QMessageBox(self)
             msg.setText("Problems writing save file.")
