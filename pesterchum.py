@@ -1350,6 +1350,7 @@ class PesterWindow(MovingWindow):
     def newMemoMsg(self, chan, handle, msg):
         if not self.memos.has_key(chan):
             # silently ignore in case we forgot to /part
+            # TODO: This is really bad practice. Fix it later.
             return
         memo = self.memos[chan]
         msg = unicode(msg)
@@ -1358,7 +1359,7 @@ class PesterWindow(MovingWindow):
             newtime = timedelta(0)
             time = TimeTracker(newtime)
             memo.times[handle] = time
-        if msg[0:3] != "/me" and msg[0:13] != "PESTERCHUM:ME":
+        if not (msg.startswith("/me") or msg.startswith("PESTERCHUM:ME")):
             msg = addTimeInitial(msg, memo.times[handle].getGrammar())
         if handle == "ChanServ":
             systemColor = QtGui.QColor(self.theme["memos/systemMsgColor"])
@@ -1383,10 +1384,12 @@ class PesterWindow(MovingWindow):
                     if mentioned:
                         self.namesound.play()
                         return
-                if self.honk and re.search(r"\bhonk\b", convertTags(msg, "text"), re.I):
-                    self.honksound.play()
-                elif self.config.memoPing():
-                    self.memosound.play()
+                if not memo.notifications_muted:
+                    if self.honk and re.search(r"\bhonk\b", convertTags(msg, "text"), re.I):
+                        # TODO: I've got my eye on you, Gamzee.
+                        self.honksound.play()
+                    elif self.config.memoPing() or memo.always_beep:
+                        self.memosound.play()
 
     def changeColor(self, handle, color):
         # pesterconvo and chumlist

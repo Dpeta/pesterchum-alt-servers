@@ -407,8 +407,29 @@ class PesterMemo(PesterConvo):
         self.invitechum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/invitechum"], self)
         self.connect(self.invitechum, QtCore.SIGNAL('triggered()'),
                      self, QtCore.SLOT('inviteChums()'))
+
+        self._beepToggle = QtGui.QAction("Beep on Message", self)
+        self._beepToggle.setCheckable(True)
+        self.connect(self._beepToggle, QtCore.SIGNAL('toggled(bool)'),
+                    self, QtCore.SLOT('toggleBeep(bool)'))
+
+        self._flashToggle = QtGui.QAction("Flash on Message", self)
+        self._flashToggle.setCheckable(True)
+        self.connect(self._flashToggle, QtCore.SIGNAL('toggled(bool)'),
+                    self, QtCore.SLOT('toggleFlash(bool)'))
+
+        self._muteToggle = QtGui.QAction("Mute Notifications", self)
+        self._muteToggle.setCheckable(True)
+        self.connect(self._muteToggle, QtCore.SIGNAL('toggled(bool)'),
+                    self, QtCore.SLOT('toggleMute(bool)'))
+
         self.optionsMenu.addAction(self.quirksOff)
         self.optionsMenu.addAction(self.oocToggle)
+
+        self.optionsMenu.addAction(self._beepToggle)
+        self.optionsMenu.addAction(self._flashToggle)
+        self.optionsMenu.addAction(self._muteToggle)
+
         self.optionsMenu.addAction(self.logchum)
         self.optionsMenu.addAction(self.invitechum)
 
@@ -507,6 +528,10 @@ class PesterMemo(PesterConvo):
         self.history = PesterHistory()
         self.applyquirks = True
         self.ooc = False
+
+        self.always_beep = False
+        self.always_flash = False
+        self.notifications_muted = False
 
     @QtCore.pyqtSlot()
     def toggleUserlist(self):

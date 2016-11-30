@@ -87,6 +87,9 @@ Bugs
 * Log folder/file names are not case-sensitive, so they break on non-Windows systems
 * Capitalized /me's don't render (should forcibly lowercase them)
 
+* Volume control doesn't work without pygame
+* Sound on Linux doesn't work without pygame
+
 Windows Bugs
 ------------
 * XP SP2: sometimes mouse clicks dont register? must be some kinda crash

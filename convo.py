@@ -133,6 +133,7 @@ class PesterTabWindow(QtGui.QFrame):
         i = self.tabIndices[handle]
         self.tabs.setTabTextColor(i, QtGui.QColor(self.mainwindow.theme["%s/tabs/newmsgcolor" % (self.type)]))
         convo = self.convos[handle]
+        # Create a function for the icon to use
         def func():
             convo.showChat()
         self.mainwindow.waitingMessages.addMessage(handle, func)
@@ -557,8 +558,34 @@ class PesterConvo(QtGui.QFrame):
         self.connect(self.logchum, QtCore.SIGNAL('triggered()'),
                      self, QtCore.SLOT('openChumLogs()'))
 
+        # For this, we'll want to use setChecked to toggle these so they match
+        # the user's setting. Alternately (better), use a tristate checkbox, so
+        # that they start semi-checked?
+        # Easiest solution: Implement a 'Mute' option that overrides all
+        # notifications for that window, save for mentions.
+        # TODO: Look into setting up theme support here.
+        self._beepToggle = QtGui.QAction("Beep on Message", self)
+        self._beepToggle.setCheckable(True)
+        self.connect(self._beepToggle, QtCore.SIGNAL('toggled(bool)'),
+                    self, QtCore.SLOT('toggleBeep(bool)'))
+
+        self._flashToggle = QtGui.QAction("Flash on Message", self)
+        self._flashToggle.setCheckable(True)
+        self.connect(self._flashToggle, QtCore.SIGNAL('toggled(bool)'),
+                    self, QtCore.SLOT('toggleFlash(bool)'))
+
+        self._muteToggle = QtGui.QAction("Mute Notifications", self)
+        self._muteToggle.setCheckable(True)
+        self.connect(self._muteToggle, QtCore.SIGNAL('toggled(bool)'),
+                    self, QtCore.SLOT('toggleMute(bool)'))
+
         self.optionsMenu.addAction(self.quirksOff)
         self.optionsMenu.addAction(self.oocToggle)
+
+        self.optionsMenu.addAction(self._beepToggle)
+        self.optionsMenu.addAction(self._flashToggle)
+        self.optionsMenu.addAction(self._muteToggle)
+
         self.optionsMenu.addAction(self.logchum)
         self.optionsMenu.addAction(self.addChumAction)
         self.optionsMenu.addAction(self.blockAction)
@@ -567,6 +594,10 @@ class PesterConvo(QtGui.QFrame):
         self.chumopen = False
         self.applyquirks = True
         self.ooc = False
+
+        self.always_beep = False
+        self.always_flash = False
+        self.notifications_muted = False
 
         if parent:
             parent.addChat(self)
@@ -637,31 +668,53 @@ class PesterConvo(QtGui.QFrame):
 
     def notifyNewMessage(self):
         # first see if this conversation HASS the focus
+        title = self.title()
+        parent = self.parent()
+        memoblink = pesterblink = self.mainwindow.config.blink()
+        memoblink &= self.mainwindow.config.MBLINK
+        pesterblink &= self.mainwindow.config.PBLINK
+        print "{!s}.notifications_muted: {!s}".format(self,
+                self.notifications_muted)
+        mutednots = self.notifications_muted
+        mtsrc = self
+        if parent:
+            try:
+                mutednots = parent.notifications_muted
+                mtsrc = parent
+            except:
+                pass
         if not (self.hasFocus() or self.textArea.hasFocus() or
                 self.textInput.hasFocus() or
-                (self.parent() and self.parent().convoHasFocus(self.title()))):
+                (parent and parent.convoHasFocus(title))):
             # ok if it has a tabconvo parent, send that the notify.
-            if self.parent():
-                self.parent().notifyNewMessage(self.title())
-                if type(self.parent()).__name__ == "PesterTabWindow":
-                  if self.mainwindow.config.blink() & self.mainwindow.config.PBLINK:
-                    self.mainwindow.gainAttention.emit(self.parent())
-                elif type(self.parent()).__name__ == "MemoTabWindow":
-                  if self.mainwindow.config.blink() & self.mainwindow.config.MBLINK:
-                    self.mainwindow.gainAttention.emit(self.parent())
+            if parent:
+                print "{!s}.notifications_muted: {!s}".format(mtsrc,
+                        mutednots)
+                if not mutednots:
+                    # Stop the icon from highlighting
+                    parent.notifyNewMessage(title)
+                    if type(parent).__name__ == "PesterTabWindow":
+                      if self.always_flash or pesterblink:
+                        self.mainwindow.gainAttention.emit(parent)
+                    elif type(parent).__name__ == "MemoTabWindow":
+                      if self.always_flash or memoblink:
+                        self.mainwindow.gainAttention.emit(parent)
             # if not change the window title and update system tray
             else:
                 self.newmessage = True
-                self.setWindowTitle(self.title()+"*")
+                self.setWindowTitle(title + "*")
+                # karxi: The order of execution here is a bit unclear...I'm not
+                # entirely sure how much of this directly affects what we see.
                 def func():
                     self.showChat()
-                self.mainwindow.waitingMessages.addMessage(self.title(), func)
-                if type(self).__name__ == "PesterConvo":
-                  if self.mainwindow.config.blink() & self.mainwindow.config.PBLINK:
-                    self.mainwindow.gainAttention.emit(self)
-                elif type(self).__name__ == "PesterMemo":
-                  if self.mainwindow.config.blink() & self.mainwindow.config.MBLINK:
-                    self.mainwindow.gainAttention.emit(self)
+                self.mainwindow.waitingMessages.addMessage(title, func)
+                if not self.notifications_muted:
+                    if type(self).__name__ == "PesterConvo":
+                      if self.always_flash or pesterblink:
+                        self.mainwindow.gainAttention.emit(self)
+                    elif type(self).__name__ == "PesterMemo":
+                      if self.always_flash or memoblink:
+                        self.mainwindow.gainAttention.emit(self)
 
     def clearNewMessage(self):
         if self.parent():
@@ -758,6 +811,18 @@ class PesterConvo(QtGui.QFrame):
         self.mainwindow.chumList.pesterlogviewer.show()
         self.mainwindow.chumList.pesterlogviewer.raise_()
         self.mainwindow.chumList.pesterlogviewer.activateWindow()
+
+    @QtCore.pyqtSlot(bool)
+    def toggleBeep(self, toggled):
+        self.always_beep = toggled
+
+    @QtCore.pyqtSlot(bool)
+    def toggleFlash(self, toggled):
+        self.always_flash = toggled
+
+    @QtCore.pyqtSlot(bool)
+    def toggleMute(self, toggled):
+        self.notifications_muted = toggled
 
     messageSent = QtCore.pyqtSignal(QtCore.QString, QtCore.QString)
     windowClosed = QtCore.pyqtSignal(QtCore.QString)
