@@ -673,8 +673,6 @@ class PesterConvo(QtGui.QFrame):
         memoblink = pesterblink = self.mainwindow.config.blink()
         memoblink &= self.mainwindow.config.MBLINK
         pesterblink &= self.mainwindow.config.PBLINK
-        print "{!s}.notifications_muted: {!s}".format(self,
-                self.notifications_muted)
         mutednots = self.notifications_muted
         mtsrc = self
         if parent:
@@ -688,8 +686,6 @@ class PesterConvo(QtGui.QFrame):
                 (parent and parent.convoHasFocus(title))):
             # ok if it has a tabconvo parent, send that the notify.
             if parent:
-                print "{!s}.notifications_muted: {!s}".format(mtsrc,
-                        mutednots)
                 if not mutednots:
                     # Stop the icon from highlighting
                     parent.notifyNewMessage(title)
