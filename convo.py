@@ -134,6 +134,7 @@ class PesterTabWindow(QtGui.QFrame):
         self.tabs.setTabTextColor(i, QtGui.QColor(self.mainwindow.theme["%s/tabs/newmsgcolor" % (self.type)]))
         convo = self.convos[handle]
         # Create a function for the icon to use
+        # TODO: Let us disable this.
         def func():
             convo.showChat()
         self.mainwindow.waitingMessages.addMessage(handle, func)
@@ -667,6 +668,9 @@ class PesterConvo(QtGui.QFrame):
         self.textArea.addMessage(lexmsg, chum)
 
     def notifyNewMessage(self):
+        # Our imports have to be here to prevent circular import issues.
+        from memos import PesterMemo, MemoTabWindow
+
         # first see if this conversation HASS the focus
         title = self.title()
         parent = self.parent()
@@ -686,14 +690,20 @@ class PesterConvo(QtGui.QFrame):
                 (parent and parent.convoHasFocus(title))):
             # ok if it has a tabconvo parent, send that the notify.
             if parent:
+                # Just let the icon highlight normally.
+                # This function *also* highlights the tab, mind.
+                parent.notifyNewMessage(title)
                 if not mutednots:
-                    # Stop the icon from highlighting
-                    parent.notifyNewMessage(title)
-                    if type(parent).__name__ == "PesterTabWindow":
-                      if self.always_flash or pesterblink:
-                        self.mainwindow.gainAttention.emit(parent)
-                    elif type(parent).__name__ == "MemoTabWindow":
+                    # Remember that these two are descended from one another.
+                    # TODO: Make these obey subclassing rules...ugh.
+                    # They should really just use the class's function and do
+                    # the checks there.
+                    # PesterTabWindow -> MemoTabWindow
+                    if isinstance(parent, MemoTabWindow):
                       if self.always_flash or memoblink:
+                        self.mainwindow.gainAttention.emit(parent)
+                    elif isinstance(parent, PesterTabWindow):
+                      if self.always_flash or pesterblink:
                         self.mainwindow.gainAttention.emit(parent)
             # if not change the window title and update system tray
             else:
@@ -704,12 +714,13 @@ class PesterConvo(QtGui.QFrame):
                 def func():
                     self.showChat()
                 self.mainwindow.waitingMessages.addMessage(title, func)
-                if not self.notifications_muted:
-                    if type(self).__name__ == "PesterConvo":
-                      if self.always_flash or pesterblink:
-                        self.mainwindow.gainAttention.emit(self)
-                    elif type(self).__name__ == "PesterMemo":
+                if not mutednots:
+                    # Once again, PesterMemo inherits from PesterConvo.
+                    if isinstance(self, PesterMemo):
                       if self.always_flash or memoblink:
+                        self.mainwindow.gainAttention.emit(self)
+                    elif isinstance(self, PesterConvo):
+                      if self.always_flash or pesterblink:
                         self.mainwindow.gainAttention.emit(self)
 
     def clearNewMessage(self):
