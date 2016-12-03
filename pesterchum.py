@@ -2778,17 +2778,29 @@ class MainProgram(QtCore.QObject):
 
         options = self.oppts(sys.argv[1:])
 
-        if pygame and pygame.mixer:
-            # we could set the frequency higher but i love how cheesy it sounds
-            try:
-                pygame.mixer.init()
-                pygame.mixer.init()
-            except pygame.error, e:
-                print "Warning: No sound! %s" % (e)
-        elif not QtGui.QSound.isAvailable():
-            print "Warning: No sound! (No pygame/QSound)"
-        else:
-            print "Warning: No sound!"
+        def doSoundInit():
+            # TODO: Make this more uniform, adapt it into a general function.
+            if pygame and pygame.mixer:
+                # we could set the frequency higher but i love how cheesy it sounds
+                try:
+                    pygame.mixer.init()
+                    pygame.mixer.init()
+                except pygame.error as err:
+                    print "Warning: No sound! (pygame error: %s)" % err
+                else:
+                    # Sound works, we're done.
+                    return
+
+            # ... Other alternatives here. ...
+
+            # Last resort. (Always 'works' on Windows, no volume control.)
+            if QtGui.QSound.isAvailable():
+                # Sound works, we're done.
+                return
+            else:
+                print "Warning: No sound! (No pygame/QSound)"
+
+        doSoundInit()
         self.widget = PesterWindow(options, app=self.app)
         self.widget.show()
 
