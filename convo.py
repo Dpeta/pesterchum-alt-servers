@@ -95,9 +95,11 @@ class PesterTabWindow(QtGui.QFrame):
 
         elif (mods == QtCore.Qt.ControlModifier and
                 keypress in (QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown)):
-            if keypress == QtCore.Qt.Key_PageUp:
+            # Inverted controls. Might add an option for this if people want
+            # it.
+            if keypress == QtCore.Qt.Key_PageDown:
                 direction = 1
-            elif keypress == QtCore.Qt.Key_PageDown:
+            elif keypress == QtCore.Qt.Key_PageUp:
                 direction = -1
             # ...Processing...
             tabs = self.tabs
