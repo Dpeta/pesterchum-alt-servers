@@ -433,39 +433,6 @@ class PesterText(QtGui.QTextEdit):
         if hasattr(parent, 'textInput') and key not in pass_to_super:
             parent.textInput.keyPressEvent(event)
 
-        #~# Check if we can switch tabs here.
-        #~tabwindow = parent.parent()
-        #~if tabwindow and keymods == QtCore.Qt.ControlModifier:
-        #~    direction = 0
-        #~    if key == QtCore.Qt.Key_PageUp:
-        #~        direction = 1
-        #~    elif key == QtCore.Qt.Key_PageDown:
-        #~        direction = -1
-        #~    if direction:
-        #~        # ...Processing...
-        #~        tabs = tabwindow.tabs
-        #~        # Pick our new index by sliding up or down the tab range.
-        #~        # NOTE: This feels like it could error. In fact, it /will/ if
-        #~        # there are no tabs, but...that shouldn't happen, should it?
-        #~        # There are probably other scenarios, too, so we'll have to
-        #~        # check on this later.
-        #~        #
-        #~        # Calculate the new index.
-        #~        ct = tabs.count()
-        #~        cind = tabs.currentIndex()
-        #~        nind = cind + direction
-        #~        if nind > (ct - 1):
-        #~            # The new index would be higher than the maximum; loop.
-        #~            nind = nind % ct
-        #~        # Otherwise, negative syntax should get it for us.
-        #~        nind = range(ct)[nind]
-        #~        # Change to the selected tab.
-        #~        # Note that this will send out the usual callbacks that handle
-        #~        # focusing and such.
-        #~        tabs.setCurrentIndex(nind)
-        #~        # Ensure this doesn't fall through normally.
-        #~        return
-
         # Pass to the normal handler.
         super(QtGui.QTextEdit, self).keyPressEvent(event)
 
