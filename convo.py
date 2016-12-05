@@ -79,6 +79,7 @@ class PesterTabWindow(QtGui.QFrame):
             return True
 
     def keyPressEvent(self, event):
+        # TODO: Clean this up. Our text areas now call this.
         keypress = event.key()
         mods = event.modifiers()
         if ((mods & QtCore.Qt.ControlModifier) and
@@ -91,6 +92,37 @@ class PesterTabWindow(QtGui.QFrame):
             else:
                 nexti = (self.tabIndices[self.currentConvo.title()] + 1) % self.tabs.count()
             self.tabs.setCurrentIndex(nexti)
+
+        elif (mods == QtCore.Qt.ControlModifier and
+                keypress in (QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown)):
+            if keypress == QtCore.Qt.Key_PageUp:
+                direction = 1
+            elif keypress == QtCore.Qt.Key_PageDown:
+                direction = -1
+            # ...Processing...
+            tabs = self.tabs
+            # Pick our new index by sliding up or down the tab range.
+            # NOTE: This feels like it could error. In fact, it /will/ if
+            # there are no tabs, but...that shouldn't happen, should it?
+            # There are probably other scenarios, too, so we'll have to
+            # check on this later.
+            #
+            # Calculate the new index.
+            ct = tabs.count()
+            cind = tabs.currentIndex()
+            nind = cind + direction
+            if nind > (ct - 1):
+                # The new index would be higher than the maximum; loop.
+                nind = nind % ct
+            # Otherwise, negative syntax should get it for us.
+            nind = range(ct)[nind]
+            # Change to the selected tab.
+            # Note that this will send out the usual callbacks that handle
+            # focusing and such.
+            tabs.setCurrentIndex(nind)
+            # Ensure this doesn't fall through normally.
+            # (Not an issue here, but this used to be on a TextArea.)
+            return
 
     def closeSoft(self):
         self.softclose = True
@@ -391,11 +423,51 @@ class PesterText(QtGui.QTextEdit):
         QtGui.QTextEdit.focusInEvent(self, event)
 
     def keyPressEvent(self, event):
-        if hasattr(self.parent(), 'textInput'):
-            if event.key() not in [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, \
-                                   QtCore.Qt.Key_Up, QtCore.Qt.Key_Down]:
-                self.parent().textInput.keyPressEvent(event)
-        QtGui.QTextEdit.keyPressEvent(self, event)
+        # First parent is the PesterConvo containing this.
+        # Second parent is the PesterTabWindow containing *it*.
+        pass_to_super = (QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown,
+                QtCore.Qt.Key_Up, QtCore.Qt.Key_Down)
+        parent = self.parent()
+        key = event.key()
+        keymods = event.modifiers()
+        if hasattr(parent, 'textInput') and key not in pass_to_super:
+            parent.textInput.keyPressEvent(event)
+
+        #~# Check if we can switch tabs here.
+        #~tabwindow = parent.parent()
+        #~if tabwindow and keymods == QtCore.Qt.ControlModifier:
+        #~    direction = 0
+        #~    if key == QtCore.Qt.Key_PageUp:
+        #~        direction = 1
+        #~    elif key == QtCore.Qt.Key_PageDown:
+        #~        direction = -1
+        #~    if direction:
+        #~        # ...Processing...
+        #~        tabs = tabwindow.tabs
+        #~        # Pick our new index by sliding up or down the tab range.
+        #~        # NOTE: This feels like it could error. In fact, it /will/ if
+        #~        # there are no tabs, but...that shouldn't happen, should it?
+        #~        # There are probably other scenarios, too, so we'll have to
+        #~        # check on this later.
+        #~        #
+        #~        # Calculate the new index.
+        #~        ct = tabs.count()
+        #~        cind = tabs.currentIndex()
+        #~        nind = cind + direction
+        #~        if nind > (ct - 1):
+        #~            # The new index would be higher than the maximum; loop.
+        #~            nind = nind % ct
+        #~        # Otherwise, negative syntax should get it for us.
+        #~        nind = range(ct)[nind]
+        #~        # Change to the selected tab.
+        #~        # Note that this will send out the usual callbacks that handle
+        #~        # focusing and such.
+        #~        tabs.setCurrentIndex(nind)
+        #~        # Ensure this doesn't fall through normally.
+        #~        return
+
+        # Pass to the normal handler.
+        super(QtGui.QTextEdit, self).keyPressEvent(event)
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
@@ -469,6 +541,11 @@ class PesterText(QtGui.QTextEdit):
         del self.sending
 
 class PesterInput(QtGui.QLineEdit):
+    # NOTE: I have ABSOLUTELY NO IDEA HOW, but using super() here breaks this
+    # class's keyPressEvent so that no input can be provided. I am *very*
+    # confused.
+    # For the sake of safety, I've avoided it here until I know what's going
+    # on.
     def __init__(self, theme, parent=None):
         QtGui.QLineEdit.__init__(self, parent)
         self.setStyleSheet(theme["convo/input/style"])

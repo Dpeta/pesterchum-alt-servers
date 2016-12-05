@@ -31,8 +31,8 @@ Features
 * Redo text processing in general
 * Redo quirk processing (use pieces from Textsub if needed)
 * LET PEOPLE TURN OFF HONKING - people already rename the soundfile and such to do this manually
-* Make CTRL+PGUP/PGDN switch memo/pester tabs
 * Set up a simple function to display a traceback instead of silently moving on!
+* Pare down the PesterMemo object so it inherits more things from PesterConvo *implicitly*
 
 * SOONER OR LATER: Redo internal chum storage, centralize data into widely accessible manager objects, etc.
 * Also: Overhaul settings storage. Bring it more in line with the system Textsub used (if feeling masochistic), but simpler.
@@ -58,9 +58,16 @@ Features
 
 * Finish creating the sound wrapper. Just make it check what the type of sound needed is upon creation, and instantiate a private class based off of that.
 	* There is basically no good way to do this without moving to Qt5. I might try that myself later, but that's a long-term goal.
-* Toggle individual tab flash / alert sounds (from the same right-click memo that lets us toggle OOC)
 * Make it possible to test quirk things and such without connecting? This'd be hard to separate out, but useful.
 * Right-click Time entry field to see those used? (Replace left/right buttons?)
+
+Todo/Done
+----
+* Fix parser text-loss bug that plagues everyone (especially Chumdroid users)
+* Make /me messages that cut continue into more /me messages
+* Make sound work on Windows through QSound (disables volume control)
+* Toggle individual tab flash / alert sounds (from the same right-click memo that lets us toggle OOC)
+* Make CTRL+PGUP/PGDN switch memo/pester tabs
 
 Debugging
 ----
