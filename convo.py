@@ -431,10 +431,11 @@ class PesterText(QtGui.QTextEdit):
         key = event.key()
         keymods = event.modifiers()
         if hasattr(parent, 'textInput') and key not in pass_to_super:
+            # TODO: Shift focus here on bare (no modifiers) alphanumerics.
             parent.textInput.keyPressEvent(event)
 
         # Pass to the normal handler.
-        super(QtGui.QTextEdit, self).keyPressEvent(event)
+        super(PesterText, self).keyPressEvent(event)
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
@@ -508,20 +509,15 @@ class PesterText(QtGui.QTextEdit):
         del self.sending
 
 class PesterInput(QtGui.QLineEdit):
-    # NOTE: I have ABSOLUTELY NO IDEA HOW, but using super() here breaks this
-    # class's keyPressEvent so that no input can be provided. I am *very*
-    # confused.
-    # For the sake of safety, I've avoided it here until I know what's going
-    # on.
     def __init__(self, theme, parent=None):
-        QtGui.QLineEdit.__init__(self, parent)
+        super(PesterInput, self).__init__(parent)
         self.setStyleSheet(theme["convo/input/style"])
     def changeTheme(self, theme):
         self.setStyleSheet(theme["convo/input/style"])
     def focusInEvent(self, event):
         self.parent().clearNewMessage()
         self.parent().textArea.textCursor().clearSelection()
-        QtGui.QLineEdit.focusInEvent(self, event)
+        super(PesterInput, self).focusInEvent(event)
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Up:
             text = unicode(self.text())
@@ -535,7 +531,7 @@ class PesterInput(QtGui.QLineEdit):
         elif event.key() in [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown]:
             self.parent().textArea.keyPressEvent(event)
         self.parent().mainwindow.idletime = 0
-        QtGui.QLineEdit.keyPressEvent(self, event)
+        super(PesterInput, self).keyPressEvent(event)
 
 class PesterConvo(QtGui.QFrame):
     def __init__(self, chum, initiated, mainwindow, parent=None):
