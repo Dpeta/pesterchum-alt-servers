@@ -23,14 +23,18 @@ except NameError:
 
 class Lexeme(object):
     def __init__(self, string, origin):
+        # The 'string' property is just what it came from; the original
+        # representation. It doesn't have to be used, and honestly probably
+        # shouldn't be.
         self.string = string
         self.origin = origin
     def __str__(self):
-        return self.string
-    def __len__(self):
-        return len(self.string)
-    def convert(self, format):
         ##return self.string
+        return self.convert(self.origin)
+    def __len__(self):
+        ##return len(self.string)
+        return len(str(self))
+    def convert(self, format):
         # This is supposed to be overwritten by subclasses
         raise NotImplementedError
     def rebuild(self, format):
@@ -74,6 +78,8 @@ class Specifier(Lexeme):
     sets_color = sets_bold = sets_italic = sets_underline = None
     resets_color = resets_bold = resets_italic = resets_underline = None
     resets_formatting = None
+    # If this form has a more compact form, use it
+    compact = False
 
 # Made so that certain odd message-ish things have a place to go. May have its
 # class changed later.
@@ -115,6 +121,8 @@ class CTag(Specifier):
             else:
                 if color.name:
                     text = "<c=%s>" % color.name
+                elif self.compact:
+                    text = "<c=%s>" % color.reduce_hexstr(color.hexstr)
                 else:
                     text = "<c=%d,%d,%d>" % color.to_rgb_tuple()
         elif format == "plaintext":
@@ -197,6 +205,7 @@ class SpecifierEnd(CTagEnd, FTagEnd):
 class Lexer(object):
     # Subclasses need to supply a ref themselves
     ref = None
+    compress_tags = False
     def breakdown(self, string, objlist):
         if not isinstance(string, basestr): msglist = string
         else: msglist = [string]
@@ -284,6 +293,10 @@ class Pesterchum(Lexer):
                     beginc += 1
                 elif beginc >= endc:
                     endc += 1
+                # Apply compression, if we're set to. We made these objects, so
+                # that should be okay.
+                if self.compress_tags:
+                    o.compact = True
             balanced.append(o)
             # Original (Pesterchum) code:
             ##if isinstance(o, colorBegin):
@@ -304,6 +317,8 @@ class Pesterchum(Lexer):
                 balanced.append(CTagEnd("</c>", self.ref, None))
         return balanced
 
+    # TODO: Let us contextually set compression here or something, ugh. If
+    # 'None' assume the self-set one.
     def list_convert(self, target, format=None):
         if format is None: format = self.ref
         converted = []

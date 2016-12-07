@@ -382,6 +382,9 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
     safekeeping = lexed[:]
     lexed = collections.deque(lexed)
     rounds = 0
+    # NOTE: This entire mess is due for a rewrite. I'll start splitting it into
+    # sub-functions for the eventualities that arise during parsing.
+    # (E.g. the text block splitter NEEDS to be a different function....)
     while len(lexed) > 0:
         rounds += 1
         if debug:
@@ -389,7 +392,6 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
         msg = lexed.popleft()
         msglen = 0
         is_text = False
-        text_preproc = False
 
         try:
             msglen = len(msg.convert(fmt))
@@ -411,7 +413,6 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
             # Thus, we can split it, finalize it, and add the remainder to the
             # next line (after the color codes).
             if is_text and efflenleft() > 30:
-                text_preproc = True
                 # We use 30 as a general 'guess' - if there's less space than
                 # that, it's probably not worth trying to cram text in.
                 # This also saves us from infinitely trying to reduce the size
@@ -424,6 +425,8 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
                 lenl = efflenleft()
                 subround = 0
                 while len(msg) > lenl:
+                    # NOTE: This may be cutting it a little close. Maybe use >=
+                    # instead?
                     subround += 1
                     if debug:
                         print "[Splitting round {}-{}...]".format(
@@ -448,9 +451,12 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
                     if debug:
                         print "msg caught; stack = {!r}".format(stack)
                 # Done processing. Pluck out the first portion so we can
-                # continue processing, then add the rest to our waiting list.
-                msg = stack.pop(0)
+                # continue processing, clean it up a bit, then add the rest to
+                # our waiting list.
+                msg = stack.pop(0).rstrip()
                 msglen = len(msg)
+                # A little bit of touching up for the head of our next line.
+                stack[0] = stack[0].lstrip()
                 # Now we have a separated list, so we can add it.
                 # First we have to reverse it, because the extendleft method of
                 # deque objects - like our lexed queue - inserts the elements
@@ -464,41 +470,78 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
                 # means forcing the issue....
                 working.append(msg)
                 curlen += msglen
+                # NOTE: This is here so we can catch it later - it marks that
+                # we've already worked on this.
+                msg = None
 
             # Clear the slate. Add the remaining ctags, then add working to
-            # output, then clear working and statistics. Then we can move on to
-            # append as normal.
+            # output, then clear working and statistics. Then we can move on.
             # Keep in mind that any open ctags get added to the beginning of
             # working again, since they're still open!
 
-            # ...
-            # ON SECOND THOUGHT: The lexer balances for us, so let's just use
-            # that for now. I can split up the function for this later.
-            working = u''.join(kxpclexer.list_convert(working))
-            working = kxpclexer.lex(working)
-            working = u''.join(kxpclexer.list_convert(working))
-            # TODO: Is that lazy? Yes. This is a modification made to test if
-            # it'll work, *not* if it'll be efficient.
+            # Add proper CTagEnd objects ourselves. Won't break anything to use
+            # raw text at time of writing, but it can't hurt to be careful.
+            # We specify the ref as our format, to note. They should match up,
+            # both being 'pchum'.
+            # It shouldn't matter that we use the same object for this - the
+            # process of rendering isn't destructive.
+            # This also doesn't follow compression settings, but closing color
+            # tags can't BE compressed, so it hardly matters.
+            cte = lexercon.CTagEnd("</c>", fmt, None)
+            working.extend([cte] * len(open_ctags))
+            if debug:
+                print "\tRound {0} linebreak: Added {1} closing ctags".format(
+                        rounds, len(open_ctags)
+                        )
 
+            # Run it through the lexer again to render it.
+            working = u''.join(kxpclexer.list_convert(working))
+            if debug:
+                print "\tRound {0} add: len == {1} (of {2})".format(
+                        rounds, len(working), maxlen
+                        )
             # Now that it's done the work for us, append and resume.
             output.append(working)
-            # Reset working, starting it with the unclosed ctags.
-            working = open_ctags[:]
-            # Calculate the length of the starting tags, add it before anything
-            # else.
-            curlen = sum(len(tag.convert(fmt)) for tag in working)
-            if text_preproc:
-                # If we got here, it means we overflowed due to text - which
-                # means we also split and added it to working. There's no
-                # reason to go on and add it twice.
-                # This could be handled with an elif chain, but eh.
+
+            if msg is not None:
+                # We didn't catch it earlier for preprocessing. Thus, toss it
+                # on the stack and continue, so it'll go through the loop.
+                # Remember, we're doing this because we don't have enough space
+                # for it. Hopefully it'll fit on the next line, or split.
+                lexed.appendleft(msg)
+                # Fall through to the next case.
+            if lexed:
+                # We have more to go.
+                # Reset working, starting it with the unclosed ctags.
+                if debug:
+                    print "\tRound {0}: More to lex".format(rounds)
+                working = open_ctags[:]
+                # Calculate the length of the starting tags, add it before
+                # anything else.
+                curlen = sum(len(tag.convert(fmt)) for tag in working)
+            else:
+                # There's nothing in lexed - but if msg wasn't None, we ADDED
+                # it to lexed. Thus, if we get here, we don't have anything
+                # more to add.
+                # Getting here means we already flushed the last of what we had
+                # to the stack.
+                # Nothing in lexed. If we didn't preprocess, then we're done.
+                if debug or True:
+                    # This probably shouldn't happen, and if it does, I want to
+                    # know if it *works* properly.
+                    print "\tRound {0}: No more to lex".format(rounds)
+                # Clean up, just in case.
+                working = []
+                open_ctags = []
+                curlen = 0
+                # TODO: What does this mean for the ctags that'd be applied?
+                # Will this break parsing? It shouldn't, but....
+
+                # Break us out of the loop...we could BREAK here and skip the
+                # else, since we know what's going on.
                 continue
-            # If we got here, it means we haven't done anything with 'msg' yet,
-            # in spite of popping it from lexed, so add it back for the next
-            # round.
-            # This sends it through for another round of splitting and work,
-            # possibly.
-            lexed.appendleft(msg)
+            # We got here because we have more to process, so head back to
+            # resume.
             continue
 
         # Normal tag processing stuff. Considerably less interesting/intensive
@@ -519,6 +562,9 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
         elif isinstance(msg, lexercon.CTag):
             # It's an opening color tag!
             open_ctags.append(msg)
+            # TODO: Check and see if we have enough room for the lexemes
+            # *after* this one. If not, shunt it back into lexed and flush
+            # working into output.
 
         # Add it to the working message.
         working.append(msg)
@@ -531,6 +577,8 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
         # So add working to the result one last time.
         working = kxpclexer.list_convert(working)
         if len(working) > 0:
+            if debug:
+                print "Adding end trails: {!r}".format(working)
             working = u''.join(working)
             output.append(working)
 
@@ -645,7 +693,10 @@ def _is_ooc(msg, strict=True):
 
 def kxhandleInput(ctx, text=None, flavor=None):
     """The function that user input that should be sent to the server is routed
-    through. Handles lexing, splitting, and quirk application."""
+    through. Handles lexing, splitting, and quirk application, as well as
+    sending."""
+    # TODO: This needs a 'dryrun' option, and ways to specify alternative
+    # outputs and such, if it's to handle all of these.
     # Flavor is important for logic, ctx is 'self'.
     # Flavors are 'convo', 'menus', and 'memos' - so named after the source
     # files for the original sentMessage variants.
@@ -775,7 +826,8 @@ def kxhandleInput(ctx, text=None, flavor=None):
         maxlen = 300
     elif flavor == "memos":
         # Use the max, with some room added so we can make additions.
-        maxlen -= 20
+        # The additions are theoretically 23 characters long, max.
+        maxlen -= 25
 
     # Split the message. (Finally.)
     # This is also set up to parse it into strings.
