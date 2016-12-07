@@ -745,8 +745,13 @@ def kxhandleInput(ctx, text=None, flavor=None):
     # Begin message processing.
     # We use 'text' despite its lack of processing because it's simpler.
     if should_quirk and not (is_action or is_ooc):
-        # Fetch the quirks we'll have to apply.
-        quirks = ctx.mainwindow.userprofile.quirks
+        if flavor != "menus":
+            # Fetch the quirks we'll have to apply.
+            quirks = ctx.mainwindow.userprofile.quirks
+        else:
+            # The quirk testing window uses a different set.
+            quirks = pesterQuirks(ctx.parent().testquirks())
+
         try:
             # Do quirk things. (Ugly, but it'll have to do for now.)
             # TODO: Look into the quirk system, modify/redo it.
