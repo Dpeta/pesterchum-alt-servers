@@ -10,6 +10,7 @@ from generic import mysteryTime
 from quirks import ScriptQuirks
 from pyquirks import PythonQuirks
 from luaquirks import LuaQuirks
+import dataobjs
 
 # karxi: My own contribution to this - a proper lexer.
 import pnc.lexercon as lexercon
@@ -750,7 +751,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
             quirks = ctx.mainwindow.userprofile.quirks
         else:
             # The quirk testing window uses a different set.
-            quirks = pesterQuirks(ctx.parent().testquirks())
+            quirks = dataobjs.pesterQuirks(ctx.parent().testquirks())
 
         try:
             # Do quirk things. (Ugly, but it'll have to do for now.)
