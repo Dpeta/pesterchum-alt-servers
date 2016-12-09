@@ -121,10 +121,22 @@ class CTag(Specifier):
             else:
                 if color.name:
                     text = "<c=%s>" % color.name
-                elif self.compact:
-                    text = "<c=%s>" % color.reduce_hexstr(color.hexstr)
                 else:
-                    text = "<c=%d,%d,%d>" % color.to_rgb_tuple()
+                    # We should have a toggle here, just in case this isn't
+                    # acceptable for some reason, but it usually will be.
+                    rgb = "<c=%d,%d,%d>" % color.to_rgb_tuple()
+                    hxs = color.hexstr
+                    if self.compact:
+                        # Try to crush it down even further.
+                        hxs = color.reduce_hexstr(hxs)
+                    hxs = "<c=%s>" % hxs
+                    if len(rgb) <= len(hxs):
+                        # Prefer the more widely-recognized default format
+                        text = rgb
+                    else:
+                        # Hex is shorter, and recognized by everything thus
+                        # far; use it.
+                        text = hxs
         elif format == "plaintext":
             text = ''
         return text

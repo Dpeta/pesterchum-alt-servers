@@ -51,6 +51,7 @@ Features
 * Add more comprehensive status support - IDLE, DND, INVISIBLE for now - or at least add similar functionality.
 * SEPARATE FUNCTIONALITY from CONNECTED STATE!! This is a huge problem! Being shunted off our nick closes windows and breaks things! Just D/C and reconnect?
 	* It'd probably be best to give an option to either CHANGE NICKS or DISCONNECT upon nick collision...? But, then how would we GHOST?
+		* Auto-disconnect if collsion before joining channels, make it possible to disconnect (but not send messages, obviously) without losing everything
 	* Maybe GHOSTing should use auto-identify to ensure- no, that doesn't work, because we can't ident into a specified nick without being ON it. Need GD's help to fix....
 
 * Separate Pesterchum system handling from window handling. Dicts should be stored and maintained via dicts - even a refined version of what I used for textsub.
@@ -71,6 +72,7 @@ Todo/Done
 * Make sound work on Windows through QSound (disables volume control)
 * Toggle individual tab flash / alert sounds (from the same right-click memo that lets us toggle OOC)
 * Make CTRL+PGUP/PGDN switch memo/pester tabs
+* Color tags are now posted as their shorter hexadecimal forms, if applicable (255,255,255 -> #FFFFFF, for example)
 
 Debugging
 ----
