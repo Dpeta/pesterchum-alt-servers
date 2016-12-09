@@ -405,7 +405,7 @@ class PesterText(QtGui.QTextEdit):
             if chum is me:
                 window.chatlog.log(parent.chum.handle, lexmsg)
             else:
-                if window.idleaction.isChecked() and parent.chumopen:
+                if (window.idler.auto or window.idler.manual) and parent.chumopen:
                     idlethreshhold = 60
                     if (not hasattr(self, 'lastmsg')) or \
                             datetime.now() - self.lastmsg > timedelta(0,idlethreshhold):
@@ -532,7 +532,7 @@ class PesterInput(QtGui.QLineEdit):
                 self.setText(prev)
         elif event.key() in [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown]:
             self.parent().textArea.keyPressEvent(event)
-        self.parent().mainwindow.idletime = 0
+        self.parent().mainwindow.idler.time = 0
         super(PesterInput, self).keyPressEvent(event)
 
 class PesterConvo(QtGui.QFrame):

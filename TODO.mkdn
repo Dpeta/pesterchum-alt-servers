@@ -63,7 +63,6 @@ Features
 * Right-click Time entry field to see those used? (Replace left/right buttons?)
 * Make the memo name entry box accept a comma-separated list
 * Make right-clicking on a tab open up the right-click menu one would get on right-clicking the title (frame??)
-* Separate auto-idle and checkbox idle so they don't share a state
 
 Todo/Done
 ----
@@ -73,6 +72,7 @@ Todo/Done
 * Toggle individual tab flash / alert sounds (from the same right-click memo that lets us toggle OOC)
 * Make CTRL+PGUP/PGDN switch memo/pester tabs
 * Color tags are now posted as their shorter hexadecimal forms, if applicable (255,255,255 -> #FFFFFF, for example)
+* Separate auto-idle and checkbox idle so they don't share a state (and make the first send set the timer for additional idle responses)
 
 Debugging
 ----

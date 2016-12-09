@@ -10,6 +10,7 @@ import random
 import re
 from time import time
 import threading, Queue
+from pnc.dep.attrdict import AttrDict
 
 reqmissing = []
 optmissing = []
@@ -1205,14 +1206,25 @@ class PesterWindow(MovingWindow):
 
         self.waitingMessages = waitingMessageHolder(self)
 
-        self.autoidle = False
-        self.idlethreshold = 60*self.config.idleTime()
-        self.idletimer = QtCore.QTimer(self)
-        self.idleposition = QtGui.QCursor.pos()
-        self.idletime = 0
-        self.connect(self.idletimer, QtCore.SIGNAL('timeout()'),
+        self.idler = AttrDict(dict(
+                # autoidle
+                auto = False,
+                # setidle
+                manual = False,
+                # idlethreshold
+                threshold = 60*self.config.idleTime(),
+                # idleaction
+                action = self.idleaction,
+                # idletimer
+                timer = QtCore.QTimer(self),
+                # idleposition
+                pos = QtGui.QCursor.pos(),
+                # idletime
+                time = 0
+                ))
+        self.connect(self.idler.timer, QtCore.SIGNAL('timeout()'),
                 self, QtCore.SLOT('checkIdle()'))
-        self.idletimer.start(1000)
+        self.idler.timer.start(1000)
 
         if not self.config.defaultprofile():
             self.changeProfile()
@@ -2026,44 +2038,64 @@ class PesterWindow(MovingWindow):
     @QtCore.pyqtSlot(bool)
     def toggleIdle(self, idle):
         if idle:
+            # We checked the box to go idle.
+            self.idler.manual = True
             self.setAway.emit(True)
             self.randhandler.setIdle(True)
-            sysColor = QtGui.QColor(self.theme["convo/systemMsgColor"])
-            verb = self.theme["convo/text/idle"]
-            for (h, convo) in self.convos.iteritems():
-                # karxi: There's an irritating issue here involving a lack of
-                # consideration for case-sensitivity.
-                # This fix is a little sloppy, and I need to look into what it
-                # might affect, but I've been using it for months and haven't
-                # noticed any issues....
-                handle = convo.chum.handle
-                # karxi: Now we just use 'handle' instead of 'h'.
-                if convo.chumopen:
-                    msg = self.profile().idlemsg(sysColor, verb)
-                    convo.textArea.append(convertTags(msg))
-                    self.chatlog.log(handle, msg)
-                    self.sendMessage.emit("PESTERCHUM:IDLE", handle)
+            self._sendIdleMsgs()
         else:
+            self.idler.manual = False
             self.setAway.emit(False)
             self.randhandler.setIdle(False)
-            self.idletime = 0
+            self.idler.time = 0
+    # karxi: TODO: Need to consider sticking an idle-setter here.
     @QtCore.pyqtSlot()
     def checkIdle(self):
+        # TODO: Streamline this later, because ew.
         newpos = QtGui.QCursor.pos()
-        if newpos == self.idleposition:
-            self.idletime += 1
+        if self.idler.manual:
+            # We're already idle - because the user said to be.
+            self.idler.pos = newpos
+            return
+
+        if newpos == self.idler.pos:
+            if not self.idler.auto:
+                # We're not already automatically idle.
+                # The cursor hasn't moved; we're that much closer to being idle.
+                self.idler.time += 1
         else:
-            self.idletime = 0
-        if self.idletime >= self.idlethreshold:
-            if not self.idleaction.isChecked():
-                self.idleaction.toggle()
-            self.autoidle = True
+            # The cursor moved; reset the idle timer.
+            self.idler.time = 0
+
+        if self.idler.time >= self.idler.threshold:
+            # We've been idle for long enough to fall automatically idle.
+            self.idler.auto = True
+            # We don't need this anymore.
+            self.idler.time = 0
+            self._sendIdleMsgs()
         else:
-            if self.autoidle:
-                if self.idleaction.isChecked():
-                    self.idleaction.toggle()
-                self.autoidle = False
-        self.idleposition = newpos
+            # The mouse moved, and we were auto-away'd.
+            if self.idler.auto:
+                # ...so un-idle us.
+                self.idler.auto = False
+        self.idler.pos = newpos
+    def _sendIdleMsgs(self):
+        # Tell everyone we're in a chat with that we just went idle.
+        sysColor = QtGui.QColor(self.theme["convo/systemMsgColor"])
+        verb = self.theme["convo/text/idle"]
+        for (h, convo) in self.convos.iteritems():
+            # karxi: There's an irritating issue here involving a lack of
+            # consideration for case-sensitivity.
+            # This fix is a little sloppy, and I need to look into what it
+            # might affect, but I've been using it for months and haven't
+            # noticed any issues....
+            handle = convo.chum.handle
+            # karxi: Now we just use 'handle' instead of 'h'.
+            if convo.chumopen:
+                msg = self.profile().idlemsg(sysColor, verb)
+                convo.textArea.append(convertTags(msg))
+                self.chatlog.log(handle, msg)
+                self.sendMessage.emit("PESTERCHUM:IDLE", handle)
     @QtCore.pyqtSlot()
     def importExternalConfig(self):
         f = QtGui.QFileDialog.getOpenFileName(self)
@@ -2428,7 +2460,7 @@ class PesterWindow(MovingWindow):
             curidle = self.config.idleTime()
             if idlesetting != curidle:
                 self.config.set('idleTime', idlesetting)
-                self.idlethreshold = 60*idlesetting
+                self.idler.threshold = 60*idlesetting
             # theme
             ghostchumsetting = self.optionmenu.ghostchum.isChecked()
             curghostchum = self.config.ghostchum()
@@ -3119,6 +3151,11 @@ Click this message to never see this again.")
         self.reconnectok = False
         self.showLoading(self.widget)
         sys.exit(self.app.exec_())
+
+def _retrieveGlobals():
+    # NOTE: Yes, this is a terrible kludge so that the console can work
+    # properly. I'm open to alternatives.
+    return globals()
 
 if __name__ == "__main__":
     # We're being run as a script - not being imported.
