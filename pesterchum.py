@@ -2053,32 +2053,36 @@ class PesterWindow(MovingWindow):
     def checkIdle(self):
         # TODO: Streamline this later, because ew.
         newpos = QtGui.QCursor.pos()
+        oldpos = self.idler.pos
+        # Save the new position.
+        self.idler.pos = newpos
+
         if self.idler.manual:
-            # We're already idle - because the user said to be.
-            self.idler.pos = newpos
+            # We're already idle, because the user said to be.
+            self.idler.time = 0
+            return
+        elif self.idler.auto:
+            self.idler.time = 0
+            if newpos != oldpos:
+                # Cursor moved; unset idle.
+                self.idler.auto = False
             return
 
-        if newpos == self.idler.pos:
-            if not self.idler.auto:
-                # We're not already automatically idle.
-                # The cursor hasn't moved; we're that much closer to being idle.
-                self.idler.time += 1
-        else:
-            # The cursor moved; reset the idle timer.
+        if newpos != oldpos:
+            # Our cursor has moved, which means we can't be idle.
             self.idler.time = 0
+            return
 
+        # If we got here, WE ARE NOT IDLE, but may become so
+        self.idler.time += 1
         if self.idler.time >= self.idler.threshold:
             # We've been idle for long enough to fall automatically idle.
             self.idler.auto = True
             # We don't need this anymore.
             self.idler.time = 0
+            # Send out the messages.
             self._sendIdleMsgs()
-        else:
-            # The mouse moved, and we were auto-away'd.
-            if self.idler.auto:
-                # ...so un-idle us.
-                self.idler.auto = False
-        self.idler.pos = newpos
+
     def _sendIdleMsgs(self):
         # Tell everyone we're in a chat with that we just went idle.
         sysColor = QtGui.QColor(self.theme["convo/systemMsgColor"])
@@ -2090,6 +2094,9 @@ class PesterWindow(MovingWindow):
             # might affect, but I've been using it for months and haven't
             # noticed any issues....
             handle = convo.chum.handle
+            if handle.lower() in ("nickserv", "chanserv", "memoserv"):
+                # Don't send these idle messages.
+                continue
             # karxi: Now we just use 'handle' instead of 'h'.
             if convo.chumopen:
                 msg = self.profile().idlemsg(sysColor, verb)

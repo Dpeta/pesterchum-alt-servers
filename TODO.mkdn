@@ -44,7 +44,6 @@ Features
 * Add support for displaying more verbose information (e.g. Cease messages which tell you more than the abbreviation of who left)
 * Make Pesterchum recognize conventional /mes so they aren't invisible
 * Fix NickServ auto-login things
-* Fix memo autojoin
 * Tell user when NickServ handles are going to expire
 * Tell user when old handles have D/C'd? Offer autoghost support?!
 
@@ -73,6 +72,7 @@ Todo/Done
 * Make CTRL+PGUP/PGDN switch memo/pester tabs
 * Color tags are now posted as their shorter hexadecimal forms, if applicable (255,255,255 -> #FFFFFF, for example)
 * Separate auto-idle and checkbox idle so they don't share a state (and make the first send set the timer for additional idle responses)
+* Stop us from sending IDLE messages to NickServ
 
 Debugging
 ----
