@@ -105,6 +105,7 @@ Bugs
 
 * Volume control doesn't work without pygame
 * Sound on Linux doesn't work without pygame
+* Update checking code gives false positives (update to use json file from git?)
 
 Windows Bugs
 ------------

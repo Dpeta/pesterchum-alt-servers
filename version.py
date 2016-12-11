@@ -8,7 +8,7 @@ except:
 import zipfile
 import os, sys, shutil
 
-USER_TYPE = "dev"
+USER_TYPE = "user"
                   # user - for normal people
                   # beta - for the original beta testers
                   # dev  - used to be for git users, now it's anyone with the 3.41 beta
@@ -31,7 +31,7 @@ _pcStatus = "A" # A  = alpha
                 # B  = beta
                 # RC = release candidate
                 # None = public release
-_pcRevision = ""
+_pcRevision = "13"
 _pcVersion = ""
 
 def pcVerCalc():
@@ -92,6 +92,11 @@ def updateCheck(q):
     except TypeError:
         return q.put((False,3))
     print full
+    print repr(verStrToNum(newest))
+    
+    # karxi: Disabled for now; causing issues.
+    return q.put((False,0))
+
     if major <= _pcMajor:
         if minor <= _pcMinor:
             if status:
