@@ -63,6 +63,9 @@ Features
 * Make the memo name entry box accept a comma-separated list
 * Make right-clicking on a tab open up the right-click menu one would get on right-clicking the title (frame??)
 
+* Add a separate 'Tweaks' section in Options
+* Fix graphical issues with dark themes vs. light themes (Qt/text too light/etc.)
+
 Todo/Done
 ----
 * Fix parser text-loss bug that plagues everyone (especially Chumdroid users)

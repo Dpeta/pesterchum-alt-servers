@@ -425,6 +425,10 @@ class PesterText(QtGui.QTextEdit):
         self.parent().clearNewMessage()
         QtGui.QTextEdit.focusInEvent(self, event)
 
+    @staticmethod
+    def isBot(*args, **kwargs):
+        return self.parent().isBot(*args, **kwargs)
+
     def keyPressEvent(self, event):
         # First parent is the PesterConvo containing this.
         # Second parent is the PesterTabWindow containing *it*.
