@@ -16,7 +16,8 @@ import ostools
 if ostools.isOSXBundle():
     logging.basicConfig(level=logging.WARNING)
 else:
-    logging.basicConfig(level=logging.INFO)
+    # karxi; We do NOT need this set to INFO; it's very, very spammy.
+    logging.basicConfig(level=logging.WARNING)
 
 class PesterIRC(QtCore.QThread):
     def __init__(self, config, window):
@@ -350,7 +351,7 @@ class PesterHandler(DefaultCommandHandler):
         # silently ignore CTCP
         if msg[0] == '\x01':
             handle = nick[0:nick.find("!")]
-            logging.info("---> recv \"CTCP %s :%s\"" % (handle, msg[1:-1]))
+            logging.warning("---> recv \"CTCP %s :%s\"" % (handle, msg[1:-1]))
             if msg[1:-1] == "VERSION":
                 helpers.ctcp_reply(self.parent.cli, handle, "VERSION", "Pesterchum %s" % (_pcVersion))
             elif msg[1:-1].startswith("NOQUIRKS") and chan[0] == "#":
@@ -358,8 +359,10 @@ class PesterHandler(DefaultCommandHandler):
                 self.parent.quirkDisable.emit(chan, msg[10:-1], op)
             return
         handle = nick[0:nick.find("!")]
-        logging.info("---> recv \"PRIVMSG %s :%s\"" % (handle, msg))
-        if chan == "#pesterchum":
+        if chan != "#pesterchum":
+            # We don't need anywhere near that much spam.
+            logging.info("---> recv \"PRIVMSG %s :%s\"" % (handle, msg))
+        else:
             # follow instructions
             if msg[0:6] == "MOOD >":
                 try:
