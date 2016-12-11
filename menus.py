@@ -1764,6 +1764,7 @@ class AboutPesterchum(QtGui.QDialog):
   oakwhiz\n\
   alGore\n\
   Cerxi (binaryCabalist)\n\
+  karxi (Midna)\n\
 \n\
 Art by:\n\
   Grimlive (aquaMarinist)\n\
