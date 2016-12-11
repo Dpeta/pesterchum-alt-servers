@@ -359,10 +359,12 @@ class PesterHandler(DefaultCommandHandler):
                 self.parent.quirkDisable.emit(chan, msg[10:-1], op)
             return
         handle = nick[0:nick.find("!")]
+
         if chan != "#pesterchum":
             # We don't need anywhere near that much spam.
             logging.info("---> recv \"PRIVMSG %s :%s\"" % (handle, msg))
-        elif chan == "#pesterchum":
+
+        if chan == "#pesterchum":
             # follow instructions
             if msg[0:6] == "MOOD >":
                 try:
