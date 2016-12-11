@@ -8,7 +8,7 @@ except:
 import zipfile
 import os, sys, shutil
 
-USER_TYPE = "user"
+USER_TYPE = "dev"
                   # user - for normal people
                   # beta - for the original beta testers
                   # dev  - used to be for git users, now it's anyone with the 3.41 beta
@@ -26,8 +26,8 @@ elif OS_TYPE == "darwin":
     OS_TYPE = "mac"
 
 _pcMajor = "3.41"
-_pcMinor = "3"
-_pcStatus = "" # A  = alpha
+_pcMinor = "4"
+_pcStatus = "A" # A  = alpha
                 # B  = beta
                 # RC = release candidate
                 # None = public release
