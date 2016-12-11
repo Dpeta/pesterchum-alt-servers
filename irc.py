@@ -362,7 +362,7 @@ class PesterHandler(DefaultCommandHandler):
         if chan != "#pesterchum":
             # We don't need anywhere near that much spam.
             logging.info("---> recv \"PRIVMSG %s :%s\"" % (handle, msg))
-        else:
+        elif chan == "#pesterchum":
             # follow instructions
             if msg[0:6] == "MOOD >":
                 try:
@@ -405,6 +405,11 @@ class PesterHandler(DefaultCommandHandler):
         if not self.mainwindow.config.lowBandwidth():
             helpers.join(self.client, "#pesterchum")
             helpers.msg(self.client, "#pesterchum", "MOOD >%d" % (mymood))
+            # We override the +T that's set by default, for now, to reenable
+            # CTCP communication.
+            # Because of the potential for spam, Low Bandwidth mode still
+            # disables this...this will likely change in the future.
+            helpers.mode(self.client, mychumhandle, "-T")
 
     def nicknameinuse(self, server, cmd, nick, msg):
         newnick = "pesterClient%d" % (random.randint(100,999))

@@ -358,6 +358,9 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
     # TODO: There's presently an issue where certain combinations of color
     # codes end up being added as a separate, empty line. This is a bug, of
     # course, and should be looked into.
+    # TODO: This may not work properly with unicode! Because IRC doesn't
+    # formally use it, it should probably use the lengths of the decomposed
+    # characters...ugh.
     lexed = list(lexed)
     working = []
     output = []
