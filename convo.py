@@ -406,8 +406,7 @@ class PesterText(QtGui.QTextEdit):
                 window.chatlog.log(parent.chum.handle, lexmsg)
             else:
                 if ((window.idler.auto or window.idler.manual) and parent.chumopen
-                        and chum.handle.lower() not in ('nickserv', 'chanserv',
-                            'hostserv')):
+                        and not parent.isBot(handle)):
                     idlethreshhold = 60
                     if (not hasattr(self, 'lastmsg')) or \
                             datetime.now() - self.lastmsg > timedelta(0,idlethreshhold):

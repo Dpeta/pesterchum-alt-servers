@@ -2051,7 +2051,6 @@ class PesterWindow(MovingWindow):
     # karxi: TODO: Need to consider sticking an idle-setter here.
     @QtCore.pyqtSlot()
     def checkIdle(self):
-        # TODO: Streamline this later, because ew.
         newpos = QtGui.QCursor.pos()
         oldpos = self.idler.pos
         # Save the new position.
@@ -2094,7 +2093,7 @@ class PesterWindow(MovingWindow):
             # might affect, but I've been using it for months and haven't
             # noticed any issues....
             handle = convo.chum.handle
-            if handle.lower() in ("nickserv", "chanserv", "memoserv"):
+            if self.isBot(handle):
                 # Don't send these idle messages.
                 continue
             # karxi: Now we just use 'handle' instead of 'h'.
@@ -2103,6 +2102,12 @@ class PesterWindow(MovingWindow):
                 convo.textArea.append(convertTags(msg))
                 self.chatlog.log(handle, msg)
                 self.sendMessage.emit("PESTERCHUM:IDLE", handle)
+
+    # Presented here so it can be called by other scripts.
+    @staticmethod
+    def isBot(handle):
+        return handle.upper() in BOTNAMES
+
     @QtCore.pyqtSlot()
     def importExternalConfig(self):
         f = QtGui.QFileDialog.getOpenFileName(self)
