@@ -475,7 +475,7 @@ class userProfile(object):
     def saveNickServPass(self):
         # remove profiles with no passwords
         for h,t in self.passwd.items():
-            if "auto" not in t or "pw" not in t or t["pw"] == "":
+            if "auto" not in t and ("pw" not in t or t["pw"] == ""):
                 del self.passwd[h]
         try:
             jsonoutput = json.dumps(self.passwd, indent=4)
