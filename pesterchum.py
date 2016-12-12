@@ -12,6 +12,9 @@ from time import time
 import threading, Queue
 from pnc.dep.attrdict import AttrDict
 
+import logging
+logging.basicConfig(level=logging.WARNING)
+
 reqmissing = []
 optmissing = []
 try:
@@ -1693,10 +1696,11 @@ class PesterWindow(MovingWindow):
                 if pygame and pygame.mixer and \
                         isinstance(sound, pygame.mixer.sound):
                             sound.set_volume(vol)
-                else:
+                elif not isinstance(sound, QtGui.QSound):
+                    # We can't set a volume on those....
                     sound.setVolume(vol)
             except Exception as err:
-                print "Couldn't set volume: {}".format(err)
+                logging.info("Couldn't set volume: {}".format(err))
 
     def changeTheme(self, theme):
         # check theme
