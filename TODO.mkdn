@@ -43,9 +43,13 @@ Features
 * Implement MemoServ support
 * Add support for displaying more verbose information (e.g. Cease messages which tell you more than the abbreviation of who left)
 * Make Pesterchum recognize conventional /mes so they aren't invisible
-* Fix NickServ auto-login things
 * Tell user when NickServ handles are going to expire
 * Tell user when old handles have D/C'd? Offer autoghost support?!
+* Make @XY and @xxxYyy formats ping their targets
+* Allow matches like @?XY and @FXY or @PXY3 - make them only match the target currently set to that.
+* Make @ notation not match @u@; and similar (make invalid nick chars break matches)
+* Fix hyperlink escaping (Qt seems to do this automatically - need a workaround)
+* Show bans if +h or higher (+h, +o, +a, +q)
 
 * Add more comprehensive status support - IDLE, DND, INVISIBLE for now - or at least add similar functionality.
 * SEPARATE FUNCTIONALITY from CONNECTED STATE!! This is a huge problem! Being shunted off our nick closes windows and breaks things! Just D/C and reconnect?
@@ -62,9 +66,11 @@ Features
 * Right-click Time entry field to see those used? (Replace left/right buttons?)
 * Make the memo name entry box accept a comma-separated list
 * Make right-clicking on a tab open up the right-click menu one would get on right-clicking the title (frame??)
+* Add an option to Cycle (for log separation)
 
 * Add a separate 'Tweaks' section in Options
 * Fix graphical issues with dark themes vs. light themes (Qt/text too light/etc.)
+* Allow manual compression changes via memo right-click menu for 'advanced' (per the setting) users
 
 Todo/Done
 ----
@@ -76,6 +82,7 @@ Todo/Done
 * Color tags are now posted as their shorter hexadecimal forms, if applicable (255,255,255 -> #FFFFFF, for example)
 * Separate auto-idle and checkbox idle so they don't share a state (and make the first send set the timer for additional idle responses)
 * Stop us from sending IDLE messages to NickServ
+* Fix NickServ auto-login things
 
 Debugging
 ----

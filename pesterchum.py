@@ -12,8 +12,19 @@ from time import time
 import threading, Queue
 from pnc.dep.attrdict import AttrDict
 
-import logging
 logging.basicConfig(level=logging.WARNING)
+
+try:
+    import console
+except ImportError:
+    _CONSOLE = False
+    logging.warning("Console file not shipped; skipping.")
+except Exception as err:
+    _CONSOLE = False
+    # Consider erroring?
+    logging.error("Failed to load console!", exc_info=err)
+else:
+    _CONSOLE = True
 
 reqmissing = []
 optmissing = []
@@ -996,6 +1007,11 @@ class PesterWindow(MovingWindow):
         MovingWindow.__init__(self, parent,
                               (QtCore.Qt.CustomizeWindowHint |
                                QtCore.Qt.FramelessWindowHint))
+
+        # For debugging
+        global PESTERAPP
+        PESTERAPP = app
+
         self.autoJoinDone = False
         self.app = app
         self.convos = CaseInsensitiveDict()
@@ -1091,6 +1107,13 @@ class PesterWindow(MovingWindow):
         self.menu = QtGui.QMenuBar(self)
         self.menu.setNativeMenuBar(False)
 
+        self.console = AttrDict()
+        self.console.window = None
+        self.console.action = QtGui.QAction("Console", self)
+        self.connect(self.console.action, QtCore.SIGNAL('triggered()'),
+                    self, QtCore.SLOT('showConsole()'))
+        self.console.is_open = False
+
         filemenu = self.menu.addMenu(self.theme["main/menus/client/_name"])
         self.filemenu = filemenu
         filemenu.addAction(opts)
@@ -1103,6 +1126,8 @@ class PesterWindow(MovingWindow):
         filemenu.addAction(talk)
         filemenu.addAction(self.idleaction)
         filemenu.addAction(grps)
+        if _CONSOLE:
+            filemenu.addAction(self.console.action)
         filemenu.addAction(self.importaction)
         filemenu.addAction(self.reconnectAction)
         filemenu.addAction(exitaction)
@@ -1463,6 +1488,34 @@ class PesterWindow(MovingWindow):
         self.tabmemo = MemoTabWindow(self)
         self.connect(self.tabmemo, QtCore.SIGNAL('windowClosed()'),
                      self, QtCore.SLOT('memoTabsClosed()'))
+
+    @QtCore.pyqtSlot()
+    def showConsole(self):
+        if not _CONSOLE:
+            # We don't have the module file for this at the moment.
+            return
+        win = self.console.window
+        if win is None:
+            # We have no console window; make one.
+            logging.warning("Making a console....")
+            self.console.window = win = console.ConsoleWindow(parent=self)
+            logging.warning("Console made.")
+            self.connect(win, QtCore.SIGNAL('windowClosed()'),
+                    self, QtCore.SLOT('consoleWindowClosed()'))
+        if self.console.is_open:
+            # Already open - hide the console.
+            win.hide()
+            self.console.is_open = False
+        else:
+            # Console isn't visible - show it.
+            win.show()
+            self.console.is_open = True
+
+    @QtCore.pyqtSlot()
+    def consoleWindowClosed(self):
+        self.console.is_open = False
+        self.console.window = None
+        logging.warning("Console closed.")
 
     def newMemo(self, channel, timestr, secret=False, invite=False):
         if channel == "#pesterchum":
