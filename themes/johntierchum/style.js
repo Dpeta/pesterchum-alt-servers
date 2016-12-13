@@ -8,7 +8,7 @@
   "menu" : { "style": "font-family: 'Arial'; font:bold; font-size: 14px; color:#FFFFFF; background-color: #6277BC;border:2px solid #9BC4F2",
   "selected": "background-color: #6090C6", 
               "loc": [161,52]},
-  "menubar": { "style": "font-family: 'Arial'; font:bold; font-size: 14px; color:#9AC3F0; allign:center;", 
+  "menubar": { "style": "font-family: 'Arial'; font:bold; font-size: 14px; color:#9AC3F0; align:center;", 
               "loc": [171,52]},
   "close": { "image": "$path/x.png",
              "loc": [351, 34]},

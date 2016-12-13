@@ -7,7 +7,7 @@
   "windowtitle": "Serious Business",
   "menu" : { "style": "font-family: 'Courier'; font: bold; font-size: 14px; background-color: #BABABA;border:2px solid #B3B3B3",
              "loc": [52,5]},
-  "menubar": { "style": "font-family: 'Courier'; font:bold; font-size: 14px; color:#000000; allign:center;" },
+  "menubar": { "style": "font-family: 'Courier'; font:bold; font-size: 14px; color:#000000; align:center;" },
   "close": { "image": "$path/x.png",
              "loc": [236, 15]},
   "minimize": { "image": "$path/m.png",
