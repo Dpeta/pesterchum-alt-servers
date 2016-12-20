@@ -406,7 +406,7 @@ class PesterText(QtGui.QTextEdit):
                 window.chatlog.log(parent.chum.handle, lexmsg)
             else:
                 if ((window.idler.auto or window.idler.manual) and parent.chumopen
-                        and not parent.isBot(handle)):
+                        and not parent.isBot(chum.handle)):
                     idlethreshhold = 60
                     if (not hasattr(self, 'lastmsg')) or \
                             datetime.now() - self.lastmsg > timedelta(0,idlethreshhold):
@@ -425,8 +425,7 @@ class PesterText(QtGui.QTextEdit):
         self.parent().clearNewMessage()
         QtGui.QTextEdit.focusInEvent(self, event)
 
-    @staticmethod
-    def isBot(*args, **kwargs):
+    def isBot(self, *args, **kwargs):
         return self.parent().isBot(*args, **kwargs)
 
     def keyPressEvent(self, event):
@@ -667,6 +666,9 @@ class PesterConvo(QtGui.QFrame):
         msg = chum.moodmsg(mood, syscolor, self.mainwindow.theme)
         self.textArea.append(convertTags(msg))
         self.mainwindow.chatlog.log(self.title(), msg)
+
+    def isBot(self, *args, **kwargs):
+        return self.parent().isBot(*args, **kwargs)
 
     def updateMood(self, mood, unblocked=False, old=None):
         syscolor = QtGui.QColor(self.mainwindow.theme["convo/systemMsgColor"])
