@@ -1,15 +1,24 @@
 # Adapted from Eco-Mono's F5Stuck RSS Client
 
+# karxi: Now that Homestuck is over, this might be removed.
+# Even if it isn't, it needs cleanup; the code is unpleasant.
+
 from libs import feedparser
 import pickle
 import os
+import sys
 import threading
 from time import mktime
 from PyQt4 import QtCore, QtGui
 
+import logging
+logging.basicConfig(level=logging.WARNING)
+
 class MSPAChecker(QtGui.QWidget):
     def __init__(self, parent=None):
-        QtCore.QObject.__init__(self, parent)
+        #~QtCore.QObject.__init__(self, parent)
+        # karxi: Why would you do that?
+        super(MSPAChecker, self).__init__(parent)
         self.mainwindow = parent
         self.refreshRate = 30 # seconds
         self.status = None
@@ -21,9 +30,8 @@ class MSPAChecker(QtGui.QWidget):
 
     def save_state(self):
         try:
-            current_status = open("status_new.pkl","w")
-            pickle.dump(self.status, current_status)
-            current_status.close()
+            with open("status_new.pkl", "w") as current_status:
+                pickle.dump(self.status, current_status)
             try:
               os.rename("status.pkl","status_old.pkl")
             except:
@@ -37,7 +45,7 @@ class MSPAChecker(QtGui.QWidget):
             if os.path.exists("status_old.pkl"):
                 os.remove("status_old.pkl")
         except Exception as e:
-            print e
+            logging.error("Error: %s", e, exc_info=sys.exc_info())
             msg = QtGui.QMessageBox(self)
             msg.setText("Problems writing save file.")
             msg.show()
@@ -48,7 +56,7 @@ class MSPAChecker(QtGui.QWidget):
             return
         if self.lock:
             return
-        print "Checking MSPA updates..."
+        logging.debug("Checking MSPA updates...")
         s = threading.Thread(target=self.check_site)
         s.start()
 
@@ -85,14 +93,14 @@ class MSPAChecker(QtGui.QWidget):
                              self, QtCore.SLOT('nothing()'))
                 self.mspa.show()
         else:
-            #print "No new updates :("
+            #logging.info("No new updates :(")
             pass
         if must_save:
             self.save_state()
 
     @QtCore.pyqtSlot()
     def visit_site(self):
-        print self.status['last_visited']['link']
+        logging.debug(self.status['last_visited']['link'])
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(self.status['last_visited']['link'], QtCore.QUrl.TolerantMode))
         if self.status['last_seen']['pubdate'] > self.status['last_visited']['pubdate']:
             #Visited for the first time. Untrip the icon and remember that we saw it.
@@ -105,7 +113,7 @@ class MSPAChecker(QtGui.QWidget):
 
 class MSPAUpdateWindow(QtGui.QDialog):
     def __init__(self, parent=None):
-        QtGui.QDialog.__init__(self, parent)
+        super(MSPAUpdateWindow, self).__init__(parent)
         self.mainwindow = parent
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
         self.setWindowTitle("MSPA Update!")
