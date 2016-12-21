@@ -253,7 +253,7 @@ class PesterTabWindow(QtGui.QFrame):
 
 class PesterMovie(QtGui.QMovie):
     def __init__(self, parent):
-        QtGui.QMovie.__init__(self, parent)
+        super(PesterMovie, self).__init__(parent)
         self.textwindow = parent
     @QtCore.pyqtSlot(int)
     def animate(self, frame):
@@ -515,11 +515,12 @@ class PesterText(QtGui.QTextEdit):
         del self.sending
 
 class PesterInput(QtGui.QLineEdit):
+    stylesheet_path = "convo/input/style"
     def __init__(self, theme, parent=None):
         super(PesterInput, self).__init__(parent)
-        self.setStyleSheet(theme["convo/input/style"])
+        self.changeTheme(theme)
     def changeTheme(self, theme):
-        self.setStyleSheet(theme["convo/input/style"])
+        self.setStyleSheet(theme[self.stylesheet_path])
     def focusInEvent(self, event):
         self.parent().clearNewMessage()
         self.parent().textArea.textCursor().clearSelection()

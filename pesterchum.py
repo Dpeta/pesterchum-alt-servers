@@ -125,6 +125,11 @@ CUSTOMBOTS = ["CALSPRITE", RANDNICK.upper()]
 BOTNAMES = ["NICKSERV", "CHANSERV", "MEMOSERV", "OPERSERV", "HELPSERV"]
 BOTNAMES.extend(CUSTOMBOTS)
 
+# Save the main app. From here, we should be able to get everything else in
+# order, for console use.
+_CONSOLE_ENV = AttrDict()
+_CONSOLE_ENV.PAPP = None
+
 
 class waitingMessageHolder(object):
     def __init__(self, mainwindow, **msgfuncs):
@@ -156,7 +161,7 @@ class waitingMessageHolder(object):
 
 class chumListing(QtGui.QTreeWidgetItem):
     def __init__(self, chum, window):
-        QtGui.QTreeWidgetItem.__init__(self, [chum.handle])
+        super(chumListing, self).__init__([chum.handle])
         self.mainwindow = window
         self.chum = chum
         self.handle = chum.handle
@@ -234,8 +239,10 @@ class chumListing(QtGui.QTreeWidgetItem):
         return (h1 < h2)
 
 class chumArea(RightClickTree):
+    # This is the class that controls the actual main chumlist, I think.
+    # Looking into how the groups work might be wise.
     def __init__(self, chums, parent=None):
-        QtGui.QTreeWidget.__init__(self, parent)
+        super(chumArea, self).__init__(parent)
         self.notify = False
         QtCore.QTimer.singleShot(30000, self, QtCore.SLOT('beginNotify()'))
         self.mainwindow = parent
@@ -881,7 +888,7 @@ class chumArea(RightClickTree):
 
 class trollSlum(chumArea):
     def __init__(self, trolls, mainwindow, parent=None):
-        QtGui.QListWidget.__init__(self, parent)
+        super(trollSlum, self).__init__(parent)
         self.mainwindow = mainwindow
         theme = self.mainwindow.theme
         self.setStyleSheet(theme["main/trollslum/chumroll/style"])
@@ -927,7 +934,7 @@ class trollSlum(chumArea):
 
 class TrollSlumWindow(QtGui.QFrame):
     def __init__(self, trolls, mainwindow, parent=None):
-        QtGui.QFrame.__init__(self, parent)
+        super(TrollSlumWindow, self).__init__(parent)
         self.mainwindow = mainwindow
         theme = self.mainwindow.theme
         self.slumlabel = QtGui.QLabel(self)
@@ -1004,13 +1011,22 @@ class TrollSlumWindow(QtGui.QFrame):
 
 class PesterWindow(MovingWindow):
     def __init__(self, options, parent=None, app=None):
-        MovingWindow.__init__(self, parent,
+        super(PesterWindow, self).__init__(parent,
                               (QtCore.Qt.CustomizeWindowHint |
                                QtCore.Qt.FramelessWindowHint))
 
         # For debugging
-        global PESTERAPP
-        PESTERAPP = app
+        _CONSOLE_ENV.PAPP = self
+        # TODO: karxi: SO! At the end of this function it seems like that
+        # object is just made into None or.../something/. Somehow, it just
+        # DIES, and I haven't the slightest idea why. I've tried multiple ways
+        # to set it that shouldn't cause issues with globals; I honestly don't
+        # know what to do.
+        # Putting logging statements in here *gives me an object*, but I can't
+        # carry it out of the function. I'll hvae to think of a way around
+        # this....
+        # If I use a definition made in here without having another elsewhere,
+        # it comes back as undefined. Just...what?
 
         self.autoJoinDone = False
         self.app = app
@@ -2857,7 +2873,7 @@ class PesterWindow(MovingWindow):
 
 class PesterTray(QtGui.QSystemTrayIcon):
     def __init__(self, icon, mainwindow, parent):
-        QtGui.QSystemTrayIcon.__init__(self, icon, parent)
+        super(PesterTray, self).__init__(icon, parent)
         self.mainwindow = mainwindow
 
     @QtCore.pyqtSlot(int)
@@ -2872,7 +2888,7 @@ class PesterTray(QtGui.QSystemTrayIcon):
 
 class MainProgram(QtCore.QObject):
     def __init__(self):
-        QtCore.QObject.__init__(self)
+        super(MainProgram, self).__init__()
         self.app = QtGui.QApplication(sys.argv)
         self.app.setApplicationName("Pesterchum 3.14")
         self.app.setQuitOnLastWindowClosed(False)

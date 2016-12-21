@@ -181,7 +181,7 @@ class TimeTracker(list):
 
 class TimeInput(QtGui.QLineEdit):
     def __init__(self, timeslider, parent):
-        QtGui.QLineEdit.__init__(self, parent)
+        super(TimeInput, self).__init__(parent)
         self.timeslider = timeslider
         self.setText("+0:00")
         self.connect(self.timeslider, QtCore.SIGNAL('valueChanged(int)'),
@@ -212,7 +212,7 @@ class TimeInput(QtGui.QLineEdit):
 
 class TimeSlider(QtGui.QSlider):
     def __init__(self, orientation, parent):
-        QtGui.QSlider.__init__(self, orientation, parent)
+        super(TimeSlider, self).__init__(orientation, parent)
         self.setTracking(True)
         self.setMinimum(-50)
         self.setMaximum(50)
@@ -227,7 +227,7 @@ class TimeSlider(QtGui.QSlider):
 
 class MemoTabWindow(PesterTabWindow):
     def __init__(self, mainwindow, parent=None):
-        PesterTabWindow.__init__(self, mainwindow, parent, "memos")
+        super(MemoTabWindow, self).__init__(mainwindow, parent, "memos")
     def addChat(self, convo):
         self.convos[convo.channel] = convo
         # either addTab or setCurrentIndex will trigger changed()
@@ -244,7 +244,7 @@ _ctag_begin = re.compile(r'<c=(.*?)>')
 
 class MemoText(PesterText):
     def __init__(self, theme, parent=None):
-        QtGui.QTextEdit.__init__(self, parent)
+        super(MemoText, self).__init__(parent)
         if hasattr(self.parent(), 'mainwindow'):
             self.mainwindow = self.parent().mainwindow
         else:
@@ -343,13 +343,14 @@ class MemoText(PesterText):
         return "[%s]" % (self.parent().title())
 
 class MemoInput(PesterInput):
-    def __init__(self, theme, parent=None):
-        QtGui.QLineEdit.__init__(self, parent)
-        self.setStyleSheet(theme["memos/input/style"])
-    def changeTheme(self, theme):
-        self.setStyleSheet(theme["memos/input/style"])
+    stylesheet_path = "memos/input/style"
+    # karxi: Because of the use of stylesheet_path, we don't have to rewrite
+    # this code.
+    # Neat, huh?
+    pass # So vim recognizes the end of this class
 
 class PesterMemo(PesterConvo):
+    # TODO: Clean up inheritance between these!! The inits are ugly.
     def __init__(self, channel, timestr, mainwindow, parent=None):
         QtGui.QFrame.__init__(self, parent)
         self.setAttribute(QtCore.Qt.WA_QuitOnClose, False)
