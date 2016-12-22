@@ -542,7 +542,7 @@ class PesterInput(QtGui.QLineEdit):
 
 class PesterConvo(QtGui.QFrame):
     def __init__(self, chum, initiated, mainwindow, parent=None):
-        QtGui.QFrame.__init__(self, parent)
+        super(PesterConvo, self).__init__(parent)
         self.setAttribute(QtCore.Qt.WA_QuitOnClose, False)
         self.setObjectName(chum.handle)
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
