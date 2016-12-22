@@ -124,12 +124,12 @@ class ConsoleWindow(QtGui.QDialog):
                 "MAINWIN": self.mainwindow,
                 "PCONFIG": self.mainwindow.config
                 }
-        _CUSTOM_ENV_USE = []
+        _CUSTOM_ENV_USED = []
         cenv = pchum.__dict__
         for k in _CUSTOM_ENV:
             if k not in cenv:
                 cenv[k] = _CUSTOM_ENV[k]
-                _CUSTOM_ENV_USE.append(k)
+                _CUSTOM_ENV_USED.append(k)
             else:
                 # Don't overwrite anything!
                 warn = "Console environment item {!r} already exists in CENV."
