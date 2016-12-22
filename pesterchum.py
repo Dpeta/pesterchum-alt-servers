@@ -888,7 +888,9 @@ class chumArea(RightClickTree):
 
 class trollSlum(chumArea):
     def __init__(self, trolls, mainwindow, parent=None):
-        super(trollSlum, self).__init__(parent)
+        #~super(trollSlum, self).__init__(parent)
+        # TODO: Rework inheritance here.
+        QtGui.QTreeWidgetItem.__init__(self, parent)
         self.mainwindow = mainwindow
         theme = self.mainwindow.theme
         self.setStyleSheet(theme["main/trollslum/chumroll/style"])

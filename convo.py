@@ -276,7 +276,7 @@ class PesterMovie(QtGui.QMovie):
 
 class PesterText(QtGui.QTextEdit):
     def __init__(self, theme, parent=None):
-        QtGui.QTextEdit.__init__(self, parent)
+        super(PesterText, self).__init__(parent)
         if hasattr(self.parent(), 'mainwindow'):
             self.mainwindow = self.parent().mainwindow
         else:

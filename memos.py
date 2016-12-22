@@ -244,7 +244,7 @@ _ctag_begin = re.compile(r'<c=(.*?)>')
 
 class MemoText(PesterText):
     def __init__(self, theme, parent=None):
-        super(MemoText, self).__init__(parent)
+        super(MemoText, self).__init__(theme, parent)
         if hasattr(self.parent(), 'mainwindow'):
             self.mainwindow = self.parent().mainwindow
         else:
