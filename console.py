@@ -124,14 +124,19 @@ class ConsoleWindow(QtGui.QDialog):
                 "MAINWIN": self.mainwindow,
                 "PCONFIG": self.mainwindow.config
                 }
+        _CUSTOM_ENV_USE = []
+        cenv = pchum.__dict__
         for k in _CUSTOM_ENV:
-            if k not in env:
-                # Don't overwrite anything!
-                env[k] = _CUSTOM_ENV[k]
+            if k not in cenv:
+                cenv[k] = _CUSTOM_ENV[k]
+                _CUSTOM_ENV_USE.append(k)
             else:
-                warn = "Console environment item {!r} already exists in main."
+                # Don't overwrite anything!
+                warn = "Console environment item {!r} already exists in CENV."
                 warn.format(k)
                 logging.warning(warn)
+        # Because all we did was change a linked AttrDict, we should be fine
+        # here.
 
         # Display the input we provided
         self.addMessage(scriptstr, 1)
@@ -155,9 +160,9 @@ class ConsoleWindow(QtGui.QDialog):
 
             # Try to clean us out of globals - this might be disabled
             # later.
-            for k in _CUSTOM_ENV:
+            for k in _CUSTOM_ENV_USED:
                 # Remove the key we added.
-                env.pop(k, None)
+                cenv.pop(k, None)
 
     def write(self, data):
         # Replaces sys.stdout briefly
