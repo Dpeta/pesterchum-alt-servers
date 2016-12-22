@@ -2138,6 +2138,8 @@ class PesterWindow(MovingWindow):
             if newpos != oldpos:
                 # Cursor moved; unset idle.
                 self.idler.auto = False
+                self.setAway.emit(False)
+                self.randhandler.setIdle(False)
             return
 
         if newpos != oldpos:
@@ -2152,7 +2154,9 @@ class PesterWindow(MovingWindow):
             self.idler.auto = True
             # We don't need this anymore.
             self.idler.time = 0
-            # Send out the messages.
+            # Make it clear that we're idle.
+            self.setAway.emit(True)
+            self.randhandler.setIdle(True)
             self._sendIdleMsgs()
 
     def _sendIdleMsgs(self):
