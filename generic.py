@@ -27,7 +27,7 @@ class PesterList(list):
 
 class PesterIcon(QtGui.QIcon):
     def __init__(self, *x):
-        QtGui.QIcon.__init__(self, x[0])
+        super(PesterIcon, self).__init__(x[0])
         if type(x[0]) in [str, unicode]:
             self.icon_pixmap = QtGui.QPixmap(x[0])
         else:
@@ -66,7 +66,7 @@ class RightClickTree(QtGui.QTreeWidget):
 
 class MultiTextDialog(QtGui.QDialog):
     def __init__(self, title, parent, *queries):
-        QtGui.QDialog.__init__(self, parent)
+        super(MultiTextDialog, self).__init__(parent)
         self.setWindowTitle(title)
         if len(queries) == 0:
             return
@@ -108,7 +108,7 @@ class MultiTextDialog(QtGui.QDialog):
 
 class MovingWindow(QtGui.QFrame):
     def __init__(self, *x, **y):
-        QtGui.QFrame.__init__(self, *x, **y)
+        super(MovingWindow, self).__init__(*x, **y)
         self.moving = None
         self.moveupdate = 0
     def mouseMoveEvent(self, event):
@@ -135,7 +135,7 @@ class NoneSound(object):
 
 class WMButton(QtGui.QPushButton):
     def __init__(self, icon, parent=None):
-        QtGui.QPushButton.__init__(self, icon, "", parent)
+        super(WMButton, self).__init__(icon, "", parent)
         self.setIconSize(icon.realsize())
         self.resize(icon.realsize())
         self.setFlat(True)
