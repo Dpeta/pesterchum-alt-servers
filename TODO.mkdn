@@ -85,12 +85,12 @@ Todo/Done
 * Separate auto-idle and checkbox idle so they don't share a state (and make the first send set the timer for additional idle responses)
 * Stop us from sending IDLE messages to NickServ
 * Fix NickServ auto-login things
+* Make a window that can be used to interface with the script directly - a simple Python console.
 
 Debugging
 ----
 * Make small, simplistic windows that allow the viewing of internal variables pertaining to things like set quirks, users present, etc.
 	* Also let it display the stylesheet settings of the current window, or similar.
-* Make a window that can be used to interface with the script directly - a simple Python console.
 
 Bugs
 ----
