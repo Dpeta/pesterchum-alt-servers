@@ -63,6 +63,7 @@ Features
 * Finish creating the sound wrapper. Just make it check what the type of sound needed is upon creation, and instantiate a private class based off of that.
 	* There is basically no good way to do this without moving to Qt5. I might try that myself later, but that's a long-term goal.
 * Make it possible to test quirk things and such without connecting? This'd be hard to separate out, but useful.
+	* Make a quirk 'bin' that exists independent of profiles, and can be copied to/from at will.
 * Right-click Time entry field to see those used? (Replace left/right buttons?)
 * Make the memo name entry box accept a comma-separated list
 * Make right-clicking on a tab open up the right-click menu one would get on right-clicking the title (frame??)
@@ -74,6 +75,7 @@ Features
 
 Todo/Done
 ----
+**Everything in this list has already been completed.**
 * Fix parser text-loss bug that plagues everyone (especially Chumdroid users)
 * Make /me messages that cut continue into more /me messages
 * Make sound work on Windows through QSound (disables volume control)
@@ -87,6 +89,7 @@ Todo/Done
 Debugging
 ----
 * Make small, simplistic windows that allow the viewing of internal variables pertaining to things like set quirks, users present, etc.
+	* Also let it display the stylesheet settings of the current window, or similar.
 * Make a window that can be used to interface with the script directly - a simple Python console.
 
 Bugs
