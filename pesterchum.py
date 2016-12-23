@@ -14,6 +14,55 @@ from pnc.dep.attrdict import AttrDict
 
 logging.basicConfig(level=logging.WARNING)
 
+def _py_version_check():
+    # == Python Version Checking ==
+    # Check that we're running the right version of Pesterchum.
+    # This is the version we need.
+    pyreq = {"major": 2, "minor": 7}
+
+    # Just some preprocessing to make formatting the version info a little
+    # easier. Note that the sys.version_info type doesn't convert to dict,
+    # despite having named indices like a namedtuple, so we have to do it
+    # manually.
+    # This is the version we have.
+    pyver = dict(zip(("major", "minor"), sys.version_info[:2]))
+
+    # Compose the base of an error message that we may use in the future.
+    errmsg = "ERROR: Pesterchum is designed to be run on Python \
+            {major}.{minor}.".format(**pyreq)
+    errmsg = [ errmsg ]
+    errmsg.append("It is not designed for use with Python {major}.{minor}.")
+    # Now we have a list that we can further process into a more specific
+    # error message.
+    if pyver["major"] > pyreq["major"]:
+        # We're using Python 3, which this script won't work with.
+        errmsg = errmsg.extend([
+                "Due to syntax differences,",
+                "it cannot be run with this version of Python."
+                ])
+        errmsg = ' '.join(errmsg)
+        errmsg = errmsg.format(**pyver)
+        logging.critical(errmsg)
+        exit()
+    elif pyver["major"] != pyreq["major"] or pyver["minor"] < pyreq["minor"]:
+        # We're either not running Python 2 (we have something earlier?!) or
+        # we're below the minimum required minor version (e.g. 2.6 or 2.4 or
+        # similar).
+        # This means that we wouldn't have certain syntax improvements that we
+        # need - like inline generators, 'with' statements, lambdas, etc.
+        # NOTE: This MAY be lowered to 2.6 later, since there's little
+        # difference.
+        errmsg = errmsg.extend([
+                "This version of Python lacks certain features",
+                "that are necessary for it to run."
+                ])
+        errmsg = ' '.join(errmsg)
+        errmsg = errmsg.format(**pyver)
+        logging.critical(errmsg)
+        exit()
+# Actually do the version check.
+_py_version_check()
+
 try:
     import console
 except ImportError:
