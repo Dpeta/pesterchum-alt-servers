@@ -57,10 +57,12 @@ necessary.
     * [Download from main branch][pchum-zip]
 5. Unzip Pesterchum somewhere easily-accessible.
 6. **If you have any custom themes**, copy/paste them into the 'themes' folder.
-   You can find this in `%APPDATA%/Local/pesterchum`.
-   Oftentimes it doesn't exist, so you'll have to make it and copy the custom
-   themes into it.
-   __If that doesn't work:__
+   You can find this in `%LOCALAPPDATA%\pesterchum`, which is the same as
+   `%APPDATA%\..\Local\pesterchum`. Copy/paste one into Explorer's address bar
+   and you'll end up where you need to be.
+   Oftentimes the 'themes' folder doesn't exist in Pesterchum's shared config
+   folder, so you'll have to make it and copy the custom themes into it.
+   __If, for some reason, that doesn't work:__
    You can also copy the missing themes into the 'themes' folder of the version
    you just unzipped. **Don't overwrite any files** if you do this - the themes
    used by this have been updated, and the older default themes may break when
