@@ -1,26 +1,16 @@
-Todo
-===============
+# Todo
 
-Features
---------
+## Features
 * Log viewer needs to have BBCode/HTML/Text copy modes
 * Copy quirks between profiles?
-* More complex quirks: by-sound
-* Spy mode
 * Turn @ and # links on/off?
-* "Someone has friended you" notifier
 * Show true bans? COMPRESS QUIT MESSAGES ON BAN
 * Colour saving boxes things?
 * Whowas for last seen online?
 * Tab completion of two letter names
-* When 'banned' make impossible to connect using timestamp banned under
 * Auto download/install updates via Windows installer
-* Turn memo notifications on/off from right-click menu on memos (Idea: lostGash)
 * Use web connection to send offline messages in email-like fashion (Idea: ghostDunk)
-* Use web connection to save profiles (Idea: ghostDunk)
 * Better NickServ registering
-* Spectation notices (Idea: lexicalNuance) (probly WONTFIX)
-* Auto-login Nickserv
 * Make toast notifications only on certain chums
 * Local alisas for chums
 * Don't make new windows be all in your face and shit
@@ -37,7 +27,6 @@ Features
 * SOONER OR LATER: Redo internal chum storage, centralize data into widely accessible manager objects, etc.
 * Also: Overhaul settings storage. Bring it more in line with the system Textsub used (if feeling masochistic), but simpler.
 * Overhaul debugging
-* Make a console to display debug info without requiring us to run from console
 * Debug generic.py's CaseInsensitiveDict/replace it with mine
 * Overhaul messaging so Chan/Nick/Memo Servs all use the same code (and lexer)
 * Implement MemoServ support
@@ -59,6 +48,7 @@ Features
 
 * Separate Pesterchum system handling from window handling. Dicts should be stored and maintained via dicts - even a refined version of what I used for textsub.
 	* Doing it this way means I can fix the case in/sensitivity issue, too.
+* Set up framework for easily logging/accessing channels, users, etc...like what hexchat has.
 
 * Finish creating the sound wrapper. Just make it check what the type of sound needed is upon creation, and instantiate a private class based off of that.
 	* There is basically no good way to do this without moving to Qt5. I might try that myself later, but that's a long-term goal.
@@ -73,8 +63,7 @@ Features
 * Fix graphical issues with dark themes vs. light themes (Qt/text too light/etc.)
 * Allow manual compression changes via memo right-click menu for 'advanced' (per the setting) users
 
-Todo/Done
-----
+## Todo/Done
 **Everything in this list has already been completed.**
 * Fix parser text-loss bug that plagues everyone (especially Chumdroid users)
 * Make /me messages that cut continue into more /me messages
@@ -87,13 +76,12 @@ Todo/Done
 * Fix NickServ auto-login things
 * Make a window that can be used to interface with the script directly - a simple Python console.
 
-Debugging
-----
+## Debugging
 * Make small, simplistic windows that allow the viewing of internal variables pertaining to things like set quirks, users present, etc.
 	* Also let it display the stylesheet settings of the current window, or similar.
+* Make a console to display debug info without requiring us to run from terminal
 
-Bugs
-----
+## Bugs
 * weird memo time bug
 * Windows doesn't show style sheet sometimes?? Maybe related to themes.
 * Issues with connecting? Client not closing connection right? People keep getting "nick taken" messages
@@ -117,18 +105,48 @@ Bugs
 * Sound on Linux doesn't work without pygame
 * Update checking code gives false positives (update to use json file from git?)
 
-Windows Bugs
-------------
+## Windows Bugs
 * XP SP2: sometimes mouse clicks dont register? must be some kinda crash
 * On reconnect and nick change, momentary theme change causes menu items to stop working
 * Random chums won't show up on chumroll
 * Popup toast notifications cause main window to raise
 
-Mac Bugs
---------
+## Mac Bugs
 * Mac doesn't show tabs right, display gifs, highlighting thing?
 * SS: also the background image is broken
 * SS: in the one-on-one pester it resizes with the window
 * SS: but the memo one doesn't resize
 * SS: and the arrows next to the time thing overlap the CLOSE button
 * Lex: There seems to be a faint outline around most non-square themes.
+
+
+## Things that won't be done
+
+### Scrapped Features
+**I'll explain why these ones won't happen.**
+> * More complex quirks: by-sound
+* This would require a way to determine what maps to a sound, and
+  replace it.
+  I've played with the idea before. It resulted in me needing to look
+  up things like the [Metaphone Algorithm][metaphone] to figure out
+  how it might be even remotely possible. The results were NOT a fun
+  time; if this is ever implemented, it will be much, much later than
+  just about everything else.
+> * Spy mode
+* I feel as though I shouldn't need to tell anyone why this is a bad idea.
+  Some people already have this capability anyway; I used to be one of them.
+  There's no real need to implement an inferior version into every single
+  client on Pesterchum.
+> * "Someone has friended you" notifier
+> * Spectation notices (Idea: lexicalNuance) (probly WONTFIX)
+* These are milder invasions of privacy than the above, but they are still
+  invasions of privacy.
+> * When 'banned' make impossible to connect using timestamp banned under
+* This is a lot of work for something that purely affects immersion - while
+  also breaking a number of things in the process. Too much work for too
+  little payoff.
+> * Use web connection to save profiles (Idea: ghostDunk)
+* There is no way to do this now that Pesterchum is basically unsupported.
+  You'll just have to settle for copying your profiles and logs when you
+  change computers.
+
