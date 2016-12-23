@@ -86,6 +86,7 @@
 * Fix NickServ auto-login things
 * Make a window that can be used to interface with the script directly - a
   simple Python console.
+
 ### Backend
 * Perpetual code cleanup, refactoring, simplification and general improvements
 * Syntax changes/updates and the like
@@ -131,6 +132,7 @@
   needed is upon creation, and instantiate a private class based off of that.
 	* There is basically no good way to do this without moving to Qt5. I
 	  might try that myself later, but that's a long-term goal.
+
 ### Debugging
 * Set up a simple function to display a traceback instead of silently moving on!
 * Make small, simplistic windows that allow the viewing of internal variables
