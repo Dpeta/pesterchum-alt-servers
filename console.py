@@ -251,11 +251,22 @@ class ConsoleText(QtGui.QTextEdit):
         result = "{}{} {}\n"
         result = result.format(timestamp, prefix, msg)
         #~self.append(result)
-        self.insertPlainText(result)
+        self.appendPlainText(result)
 
         # Direction doesn't matter here - it's the console.
         self.lastmsg = datetime.datetime.now()
         # This needs to finish being rewritten....
+
+    def appendPlainText(self, text):
+        """Add plain text to the end of the document, a la insertPlainText."""
+        # Save the old cursor
+        oldcur = self.textCursor()
+        # Move the cursor to the end of the document for insertion
+        self.moveCursor(QtGui.QTextCursor.End)
+        # Insert the text
+        self.insertPlainText(text)
+        # Return the cursor to wherever it was prior
+        self.setTextCursor(oldcur)
 
     def changeTheme(self, theme):
         self.initTheme(theme)
