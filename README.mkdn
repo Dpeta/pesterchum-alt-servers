@@ -4,16 +4,20 @@ Welcome to Pesterchum 3.41!
 ## FOR NEW USERS
 This modification of Pesterchum is intended for people who are already familiar
 with using the base client.
-If you aren't, please check the standard build's [documentation][doc].
 
-[doc]: https://github.com/illuminatedwax/pesterchum/blob/master/README.mkdn
+If you aren't, please check the standard build's [documentation][pchum-doc].
+
+[pchum-orig]: https://github.com/illuminatedwax/pesterchum
+[pchum-doc]: https://github.com/illuminatedwax/pesterchum/blob/master/README.mkdn
 
 ## FOR EVERYONE ELSE
 Greetings! This is a modification of Pesterchum, made because Pesterchum is
 effectively no longer maintained, that is intended to fix a number of issues.
+
 The code used as a base is a newer version of Pesterchum than the one in
 circulation, and thus has plenty of useful features that can be found in the
 [CHANGELOG][changes].
+
 In addition, there are other features and improvements that have been made, and
 there are many more planned. Check the [TODO list][todo-done] to see what's
 been fixed, as well as what's [planned][todo-upcoming].
@@ -23,18 +27,18 @@ been fixed, as well as what's [planned][todo-upcoming].
 [todo-upcoming]: https://github.com/karxi/pesterchum/blob/master/TODO.mkdn#features
 
 ### Installation
-There isn't a lightweight installer yet, but the steps aren't all that
+There isn't an automated installer yet, but the steps involved aren't all that
 difficult.
 
 #### Pitfalls
 * If you're on a 64-bit system (most are these days), use those links. You can
-  also use the 32 bit versions, if you choose, but you *cannot* mix them.
+    also use the 32 bit versions, if you choose, but you *cannot* mix them.
 * If you're on a 32-bit system but use the 64-bit installers, you'll get an
-  error along the lines of "not a valid Win32 application", or the 
-  installer will simply fail.
+    error along the lines of "not a valid Win32 application", or the 
+    installer will simply fail.
 * This version of Pesterchum does not come compiled as an executable, and thus
-  does not have Python/PyQt4 packaged with it. Those are necessary for
-  Pesterchum to run, so you have to install them manually.
+    does not have Python/PyQt4 packaged with it. Those are necessary for
+    Pesterchum to run, so you have to install them manually.
 
 #### First-Time Install
 Download links are for Windows, but a quick Google search will find everything
@@ -43,35 +47,48 @@ necessary.
 1. Install **Python 2.7** or higher if you don't already have it:
     * [32 bit][python2-32]
     * [64 bit][python2-64]
-    * Be **sure** to add Python to the PATH if asked to do so during
-      installation. It means Python will be usable from the console,
-      which is necessary for this to run.
+ 
+    Be **sure** to add Python to the PATH if asked to do so during
+    installation. It means Python will be usable from the console,
+    which is necessary for this to run.
+
 2. Install **PyQt4**:
     * [32 bit][pyqt4-32]
     * [64 bit][pyqt4-64]
-3. (LINUX) Install **pygame**:
+
+3. **(LINUX)** Install **pygame**:
     * [pygame download page][pygame-dl]
-    * You don't need to install this if you're using Windows; sound should
-      work fine without it.
+    * You don't need to install this if you're using Windows. Linux users need
+        to install it to enable sound, but it will otherwise work without it.
+    * If you want to download this, you should probably do so using your native
+        package manager.
+
 4. Download **Pesterchum**:
     * [Download from main branch][pchum-zip]
+
 5. Unzip Pesterchum somewhere easily-accessible.
+
 6. **If you have any custom themes**, copy/paste them into the 'themes' folder.
-   You can find this in `%LOCALAPPDATA%\pesterchum`, which is the same as
-   `%APPDATA%\..\Local\pesterchum`. Copy/paste one into Explorer's address bar
-   and you'll end up where you need to be.
-   Oftentimes the 'themes' folder doesn't exist in Pesterchum's shared config
-   folder, so you'll have to make it and copy the custom themes into it.
-   __If, for some reason, that doesn't work:__
-   You can also copy the missing themes into the 'themes' folder of the version
-   you just unzipped. **Don't overwrite any files** if you do this - the themes
-   used by this have been updated, and the older default themes may break when
-   used.
+    You can find this in `%LOCALAPPDATA%\pesterchum`, which is the same as
+    `%APPDATA%\..\Local\pesterchum`. Copy/paste one into Explorer's address bar
+    and you'll end up where you need to be.
+
+    Oftentimes the 'themes' folder doesn't exist in Pesterchum's user-specific
+    config folder, so you'll have to make it and copy the custom themes into
+    it.
+
+    __If, for some reason, that doesn't work:__
+
+    You can also copy the missing themes into the 'themes' folder of the version
+    you just unzipped. **Don't overwrite any files** if you do this - the themes
+    used by this have been updated, and the older default themes may break when
+    used.
+
 7. Run Pesterchum! How you do this depends on the OS:
-    * (WINDOWS) Run `w32-run-pchum.bat`.
-    * (LINUX) Run `./pesterchum`, preferably via terminal.
+    * **(WINDOWS)** Run `w32-run-pchum.bat`.
+    * **(LINUX)** Run `./pesterchum`, preferably via terminal.
     * Note that this is made to provide debugging information - so that if
-      errors come up, they can be reported to me, and I can fix them.
+        errors come up, they can be reported to me, and I can fix them.
 
 [python2-32]: https://www.python.org/ftp/python/2.7.12/python-2.7.12.msi
 [python2-64]: https://www.python.org/ftp/python/2.7.12/python-2.7.12.amd64.msi
