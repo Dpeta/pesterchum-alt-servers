@@ -118,7 +118,6 @@ class ConsoleWindow(QtGui.QDialog):
             env = pchum._retrieveGlobals()
 
         # Modify the environment the script will execute in.
-        # NOTE: This doesn't presently work, for some reason.
         _CUSTOM_ENV = {
                 "CONSOLE": self,
                 "MAINWIN": self.mainwindow,
@@ -126,9 +125,16 @@ class ConsoleWindow(QtGui.QDialog):
                 }
         _CUSTOM_ENV_USED = []
         cenv = pchum.__dict__
+        # Display the input we provided
+        # We do this here, *before* we do our variable injection, so that it
+        # doesn't have to be part of the try statement, where it could
+        # potentially complicate matters/give false positives.
+        self.addMessage(scriptstr, 1)
         for k in _CUSTOM_ENV:
             if k not in cenv:
+                # Inject the variable for ease of use.
                 cenv[k] = _CUSTOM_ENV[k]
+                # Record that we injected it.
                 _CUSTOM_ENV_USED.append(k)
             else:
                 # Don't overwrite anything!
@@ -137,27 +143,24 @@ class ConsoleWindow(QtGui.QDialog):
                 logging.warning(warn)
         # Because all we did was change a linked AttrDict, we should be fine
         # here.
-
-        # Display the input we provided
-        self.addMessage(scriptstr, 1)
-        # Replace the old writer (for now)
-        sysout, sys.stdout = sys.stdout, self
         try:
-            code = compile(scriptstr + '\n', "<string>", "single")
-            result = eval(code, env)
-        except:
-            # Something went wrong.
-            #~logging.exception("Exception: %s", err, exc_info=sys.exc_info())
-            self.addTraceback(sys.exc_info()[2])
-        else:
-            # No errors.
-            if result is not None:
-                #~self.addMessage(repr(result), -1)
-                print repr(result)
+            # Replace the old writer (for now)
+            sysout, sys.stdout = sys.stdout, self
+            try:
+                code = compile(scriptstr + '\n', "<string>", "single")
+                # Will using cenv instead of env cause problems?...
+                result = eval(code, cenv)
+            except:
+                # Something went wrong.
+                self.addTraceback(sys.exc_info()[2])
+            else:
+                # No errors.
+                if result is not None:
+                    print repr(result)
+            finally:
+                # Restore system output.
+                sys.stdout = sysout
         finally:
-            # Restore system output.
-            sys.stdout = sysout
-
             # Try to clean us out of globals - this might be disabled
             # later.
             for k in _CUSTOM_ENV_USED:
