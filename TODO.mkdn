@@ -26,6 +26,7 @@
 
 * SOONER OR LATER: Redo internal chum storage, centralize data into widely accessible manager objects, etc.
 * Also: Overhaul settings storage. Bring it more in line with the system Textsub used (if feeling masochistic), but simpler.
+* Overhaul information storage - chums, conversations, memos; all should be handled by a backend and merely RENDERED into Qt objects!!
 * Overhaul debugging
 * Debug generic.py's CaseInsensitiveDict/replace it with mine
 * Overhaul messaging so Chan/Nick/Memo Servs all use the same code (and lexer)
@@ -95,8 +96,9 @@
 
 * Mentions occasionally don't work (e.g. in /me)
 * Character times aren't 'forgotten' on Part
-* +c is not properly recognized on join, nor does it stop someone from reenabling their quirk (let ops and above ignore it)
+* +c is not properly recognized on join, nor does it stop someone from reenabling their quirk (let ops and above ignore it?)
 * Chumlist handles groups pretty badly (no using the same name as a handle, for example? Needs an errormessage at least)
+	* The whole chumlist handling system really ought to be refactored into something sane...the objects should only be there to render
 * PESTERCHUM: messages are sent to things like NickServ
 * Log folder/file names are not case-sensitive, so they break on non-Windows systems
 * Capitalized /me's don't render (should forcibly lowercase them)
@@ -127,7 +129,7 @@
 
 > * More complex quirks: by-sound
 
-: This would require a way to determine what maps to a sound, and
+* This would require a way to determine what maps to a sound, and
   replace it.
   I've played with the idea before. It resulted in me needing to look
   up things like the [Metaphone Algorithm][metaphone] to figure out
@@ -137,7 +139,7 @@
 
 > * Spy mode
 
-: I feel as though I shouldn't need to tell anyone why this is a bad idea.
+* I feel as though I shouldn't need to tell anyone why this is a bad idea.
   Some people already have this capability anyway; I used to be one of them.
   There's no real need to implement an inferior version into every single
   client on Pesterchum.
@@ -145,18 +147,18 @@
 > * "Someone has friended you" notifier
 > * Spectation notices (Idea: lexicalNuance) (probly WONTFIX)
 
-: These are milder invasions of privacy than the above, but they are still
+* These are milder invasions of privacy than the above, but they are still
   invasions of privacy.
 
 > * When 'banned' make impossible to connect using timestamp banned under
 
-: This is a lot of work for something that purely affects immersion - while
+* This is a lot of work for something that purely affects immersion - while
   also breaking a number of things in the process. Too much work for too
   little payoff.
 
 > * Use web connection to save profiles (Idea: ghostDunk)
 
-: There is no way to do this now that Pesterchum is basically unsupported.
+* There is no way to do this now that Pesterchum is basically unsupported.
   You'll just have to settle for copying your profiles and logs when you
   change computers.
 
