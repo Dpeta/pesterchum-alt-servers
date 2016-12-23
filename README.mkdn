@@ -37,23 +37,24 @@ difficult.
   Pesterchum to run, so you have to install them manually.
 
 #### First-Time Install
-* Download links are for Windows, but a quick Google search will find
-  everything necessary.
-1. Install Python 2.7 or higher if you don't already have it:
-	* [32 bit][python2-32]
-	* [64 bit][python2-64]
-	Be **sure** to add Python to the PATH if asked to do so during
-	installation. It means Python will be usable from the console,
-	which is necessary for this to run.
-2. Install PyQt4:
-	* [32 bit][pyqt4-32]
-	* [64 bit][pyqt4-64]
-3. (LINUX) Install pygame:
-	* [pygame download page][pygame-dl]
-	You don't need to install this if you're using Windows; sound should
-	work fine without it.
-4. Download Pesterchum:
-	* [Download from main branch][pchum-zip]
+Download links are for Windows, but a quick Google search will find everything
+necessary.
+
+1. Install **Python 2.7** or higher if you don't already have it:
+    * [32 bit][python2-32]
+    * [64 bit][python2-64]
+    * Be **sure** to add Python to the PATH if asked to do so during
+      installation. It means Python will be usable from the console,
+      which is necessary for this to run.
+2. Install **PyQt4**:
+    * [32 bit][pyqt4-32]
+    * [64 bit][pyqt4-64]
+3. (LINUX) Install **pygame**:
+    * [pygame download page][pygame-dl]
+    * You don't need to install this if you're using Windows; sound should
+      work fine without it.
+4. Download **Pesterchum**:
+    * [Download from main branch][pchum-zip]
 5. Unzip Pesterchum somewhere easily-accessible.
 6. **If you have any custom themes**, copy/paste them into the 'themes' folder.
    You can find this in `%APPDATA%/Local/pesterchum`.
@@ -65,10 +66,10 @@ difficult.
    used by this have been updated, and the older default themes may break when
    used.
 7. Run Pesterchum! How you do this depends on the OS:
-	* (WINDOWS) Run `w32-run-pchum.bat`.
-	* (LINUX) Run `./pesterchum`, preferably via terminal.
-   Note that this is made to provide debugging information - so that if errors
-   come up, they can be reported to me, and I can fix them.
+    * (WINDOWS) Run `w32-run-pchum.bat`.
+    * (LINUX) Run `./pesterchum`, preferably via terminal.
+    * Note that this is made to provide debugging information - so that if
+      errors come up, they can be reported to me, and I can fix them.
 
 [python2-32]: https://www.python.org/ftp/python/2.7.12/python-2.7.12.msi
 [python2-64]: https://www.python.org/ftp/python/2.7.12/python-2.7.12.amd64.msi
