@@ -42,7 +42,7 @@ difficult.
 1. Install Python 2.7 or higher if you don't already have it:
 	* [32 bit][python2-32]
 	* [64 bit][python2-64]
-	Be *sure* to add Python to the PATH if asked to do so during
+	Be **sure** to add Python to the PATH if asked to do so during
 	installation. It means Python will be usable from the console,
 	which is necessary for this to run.
 2. Install PyQt4:

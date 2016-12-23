@@ -9,83 +9,143 @@
 * Whowas for last seen online?
 * Tab completion of two letter names
 * Auto download/install updates via Windows installer
-* Use web connection to send offline messages in email-like fashion (Idea: ghostDunk)
+* Use web connection to send offline messages in email-like fashion
+  (Idea: ghostDunk)
 * Better NickServ registering
 * Make toast notifications only on certain chums
 * Local alisas for chums
 * Don't make new windows be all in your face and shit
 * Hide offline friends per group
 
-* Implement new Lexer for the sake of everyone's sanity
-* Redo PESTERCHUM: processing/redo whole msg received processing chain
-* Redo text processing in general
-* Redo quirk processing (use pieces from Textsub if needed)
-* LET PEOPLE TURN OFF HONKING - people already rename the soundfile and such to do this manually
-* Set up a simple function to display a traceback instead of silently moving on!
-* Pare down the PesterMemo object so it inherits more things from PesterConvo *implicitly*
+* LET PEOPLE TURN OFF HONKING - people already rename the soundfile and such to
+  do this manually
 
-* SOONER OR LATER: Redo internal chum storage, centralize data into widely accessible manager objects, etc.
-* Also: Overhaul settings storage. Bring it more in line with the system Textsub used (if feeling masochistic), but simpler.
-* Overhaul information storage - chums, conversations, memos; all should be handled by a backend and merely RENDERED into Qt objects!!
-* Overhaul debugging
-* Debug generic.py's CaseInsensitiveDict/replace it with mine
-* Overhaul messaging so Chan/Nick/Memo Servs all use the same code (and lexer)
-* Implement MemoServ support
-* Add support for displaying more verbose information (e.g. Cease messages which tell you more than the abbreviation of who left)
+* Implement **MemoServ** support
+* Add support for displaying more verbose information (e.g. Cease messages which
+  tell you more than the abbreviation of who left)
 * Make Pesterchum recognize conventional /mes so they aren't invisible
 * Tell user when NickServ handles are going to expire
 * Tell user when old handles have D/C'd? Offer autoghost support?!
 * Make @XY and @xxxYyy formats ping their targets
-* Allow matches like @?XY and @FXY or @PXY3 - make them only match the target currently set to that.
-* Make @ notation not match @u@; and similar (make invalid nick chars break matches)
+* Allow matches like @?XY and @FXY or @PXY3 - make them only match the target
+  currently set to that.
+* Make @ notation not match @u@; and similar (make invalid nick chars break
+  matches)
 * Fix hyperlink escaping (Qt seems to do this automatically - need a workaround)
 * Show bans if +h or higher (+h, +o, +a, +q)
 
-* Add more comprehensive status support - IDLE, DND, INVISIBLE for now - or at least add similar functionality.
-* SEPARATE FUNCTIONALITY from CONNECTED STATE!! This is a huge problem! Being shunted off our nick closes windows and breaks things! Just D/C and reconnect?
-	* It'd probably be best to give an option to either CHANGE NICKS or DISCONNECT upon nick collision...? But, then how would we GHOST?
-		* Auto-disconnect if collsion before joining channels, make it possible to disconnect (but not send messages, obviously) without losing everything
-	* Maybe GHOSTing should use auto-identify to ensure- no, that doesn't work, because we can't ident into a specified nick without being ON it. Need GD's help to fix....
+* Add more comprehensive status support - IDLE, DND, INVISIBLE for now - or at
+  least add similar functionality.
+* SEPARATE FUNCTIONALITY from CONNECTED STATE!! This is a huge problem! Being
+  shunted off our nick closes windows and breaks things! Just D/C and reconnect?
+	* It'd probably be best to give an option to either CHANGE NICKS or
+	  DISCONNECT upon nick collision...? But, then how would we GHOST?
+		* Auto-disconnect if collsion before joining channels, make it
+		  possible to disconnect (but not send messages, obviously)
+		  without losing everything
+	* Maybe GHOSTing should use auto-identify to ensure- no, that doesn't
+	  work, because we can't ident into a specified nick without being ON
+	  it. Need GD's help to fix....
 
-* Separate Pesterchum system handling from window handling. Dicts should be stored and maintained via dicts - even a refined version of what I used for textsub.
-	* Doing it this way means I can fix the case in/sensitivity issue, too.
-* Set up framework for easily logging/accessing channels, users, etc...like what hexchat has.
+* Option to disable backwards compatibility:
+	* For those that are *really* sure that this build is the build for
+	  them.
+	* Should enable extra features, including ctag compression.
+	* Allow manual compression changes via memo right-click menu for
+	  'advanced' (per the setting) users
 
-* Finish creating the sound wrapper. Just make it check what the type of sound needed is upon creation, and instantiate a private class based off of that.
-	* There is basically no good way to do this without moving to Qt5. I might try that myself later, but that's a long-term goal.
-* Make it possible to test quirk things and such without connecting? This'd be hard to separate out, but useful.
-	* Make a quirk 'bin' that exists independent of profiles, and can be copied to/from at will.
+* Make it possible to test quirk things and such without connecting? This'd be
+  hard to separate out, but useful.
+	* Make a quirk 'bin' that exists independent of profiles, and can be
+	  copied to/from at will.
 * Right-click Time entry field to see those used? (Replace left/right buttons?)
+	* Save commonly-used times on a per-handle basis!
 * Make the memo name entry box accept a comma-separated list
-* Make right-clicking on a tab open up the right-click menu one would get on right-clicking the title (frame??)
+* Make right-clicking on a tab open up the right-click menu one would get on
+  right-clicking the title (frame??)
 * Add an option to Cycle (for log separation)
 
 * Add a separate 'Tweaks' section in Options
-* Fix graphical issues with dark themes vs. light themes (Qt/text too light/etc.)
-* Allow manual compression changes via memo right-click menu for 'advanced' (per the setting) users
+* Fix graphical issues with dark themes vs. light themes (Qt/text too
+  light/etc.)
 
 ## Todo/Done
-**Everything in this list has already been completed.**
+**Everything in this section has already been completed.**
+### Usability
 * Fix parser text-loss bug that plagues everyone (especially Chumdroid users)
 * Make /me messages that cut continue into more /me messages
 * Make sound work on Windows through QSound (disables volume control)
-* Toggle individual tab flash / alert sounds (from the same right-click memo that lets us toggle OOC)
+* Toggle individual tab flash / alert sounds (from the same right-click memo
+  that lets us toggle OOC)
 * Make CTRL+PGUP/PGDN switch memo/pester tabs
-* Color tags are now posted as their shorter hexadecimal forms, if applicable (255,255,255 -> #FFFFFF, for example)
-* Separate auto-idle and checkbox idle so they don't share a state (and make the first send set the timer for additional idle responses)
+* Color tags are now posted as their shorter hexadecimal forms, if applicable
+  (255,255,255 -> #FFFFFF, for example)
+* Separate auto-idle and checkbox idle so they don't share a state (and make
+  the first send set the timer for additional idle responses)
 * Stop us from sending IDLE messages to NickServ
 * Fix NickServ auto-login things
-* Make a window that can be used to interface with the script directly - a simple Python console.
+* Make a window that can be used to interface with the script directly - a
+  simple Python console.
+### Backend
+* Perpetual code cleanup, refactoring, simplification and general improvements
+* Syntax changes/updates and the like
 
-## Debugging
-* Make small, simplistic windows that allow the viewing of internal variables pertaining to things like set quirks, users present, etc.
-	* Also let it display the stylesheet settings of the current window, or similar.
+## Code
+**Improvements and changes pertaining to Pesterchum's internals.**
+### General
+* Implement new Lexer for the sake of everyone's sanity
+* Redo `PESTERCHUM:` processing/redo whole msg received processing chain
+* Redo text processing in general
+* Redo quirk processing (use pieces from Textsub if needed)
+* Pare down the PesterMemo object so it inherits more things from PesterConvo
+  *implicitly*
+* SOONER OR LATER: Redo internal chum storage, centralize data into widely
+  accessible manager objects, etc.
+* Also: Overhaul settings storage. Bring it more in line with the system Textsub
+  used (if feeling masochistic), but simpler.
+* **Overhaul information storage** - chums, conversations, memos; all should be
+  handled by a backend and merely RENDERED into Qt objects!!
+* Overhaul debugging
+* Debug generic.py's CaseInsensitiveDict/replace it with mine
+* Overhaul messaging so **Chan/Nick/Memo Servs** all use the same code (and 
+  lexer)
+* **Separate Pesterchum system handling from window handling.** Dicts should be
+  stored and maintained via dicts - even a refined version of what I used for
+  textsub.
+	* Doing it this way means I can fix the case in/sensitivity issue, too.
+* Set up framework for easily logging/accessing channels, users, etc...like
+  what hexchat has.
+* More efficient framework for accessing stored user information - right now,
+  Pesterchum keeps information on user colors and such on hand *forever*,
+  meaning that things inevitably get clogged up with handles that are never
+  really seen, or only seen once, or even just randomly generated. This is
+  silly and should be changed; I'll probably make a namedtuple for users or
+  something, and save it all to a separate JSON file or two.
+  Said JSON file should keep the extra information on hand - or rather, the
+  'recent users' JSON file should keep most of the detailed information and be
+  accessed first, with the larger 'inactive users' file being accessed to check
+  for unfamiliar handles.
+  These would have to output the old data to pesterchum.js for backwards
+  compatibility purposes.
+* Finish creating the sound wrapper. Just make it check what the type of sound
+  needed is upon creation, and instantiate a private class based off of that.
+	* There is basically no good way to do this without moving to Qt5. I
+	  might try that myself later, but that's a long-term goal.
+### Debugging
+* Set up a simple function to display a traceback instead of silently moving on!
+* Make small, simplistic windows that allow the viewing of internal variables
+  pertaining to things like set quirks, users present, etc.
+	* Also let it display the stylesheet settings of the current window, or
+	  similar.
 * Make a console to display debug info without requiring us to run from terminal
+* Allow us to specify flags via command line
+	* Let us specify a separate config (pesterchum.js) file!!
 
 ## Bugs
 * weird memo time bug
 * Windows doesn't show style sheet sometimes?? Maybe related to themes.
-* Issues with connecting? Client not closing connection right? People keep getting "nick taken" messages
+* Issues with connecting? Client not closing connection right? People keep
+  getting "nick taken" messages
 * When using mood sort, scroll position jumps to last selected chum
 * Closing a timeclone doesn't actually cease for everyone else
 * Kill Zalgo
@@ -96,24 +156,34 @@
 
 * Mentions occasionally don't work (e.g. in /me)
 * Character times aren't 'forgotten' on Part
-* +c is not properly recognized on join, nor does it stop someone from reenabling their quirk (let ops and above ignore it?)
-* Chumlist handles groups pretty badly (no using the same name as a handle, for example? Needs an errormessage at least)
-	* The whole chumlist handling system really ought to be refactored into something sane...the objects should only be there to render
+* +c is not properly recognized on join, nor does it stop someone from
+  reenabling their quirk (let ops and above ignore it?)
+* Chumlist handles groups pretty badly (no using the same name as a handle, for
+  example? Needs an errormessage at least)
+	* The whole chumlist handling system really ought to be refactored into
+	  something sane...the objects should only be there to render
 * PESTERCHUM: messages are sent to things like NickServ
-* Log folder/file names are not case-sensitive, so they break on non-Windows systems
+* Log folder/file names are not case-sensitive, so they break on non-Windows
+  systems
 * Capitalized /me's don't render (should forcibly lowercase them)
 
 * Volume control doesn't work without pygame
 * Sound on Linux doesn't work without pygame
 * Update checking code gives false positives (update to use json file from git?)
+* Pesterchum doesn't seem to close all of its file handles - it runs out of
+  handles to use on Linux
+	* Others have reported memory leak-induced crashes on Windows. These
+	  may or may not be related.
 
 ## Windows Bugs
 * XP SP2: sometimes mouse clicks dont register? must be some kinda crash
-* On reconnect and nick change, momentary theme change causes menu items to stop working
+* On reconnect and nick change, momentary theme change causes menu items to
+  stop working
 * Random chums won't show up on chumroll
 * Popup toast notifications cause main window to raise
 
 ## Mac Bugs
+**Due to my lack of access to a Mac, these are unlikely to be fixed.**
 * Mac doesn't show tabs right, display gifs, highlighting thing?
 * SS: also the background image is broken
 * SS: in the one-on-one pester it resizes with the window
@@ -123,7 +193,7 @@
 
 
 ## Things that won't be done
-
+**Requests that, for one reason or another, will not be fulfilled.**
 ### Scrapped Features
 **I'll explain why these ones won't happen.**
 
@@ -136,6 +206,7 @@
   how it might be even remotely possible. The results were NOT a fun
   time; if this is ever implemented, it will be much, much later than
   just about everything else.
+[metaphone]: https://en.wikipedia.org/wiki/Metaphone
 
 > * Spy mode
 
@@ -158,10 +229,9 @@
 
 > * Use web connection to save profiles (Idea: ghostDunk)
 
-* There is no way to do this now that Pesterchum is basically unsupported.
-  You'll just have to settle for copying your profiles and logs when you
-  change computers.
+* There is no way to do this now that Pesterchum is basically unsupported; an
+  external server would be necessary for storage.
+  As such, you'll just have to settle for copying your profiles and logs when
+  you change computers.
 
 
-
-[metaphone]: https://en.wikipedia.org/wiki/Metaphone
