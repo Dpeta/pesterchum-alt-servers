@@ -162,3 +162,6 @@
   You'll just have to settle for copying your profiles and logs when you
   change computers.
 
+
+
+[metaphone]: https://en.wikipedia.org/wiki/Metaphone
