@@ -125,7 +125,7 @@
 ### Scrapped Features
 **I'll explain why these ones won't happen.**
 > * More complex quirks: by-sound
-* This would require a way to determine what maps to a sound, and
+: This would require a way to determine what maps to a sound, and
   replace it.
   I've played with the idea before. It resulted in me needing to look
   up things like the [Metaphone Algorithm][metaphone] to figure out
@@ -133,20 +133,20 @@
   time; if this is ever implemented, it will be much, much later than
   just about everything else.
 > * Spy mode
-* I feel as though I shouldn't need to tell anyone why this is a bad idea.
+: I feel as though I shouldn't need to tell anyone why this is a bad idea.
   Some people already have this capability anyway; I used to be one of them.
   There's no real need to implement an inferior version into every single
   client on Pesterchum.
 > * "Someone has friended you" notifier
 > * Spectation notices (Idea: lexicalNuance) (probly WONTFIX)
-* These are milder invasions of privacy than the above, but they are still
+: These are milder invasions of privacy than the above, but they are still
   invasions of privacy.
 > * When 'banned' make impossible to connect using timestamp banned under
-* This is a lot of work for something that purely affects immersion - while
+: This is a lot of work for something that purely affects immersion - while
   also breaking a number of things in the process. Too much work for too
   little payoff.
 > * Use web connection to save profiles (Idea: ghostDunk)
-* There is no way to do this now that Pesterchum is basically unsupported.
+: There is no way to do this now that Pesterchum is basically unsupported.
   You'll just have to settle for copying your profiles and logs when you
   change computers.
 
