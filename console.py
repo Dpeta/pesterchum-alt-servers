@@ -179,6 +179,15 @@ class ConsoleWindow(QtGui.QDialog):
 
 
 class ConsoleText(QtGui.QTextEdit):
+    scrollbar_qtss = """
+    QTextEdit {{ {style[convo/textarea/style]} }}
+    QScrollBar:vertical {{ {style[convo/scrollbar/style]} }}
+    QScrollBar::handle:vertical {{ {style[convo/scrollbar/handle]} }}
+    QScrollBar::add-line:vertical {{ {style[convo/scrollbar/downarrow]} }}
+    QScrollBar::sub-line:vertical {{ {style[convo/scrollbar/uparrow]} }}
+    QScrollBar:up-arrow:vertical {{ {style[convo/scrollbar/uarrowstyle]} }}
+    QScrollBar:down-arrow:vertical {{ {style[convo/scrollbar/darrowstyle]} }}
+    """
     def __init__(self, theme, parent=None):
         super(ConsoleText, self).__init__(parent)
         if hasattr(self.parent(), 'mainwindow'):
@@ -204,9 +213,28 @@ class ConsoleText(QtGui.QTextEdit):
 
     def initTheme(self, theme):
         if theme.has_key("convo/scrollbar"):
-            self.setStyleSheet("QTextEdit { %s } QScrollBar:vertical { %s } QScrollBar::handle:vertical { %s } QScrollBar::add-line:vertical { %s } QScrollBar::sub-line:vertical { %s } QScrollBar:up-arrow:vertical { %s } QScrollBar:down-arrow:vertical { %s }" % (theme["convo/textarea/style"], theme["convo/scrollbar/style"], theme["convo/scrollbar/handle"], theme["convo/scrollbar/downarrow"], theme["convo/scrollbar/uparrow"], theme["convo/scrollbar/uarrowstyle"], theme["convo/scrollbar/darrowstyle"] ))
+            # TODO: Make all of this into a Styler mixin, so we can just feed
+            # it a theme whenever we want to change.
+            # We'd have to define the keys we're affecting, but that shouldn't
+            # be too hard - it's what dicts are for.
+
+            # These will be passed to format(), so we need to escape the
+            # containing braces.
+            stylesheet = self.scrollbar_qtss
+            #~themekeys = (
+            #~        "convo/textarea/style",
+            #~        "convo/scrollbar/style",
+            #~        "convo/scrollbar/handle",
+            #~        "convo/scrollbar/downarrow",
+            #~        "convo/scrollbar/uparrow",
+            #~        "convo/scrollbar/uarrowstyle",
+            #~        "convo/scrollbar/darrowstyle"
+            #~        )
+            #~style = (k: theme[k] for k in themekeys)
         else:
-            self.setStyleSheet("QTextEdit { %s }" % (theme["convo/textarea/style"]))
+            stylesheet = "QTextEdit {{ {style[convo/textarea/style]} }}"
+        stylesheet = stylesheet.format(style=theme)
+        self.setStyleSheet(stylesheet)
 
     def addMessage(self, msg, direction):
         # Display a message we've received.
@@ -368,4 +396,4 @@ class ConsoleInput(QtGui.QLineEdit):
 
 
 
-
+# vim: set autoindent ts=4 softtabstop=4 shiftwidth=4 textwidth=79 expandtab:
