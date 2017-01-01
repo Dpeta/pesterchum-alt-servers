@@ -2,16 +2,12 @@
 
 ## Features
 * Log viewer needs to have BBCode/HTML/Text copy modes
-* Copy quirks between profiles?
 * Turn @ and # links on/off?
 * Show true bans? COMPRESS QUIT MESSAGES ON BAN
 * Colour saving boxes things?
 * Whowas for last seen online?
 * Tab completion of two letter names
 * Auto download/install updates via Windows installer
-* Use web connection to send offline messages in email-like fashion
-    (Idea: ghostDunk)
-* Better NickServ registering
 * Make toast notifications only on certain chums
 * Local alisas for chums
 * Don't make new windows be all in your face and shit
@@ -20,22 +16,26 @@
 * LET PEOPLE TURN OFF HONKING - people already rename the soundfile and such to
     do this manually
 
-* Implement **MemoServ** support
 * Add support for displaying more verbose information (e.g. Cease messages which
     tell you more than the abbreviation of who left)
 * Make Pesterchum recognize conventional /mes so they aren't invisible
-* Tell user when NickServ handles are going to expire
-* Tell user when old handles have D/C'd? Offer autoghost support?!
 * Make @XY and @xxxYyy formats ping their targets
 * Allow matches like @?XY and @FXY or @PXY3 - make them only match the target
     currently set to that.
 * Make @ notation not match @u@; and similar (make invalid nick chars break
     matches)
+* Allow use of @ and # links to switch between logs in log viewer (start with
+    the closest time to the line of the log that's linking)
+* Improve log viewer in general (unbind instances from specific users/memos)
 * Fix hyperlink escaping (Qt seems to do this automatically - need a workaround)
 * Show bans if +h or higher (+h, +o, +a, +q)
+* Auto-invite (for people on the friends list?)
+* Right click on names for inviting, ACTUALLY banning, PMing, ... See also:
+    Things proper IRC clients can do. (Set basic mode stuff up first, get the
+    infrastructure in place.)
 
 * Add more comprehensive status support - IDLE, DND, INVISIBLE for now - or at
-  least add similar functionality.
+    least add similar functionality.
 * SEPARATE FUNCTIONALITY from CONNECTED STATE!! This is a huge problem! Being
     shunted off our nick closes windows and breaks things! Just D/C and
     reconnect?
@@ -48,17 +48,13 @@
         work, because we can't ident into a specified nick without being ON
         it. Need GD's help to fix....
 
-* Option to disable backwards compatibility:
-    * For those that are *really* sure that this build is the build for
-        them.
-    * Should enable extra features, including ctag compression.
-    * Allow manual compression changes via memo right-click menu for
-        'advanced' (per the setting) users
-
 * Make it possible to test quirk things and such without connecting? This'd be
     hard to separate out, but useful.
     * Make a quirk 'bin' that exists independent of profiles, and can be
         copied to/from at will.
+        * Allow us to set quirks that apply to all profiles! For things like
+            replacement quirks.
+
 * Right-click Time entry field to see those used? (Replace left/right buttons?)
     * Save commonly-used times on a per-handle basis!
 * Make the memo name entry box accept a comma-separated list
@@ -72,8 +68,54 @@
 * Fix graphical issues with dark themes vs. light themes (Qt/text too
     light/etc.)
 
+### Services
+* Use web connection to send offline messages in email-like fashion
+    (Idea: ghostDunk)
+* Better NickServ registering
+* Implement **MemoServ** support
+* Tell user when NickServ handles are going to expire
+* Tell user when old handles have D/C'd? Offer autoghost support?!
+
+### GUI
+* Refactor code to make way for QShortcut usage. (Unify shortcut processing?)
+    * Enable/Disable toggle (Firefox style option sheet? Seems okay.)
+    * Ctrl+W closes tab
+    * Ctrl+Shift+PGUP/PGDN shifts tab
+    * Make Ctrl+J/K usable for tab shifting
+    * Option to disable Ctrl+Tab's jump to newest
+    * Ctrl+Shift+V "Mass Paste" option (parse lines in sequence)?
+* Make system messages use timestamps like everything else
+* Offer option for timestamps in memos
+
+### Advanced
+* Offer option for 'new' syntax adjustments
+    * Replace: "???, ???, ??? ceased responding to memo." for parts.
+        * "XY ({handle}) ({times}) ceased responding to memo."
+        * If +h or above: Include host as well as handle.
+    * Replace: "??? ceased responding to memo." for nickchanges.
+        * "XY ({handle} {host?}) left memo; AB ({handle} joined memo."
+        * Can violate the norms somewhat, these aren't theme-controlled.
+            They're basically for power users/admins.
+* Offer GUI changes
+    * Make tabs "{name} ({# of unread msgs})" if unread
+    * Make themes able to define colors that are too dark to read for an
+        individual window
+    * Set up code for 'nudging' color codes into readable territory; presumably
+        via an adjustable setting. (This CANNOT affect logs - just the log
+        reader.)
+* Come up with a solution for duplicate times/handle abbreviations
+    * Maybe make mouseover for the handles display the full handle?
+
+* Option to disable backwards compatibility:
+    * For those that are *really* sure that this build is the build for
+        them.
+    * Should enable extra features, including ctag compression.
+    * Allow manual compression changes via memo right-click menu for
+        'advanced' (per the setting) users
+
 ## Todo/Done
 **Everything in this section has already been completed.**
+
 ### Usability
 * Fix parser text-loss bug that plagues everyone (especially Chumdroid users)
 * Make /me messages that cut continue into more /me messages
@@ -96,6 +138,7 @@
 
 ## Code
 **Improvements and changes pertaining to Pesterchum's internals.**
+
 ### General
 * Implement new Lexer for the sake of everyone's sanity
 * Redo `PESTERCHUM:` processing/redo whole msg received processing chain
@@ -110,6 +153,8 @@
 * **Overhaul information storage** - chums, conversations, memos; all should be
     handled by a backend and merely RENDERED into Qt objects!!
 * Overhaul debugging
+    * Give an actual (small) window with traceback that can be sent to dev(s)
+        * Use the console for this?
 * Debug generic.py's CaseInsensitiveDict/replace it with mine
 * Overhaul messaging so **Chan/Nick/Memo Servs** all use the same code (and 
     lexer)
@@ -138,6 +183,7 @@
 
 ### Debugging
 * Set up a simple function to display a traceback instead of silently moving on!
+    * Use the console for this?
 * Make small, simplistic windows that allow the viewing of internal variables
   pertaining to things like set quirks, users present, etc.
     * Also let it display the stylesheet settings of the current window, or
@@ -145,6 +191,8 @@
 * Make a console to display debug info without requiring us to run from terminal
 * Allow us to specify flags via command line
     * Let us specify a separate config (pesterchum.js) file!!
+* Make the console support color (not ctags, more stylesheet stuff) (need
+    parser work for this)
 
 ## Bugs
 * weird memo time bug
@@ -179,6 +227,11 @@
     handles to use on Linux
     * Others have reported memory leak-induced crashes on Windows. These
         may or may not be related.
+* Malformed Pesterchum profiles cause the program to crash and burn
+    * What causes these? Exiting in the middle of a write operation? Threading
+        issues?
+* Pesterchum's threading is messy and scary, and should probably be cleaned up
+    some via the addition of locks
 
 ## Windows Bugs
 * XP SP2: sometimes mouse clicks dont register? must be some kinda crash
@@ -199,6 +252,7 @@
 
 ## Things that won't be done
 **Requests that, for one reason or another, will not be fulfilled.**
+
 ### Scrapped Features
 **I'll explain why these ones won't happen.**
 

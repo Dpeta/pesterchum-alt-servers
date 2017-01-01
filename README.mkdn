@@ -31,8 +31,8 @@ There isn't an automated installer yet, but the steps involved aren't all that
 difficult.
 
 #### Pitfalls
-* If you're on a 64-bit system (most are these days), use those links. You can
-    also use the 32 bit versions, if you choose, but you *cannot* mix them.
+* If you're on a 64-bit system (and most are these days), use those links. You
+    can also use the 32 bit versions, if you choose, but you *cannot* mix them.
 * If you're on a 32-bit system but use the 64-bit installers, you'll get an
     error along the lines of "not a valid Win32 application", or the 
     installer will simply fail.

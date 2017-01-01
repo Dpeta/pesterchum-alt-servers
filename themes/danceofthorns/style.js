@@ -9,7 +9,7 @@
              "selected": "background-color: #AE6BB9",
              "menuitem": "margin-right:14px;",
              "loc": [49,59]},
-  "menubar": { "style": "font-family: 'Verdana'; font:bold; font-size: 14px; color:#FFFFFF; align:center;" },
+  "menubar": { "style": "font-family: 'Verdana'; font:bold; font-size: 14px; color:#FFFFFF; text-align:center;" },
   "menus": {"client": {"_name": "Client",
                        "options": "Options",
                        "memos": "Cults",

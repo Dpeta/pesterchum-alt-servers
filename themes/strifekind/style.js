@@ -6,7 +6,7 @@
   "newmsgicon": "$path/trayicon2.png",
   "windowtitle": "CHUMKIND",
   "menu" : { "style": "font-family: 'Courier'; font: bold; font-size: 14px; background-color: #00C661;border:2px solid #00E371" },
-  "menubar": { "style": "font-family: 'Courier'; font:bold; font-size: 14px; color:#FFFFFF; align:center;" },
+  "menubar": { "style": "font-family: 'Courier'; font:bold; font-size: 14px; color:#FFFFFF; text-align:center;" },
   "close": { "image": "$path/x.png",
              "loc": [10, 30]},
   "minimize": { "image": "$path/m.png",
