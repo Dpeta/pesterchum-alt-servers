@@ -129,6 +129,22 @@ class PesterTabWindow(QtGui.QFrame):
             # (Not an issue here, but this used to be on a TextArea.)
             return
 
+    def contextMenuEvent(self, event):
+        #~if event.reason() == QtGui.QContextMenuEvent.Mouse:
+        tabi = self.tabs.tabAt(event.pos())
+        if tabi < 0:
+            tabi = self.tabs.currentIndex()
+        for h, i in self.tabIndices.items():
+            if i == tabi:
+                # Our index matches, grab the object using our handle.
+                convo = self.convos[h]
+                break
+        else:
+            # No matches
+            return
+        # Pop up the options menu of the relevant tab.
+        convo.contextMenuEvent(event)
+
     def closeSoft(self):
         self.softclose = True
         self.close()
