@@ -78,6 +78,9 @@ class PesterTabWindow(QtGui.QFrame):
             self.tabs.tabText(self.tabs.currentIndex()) == convo.title()):
             return True
 
+    def isBot(self, *args, **kwargs):
+        return self.mainwindow.isBot(*args, **kwargs)
+
     def keyPressEvent(self, event):
         # TODO: Clean this up. Our text areas now call this.
         keypress = event.key()
