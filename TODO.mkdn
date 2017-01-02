@@ -41,7 +41,7 @@
     reconnect?
     * It'd probably be best to give an option to either CHANGE NICKS or
         DISCONNECT upon nick collision...? But, then how would we GHOST?
-        * Auto-disconnect if collsion before joining channels, make it
+        * Auto-disconnect if collision before joining channels, make it
             possible to disconnect (but not send messages, obviously)
             without losing everything
     * Maybe GHOSTing should use auto-identify to ensure- no, that doesn't
@@ -57,7 +57,6 @@
 
 * Right-click Time entry field to see those used? (Replace left/right buttons?)
     * Save commonly-used times on a per-handle basis!
-* Make the memo name entry box accept a comma-separated list
 * Make the memo list highlight/recolor the names of channels you're in
     (including secret ones)
 * Make right-clicking on a tab open up the right-click menu one would get on
@@ -160,6 +159,7 @@ version of the client. There aren't really any other choices.
 * Fix NickServ auto-login things
 * Make a window that can be used to interface with the script directly - a
     simple Python console.
+* Make the memo name entry box accept a comma-separated list
 
 ### Backend
 * Perpetual code cleanup, refactoring, simplification and general improvements

@@ -2301,9 +2301,17 @@ class PesterWindow(MovingWindow):
 
         if self.memochooser.newmemoname():
             newmemo = self.memochooser.newmemoname()
-            channel = "#"+unicode(newmemo).replace(" ", "_")
-            channel = re.sub(r"[^A-Za-z0-9#_]", "", channel)
-            self.newMemo(channel, time, secret=secret, invite=invite)
+            channel = unicode(newmemo).replace(" ", "_")
+            channel = re.sub(r"[^A-Za-z0-9#_\,]", "", channel)
+            # Allow us to join more than one with this.
+            chans = channel.split(',')
+            # Filter out empty entries.
+            chans = filter(None, chans)
+            for c in chans:
+                c = '#' + c
+                # We should really change this code to only make the memo once
+                # the server has confirmed that we've joined....
+                self.newMemo(c, time, secret=secret, invite=invite)
 
         for SelectedMemo in self.memochooser.SelectedMemos():
             channel = "#"+unicode(SelectedMemo.target)
