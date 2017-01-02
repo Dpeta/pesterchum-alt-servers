@@ -1,4 +1,3 @@
-# vim: set autoindent ts=4 softtabstop=4 shiftwidth=4 textwidth=79 expandtab:
 # -*- coding=UTF-8; tab-width: 4 -*-
 
 from PyQt4 import QtGui, QtCore
@@ -8,6 +7,8 @@ from os import remove
 
 import dataobjs, generic, memos, parsetools, ostools
 from version import _pcVersion
+
+from pnc.dep.attrdict import AttrDict
 
 _datadir = ostools.getDataDir()
 
@@ -20,9 +21,8 @@ logging.basicConfig(level=logging.WARNING)
 class ConsoleWindow(QtGui.QDialog):
     # A simple console class, cobbled together from the corpse of another.
 
-    textArea = None
-    textInput = None
-    history = None
+    # This is a holder for our text inputs.
+    text = AttrDict()
     # I should probably put up constants for 'direction' if this is going to
     # get this complicated. TODO!
     incoming_prefix = "<<<"
@@ -39,28 +39,30 @@ class ConsoleWindow(QtGui.QDialog):
             self.mainwindow = parent
         theme = self.mainwindow.theme
 
+        self.text = AttrDict()
+
         # Set up our style/window specifics
         self.setStyleSheet(theme["main/defaultwindow/style"])
         self.setWindowTitle("==> Console")
         self.resize(350,300)
 
-        self.textArea = ConsoleText(theme, self)
-        self.textInput = ConsoleInput(theme, self)
-        self.textInput.setFocus()
+        self.text.area = ConsoleText(theme, self)
+        self.text.input = ConsoleInput(theme, self)
+        self.text.input.setFocus()
 
-        self.connect(self.textInput, QtCore.SIGNAL('returnPressed()'),
+        self.connect(self.text.input, QtCore.SIGNAL('returnPressed()'),
                      self, QtCore.SLOT('sentMessage()'))
 
         self.chumopen = True
         self.chum = self.mainwindow.profile()
-        self.history = dataobjs.PesterHistory()
+        self.text.history = dataobjs.PesterHistory()
 
         # For backing these up
         self.stdout = self.stderr = None
 
         layout_0 = QtGui.QVBoxLayout()
-        layout_0.addWidget(self.textArea)
-        layout_0.addWidget(self.textInput)
+        layout_0.addWidget(self.text.area)
+        layout_0.addWidget(self.text.input)
         self.setLayout(layout_0)
 
     def parent(self):
@@ -71,21 +73,21 @@ class ConsoleWindow(QtGui.QDialog):
 
     @QtCore.pyqtSlot()
     def sentMessage(self):
-        text = self.textInput.text()
+        text = self.text.input.text()
         # TODO: Make this deal with unicode text, it'll crash and burn as-is.
         text = str(text)
         text = text.rstrip()
 
-        self.history.add(text)
-        self.textInput.setText("")
+        self.text.history.add(text)
+        self.text.input.setText("")
 
         self.execInConsole(text)
         # Scroll down to the bottom so we can see the results.
-        sb = self.textArea.verticalScrollBar()
+        sb = self.text.area.verticalScrollBar()
         sb.setValue(sb.maximum())
 
     def addTraceback(self, tb=None):
-        # We should do the formatting here, but eventually pass it to textArea
+        # We should do the formatting here, but eventually pass it to text.area
         # to addMessage whatever output we produced.
         # If we're called by addMessage - and we should be - then sys.stdout is
         # still being redirected into the console.
@@ -99,7 +101,7 @@ class ConsoleWindow(QtGui.QDialog):
 
     def addMessage(self, msg, direction):
         # Redirect to where these things belong.
-        self.textArea.addMessage(msg, direction=direction)
+        self.text.area.addMessage(msg, direction=direction)
 
     def closeEvent(self, event):
         # TODO: Set up ESC to close the console...or refer to hiding it as
@@ -179,8 +181,7 @@ class ConsoleWindow(QtGui.QDialog):
 
 
 class ConsoleText(QtGui.QTextEdit):
-    scrollbar_qtss = """
-    QTextEdit {{ {style[convo/textarea/style]} }}
+    stylesheet_template = """
     QScrollBar:vertical {{ {style[convo/scrollbar/style]} }}
     QScrollBar::handle:vertical {{ {style[convo/scrollbar/handle]} }}
     QScrollBar::add-line:vertical {{ {style[convo/scrollbar/downarrow]} }}
@@ -188,12 +189,18 @@ class ConsoleText(QtGui.QTextEdit):
     QScrollBar:up-arrow:vertical {{ {style[convo/scrollbar/uarrowstyle]} }}
     QScrollBar:down-arrow:vertical {{ {style[convo/scrollbar/darrowstyle]} }}
     """
+    stylesheet_path = "convo/textarea/style"
+    # NOTE: Qt applies stylesheets like switching CSS files. They are NOT
+    # applied piecemeal.
+    # TODO: Consider parsing the themes out into stylesheets with pieces that
+    # we can hand to each widget.
+
     def __init__(self, theme, parent=None):
         super(ConsoleText, self).__init__(parent)
-        if hasattr(self.parent(), 'mainwindow'):
-            self.mainwindow = self.parent().mainwindow
+        if hasattr(self.window(), 'mainwindow'):
+            self.mainwindow = self.window().mainwindow
         else:
-            self.mainwindow = self.parent()
+            self.mainwindow = self.window()
 
         self.hasTabs = False
         self.initTheme(theme)
@@ -212,27 +219,16 @@ class ConsoleText(QtGui.QTextEdit):
         self.textSelected = ready
 
     def initTheme(self, theme):
-        if theme.has_key("convo/scrollbar"):
+        # The basic style...
+        stylesheet = "QTextEdit {{ {style[convo/textarea/style]} }}"
+        if "convo/scrollbar" in theme:
             # TODO: Make all of this into a Styler mixin, so we can just feed
             # it a theme whenever we want to change.
             # We'd have to define the keys we're affecting, but that shouldn't
             # be too hard - it's what dicts are for.
 
-            # These will be passed to format(), so we need to escape the
-            # containing braces.
-            stylesheet = self.scrollbar_qtss
-            #~themekeys = (
-            #~        "convo/textarea/style",
-            #~        "convo/scrollbar/style",
-            #~        "convo/scrollbar/handle",
-            #~        "convo/scrollbar/downarrow",
-            #~        "convo/scrollbar/uparrow",
-            #~        "convo/scrollbar/uarrowstyle",
-            #~        "convo/scrollbar/darrowstyle"
-            #~        )
-            #~style = (k: theme[k] for k in themekeys)
-        else:
-            stylesheet = "QTextEdit {{ {style[convo/textarea/style]} }}"
+            # Add the rest.
+            stylesheet += '\n' + self.stylesheet_template
         stylesheet = stylesheet.format(style=theme)
         self.setStyleSheet(stylesheet)
 
@@ -243,7 +239,7 @@ class ConsoleText(QtGui.QTextEdit):
             return
         #~color = chum.colorcmd()
         #~initials = chum.initials()
-        parent = self.parent()
+        parent = self.window()
         mwindow = parent.mainwindow
 
         systemColor = QtGui.QColor(mwindow.theme["convo/systemMsgColor"])
@@ -278,7 +274,6 @@ class ConsoleText(QtGui.QTextEdit):
         # do that there.
         result = "{}{} {}\n"
         result = result.format(timestamp, prefix, msg)
-        #~self.append(result)
         self.appendPlainText(result)
 
         # Direction doesn't matter here - it's the console.
@@ -302,17 +297,17 @@ class ConsoleText(QtGui.QTextEdit):
         sb.setValue(sb.maximum())
 
     def focusInEvent(self, event):
-        self.parent().clearNewMessage()
+        self.window().clearNewMessage()
         super(ConsoleText, self).focusInEvent(event)
 
     def keyPressEvent(self, event):
         # NOTE: This doesn't give focus to the input bar, which it probably
         # should.
         # karxi: Test for tab changing?
-        if hasattr(self.parent(), 'textInput'):
+        if self.window().text.input:
             if event.key() not in (QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown,
                                    QtCore.Qt.Key_Up, QtCore.Qt.Key_Down):
-                self.parent().textInput.keyPressEvent(event)
+                self.window().text.input.keyPressEvent(event)
 
         super(ConsoleText, self).keyPressEvent(event)
 
@@ -366,14 +361,14 @@ class ConsoleInput(QtGui.QLineEdit):
 
     def focusInEvent(self, event):
         # We gained focus. Notify the parent window that this happened.
-        self.parent().clearNewMessage()
-        self.parent().textArea.textCursor().clearSelection()
+        self.window().clearNewMessage()
+        self.window().text.area.textCursor().clearSelection()
 
         super(ConsoleInput, self).focusInEvent(event)
 
     def keyPressEvent(self, event):
         evtkey = event.key()
-        parent = self.parent()
+        parent = self.window()
 
         # If a key is pressed here, we're not idle....
         # NOTE: Do we really want everyone knowing we're around if we're
@@ -382,18 +377,18 @@ class ConsoleInput(QtGui.QLineEdit):
         
         if evtkey == QtCore.Qt.Key_Up:
             text = unicode(self.text())
-            next = parent.history.next(text)
+            next = parent.text.history.next(text)
             if next is not None:
                 self.setText(next)
         elif evtkey == QtCore.Qt.Key_Down:
-            prev = parent.history.prev()
+            prev = parent.text.history.prev()
             if prev is not None:
                 self.setText(prev)
         elif evtkey in (QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown):
-            parent.textArea.keyPressEvent(event)
+            parent.text.area.keyPressEvent(event)
         else:
             super(ConsoleInput, self).keyPressEvent(event)
 
 
 
-# vim: set autoindent ts=4 softtabstop=4 shiftwidth=4 textwidth=79 expandtab:
+# vim: set autoindent ts=4 sts=4 sw=4 textwidth=79 expandtab:

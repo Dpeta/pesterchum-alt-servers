@@ -41,7 +41,7 @@ class PesterLog(object):
             if not self.parent.config.logPesters() & self.parent.config.LOG: return
             if not self.parent.config.logPesters() & self.parent.config.STAMP:
                 time = ""
-        if unicode(handle).upper() == "NICKSERV": return
+        if self.parent.isBot(handle): return
         #watch out for illegal characters
         handle = re.sub(r'[<>:"/\\|?*]', "_", handle)
         bbcodemsg = time + convertTags(msg, "bbcode")
@@ -591,11 +591,11 @@ class pesterTheme(dict):
     def __getitem__(self, key):
         keys = key.split("/")
         try:
-            v = dict.__getitem__(self, keys.pop(0))
+            v = super(pesterTheme, self).__getitem__(keys.pop(0))
         except KeyError as e:
                 if hasattr(self, 'inheritedTheme'):
                     return self.inheritedTheme[key]
-                if hasattr(self, 'defaultTheme'):
+                elif hasattr(self, 'defaultTheme'):
                     return self.defaultTheme[key]
                 else:
                     raise e
@@ -605,21 +605,21 @@ class pesterTheme(dict):
             except KeyError as e:
                 if hasattr(self, 'inheritedTheme'):
                     return self.inheritedTheme[key]
-                if hasattr(self, 'defaultTheme'):
+                elif hasattr(self, 'defaultTheme'):
                     return self.defaultTheme[key]
                 else:
                     raise e
         return v
     def pathHook(self, d):
         for (k, v) in d.iteritems():
-            if type(v) is unicode:
+            if isinstance(v, unicode):
                 s = Template(v)
                 d[k] = s.safe_substitute(path=self.path)
         return d
     def get(self, key, default):
         keys = key.split("/")
         try:
-            v = dict.__getitem__(self, keys.pop(0))
+            v = super(pesterTheme, self).__getitem__(keys.pop(0))
             for k in keys:
                 v = v[k]
             return default if v is None else v
@@ -632,10 +632,10 @@ class pesterTheme(dict):
     def has_key(self, key):
         keys = key.split("/")
         try:
-            v = dict.__getitem__(self, keys.pop(0))
+            v = super(pesterTheme, self).__getitem__(keys.pop(0))
             for k in keys:
                 v = v[k]
-            return False if v is None else True
+            return (v is not None)
         except KeyError:
             if hasattr(self, 'inheritedTheme'):
                 return self.inheritedTheme.has_key(key)

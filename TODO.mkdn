@@ -78,14 +78,43 @@
 
 ### GUI
 * Refactor code to make way for QShortcut usage. (Unify shortcut processing?)
-    * Enable/Disable toggle (Firefox style option sheet? Seems okay.)
+    * Enable/Disable toggle (Firefox style option sheet-esque? Seems okay.)
     * Ctrl+W closes tab
-    * Ctrl+Shift+PGUP/PGDN shifts tab
-    * Make Ctrl+J/K usable for tab shifting
+    * Ctrl+Shift+PGUP/PGDN moves tab
+    * Make Ctrl+J/K usable for tab changing
     * Option to disable Ctrl+Tab's jump to newest
     * Ctrl+Shift+V "Mass Paste" option (parse lines in sequence)?
 * Make system messages use timestamps like everything else
 * Offer option for timestamps in memos
+* Make certain dialogues start on the safer of the two options
+    * Make the Reconnect dialog start on reconnect
+    * Make the Rejoin dialog start on rejoin
+    * Make the Invite dialog start on decline
+* Make a status window/popup to contain logs of information like invites
+
+### "Security"
+**Note: The idea of security on this platform is pretty much laughable. Most of
+these changes are simply bandages being placed over fundamentally flawed
+design.**
+
+If you want Pesterchum to be more secure, either get ghostDunk to make changes
+to the server and its administration policies, or get everyone to switch to this
+version of the client. There aren't really any other choices.
+
+* Flood protection (don't send because of the same target too many times in a
+    row)
+    * Just requires a timer + lastmessage date check.
+* Lock exploitable functionality to those on your friends list (optional)
+    * Canon handles are excluded from this concern, but subject to flood
+        controls regardless.
+    * A measure of politeness is reasonable here - checking if a friend is on
+        as a different handle should be okay, once IRC access is revamped.
+    * Don't send MOOD answers to those not friended
+    * Ignore pesters from those not on your friends list (optional)
+        * Ignore pesters from those not sharing a memo? (optional)
+* Make BLOCKED list persistent, if it isn't already
+    * Offer option to block hosts, not just handles...
+        * Explain to the user that this option is very dangerous.
 
 ### Advanced
 * Offer option for 'new' syntax adjustments
@@ -141,6 +170,7 @@
 
 ### General
 * Implement new Lexer for the sake of everyone's sanity
+    * This is half-done - rendering still uses the old lexer
 * Redo `PESTERCHUM:` processing/redo whole msg received processing chain
 * Redo text processing in general
 * Redo quirk processing (use pieces from Textsub if needed)

@@ -1,3 +1,4 @@
+# -*- coding=UTF-8; tab-width: 4 -*-
 # Heavily modified version of the code featured at the given link
 ## {{{ http://code.activestate.com/recipes/473786/ (r1)
 class AttrDict(dict):
@@ -131,3 +132,5 @@ class DefAttrDict(AttrDict):
 
     def copy(self): return type(self)(self.default_factory, self)
     __copy__ = copy
+
+# vim: set autoindent ts=4 sts=4 sw=4 textwidth=79 expandtab:

@@ -3,8 +3,8 @@ from __future__ import division
 
 __all__ = ["Color"]
 
-# Copied from my old Textsub script. Please forgive the mess, and keep in mind
-# that this may be phased out in the future.
+# karxi: Copied from my old Textsub script. Please forgive the mess, and keep
+# in mind that this may be phased out in the future.
 
 
 
@@ -597,3 +597,5 @@ _irc_colors.update({
 for k, v in _irc_colors.items():
     v.ccode = "%02d" % k
 del k, v
+
+# vim: set autoindent ts=4 sts=4 sw=4 textwidth=79 expandtab:
