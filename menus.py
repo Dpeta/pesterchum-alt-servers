@@ -2,7 +2,7 @@ from PyQt4 import QtGui, QtCore
 import re, ostools
 
 from os import remove
-from generic import RightClickList, RightClickTree, MultiTextDialog
+from generic import RightClickList, RightClickTree, MultiTextDialog, NoneSound
 from dataobjs import pesterQuirk, PesterProfile
 from memos import TimeSlider, TimeInput
 from version import _pcVersion
@@ -1065,7 +1065,18 @@ class PesterOptions(QtGui.QDialog):
         self.volume.setValue(self.config.volume())
         self.connect(self.volume, QtCore.SIGNAL('valueChanged(int)'),
                      self, QtCore.SLOT('printValue(int)'))
-        self.currentVol = QtGui.QLabel(str(self.config.volume())+"%", self)
+        # Disable the volume slider if we can't actually use it.
+        if parent.canSetVolume():
+            self.currentVol = QtGui.QLabel(
+                    "{0!s}%".format(self.config.volume()), self)
+            # We don't need to explicitly set this, but it helps drive the
+            # point home
+            self.volume.setEnabled(True)
+        else:
+            # We can't set the volume....
+            self.currentVol = QtGui.QLabel(
+                    "(Disabled: Sound Mixer Error)", self)
+            self.volume.setEnabled(False)
         self.currentVol.setAlignment(QtCore.Qt.AlignHCenter)
 
 
@@ -1233,6 +1244,7 @@ class PesterOptions(QtGui.QDialog):
         self.notifyChange(self.notifycheck.checkState())
 
         if parent.advanced:
+            # NOTE: This doesn't do anything right now - so change it!
             self.modechange = QtGui.QLineEdit(self)
             layout_change = QtGui.QHBoxLayout()
             layout_change.addWidget(QtGui.QLabel("Change:"))
@@ -1308,7 +1320,13 @@ class PesterOptions(QtGui.QDialog):
         layout_indent.setContentsMargins(22,0,0,0)
         layout_sound.addLayout(layout_indent)
         layout_sound.addSpacing(15)
-        layout_sound.addWidget(QtGui.QLabel("Master Volume:", self))
+        mvol = QtGui.QLabel("Master Volume:", self)
+        # If we can't set the volume, grey this out as well
+        #~mvol.setEnabled(parent.canSetVolume())
+        # Normally we'd grey this out, but that presently makes things
+        # rather unreadable
+        # Later we can look into changing the color to a theme[] entry
+        layout_sound.addWidget(mvol)
         layout_sound.addWidget(self.volume)
         layout_sound.addWidget(self.currentVol)
         self.pages.addWidget(widget)

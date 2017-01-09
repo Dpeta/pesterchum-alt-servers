@@ -1086,6 +1086,13 @@ class PesterWindow(MovingWindow):
         self.tabconvo = None
         self.tabmemo = None
         self.shortcuts = AttrDict()
+        # karxi: For the record, these are set via commandline arguments. By
+        # default, they aren't usable any other way - you can't set them via
+        # the config files.
+        # ...which means the flag for disabling honking is also hidden and
+        # impossible to set via pesterchum.js.
+        #
+        # This was almost certainly intentional.
         if "advanced" in options:
               self.advanced = options["advanced"]
         else: self.advanced = False
@@ -1108,12 +1115,14 @@ class PesterWindow(MovingWindow):
             self.theme = self.userprofile.getTheme()
         self.modes = ""
 
+        self.sound_type = None
+
         self.randhandler = RandomHandler(self)
 
         try:
             themeChecker(self.theme)
         except ThemeException as inst:
-            print "Caught: " + inst.parameter
+            logging.error("Caught: " + inst.parameter)
             themeWarning = QtGui.QMessageBox(self)
             themeWarning.setText("Theme Error: %s" % inst)
             themeWarning.exec_()
@@ -1814,6 +1823,8 @@ class PesterWindow(MovingWindow):
                 # We don't have any options...just use fillers.
                 soundclass = NoneSound
 
+        self.sound_type = soundclass
+
         # Use the class we chose to build the sound set.
         try:
             # karxi: These all seem to be created using local paths.
@@ -1825,7 +1836,7 @@ class PesterWindow(MovingWindow):
             self.ceasesound = soundclass(self.theme["main/sounds/ceasesound"])
             self.honksound = soundclass("themes/honk.wav")
         except Exception as err:
-            print "Warning: Error loading sounds!"
+            logging.error("Warning: Error loading sounds! ({0!r})".format(err))
             self.alarm = NoneSound()
             self.memosound = NoneSound()
             self.namesound = NoneSound()
@@ -1851,6 +1862,18 @@ class PesterWindow(MovingWindow):
                     sound.setVolume(vol)
             except Exception as err:
                 logging.info("Couldn't set volume: {}".format(err))
+
+    def canSetVolume(self):
+        """Returns the state of volume setting capabilities."""
+        # If the volume can be changed by Pesterchum.
+        if self.sound_type is None:
+            # We haven't initialized yet.
+            return False
+        if pygame and pygame.mixer:
+            # pygame lets us set the volume, thankfully
+            return True
+        # Aside from that, we don't have any alternatives at the moment.
+        return False
 
     def changeTheme(self, theme):
         # check theme
