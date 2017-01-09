@@ -2970,6 +2970,29 @@ class PesterTray(QtGui.QSystemTrayIcon):
 class MainProgram(QtCore.QObject):
     def __init__(self):
         super(MainProgram, self).__init__()
+
+        if os.name.upper() == "NT":
+            # karxi: Before we do *anything* else, we have to make a special
+            # exception for Windows. Otherwise, the icon won't work properly.
+            # NOTE: This is presently being tested, since I don't have a
+            # Windows computer at the moment. Hopefully it'll work.
+            # See http://stackoverflow.com/a/1552105 for more details.
+            from ctypes import windll
+            # Note that this has to be unicode.
+            wid = u"mspa.homestuck.pesterchum.314"
+            # Designate this as a separate process - i.e., tell Windows that
+            # Python is just hosting Pesterchum.
+            # TODO: Eventually we should get this changed so it checks and
+            # restores the old ID upon exit, but this usually doesn't matter -
+            # most users won't keep the process running once Pesterchum closes.
+            try:
+                windll.shell32.SetCurrentProcessExplicitAppUserModelID(wid)
+            except Exception as err:
+                # Log, but otherwise ignore any exceptions.
+                logging.error("Failed to set AppUserModel ID: {0}".format(err))
+                logging.error("Attempted to set as {0!r}.".format(wid))
+            # Back to our scheduled program.
+
         self.app = QtGui.QApplication(sys.argv)
         self.app.setApplicationName("Pesterchum 3.14")
         self.app.setQuitOnLastWindowClosed(False)
