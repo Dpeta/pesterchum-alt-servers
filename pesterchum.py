@@ -1179,16 +1179,16 @@ class PesterWindow(MovingWindow):
         self.console.window = None
         self.console.action = QtGui.QAction("Console", self)
         self.connect(self.console.action, QtCore.SIGNAL('triggered()'),
-                    self, QtCore.SLOT('showConsole()'))
+                    self, QtCore.SLOT('toggleConsole()'))
         self.console.shortcut = QtGui.QShortcut(
                 QtGui.QKeySequence("Ctrl+`"), self)
         # Make sure the shortcut works anywhere.
         # karxi: There's something wrong with the inheritance scheme here.
         self.console.shortcut.setContext(QtCore.Qt.ApplicationShortcut)
         self.connect(self.console.shortcut, QtCore.SIGNAL('activated()'),
-                self, QtCore.SLOT('showConsole()'))
+                self, QtCore.SLOT('toggleConsole()'))
         #~# Use new-style connections
-        #~self.console.shortcut.activated.connect(self.showConsole)
+        #~self.console.shortcut.activated.connect(self.toggleConsole)
         # Apparently those can crash sometimes...c'est la vie. Can't use 'em.
         self.console.is_open = False
 
@@ -1568,7 +1568,7 @@ class PesterWindow(MovingWindow):
                      self, QtCore.SLOT('memoTabsClosed()'))
 
     @QtCore.pyqtSlot()
-    def showConsole(self):
+    def toggleConsole(self):
         if not _CONSOLE:
             # We don't have the module file for this at the moment.
             return
@@ -1581,9 +1581,23 @@ class PesterWindow(MovingWindow):
             self.connect(win, QtCore.SIGNAL('windowClosed()'),
                     self, QtCore.SLOT('consoleWindowClosed()'))
         if self.console.is_open:
-            # Already open - hide the console.
-            win.hide()
-            self.console.is_open = False
+            if not (win.hasFocus() or win.text.area.hasFocus() or
+                    win.text.input.hasFocus()):
+                # The console is open, but not in focus. Bring it to the fore.
+                # NOTE: This is a bit of a kludgy method - it may not work
+                # properly on Windows. Need to look into workarounds.
+                #
+                # karxi: I *think* that Windows doesn't mind if the
+                # process/window that 'owns' this one changes our focus, since
+                # the application ultimately already *has* our focus - but I'm
+                # not sure.
+                win.raise_()
+                win.show()
+                win.activateWindow()
+            else:
+                # The console is open and in focus, so hide it for now.
+                win.hide()
+                self.console.is_open = False
         else:
             # Console isn't visible - show it.
             win.show()
