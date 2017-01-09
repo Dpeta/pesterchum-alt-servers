@@ -579,6 +579,8 @@ class PesterInput(QtGui.QLineEdit):
             prev = self.parent().history.prev()
             if prev is not None:
                 self.setText(prev)
+        elif event.key() in [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown]:
+            self.parent().textArea.keyPressEvent(event)
         self.parent().mainwindow.idler.time = 0
         super(PesterInput, self).keyPressEvent(event)
 
