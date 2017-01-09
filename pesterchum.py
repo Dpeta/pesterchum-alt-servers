@@ -1085,6 +1085,7 @@ class PesterWindow(MovingWindow):
         self.memos = CaseInsensitiveDict()
         self.tabconvo = None
         self.tabmemo = None
+        self.shortcuts = AttrDict()
         if "advanced" in options:
               self.advanced = options["advanced"]
         else: self.advanced = False
@@ -1179,6 +1180,16 @@ class PesterWindow(MovingWindow):
         self.console.action = QtGui.QAction("Console", self)
         self.connect(self.console.action, QtCore.SIGNAL('triggered()'),
                     self, QtCore.SLOT('showConsole()'))
+        self.console.shortcut = QtGui.QShortcut(
+                QtGui.QKeySequence("Ctrl+`"), self)
+        # Make sure the shortcut works anywhere.
+        # karxi: There's something wrong with the inheritance scheme here.
+        self.console.shortcut.setContext(QtCore.Qt.ApplicationShortcut)
+        self.connect(self.console.shortcut, QtCore.SIGNAL('activated()'),
+                self, QtCore.SLOT('showConsole()'))
+        #~# Use new-style connections
+        #~self.console.shortcut.activated.connect(self.showConsole)
+        # Apparently those can crash sometimes...c'est la vie. Can't use 'em.
         self.console.is_open = False
 
         filemenu = self.menu.addMenu(self.theme["main/menus/client/_name"])
@@ -2002,6 +2013,12 @@ class PesterWindow(MovingWindow):
         msgbox.setText("You're invited!")
         msgbox.setInformativeText("%s has invited you to the memo: %s\nWould you like to join them?" % (handle, channel))
         msgbox.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+        # Find the Cancel button and make it default
+        for b in msgbox.buttons():
+            if msgbox.buttonRole(b) == QtGui.QMessageBox.RejectRole:
+                # We found the 'Cancel' button, set it as the default
+                b.setAutoDefault(True)
+                break
         ret = msgbox.exec_()
         if ret == QtGui.QMessageBox.Ok:
             self.newMemo(unicode(channel), "+0:00")
@@ -2299,6 +2316,11 @@ class PesterWindow(MovingWindow):
         secret = self.memochooser.secretChannel.isChecked()
         invite = self.memochooser.inviteChannel.isChecked()
 
+        # Join the ones on the list first
+        for SelectedMemo in self.memochooser.SelectedMemos():
+            channel = "#"+unicode(SelectedMemo.target)
+            self.newMemo(channel, time)
+
         if self.memochooser.newmemoname():
             newmemo = self.memochooser.newmemoname()
             channel = unicode(newmemo).replace(" ", "_")
@@ -2312,10 +2334,6 @@ class PesterWindow(MovingWindow):
                 # We should really change this code to only make the memo once
                 # the server has confirmed that we've joined....
                 self.newMemo(c, time, secret=secret, invite=invite)
-
-        for SelectedMemo in self.memochooser.SelectedMemos():
-            channel = "#"+unicode(SelectedMemo.target)
-            self.newMemo(channel, time)
 
         self.memochooser = None
     @QtCore.pyqtSlot()

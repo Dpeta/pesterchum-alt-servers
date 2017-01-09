@@ -15,10 +15,11 @@ from parsetools import convertTags, lexMessage, splitMessage, mecmd, colorBegin,
 import parsetools
 
 import pnc.lexercon as lexercon
+from pnc.dep.attrdict import AttrDict
 
 class PesterTabWindow(QtGui.QFrame):
     def __init__(self, mainwindow, parent=None, convo="convo"):
-        QtGui.QFrame.__init__(self, parent)
+        super(PesterTabWindow, self).__init__(parent)
         self.setAttribute(QtCore.Qt.WA_QuitOnClose, False)
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.mainwindow = mainwindow
@@ -32,6 +33,30 @@ class PesterTabWindow(QtGui.QFrame):
                      self, QtCore.SLOT('tabClose(int)'))
         self.connect(self.tabs, QtCore.SIGNAL('tabMoved(int, int)'),
                      self, QtCore.SLOT('tabMoved(int, int)'))
+
+        self.shortcuts = AttrDict()
+        self.shortcuts.tabNext = QtGui.QShortcut(
+                QtGui.QKeySequence('Ctrl+j'), self,
+                context=QtCore.Qt.WidgetWithChildrenShortcut)
+        self.shortcuts.tabLast = QtGui.QShortcut(
+                QtGui.QKeySequence('Ctrl+k'), self,
+                context=QtCore.Qt.WidgetWithChildrenShortcut)
+        # Note that we use reversed keys here.
+        self.shortcuts.tabUp = QtGui.QShortcut(
+                QtGui.QKeySequence('Ctrl+PgDown'), self,
+                context=QtCore.Qt.WidgetWithChildrenShortcut)
+        self.shortcuts.tabDn = QtGui.QShortcut(
+                QtGui.QKeySequence('Ctrl+PgUp'), self,
+                context=QtCore.Qt.WidgetWithChildrenShortcut)
+
+        self.connect(self.shortcuts.tabNext, QtCore.SIGNAL('activated()'),
+                self, QtCore.SLOT('nudgeTabNext()'))
+        self.connect(self.shortcuts.tabUp, QtCore.SIGNAL('activated()'),
+                self, QtCore.SLOT('nudgeTabNext()'))
+        self.connect(self.shortcuts.tabLast, QtCore.SIGNAL('activated()'),
+                self, QtCore.SLOT('nudgeTabLast()'))
+        self.connect(self.shortcuts.tabDn, QtCore.SIGNAL('activated()'),
+                self, QtCore.SLOT('nudgeTabLast()'))
 
         self.initTheme(self.mainwindow.theme)
         self.layout = QtGui.QVBoxLayout()
@@ -96,38 +121,39 @@ class PesterTabWindow(QtGui.QFrame):
                 nexti = (self.tabIndices[self.currentConvo.title()] + 1) % self.tabs.count()
             self.tabs.setCurrentIndex(nexti)
 
-        elif (mods == QtCore.Qt.ControlModifier and
-                keypress in (QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown)):
-            # Inverted controls. Might add an option for this if people want
-            # it.
-            if keypress == QtCore.Qt.Key_PageDown:
-                direction = 1
-            elif keypress == QtCore.Qt.Key_PageUp:
-                direction = -1
-            # ...Processing...
-            tabs = self.tabs
-            # Pick our new index by sliding up or down the tab range.
-            # NOTE: This feels like it could error. In fact, it /will/ if
-            # there are no tabs, but...that shouldn't happen, should it?
-            # There are probably other scenarios, too, so we'll have to
-            # check on this later.
-            #
-            # Calculate the new index.
-            ct = tabs.count()
-            cind = tabs.currentIndex()
-            nind = cind + direction
-            if nind > (ct - 1):
-                # The new index would be higher than the maximum; loop.
-                nind = nind % ct
-            # Otherwise, negative syntax should get it for us.
-            nind = range(ct)[nind]
-            # Change to the selected tab.
-            # Note that this will send out the usual callbacks that handle
-            # focusing and such.
-            tabs.setCurrentIndex(nind)
-            # Ensure this doesn't fall through normally.
-            # (Not an issue here, but this used to be on a TextArea.)
-            return
+    @QtCore.pyqtSlot()
+    def nudgeTabNext(self): return self.nudgeTabIndex(+1)
+    @QtCore.pyqtSlot()
+    def nudgeTabLast(self): return self.nudgeTabIndex(-1)
+
+    def nudgeTabIndex(self, direction):
+        # Inverted controls. Might add an option for this if people want
+        # it.
+        #~if keypress == QtCore.Qt.Key_PageDown:
+        #~    direction = 1
+        #~elif keypress == QtCore.Qt.Key_PageUp:
+        #~    direction = -1
+        # ...Processing...
+        tabs = self.tabs
+        # Pick our new index by sliding up or down the tab range.
+        # NOTE: This feels like it could error. In fact, it /will/ if
+        # there are no tabs, but...that shouldn't happen, should it?
+        # There are probably other scenarios, too, so we'll have to
+        # check on this later.
+        #
+        # Calculate the new index.
+        ct = tabs.count()
+        cind = tabs.currentIndex()
+        nind = cind + direction
+        if nind > (ct - 1):
+            # The new index would be higher than the maximum; loop.
+            nind = nind % ct
+        # Otherwise, negative syntax should get it for us.
+        nind = range(ct)[nind]
+        # Change to the selected tab.
+        # Note that this will send out the usual callbacks that handle
+        # focusing and such.
+        tabs.setCurrentIndex(nind)
 
     def contextMenuEvent(self, event):
         #~if event.reason() == QtGui.QContextMenuEvent.Mouse:
@@ -450,8 +476,7 @@ class PesterText(QtGui.QTextEdit):
     def keyPressEvent(self, event):
         # First parent is the PesterConvo containing this.
         # Second parent is the PesterTabWindow containing *it*.
-        pass_to_super = (QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown,
-                QtCore.Qt.Key_Up, QtCore.Qt.Key_Down)
+        pass_to_super = (QtCore.Qt.Key_Up, QtCore.Qt.Key_Down)
         parent = self.parent()
         key = event.key()
         keymods = event.modifiers()
@@ -554,8 +579,6 @@ class PesterInput(QtGui.QLineEdit):
             prev = self.parent().history.prev()
             if prev is not None:
                 self.setText(prev)
-        elif event.key() in [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown]:
-            self.parent().textArea.keyPressEvent(event)
         self.parent().mainwindow.idler.time = 0
         super(PesterInput, self).keyPressEvent(event)
 

@@ -1730,6 +1730,9 @@ class LoadingScreen(QtGui.QDialog):
         self.loadinglabel = QtGui.QLabel("CONN3CT1NG", self)
         self.cancel = QtGui.QPushButton("QU1T >:?", self)
         self.ok = QtGui.QPushButton("R3CONN3CT >:]", self)
+        # Help reduce the number of accidental Pesterchum closures... :|
+        self.cancel.setAutoDefault(False)
+        self.ok.setAutoDefault(True)
         self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
                      self, QtCore.SLOT('reject()'))
         self.connect(self.ok, QtCore.SIGNAL('clicked()'),

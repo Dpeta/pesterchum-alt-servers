@@ -375,6 +375,9 @@ class PesterMemo(PesterConvo):
         self.userlist = RightClickList(self)
         self.userlist.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding))
         self.userlist.optionsMenu = QtGui.QMenu(self)
+        self.pesterChumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
+        self.connect(self.pesterChumAction, QtCore.SIGNAL('triggered()'),
+                     self, QtCore.SLOT('newPesterSlot()'))
         self.addchumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
         self.connect(self.addchumAction, QtCore.SIGNAL('triggered()'),
                      self, QtCore.SLOT('addChumSlot()'))
@@ -390,6 +393,7 @@ class PesterMemo(PesterConvo):
         self.quirkDisableAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirkkill"], self)
         self.connect(self.quirkDisableAction, QtCore.SIGNAL('triggered()'),
                      self, QtCore.SLOT('killQuirkUser()'))
+        self.userlist.optionsMenu.addAction(self.pesterChumAction)
         self.userlist.optionsMenu.addAction(self.addchumAction)
         # ban & op list added if we are op
 
@@ -1024,6 +1028,12 @@ class PesterMemo(PesterConvo):
                 msgbox.setText(self.mainwindow.theme["convo/text/kickedmemo"])
                 msgbox.setInformativeText("press 0k to rec0nnect or cancel to absc0nd")
                 msgbox.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+                # Find the OK button and make it default
+                for b in msgbox.buttons():
+                    if msgbox.buttonRole(b) == QtGui.QMessageBox.AcceptRole:
+                        # We found the 'OK' button, set it as the default
+                        b.setAutoDefault(True)
+                        break
                 ret = msgbox.exec_()
                 if ret == QtGui.QMessageBox.Ok:
                     self.userlist.clear()
@@ -1159,6 +1169,15 @@ class PesterMemo(PesterConvo):
             self.sortUsers()
         elif c.lower() == self.channel.lower() and h == "" and update[0] in ["+","-"]:
             self.updateChanModes(update, op)
+
+    @QtCore.pyqtSlot()
+    def newPesterSlot(self):
+        # We're opening a pester with someone in our user list.
+        user = self.userlist.currentItem()
+        if not user:
+            return
+        user = unicode(user.text())
+        self.mainwindow.newConversation(user)
 
     @QtCore.pyqtSlot()
     def addChumSlot(self):

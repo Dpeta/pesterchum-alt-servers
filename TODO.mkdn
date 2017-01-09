@@ -59,8 +59,6 @@
     * Save commonly-used times on a per-handle basis!
 * Make the memo list highlight/recolor the names of channels you're in
     (including secret ones)
-* Make right-clicking on a tab open up the right-click menu one would get on
-    right-clicking the title (frame??)
 * Add an option to Cycle (for log separation)
 
 * Add a separate 'Tweaks' section in Options
@@ -80,15 +78,10 @@
     * Enable/Disable toggle (Firefox style option sheet-esque? Seems okay.)
     * Ctrl+W closes tab
     * Ctrl+Shift+PGUP/PGDN moves tab
-    * Make Ctrl+J/K usable for tab changing
     * Option to disable Ctrl+Tab's jump to newest
     * Ctrl+Shift+V "Mass Paste" option (parse lines in sequence)?
 * Make system messages use timestamps like everything else
 * Offer option for timestamps in memos
-* Make certain dialogues start on the safer of the two options
-    * Make the Reconnect dialog start on reconnect
-    * Make the Rejoin dialog start on rejoin
-    * Make the Invite dialog start on decline
 * Make a status window/popup to contain logs of information like invites
 
 ### "Security"
@@ -98,7 +91,7 @@ design.**
 
 If you want Pesterchum to be more secure, either get ghostDunk to make changes
 to the server and its administration policies, or get everyone to switch to this
-version of the client. There aren't really any other choices.
+version of the client. There aren't really any other options.
 
 * Flood protection (don't send because of the same target too many times in a
     row)
@@ -144,13 +137,23 @@ version of the client. There aren't really any other choices.
 ## Todo/Done
 **Everything in this section has already been completed.**
 
+### GUI
+* Toggle individual tab flash / alert sounds (from the same right-click memo
+    that lets us toggle OOC)
+* Make CTRL+PGUP/PGDN switch memo/pester tabs
+* Make Ctrl+J/K usable for tab changing
+* Make right-clicking on a tab open up the right-click menu one would get on
+    right-clicking the title (frame??)
+* Right-click in userlist offers option to Pester
+* Make certain dialogues start on the safer of the two options
+    * Make the Reconnect dialog start on Reconnect
+    * Make the Rejoin dialog start on Rejoin
+    * Make the Invite dialog start on Decline
+
 ### Usability
 * Fix parser text-loss bug that plagues everyone (especially Chumdroid users)
 * Make /me messages that cut continue into more /me messages
 * Make sound work on Windows through QSound (disables volume control)
-* Toggle individual tab flash / alert sounds (from the same right-click memo
-    that lets us toggle OOC)
-* Make CTRL+PGUP/PGDN switch memo/pester tabs
 * Color tags are now posted as their shorter hexadecimal forms, if applicable
     (255,255,255 -> #FFFFFF, for example)
 * Separate auto-idle and checkbox idle so they don't share a state (and make

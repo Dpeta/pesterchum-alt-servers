@@ -9,6 +9,7 @@ import dataobjs, generic, memos, parsetools, ostools
 from version import _pcVersion
 
 from pnc.dep.attrdict import AttrDict
+#~from styling import styler
 
 _datadir = ostools.getDataDir()
 
@@ -19,6 +20,7 @@ logging.basicConfig(level=logging.WARNING)
 
 
 class ConsoleWindow(QtGui.QDialog):
+#~class ConsoleWindow(styler.PesterBaseWindow):
     # A simple console class, cobbled together from the corpse of another.
 
     # This is a holder for our text inputs.
@@ -109,6 +111,10 @@ class ConsoleWindow(QtGui.QDialog):
         parent = self.parent()
         parent.console.is_open = False
         parent.console.window = None
+
+    def hideEvent(self, event):
+        parent = self.parent()
+        parent.console.is_open = False
 
     # Actual console stuff.
     def execInConsole(self, scriptstr, env=None):
