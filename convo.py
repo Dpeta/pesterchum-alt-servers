@@ -476,7 +476,8 @@ class PesterText(QtGui.QTextEdit):
     def keyPressEvent(self, event):
         # First parent is the PesterConvo containing this.
         # Second parent is the PesterTabWindow containing *it*.
-        pass_to_super = (QtCore.Qt.Key_Up, QtCore.Qt.Key_Down)
+        pass_to_super = (QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown,
+                QtCore.Qt.Key_Up, QtCore.Qt.Key_Down)
         parent = self.parent()
         key = event.key()
         keymods = event.modifiers()
