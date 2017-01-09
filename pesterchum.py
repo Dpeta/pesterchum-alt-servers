@@ -1776,6 +1776,11 @@ class PesterWindow(MovingWindow):
         else:
             self.mychumcolor.setText("")
 
+        if _CONSOLE:
+            if self.console.window:
+                # A bit of an ugly hack....
+                self.console.window.changeTheme(theme)
+
         # sounds
         self._setup_sounds()
         self.setVolume(self.config.volume())

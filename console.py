@@ -23,6 +23,7 @@ class ConsoleWindow(QtGui.QDialog):
 #~class ConsoleWindow(styler.PesterBaseWindow):
     # A simple console class, cobbled together from the corpse of another.
 
+    stylesheet_path = "main/defaultwindow/style"
     # This is a holder for our text inputs.
     text = AttrDict()
     # I should probably put up constants for 'direction' if this is going to
@@ -40,14 +41,10 @@ class ConsoleWindow(QtGui.QDialog):
         except:
             self.mainwindow = parent
         theme = self.mainwindow.theme
+        # This won't initialize the sub-objects, because they don't exist yet.
+        self.initTheme(theme)
 
         self.text = AttrDict()
-
-        # Set up our style/window specifics
-        self.setStyleSheet(theme["main/defaultwindow/style"])
-        self.setWindowTitle("==> Console")
-        self.resize(350,300)
-
         self.text.area = ConsoleText(theme, self)
         self.text.input = ConsoleInput(theme, self)
         self.text.input.setFocus()
@@ -115,6 +112,19 @@ class ConsoleWindow(QtGui.QDialog):
     def hideEvent(self, event):
         parent = self.parent()
         parent.console.is_open = False
+
+    def initTheme(self, theme):
+        # Set up our style/window specifics
+        self.changeTheme(theme)
+        self.resize(350,300)
+
+    def changeTheme(self, theme):
+        self.setStyleSheet(theme[self.stylesheet_path])
+        self.setWindowTitle("==> Console")
+        if "area" in self.text and "input" in self.text:
+            self.text.area.changeTheme(theme)
+            self.text.input.changeTheme(theme)
+
 
     # Actual console stuff.
     def execInConsole(self, scriptstr, env=None):
