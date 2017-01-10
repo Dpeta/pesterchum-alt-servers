@@ -1032,7 +1032,11 @@ class PesterMemo(PesterConvo):
                 for b in msgbox.buttons():
                     if msgbox.buttonRole(b) == QtGui.QMessageBox.AcceptRole:
                         # We found the 'OK' button, set it as the default
+                        b.setDefault(True)
                         b.setAutoDefault(True)
+                        # Actually set it as the selected option, since we're
+                        # already stealing focus
+                        b.setFocus()
                         break
                 ret = msgbox.exec_()
                 if ret == QtGui.QMessageBox.Ok:

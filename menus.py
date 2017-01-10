@@ -1763,6 +1763,9 @@ class LoadingScreen(QtGui.QDialog):
         layout_1.addWidget(self.ok)
         self.layout.addLayout(layout_1)
         self.setLayout(self.layout)
+        # Help reduce the number of accidental Pesterchum closures... :|
+        self.cancel.setDefault(False)
+        self.ok.setDefault(True)
 
     def hideReconnect(self):
         self.ok.hide()
