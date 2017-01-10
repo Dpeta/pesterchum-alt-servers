@@ -33,6 +33,8 @@ class ConsoleWindow(QtGui.QDialog):
     neutral_prefix = "!!!"
     waiting_prefix = "..."
 
+    _CUSTOM_ENV = {}
+
     def __init__(self, parent):
         super(ConsoleWindow, self).__init__(parent)
         self.prnt = parent
@@ -136,13 +138,19 @@ class ConsoleWindow(QtGui.QDialog):
             env = pchum._retrieveGlobals()
 
         # Modify the environment the script will execute in.
-        _CUSTOM_ENV = {
+        # Fetch from the class/instance first.
+        _CUSTOM_ENV = self._CUSTOM_ENV.copy()
+        # Modify with some hard-coded environmental additions.
+        _CUSTOM_ENV.update({
                 "CONSOLE": self,
                 "MAINWIN": self.mainwindow,
                 "PCONFIG": self.mainwindow.config,
                 "exit": lambda: self.mainwindow.exitaction.trigger()
-                }
+                })
         _CUSTOM_ENV["quit"] = _CUSTOM_ENV["exit"]
+        # Add whatever additions were set in the main pesterchum file.
+        _CUSTOM_ENV.update(pchum._CONSOLE_ENV)
+
         _CUSTOM_ENV_USED = []
         cenv = pchum.__dict__
         # Display the input we provided
