@@ -139,8 +139,10 @@ class ConsoleWindow(QtGui.QDialog):
         _CUSTOM_ENV = {
                 "CONSOLE": self,
                 "MAINWIN": self.mainwindow,
-                "PCONFIG": self.mainwindow.config
+                "PCONFIG": self.mainwindow.config,
+                "exit": lambda: self.mainwindow.exitaction.trigger()
                 }
+        _CUSTOM_ENV["quit"] = _CUSTOM_ENV["exit"]
         _CUSTOM_ENV_USED = []
         cenv = pchum.__dict__
         # Display the input we provided
@@ -156,7 +158,7 @@ class ConsoleWindow(QtGui.QDialog):
                 _CUSTOM_ENV_USED.append(k)
             else:
                 # Don't overwrite anything!
-                warn = "Console environment item {!r} already exists in CENV."
+                warn = "Console environment item {0!r} already exists in CENV."
                 warn.format(k)
                 logging.warning(warn)
         # Because all we did was change a linked AttrDict, we should be fine
