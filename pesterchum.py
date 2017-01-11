@@ -1184,21 +1184,29 @@ class PesterWindow(MovingWindow):
         self.menu = QtGui.QMenuBar(self)
         self.menu.setNativeMenuBar(False)
 
-        self.console = AttrDict()
-        self.console.window = None
-        self.console.action = QtGui.QAction("Console", self)
+        self.console = AttrDict(dict(
+            window = None,
+            action = QtGui.QAction("Console", self),
+            is_open = False
+            ))
+        self.console.shortcuts = AttrDict(dict(
+            conkey = QtGui.QShortcut(QtGui.QKeySequence("Ctrl+`"), self,
+                context=QtCore.Qt.ApplicationShortcut),
+            curwgt = QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Alt+w"), self,
+                context=QtCore.Qt.ApplicationShortcut)
+            ))
         self.connect(self.console.action, QtCore.SIGNAL('triggered()'),
                     self, QtCore.SLOT('toggleConsole()'))
-        self.console.shortcut = QtGui.QShortcut(
-                QtGui.QKeySequence("Ctrl+`"), self)
         # Make sure the shortcut works anywhere.
         # karxi: There's something wrong with the inheritance scheme here.
-        self.console.shortcut.setContext(QtCore.Qt.ApplicationShortcut)
-        self.connect(self.console.shortcut, QtCore.SIGNAL('activated()'),
-                self, QtCore.SLOT('toggleConsole()'))
+        #~self.console.shortcuts.conkey.setContext(QtCore.Qt.ApplicationShortcut)
+        self.connect(self.console.shortcuts.conkey,
+                QtCore.SIGNAL('activated()'), self, QtCore.SLOT('toggleConsole()'))
         #~# Use new-style connections
         #~self.console.shortcut.activated.connect(self.toggleConsole)
         # Apparently those can crash sometimes...c'est la vie. Can't use 'em.
+        #~self.connect(self.console.shortcuts.curwgt,
+        #~        QtCore.SIGNAL('activate()'), self.console.
         self.console.is_open = False
 
         filemenu = self.menu.addMenu(self.theme["main/menus/client/_name"])
@@ -1589,9 +1597,35 @@ class PesterWindow(MovingWindow):
             logging.warning("Console made.")
             self.connect(win, QtCore.SIGNAL('windowClosed()'),
                     self, QtCore.SLOT('consoleWindowClosed()'))
+            self.connect(self.console.shortcuts.curwgt,
+                    QtCore.SIGNAL('activated()'),
+                    win, QtCore.SLOT('designateCurrentWidget()'))
+
         if self.console.is_open:
-            if not (win.hasFocus() or win.text.area.hasFocus() or
-                    win.text.input.hasFocus()):
+            for wgt in win.findChildren(QtGui.QWidget):
+                try:
+                    focused = wgt.hasFocus()
+                except AttributeError:
+                    # The widget doesn't have a hasFocus method.
+                    # Just to reduce ambiguity
+                    focused = False
+                    # Try the next one.
+                    continue
+                # No error, let's see if we're actually focused.
+                if focused:
+                    logging.debug(
+                            "{0!r} is in focus (parent: {1!r}); hiding".format(
+                            wgt, wgt.parent())
+                            )
+                    # This widget, a child of our console, has focus.
+                    # So...the console has focus.
+                    # Set focus to the text input just for good measure.
+                    win.text.input.setFocus()
+                    # ...then hide it all.
+                    win.hide()
+                    self.console.is_open = False
+                    break
+            else:
                 # The console is open, but not in focus. Bring it to the fore.
                 # NOTE: This is a bit of a kludgy method - it may not work
                 # properly on Windows. Need to look into workarounds.
@@ -1600,14 +1634,15 @@ class PesterWindow(MovingWindow):
                 # process/window that 'owns' this one changes our focus, since
                 # the application ultimately already *has* our focus - but I'm
                 # not sure.
+                logging.debug("Console isn't in focus; fixing")
                 win.raise_()
                 win.show()
                 win.activateWindow()
-            else:
-                # The console is open and in focus, so hide it for now.
-                win.hide()
-                self.console.is_open = False
+
+                win.text.input.setFocus()
+                # No need to explicitly set it as open; it already is.
         else:
+            logging.debug("Console not visible; showing")
             # Console isn't visible - show it.
             win.show()
             self.console.is_open = True

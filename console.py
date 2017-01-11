@@ -1,4 +1,5 @@
 # -*- coding=UTF-8; tab-width: 4 -*-
+from __future__ import print_function
 
 from PyQt4 import QtGui, QtCore
 import re, os, traceback, sys
@@ -29,9 +30,13 @@ class ConsoleWindow(QtGui.QDialog):
     # I should probably put up constants for 'direction' if this is going to
     # get this complicated. TODO!
     incoming_prefix = "<<<"
+    miscinfo_prefix = "==>"
     outgoing_prefix = ">>>"
     neutral_prefix = "!!!"
     waiting_prefix = "..."
+
+    selected_widget = None
+    show_info_on_select = True
 
     _CUSTOM_ENV = {}
 
@@ -54,8 +59,6 @@ class ConsoleWindow(QtGui.QDialog):
         self.connect(self.text.input, QtCore.SIGNAL('returnPressed()'),
                      self, QtCore.SLOT('sentMessage()'))
 
-        self.chumopen = True
-        self.chum = self.mainwindow.profile()
         self.text.history = dataobjs.PesterHistory()
 
         # For backing these up
@@ -110,6 +113,7 @@ class ConsoleWindow(QtGui.QDialog):
         parent = self.parent()
         parent.console.is_open = False
         parent.console.window = None
+        return super(ConsoleWindow, self).closeEvent(event)
 
     def hideEvent(self, event):
         parent = self.parent()
@@ -118,7 +122,7 @@ class ConsoleWindow(QtGui.QDialog):
     def initTheme(self, theme):
         # Set up our style/window specifics
         self.changeTheme(theme)
-        self.resize(350,300)
+        self.resize(400,600)
 
     def changeTheme(self, theme):
         self.setStyleSheet(theme[self.stylesheet_path])
@@ -126,6 +130,103 @@ class ConsoleWindow(QtGui.QDialog):
         if "area" in self.text and "input" in self.text:
             self.text.area.changeTheme(theme)
             self.text.input.changeTheme(theme)
+
+    @QtCore.pyqtSlot()
+    def designateCurrentWidget(self):
+        # Display and save the current widget!
+        # TODO: Consider (reversible) highlighting or selection or something
+        # fancy. It'd help people write styles, wouldn't it?
+        # ...just remember to use mouseRelease() if you work with hovering.
+
+        # Direction: Misc. Info
+        direction = 2
+
+        pos = QtGui.QCursor.pos()
+        wgt = QtGui.QApplication.widgetAt(pos)
+        if wgt is None:
+            # Don't set None, for now. May change this later.
+            self.addMessage("You need to have your cursor over something " + \
+                    "in Pesterchum to use that.",
+                    direction=direction)
+            return
+
+        self.selected_widget = wgt
+        nchild = len(wgt.children())
+        output = []
+        output.append("CONSOLE.selected_widget = {0!r}".format(wgt))
+        output.append("{0: <4}Parent: {1!r}".format('', wgt.parent()))
+        output.append("{0: <4}{1:4d} child{2}".format('',
+            nchild, ("ren" if abs(nchild) != 1 else "") ))
+        if self.show_info_on_select:
+            qtss = None
+            uses_ss = None
+            try:
+                qtss = wgt.styleSheet()
+            except:
+                pass
+            else:
+                if unicode(qtss) == unicode(""):
+                    uses_ss, ss_msg = False, "No"
+                elif qtss is not None:
+                    uses_ss, ss_msg = True, "Yes"
+                else:
+                    uses_ss, ss_msg = None, "Invalid"
+
+            ss_par, ss_par_msg = None, ""
+            if uses_ss is False:
+                # TODO: Split this into a sub-function or integrate it into
+                # Styler or *something*.
+                # The stylesheet was probably defined on a parent higher up.
+                # Rungs above the start
+                i = 0
+                # qtss is still "" from earlier
+                while not qtss:
+                    try:
+                        ss_par = wgt.parent()
+                        qtss = ss_par.styleSheet()
+                    except:
+                        # Can't ascend...and we're still in loop, so we don't
+                        # have what we came for.
+                        # Either that, or it's incompatible, which means the
+                        # ones above are anyway.
+                        ss_par = False
+                        break
+                    else:
+                        # Indicate that we got this from a parent
+                        i += 1
+
+                if not qtss:
+                    # There are no stylesheets here.
+                    if ss_par is False:
+                        # We had parent issues.
+                        # TODO: Specifically indicate invalid parent.
+                        uses_ss, ss_msg = None, "Invalid"
+                    else:
+                        uses_ss, ss_msg = False, "No"
+                else:
+                    # We got a stylesheet out of this!
+                    uses_ss, ss_msg = True, "Yes"
+                    #~ss_par_msg = "{0: <4}...on parent ↑{1:d}: {2!r}".format('',
+                    ss_par_msg = "{0: <4}...on parent #{1:d}: {2!r}".format('',
+                            i, ss_par)
+
+            msg = []
+            msg.append("{0: <4}QtSS?: {1}".format('', ss_msg))
+            # A stylesheet analyzer would be wonderful here. Perhaps something
+            # that tells us how many parent classes define stylesheets?
+            if uses_ss:
+                if ss_par_msg:
+                    # We got this stylesheet from a parent object somewhere.
+                    msg.append(ss_par_msg)
+                msg.append("{0: <4}".format("Stylesheet:"))
+                for ln in qtss.split('\n'):
+                    msg.append("{0: <8}".format(ln))
+
+            # Actually add this stuff to the result we're constructing
+            output.extend(msg)
+
+        output = '\n'.join(output)
+        self.addMessage(output, direction=direction)
 
 
     # Actual console stuff.
@@ -147,7 +248,10 @@ class ConsoleWindow(QtGui.QDialog):
                 "PCONFIG": self.mainwindow.config,
                 "exit": lambda: self.mainwindow.exitaction.trigger()
                 })
-        _CUSTOM_ENV["quit"] = _CUSTOM_ENV["exit"]
+        # Aliases.
+        _CUSTOM_ENV.update({
+                "quit": _CUSTOM_ENV["exit"]
+                })
         # Add whatever additions were set in the main pesterchum file.
         _CUSTOM_ENV.update(pchum._CONSOLE_ENV)
 
@@ -184,7 +288,7 @@ class ConsoleWindow(QtGui.QDialog):
             else:
                 # No errors.
                 if result is not None:
-                    print repr(result)
+                    print(repr(result))
             finally:
                 # Restore system output.
                 sys.stdout = sysout
@@ -208,13 +312,13 @@ class ConsoleWindow(QtGui.QDialog):
 
 class ConsoleText(QtGui.QTextEdit):
     stylesheet_template = """
-    QScrollBar:vertical {{ {style[convo/scrollbar/style]} }}
-    QScrollBar::handle:vertical {{ {style[convo/scrollbar/handle]} }}
-    QScrollBar::add-line:vertical {{ {style[convo/scrollbar/downarrow]} }}
-    QScrollBar::sub-line:vertical {{ {style[convo/scrollbar/uparrow]} }}
-    QScrollBar:up-arrow:vertical {{ {style[convo/scrollbar/uarrowstyle]} }}
-    QScrollBar:down-arrow:vertical {{ {style[convo/scrollbar/darrowstyle]} }}
-    """
+        QScrollBar:vertical {{ {style[convo/scrollbar/style]} }}
+        QScrollBar::handle:vertical {{ {style[convo/scrollbar/handle]} }}
+        QScrollBar::add-line:vertical {{ {style[convo/scrollbar/downarrow]} }}
+        QScrollBar::sub-line:vertical {{ {style[convo/scrollbar/uparrow]} }}
+        QScrollBar:up-arrow:vertical {{ {style[convo/scrollbar/uarrowstyle]} }}
+        QScrollBar:down-arrow:vertical {{ {style[convo/scrollbar/darrowstyle]} }}
+        """
     stylesheet_path = "convo/textarea/style"
     # NOTE: Qt applies stylesheets like switching CSS files. They are NOT
     # applied piecemeal.
@@ -283,7 +387,10 @@ class ConsoleText(QtGui.QTextEdit):
             timestamp = ""
 
         # Figure out what prefix to use.
-        if direction > 0:
+        if direction > 1:
+            # Misc. Info
+            prefix = parent.miscinfo_prefix
+        elif direction > 0:
             # Outgoing.
             prefix = parent.outgoing_prefix
         elif direction < 0:

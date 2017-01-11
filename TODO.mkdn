@@ -161,8 +161,11 @@ version of the client. There aren't really any other options.
 * Stop us from sending IDLE messages to NickServ
 * Fix NickServ auto-login things
 * Make a window that can be used to interface with the script directly - a
-    simple Python console.
+    simple Python console
 * Make the memo name entry box accept a comma-separated list
+* Make console users able to check widget theme/style information via mouseover
+	and key combo (for people making themes or debugging)
+	* This is presently Ctrl+Alt+w, after opening the console (Ctrl+~).
 
 ### Backend
 * Perpetual code cleanup, refactoring, simplification and general improvements
