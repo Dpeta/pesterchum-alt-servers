@@ -1766,11 +1766,26 @@ class LoadingScreen(QtGui.QDialog):
         # Help reduce the number of accidental Pesterchum closures... :|
         self.cancel.setDefault(False)
         self.ok.setDefault(True)
+        self.ok.setFocus()
+        self.timer = None
 
-    def hideReconnect(self):
+    def hideReconnect(self, safe=True):
         self.ok.hide()
+        if safe:
+            # Set a timer so that we don't immediately disconnect anyway.
+            self.cancel.setEnabled(False)
+            # A few seconds should be enough.
+            self.timer = QtCore.QTimer.singleShot(2000, self,
+                    QtCore.SLOT('enableQuit()'))
+
     def showReconnect(self):
         self.ok.show()
+        # Again...stop accidental closes.
+        self.ok.setFocus()
+
+    @QtCore.pyqtSlot()
+    def enableQuit(self):
+        self.cancel.setEnabled(True)
 
     tryAgain = QtCore.pyqtSignal()
 
