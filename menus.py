@@ -150,6 +150,16 @@ class PesterQuirkList(QtGui.QTreeWidget):
                 msgbox.setWindowTitle("WARNING!")
                 msgbox.setInformativeText("Are you sure you want to delete the quirk group: %s" % (f.text(0)))
                 msgbox.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+                # Find the Cancel button and make it default
+                for b in msgbox.buttons():
+                    if msgbox.buttonRole(b) == QtGui.QMessageBox.RejectRole:
+                        # We found the 'OK' button, set it as the default
+                        b.setDefault(True)
+                        b.setAutoDefault(True)
+                        # Actually set it as the selected option, since we're
+                        # already stealing focus
+                        b.setFocus()
+                        break
                 ret = msgbox.exec_()
                 if ret == QtGui.QMessageBox.Ok:
                     self.takeTopLevelItem(self.indexOfTopLevelItem(f))
