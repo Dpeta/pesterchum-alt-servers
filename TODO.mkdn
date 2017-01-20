@@ -343,3 +343,5 @@ version of the client. There aren't really any other options.
     you change computers.
 
 
+
+[modeline]: vim:set autoindent ts=4 sts=4 sw=4 tw=79 expandtab:
