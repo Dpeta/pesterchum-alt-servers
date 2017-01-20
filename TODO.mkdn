@@ -1,5 +1,8 @@
 # Todo
 
+## Git
+* Set up issue tracking for this fork, if possible (and move the TODO list)
+
 ## Features
 * Log viewer needs to have BBCode/HTML/Text copy modes
 * Turn @ and # links on/off?
@@ -36,6 +39,7 @@
 
 * Add more comprehensive status support - IDLE, DND, INVISIBLE for now - or at
     least add similar functionality.
+* Improve Pesterchum's tracking of disconnections (check memos for quits...)
 * SEPARATE FUNCTIONALITY from CONNECTED STATE!! This is a huge problem! Being
     shunted off our nick closes windows and breaks things! Just D/C and
     reconnect?
@@ -254,7 +258,9 @@ version of the client. There aren't really any other options.
 * PESTERCHUM: messages are sent to things like NickServ
 * Log folder/file names are not case-sensitive, so they break on non-Windows
     systems
+* Log viewer needs adjustments and sanity checking for log directories
 * Capitalized /me's don't render (should forcibly lowercase them)
+* 'pcd10' and similar users don't get proper abbreviations on part (ugh)
 
 * Volume control doesn't work without pygame
 * Sound on Linux doesn't work without pygame
@@ -263,11 +269,18 @@ version of the client. There aren't really any other options.
     handles to use on Linux
     * Others have reported memory leak-induced crashes on Windows. These
         may or may not be related.
+* Pesterchum groups aren't carried over when profiles are copied!
 * Malformed Pesterchum profiles cause the program to crash and burn
     * What causes these? Exiting in the middle of a write operation? Threading
         issues?
+* Malformed Python quirks try to open an error dialog and crash if Pesterchum
+	is opened as a module
 * Pesterchum's threading is messy and scary, and should probably be cleaned up
     some via the addition of locks
+* Pesterchum's file handling is atrocious - inefficient to the extreme.
+    * There are multiple copies of things that really need only be loaded once
+        in a lot of different places.
+    * Memos don't seem to close their file handles properly. (Logs too??)
 
 ## Windows Bugs
 * XP SP2: sometimes mouse clicks dont register? must be some kinda crash
