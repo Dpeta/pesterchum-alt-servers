@@ -84,6 +84,10 @@
     * Ctrl+Shift+PGUP/PGDN moves tab
     * Option to disable Ctrl+Tab's jump to newest
     * Ctrl+Shift+V "Mass Paste" option (parse lines in sequence)?
+* Make mouseovers (refocusing) reset idle timer (disableable)
+* Set up EVENT FILTERS in windows to redirect events to the right places
+    * Make the context key (if used in the text area) append the menu options
+        from the right-click menu
 * Make system messages use timestamps like everything else
 * Offer option for timestamps in memos
 * Make a status window/popup to contain logs of information like invites
@@ -220,6 +224,13 @@ version of the client. There aren't really any other options.
     needed is upon creation, and instantiate a private class based off of that.
     * There is basically no good way to do this without moving to Qt5. I
         might try that myself later, but that's a long-term goal.
+* Stop from sending TIME notifications when unable
+    * Until then: Hide resulting "no external messages"/+m messages.
+* Stop sending auto-IDLE messages unless the chat has been updated since the
+    last one.
+* Make groups, chums, etc. preferentially load from the main directory, *then*
+    check logs.
+    * Compatibility is important, so update both if they exist. (Bluh!)
 
 ### Debugging
 * Set up a simple function to display a traceback instead of silently moving on!

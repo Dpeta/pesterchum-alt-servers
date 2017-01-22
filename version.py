@@ -1,12 +1,10 @@
-import urllib
-import re
-import time
+import json, re, time, urllib, zipfile
 try:
     import tarfile
 except:
     tarfile = None
-import zipfile
 import os, sys, shutil
+from pnc.dep.attrdict import AttrDict
 
 USER_TYPE = "user"
                   # user - for normal people
@@ -25,6 +23,7 @@ if OS_TYPE.startswith("linux"):
 elif OS_TYPE == "darwin":
     OS_TYPE = "mac"
 
+# These will eventually be phased out
 _pcMajor = "3.41"
 _pcMinor = "4"
 _pcStatus = "A" # A  = alpha
@@ -34,12 +33,98 @@ _pcStatus = "A" # A  = alpha
 _pcRevision = "13"
 _pcVersion = ""
 
+_updateCheckURL = "https://github.com/karxi/pesterchum/raw/master/VERSION.js"
+
+jsodeco = json.JSONDecoder()
+
+# Not 100% finished - certain output formats seem odd
+def get_pchum_ver(raw=0, pretty=False, file=None, use_hard_coded=None):
+    # If use_hard_coded is None, we don't care. If it's False, we won't use it.
+    getrawlines = lambda fobj: [ x.strip() for x in fobj.readlines() ]
+    if file:
+        # Don't fall back onto defaults if we were given a file.
+        use_hard_coded = False
+
+    try:
+        if use_hard_coded:
+            # This is messy code, but we just want it to work for now.
+            raise ValueError
+
+        if file:
+            # Leave closing this to the caller.
+            raw_ver = getrawlines(file)
+        else:
+            # Open our default file ourselves.
+            with open("VERSION.js", 'r') as fo:
+                raw_ver = getrawlines(fo)
+        raw_ver = ' '.join(raw_ver)
+        # Now that we have the actual version, we can just set everything up
+        # neatly.
+        ver = jsodeco.decode(raw_ver)
+        ver = AttrDict( (k.encode('ascii'), v) for k, v in ver.items() )
+        # Do a bit of compensation for the unicode part of JSON.
+        ver.status, ver.utype = str(ver.status), str(ver.utype)
+    except:
+        if use_hard_coded == False:
+            # We refuse to use the hard-coded values, period.
+            raise
+
+        global _pcMajor, _pcMinor, _pcStatus, _pcRevision, USER_TYPE
+        ver = AttrDict({
+            "major": _pcMajor, "minor": _pcMinor,
+            "status": _pcStatus, "rev": _pcRevision,
+            "utype": USER_TYPE
+            })
+
+    ver.major = float(ver.major)
+    ver.minor = int(ver.minor)
+    if not ver.status:
+        ver.status = None
+    ver.rev = int(ver.rev)
+    if raw:
+        if raw > 1:
+            # Give the AttrDict.
+            return ver
+        else:
+            # Give a tuple.
+            return (ver.major, ver.minor, ver.status, ver.rev, ver.utype)
+    # Compose the version information into a string.
+    # We usually specify the format for this pretty strictly.
+    # We wnat it to look like "3.14.01-A07", for example.
+    elif pretty:
+        if pretty > True:
+            # True == 1; we get here if pretty is greater than 1
+            if ver.utype == "edge":
+                # If this is an edge build, the other types don't really
+                # matter.
+                ver.status = "Bleeding Edge"
+            else:
+                statuses = {
+                        # These are slightly unnecessary, but....
+                        "A":    "Alpha",
+                        "B":    "Beta",
+                        "RC":   "Release Candidate"
+                        }
+                # Pick a status or don't give one.
+                ver.status = statuses.get(ver.status, "")
+            if ver.status:
+                ver.status = " " + ver.status
+            # Not the same as the original output, but it seems nicer.
+            retval = "{major:.2f}.{minor:02d}{status!s} {rev:02d}"
+        else:
+            retval = "{major:.2f}.{minor:02d}-r{rev:02d}{status!s} ({utype!s})"
+    elif ver.status:
+        retval = "{major:.2f}.{minor:02d}-{status!s}{rev:02d}"
+    else:
+        retval = "{major:.2f}.{minor:02d}.{rev:02d}"
+    return retval.format(**ver)
+
 def pcVerCalc():
     global _pcVersion
-    if _pcStatus:
-        _pcVersion = "%s.%s-%s%s" % (_pcMajor, _pcMinor, _pcStatus, _pcRevision)
-    else:
-        _pcVersion = "%s.%s.%s" % (_pcMajor, _pcMinor, _pcRevision)
+
+    # The logic for this has been moved for the sake of ease of use.
+    _pcVersion = get_pchum_ver(raw=False)
+
 
 def lexVersion(short=False):
     if not _pcStatus:
@@ -75,6 +160,41 @@ def verStrToNum(ver):
         print "Update check Failure: 3"; return
     full = ver[:ver.find(":")]
     return full,w.group(1),w.group(2),w.group(3),w.group(4),w.group(5)
+
+def is_outdated(url=None):
+    if not url:
+        global _updateCheckURL
+        url = _updateCheckURL
+
+    # karxi: Do we really need to sleep here? Why?
+    time.sleep(3)
+    try:
+        jsfile = urllib.urlopen(_updateCheckURL)
+        gitver = get_pchum_ver(raw=2, file=jsfile)
+    except:
+        # No error handling yet....
+        raise
+    finally:
+        jsfile.close()
+    ourver = get_pchum_ver(raw=2)
+
+    # Now we can compare.
+    outdated = False
+    # What, if anything, tipped us off
+    trigger = None
+    keys = ("major", "minor", "rev", "status")
+    for k in keys:
+        if gitver[k] > ourver[k]:
+            # We don't test for 'bleeding edge' just yet.
+            trigger = k
+            outdated = True
+    if outdated:
+        logger.info(
+            "Out of date (newer is {0!r} {1} to our {2})".format(
+                trigger, gitver[trigger], ourver[trigger]))
+    return outdated
+# So now all that's left to do is to set up the actual downloading of
+# updates...or at least a notifier, until it can be automated.
 
 def updateCheck(q):
     time.sleep(3)
