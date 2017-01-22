@@ -197,6 +197,10 @@ def is_outdated(url=None):
 # updates...or at least a notifier, until it can be automated.
 
 def updateCheck(q):
+    # karxi: Disabled for now; causing issues.
+    # There should be an alternative system in place soon.
+    return q.put((False,0))
+
     time.sleep(3)
     data = urllib.urlencode({"type" : USER_TYPE, "os" : OS_TYPE, "install" : INSTALL_TYPE})
     try:
@@ -213,9 +217,6 @@ def updateCheck(q):
         return q.put((False,3))
     print full
     print repr(verStrToNum(newest))
-    
-    # karxi: Disabled for now; causing issues.
-    return q.put((False,0))
 
     if major <= _pcMajor:
         if minor <= _pcMinor:
