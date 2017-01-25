@@ -1183,6 +1183,7 @@ class PesterWindow(MovingWindow):
 
         self.menu = QtGui.QMenuBar(self)
         self.menu.setNativeMenuBar(False)
+        self.menu.setObjectName("mainmenu")
 
         self.console = AttrDict(dict(
             window = None,
@@ -1304,18 +1305,23 @@ class PesterWindow(MovingWindow):
                      QtCore.SLOT('blockChum(QString)'))
 
         self.addChumButton = QtGui.QPushButton(self.theme["main/addchum/text"], self)
+        self.addChumButton.setObjectName("addchumbtn")
         self.connect(self.addChumButton, QtCore.SIGNAL('clicked()'),
                      self, QtCore.SLOT('addChumWindow()'))
         self.pesterButton = QtGui.QPushButton(self.theme["main/pester/text"], self)
+        self.pesterButton.setObjectName("newpesterbtn")
         self.connect(self.pesterButton, QtCore.SIGNAL('clicked()'),
                      self, QtCore.SLOT('pesterSelectedChum()'))
         self.blockButton = QtGui.QPushButton(self.theme["main/block/text"], self)
+        self.blockButton.setObjectName("blockbtn")
         self.connect(self.blockButton, QtCore.SIGNAL('clicked()'),
                      self, QtCore.SLOT('blockSelectedChum()'))
 
         self.moodsLabel = QtGui.QLabel(self.theme["main/moodlabel/text"], self)
+        self.moodsLabel.setObjectName("moodlabel")
 
         self.mychumhandleLabel = QtGui.QLabel(self.theme["main/mychumhandle/label/text"], self)
+        self.mychumhandleLabel.setObjectName("myhandlelabel")
         self.mychumhandle = QtGui.QPushButton(self.profile().handle, self)
         self.mychumhandle.setFlat(True)
         self.connect(self.mychumhandle, QtCore.SIGNAL('clicked()'),

@@ -147,6 +147,7 @@ class PesterQuirkList(QtGui.QTreeWidget):
             if not f.parent(): # group
                 msgbox = QtGui.QMessageBox()
                 msgbox.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
+                msgbox.setObjectName("delquirkwarning")
                 msgbox.setWindowTitle("WARNING!")
                 msgbox.setInformativeText("Are you sure you want to delete the quirk group: %s" % (f.text(0)))
                 msgbox.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
@@ -776,8 +777,10 @@ class PesterChooseProfile(QtGui.QDialog):
         self.currentHandle = QtGui.QLabel("CHANGING FROM %s" % userprofile.chat.handle)
         self.chumHandle = QtGui.QLineEdit(self)
         self.chumHandle.setMinimumWidth(200)
+        self.chumHandle.setObjectName("setprofilehandle")
         self.chumHandleLabel = QtGui.QLabel(self.theme["main/mychumhandle/label/text"], self)
         self.chumColorButton = QtGui.QPushButton(self)
+        self.chumColorButton.setObjectName("setprofilecolor")
         self.chumColorButton.resize(50, 20)
         self.chumColorButton.setStyleSheet("background: %s" % (userprofile.chat.colorhtml()))
         self.chumcolor = userprofile.chat.color
@@ -835,6 +838,7 @@ class PesterChooseProfile(QtGui.QDialog):
             layout_0.addWidget(self.delete)
         layout_0.addLayout(layout_2)
         self.errorMsg = QtGui.QLabel(self)
+        self.errorMsg.setObjectName("errormsg")
         self.errorMsg.setStyleSheet("color:red;")
         layout_0.addWidget(self.errorMsg)
         self.setLayout(layout_0)
@@ -870,12 +874,15 @@ class PesterChooseProfile(QtGui.QDialog):
             handle = unicode(self.profileBox.currentText())
             if handle == self.parent.profile().handle:
                 problem = QtGui.QMessageBox()
+                # karxi Will probably change this to its own name later.
+                problem.setObjectName("errmsg")
                 problem.setStyleSheet(self.theme["main/defaultwindow/style"])
                 problem.setWindowTitle("Problem!")
                 problem.setInformativeText("You can't delete the profile you're currently using!")
                 problem.setStandardButtons(QtGui.QMessageBox.Ok)
                 problem.exec_()
                 return
+            # TODO: Make this select 'no' as the default, as usual.
             msgbox = QtGui.QMessageBox()
             msgbox.setStyleSheet(self.theme["main/defaultwindow/style"])
             msgbox.setWindowTitle("WARNING!")
@@ -887,6 +894,7 @@ class PesterChooseProfile(QtGui.QDialog):
                     remove(_datadir+"profiles/%s.js" % (handle))
                 except OSError:
                     problem = QtGui.QMessageBox()
+                    problem.setObjectName("errmsg")
                     problem.setStyleSheet(self.theme["main/defaultwindow/style"])
                     problem.setWindowTitle("Problem!")
                     problem.setInformativeText("There was a problem deleting the profile: %s" % (handle))
