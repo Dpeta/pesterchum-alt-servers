@@ -1,10 +1,12 @@
-import json, re, time, urllib, zipfile
+import json, logging, re, time, urllib, zipfile
 try:
     import tarfile
 except:
     tarfile = None
 import os, sys, shutil
 from pnc.dep.attrdict import AttrDict
+
+logger = logging.getLogger(__name__)
 
 USER_TYPE = "user"
                   # user - for normal people
@@ -34,8 +36,12 @@ _pcRevision = "13"
 _pcVersion = ""
 
 _updateCheckURL = "https://github.com/karxi/pesterchum/raw/master/VERSION.js"
+_downloadURL = "https://github.com/karxi/pesterchum/archive/master.zip"
 
 jsodeco = json.JSONDecoder()
+
+# Whether or not we've completed an update (requires a restart).
+has_updated = False
 
 # Not 100% finished - certain output formats seem odd
 def get_pchum_ver(raw=0, pretty=False, file=None, use_hard_coded=None):
@@ -196,6 +202,70 @@ def is_outdated(url=None):
 # So now all that's left to do is to set up the actual downloading of
 # updates...or at least a notifier, until it can be automated.
 
+def updatePesterchum(url=None):
+    # TODO: This is still WIP; the actual copying needs to be adjusted.
+    if url is None:
+        global _downloadURL
+        url = _downloadURL
+
+    try:
+        # Try to fetch the update.
+        fn, fninfo = urllib.urlretrieve(url)
+    except urllib.ContentTooShortError:
+        # Our download was interrupted; there's not really anything we can do
+        # here.
+        raise
+
+    ext = osp.splitext(fn)
+
+    if ext == ".zip":
+        import zipfile
+        is_updatefile = zipfile.is_zipfile
+        openupdate = zipfile.ZipFile
+    elif tarfile and ext.startswith(".tar"):
+        import tarfile
+        is_updatefile = tarfile.is_tarfile
+        openupdate = tarfile.open
+    else:
+        logger.info("No handler available for update {0!r}".format(fn))
+        return
+    logger.info("Opening update {0!s} {1!r} ...".format(ext, fn))
+
+    if is_updatefile(fn):
+        update = openupdate(fn, 'r')
+        tmpfldr, updfldr = "tmp", "update"
+
+        # Set up the folder structure.
+        if osp.exists(updfldr):
+            # We'll need this later.
+            shutil.rmtree(updfldr)
+        if osp.exists(tmpfldr):
+            shutil.rmtree(tmpfldr)
+        os.mkdir(tmpfldr)
+        update.extractall(tmpfldr)
+        contents = os.listdir(tmpfldr)
+
+        # Is there only one folder here? Git likes to do this with repos.
+        # If there is, move it to our update folder.
+        # If there isn't, move the temp directory to our update folder.
+        if len(tmpcts) == 1:
+            arcresult = osp.join(tmpfldr, contents[0])
+            if osp.isdir(arcresult):
+                shutil.move(arcresult, updfldr)
+        else:
+            shutil.move(tmpfldr, updfldr)
+        # Remove the temporary folder.
+        os.rmdir(tmpfldr)
+        # Remove the update file.
+        os.remove(fn)
+        # ... What does this even do? It recurses....
+        removeCopies(updfldr)
+        # Why do these both skip the first seven characters?!
+        copyUpdate(updfldr)
+
+        # Finally, remove the update folder.
+        shutil.rmtree(updfldr)
+
 def updateCheck(q):
     # karxi: Disabled for now; causing issues.
     # There should be an alternative system in place soon.
@@ -234,21 +304,33 @@ def updateCheck(q):
 
 def removeCopies(path):
     for f in os.listdir(path):
-        filePath = os.path.join(path, f)
-        if not os.path.isdir(filePath):
-            if os.path.exists(filePath[7:]):
-                os.remove(filePath[7:])
+        filePath = osp.join(path, f)
+        trunc, rem = filePath[:7], filePath[7:]
+        if not osp.isdir(filePath):
+            if osp.exists(rem):
+                logger.debug(
+                    "{0: <4}Deleting copy: {1!r} >{2!r}<".format(
+                        '', trunc, rem)
+                )
+                os.remove(rem)
         else:
+            # Recurse
             removeCopies(filePath)
 
 def copyUpdate(path):
     for f in os.listdir(path):
-        filePath = os.path.join(path, f)
-        if not os.path.isdir(filePath):
-            shutil.copy2(filePath, filePath[7:])
+        filePath = osp.join(path, f)
+        trunc, rem = filePath[:7], filePath[7:]
+        if not osp.isdir(filePath):
+            logger.debug(
+                "{0: <4}Making copy: {1!r} ==> {2!r}".format(
+                    '', filePath, rem)
+            )
+            shutil.copy2(filePath, rem)
         else:
-            if not os.path.exists(filePath[7:]):
-                os.mkdir(filePath[7:])
+            if not osp.exists(rem):
+                os.mkdir(rem)
+            # Recurse
             copyUpdate(filePath)
 
 def updateExtract(url, extension):
