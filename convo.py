@@ -15,7 +15,11 @@ from parsetools import convertTags, lexMessage, splitMessage, mecmd, colorBegin,
 import parsetools
 
 import pnc.lexercon as lexercon
-from pnc.dep.attrdict import AttrDict
+try:
+    from pnc.attrdict import AttrDict
+except ImportError:
+    # Fall back on the old location - just in case
+    from pnc.dep.attrdict import AttrDict
 
 class PesterTabWindow(QtGui.QFrame):
     def __init__(self, mainwindow, parent=None, convo="convo"):
