@@ -98,6 +98,13 @@ necessary.
 [pchum-zip]: https://github.com/karxi/pesterchum/archive/master.zip
 
 #### Upgrading
+**NOTE: This only applies to those who already have this patched Pesterchum
+installed.**  
+**DO NOT extract this into a folder containing pesterchum.exe, because it WILL
+break.** Read up to **First-Time Install** if you're installing this version
+for the first time.  
+Otherwise...
+
 Just re-download the [Pesterchum zip][pchum-zip] and extract it over your old
 installation, replacing everything that was already there. That's all there is
 to it!
