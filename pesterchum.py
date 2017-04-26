@@ -1445,7 +1445,7 @@ class PesterWindow(MovingWindow):
                     self.ceasesound.play()
                 else:
                     self.alarm.play()
-            elif self.convo.always_beep:
+            elif convo.always_beep:
                 self.alarm.play()
     def newMemoMsg(self, chan, handle, msg):
         if not self.memos.has_key(chan):
