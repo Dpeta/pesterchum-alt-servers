@@ -1440,13 +1440,11 @@ class PesterWindow(MovingWindow):
         convo.addMessage(msg, False)
         # play sound here
         if self.config.soundOn():
-            if self.config.chatSound():
+            if self.config.chatSound() or convo.always_beep:
                 if msg in ["PESTERCHUM:CEASE", "PESTERCHUM:BLOCK"]:
                     self.ceasesound.play()
                 else:
                     self.alarm.play()
-            elif convo.always_beep:
-                self.alarm.play()
     def newMemoMsg(self, chan, handle, msg):
         if not self.memos.has_key(chan):
             # silently ignore in case we forgot to /part
