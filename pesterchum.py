@@ -2031,7 +2031,7 @@ class PesterWindow(MovingWindow):
     def deliverNotice(self, handle, msg):
         h = unicode(handle)
         m = unicode(msg)
-        if m.startswith("Your nickname is now being changed to"):
+        if h.upper() == "NICKSERV" and m.startswith("Your nickname is now being changed to"):
             changedto = m[39:-1]
             msgbox = QtGui.QMessageBox()
             msgbox.setText("This chumhandle has been registered; you may not use it.")
