@@ -42,5 +42,9 @@ shutil.copy("pesterchum.nsi", "build/pesterchum/")
 shutil.copy("pesterchum-update.nsi", "build/pesterchum/")
 os.mkdir("build/pesterchum/profiles")
 os.mkdir("build/pesterchum/logs")
-shutil.copy("README.mkdn", "build/pesterchum/")
+
+#Readme & txt
+shutil.copy("README.md", "build/pesterchum/")
+shutil.copy("README-pesterchum.mkdn", "build/pesterchum/")
+shutil.copy("README-karxi.mkdn", "build/pesterchum/")
 shutil.copy("themes.txt", "build/pesterchum/")
