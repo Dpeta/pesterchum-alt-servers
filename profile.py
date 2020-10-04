@@ -292,9 +292,9 @@ class userConfig(object):
         # HOPEFULLY this is a temporary solution 
         
         msgBox = QtGui.QMessageBox()
-        #msgBox.setIcon(QtGui.QMessageBox.Information)
-        #msgBox.setText("")
-        msgBox.setWindowTitle("Which server do you want to connect to?")
+        msgBox.setIcon(QtGui.QMessageBox.Information)
+        msgBox.setWindowTitle("Choose a server.")
+        msgBox.setText("Which server do you want to connect to?")
         msgBox.addButton(QtGui.QPushButton("ghostDunk's server (Official)"), QtGui.QMessageBox.YesRole)
         msgBox.addButton(QtGui.QPushButton("turntechCatnip's server"), QtGui.QMessageBox.NoRole)
         msgBox.addButton(QtGui.QPushButton('kaliope.ddns.net'), QtGui.QMessageBox.RejectRole)
