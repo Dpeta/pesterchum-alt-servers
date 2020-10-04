@@ -14,6 +14,8 @@ from mood import Mood
 from dataobjs import PesterProfile, pesterQuirk, pesterQuirks
 from parsetools import convertTags, addTimeInitial, themeChecker, ThemeException
 
+import configparser # For loading server.ini
+
 _datadir = ostools.getDataDir()
 
 class PesterLog(object):
@@ -285,35 +287,10 @@ class userConfig(object):
     def server(self):
         if hasattr(self.parent, 'serverOverride'):
             return self.parent.serverOverride
-        # Okay, so I tried to use qt to promt the user to choose a server via a message box.
-        # It seems to ...work... but I know that this isn't the proper way to implement something like this at all.
-        # But, uh, I have no clue how to properly use qt.
-        # If anyone knows how to actually implement something like this please feel free to fix this.
-        # HOPEFULLY this is a temporary solution 
-        
-        msgBox = QtGui.QMessageBox()
-        msgBox.setIcon(QtGui.QMessageBox.Information)
-        msgBox.setWindowTitle("Choose a server.")
-        msgBox.setText("Which server do you want to connect to?")
-        msgBox.addButton(QtGui.QPushButton("ghostDunk's server (Official)"), QtGui.QMessageBox.YesRole)
-        msgBox.addButton(QtGui.QPushButton("turntechCatnip's server"), QtGui.QMessageBox.NoRole)
-        msgBox.addButton(QtGui.QPushButton('kaliope.ddns.net'), QtGui.QMessageBox.RejectRole)
-        ret = msgBox.exec_()
-        #pressed_button = msgBox.clickedButton()
-        reply = msgBox.buttonRole(msgBox.clickedButton())
-
-        if (reply==QtGui.QMessageBox.YesRole):
-            print("Server is: irc.mindfang.org")
-            return self.config.get('server', 'irc.mindfang.org')
-        if (reply==QtGui.QMessageBox.NoRole):
-            print("Server is: 178.84.124.125")
-            return self.config.get('server', '178.84.124.125')
-        if (reply==QtGui.QMessageBox.RejectRole):
-            print("Server is: kaliope.ddns.net")
-            return self.config.get('server', 'kaliope.ddns.net')
-        
-        #print(reply)
-        #return self.config.get('server', 'irc.mindfang.org')
+        # Get chosen server from server.ini
+        config = configparser.ConfigParser()
+        config.read('server.ini')
+        return self.config.get('server', config['SERVER']['server'])
     def port(self):
         if hasattr(self.parent, 'portOverride'):
             return self.parent.portOverride
