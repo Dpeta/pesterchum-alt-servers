@@ -18,7 +18,7 @@ build_exe_options = {
 }
 
 setup(
-        name = "PESTERCHUM-alt",
+        name = "PESTERCHUM-ALT-SERVERS",
         version = "3.41",
         description = "P3ST3RCHUM",
         executables = [Executable("pesterchum.py",
