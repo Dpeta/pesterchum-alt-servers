@@ -6,6 +6,7 @@ import shutil
 import requests
 import urllib
 import PyQt4
+import configparser
 from Queue import *
 
 if sys.platform == "win32":
@@ -14,13 +15,21 @@ else:
     base = "Console"
 
 build_exe_options = {
-    "includes": ["requests","urllib"] # <-- Include
+    "includes": ["requests","urllib"],
+    'excludes': ['collections.sys',
+                 'collections._sre',
+                 'collections._json',
+                 'collections._locale',
+                 'collections._struct',
+                 'collections.array',
+                 'collections._weakref'], # Not excluding these is the only way I could get it to build while using configparser. I don't know why though.
 }
 
 setup(
-        name = "PESTERCHUM-ALT-SERVERS",
+        name = "PESTERCHUM",
         version = "3.41",
         description = "P3ST3RCHUM",
+        options = {"build_exe": build_exe_options},
         executables = [Executable("pesterchum.py",
                                   base=base,
                                   compress=True,
@@ -40,6 +49,7 @@ shutil.copytree("themes", "build/pesterchum/themes")
 shutil.copytree("smilies", "build/pesterchum/smilies")
 shutil.copy("pesterchum.nsi", "build/pesterchum/")
 shutil.copy("pesterchum-update.nsi", "build/pesterchum/")
+shutil.copy("server.ini", "build/pesterchum/")
 os.mkdir("build/pesterchum/profiles")
 os.mkdir("build/pesterchum/logs")
 
