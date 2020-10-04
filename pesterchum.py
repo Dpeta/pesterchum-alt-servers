@@ -1,5 +1,6 @@
 # pesterchum
 import os, shutil, sys, getopt
+import configparser
 if os.path.dirname(sys.argv[0]):
     os.chdir(os.path.dirname(sys.argv[0]))
 import logging
@@ -135,7 +136,6 @@ BOTNAMES.extend(CUSTOMBOTS)
 # order, for console use.
 _CONSOLE_ENV = AttrDict()
 _CONSOLE_ENV.PAPP = None
-
 
 class waitingMessageHolder(object):
     def __init__(self, mainwindow, **msgfuncs):
@@ -3043,6 +3043,38 @@ class MainProgram(QtCore.QObject):
 
         options = self.oppts(sys.argv[1:])
 
+        # Choose a server by qt message box.
+        # Writes the result to server.ini
+        
+        msgBox = QtGui.QMessageBox()
+        msgBox.setIcon(QtGui.QMessageBox.Information)
+        msgBox.setWindowTitle("Choose a server.")
+        msgBox.setText("Which server do you want to connect to?")
+        msgBox.addButton(QtGui.QPushButton("ghostDunk's server (Official)"), QtGui.QMessageBox.YesRole)
+        msgBox.addButton(QtGui.QPushButton("turntechCatnip's server"), QtGui.QMessageBox.NoRole)
+        msgBox.addButton(QtGui.QPushButton('kaliope.ddns.net'), QtGui.QMessageBox.RejectRole)
+        ret = msgBox.exec_()
+        reply = msgBox.buttonRole(msgBox.clickedButton())
+        
+        config = configparser.ConfigParser()
+        config.read('server.ini')
+        
+        if (reply==QtGui.QMessageBox.YesRole):
+            print("Server is: irc.mindfang.org")
+            config['SERVER']['server'] = 'irc.mindfang.org'
+        if (reply==QtGui.QMessageBox.NoRole):
+            print("Server is: 178.84.124.125")
+            config['SERVER']['server'] = '178.84.124.125'
+        if (reply==QtGui.QMessageBox.RejectRole):
+            print("Server is: kaliope.ddns.net")
+            config['SERVER']['server'] = 'kaliope.ddns.net'
+    
+        #Write result to server.ini
+        with open('server.ini', 'w') as configfile:
+            config.write(configfile)
+        
+
+        
         def doSoundInit():
             # TODO: Make this more uniform, adapt it into a general function.
             if pygame and pygame.mixer:
