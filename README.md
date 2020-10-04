@@ -8,7 +8,7 @@ Currently promts the user on launch to choose a server. The implementation of th
 
 Currently lets you choose between:
 * ghostDunk's server
-* My server
+* My server (turntechCatnip)
 * @chaoticCharacte's server
 
 ## Building
