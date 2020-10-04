@@ -3,15 +3,22 @@ from cx_Freeze import setup, Executable
 import sys
 import os
 import shutil
+import requests
+import urllib
+import PyQt4
+from Queue import *
 
 if sys.platform == "win32":
     base = "Win32GUI"
-    #base = "Console"
 else:
     base = "Console"
 
+build_exe_options = {
+    "includes": ["requests","urllib"] # <-- Include
+}
+
 setup(
-        name = "PESTERCHUM",
+        name = "PESTERCHUM-alt",
         version = "3.41",
         description = "P3ST3RCHUM",
         executables = [Executable("pesterchum.py",
@@ -24,22 +31,16 @@ setup(
                                   compress=True,
                                   icon="pesterchum.ico",
                                   )])
+
+#Replace exe.win-amd64-2.7 with whatever it seems to generate as for you.
 if sys.platform == "win32":
-    os.rename("build/exe.win32-2.6", "build/pesterchum")
+    os.rename("build/exe.win-amd64-2.7", "build/pesterchum")
 
 shutil.copytree("themes", "build/pesterchum/themes")
-shutil.copytree("imageformats", "build/pesterchum/imageformats")
 shutil.copytree("smilies", "build/pesterchum/smilies")
-shutil.copy("pesterchum.js", "build/pesterchum/")
-shutil.copy("C:/Dev/Py26MSdlls-9.0.21022.8/msvc/msvcm90.dll", "build/pesterchum")
-shutil.copy("C:/Dev/Py26MSdlls-9.0.21022.8/msvc/msvcp90.dll", "build/pesterchum")
-shutil.copy("C:/Dev/Py26MSdlls-9.0.21022.8/msvc/msvcr90.dll", "build/pesterchum")
-shutil.copy("C:/Dev/Py26MSdlls-9.0.21022.8/msvc/x86_Microsoft.VC90.CRT_1fc8b3b9a1e18e3b_9.0.21022.8_x-ww_d08d0375.manifest",
-            "build/pesterchum")
 shutil.copy("pesterchum.nsi", "build/pesterchum/")
 shutil.copy("pesterchum-update.nsi", "build/pesterchum/")
 os.mkdir("build/pesterchum/profiles")
 os.mkdir("build/pesterchum/logs")
-shutil.copy("logs/chums.js", "build/pesterchum/logs")
-shutil.copy("readme.txt", "build/pesterchum/")
+shutil.copy("README.mkdn", "build/pesterchum/")
 shutil.copy("themes.txt", "build/pesterchum/")
