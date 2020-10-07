@@ -3052,7 +3052,7 @@ class MainProgram(QtCore.QObject):
         msgBox.setText("Which server do you want to connect to?")
         msgBox.addButton(QtGui.QPushButton("irc.mindfang.org (Official)"), QtGui.QMessageBox.YesRole)
         msgBox.addButton(QtGui.QPushButton("pesterchum.xyz (Unofficial)"), QtGui.QMessageBox.NoRole)
-        msgBox.addButton(QtGui.QPushButton('kaliope.ddns.net'), QtGui.QMessageBox.RejectRole)
+        msgBox.addButton(QtGui.QPushButton('kaliope.ddns.net (Unofficial)'), QtGui.QMessageBox.RejectRole)
         ret = msgBox.exec_()
         reply = msgBox.buttonRole(msgBox.clickedButton())
         
