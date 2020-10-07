@@ -9,7 +9,7 @@ Currently promts the user on launch to choose a server. The implementation of th
 Currently lets you choose between:
 * ghostDunk's server
 * My server (turntechCatnip)
-* @chaoticCharacte's server
+* ~~@chaoticCharacte's server~~
 
 ## Building
 Just simply running "python setup.py build" seems to be working for me for building on windows now.
