@@ -7,9 +7,9 @@ Normal pesterchum documentation is in "README-pesterchum.mkdn" and the one for K
 Currently promts the user on launch to choose a server. The implementation of this isn't very pretty, but it seems to function in it's current state.
 
 Currently lets you choose between:
-* ghostDunk's server
-* My server (turntechCatnip)
-* ~~@chaoticCharacte's server~~
+* irc.mindfang.org (ghostDunk's server) (Official)
+* pesterchum.xyz (turntechCatnip's server) (Unofficial)
+* kaliope.ddns.net (@chaoticCharacte's server)
 
 ## Building
 Just simply running "python setup.py build" seems to be working for me for building on windows now.
