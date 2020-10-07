@@ -47,7 +47,7 @@ if sys.platform == "win32":
 
 shutil.copytree("themes", "build/pesterchum/themes")
 shutil.copytree("smilies", "build/pesterchum/smilies")
-shutil.copytree("quirks", "build/pesterchum/smilies")
+shutil.copytree("quirks", "build/pesterchum/quirks")
 shutil.copy("pesterchum.nsi", "build/pesterchum/")
 shutil.copy("pesterchum-update.nsi", "build/pesterchum/")
 shutil.copy("server.ini", "build/pesterchum/")
