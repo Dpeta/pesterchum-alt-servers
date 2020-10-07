@@ -3052,7 +3052,7 @@ class MainProgram(QtCore.QObject):
         msgBox.setText("Which server do you want to connect to?")
         msgBox.addButton(QtGui.QPushButton("irc.mindfang.org (Official)"), QtGui.QMessageBox.YesRole)
         msgBox.addButton(QtGui.QPushButton("pesterchum.xyz (Unofficial)"), QtGui.QMessageBox.NoRole)
-        #msgBox.addButton(QtGui.QPushButton('kaliope.ddns.net'), QtGui.QMessageBox.RejectRole)
+        msgBox.addButton(QtGui.QPushButton('kaliope.ddns.net'), QtGui.QMessageBox.RejectRole)
         ret = msgBox.exec_()
         reply = msgBox.buttonRole(msgBox.clickedButton())
         
@@ -3065,9 +3065,9 @@ class MainProgram(QtCore.QObject):
         if (reply==QtGui.QMessageBox.NoRole):
             print("Server is: pesterchum.xyz")
             config['SERVER']['server'] = 'pesterchum.xyz'
-        #if (reply==QtGui.QMessageBox.RejectRole):
-        #    print("Server is: kaliope.ddns.net")
-        #    config['SERVER']['server'] = 'kaliope.ddns.net'
+        if (reply==QtGui.QMessageBox.RejectRole):
+            print("Server is: kaliope.ddns.net")
+            config['SERVER']['server'] = 'kaliope.ddns.net'
     
         #Write result to server.ini
         with open('server.ini', 'w') as configfile:
