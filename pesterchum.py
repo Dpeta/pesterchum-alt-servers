@@ -3048,11 +3048,11 @@ class MainProgram(QtCore.QObject):
         
         msgBox = QtGui.QMessageBox()
         msgBox.setIcon(QtGui.QMessageBox.Information)
-        msgBox.setWindowTitle("Choose a server.")
+        msgBox.setWindowTitle("Please choose a server")
         msgBox.setText("Which server do you want to connect to?")
-        msgBox.addButton(QtGui.QPushButton("ghostDunk's server (Official)"), QtGui.QMessageBox.YesRole)
-        msgBox.addButton(QtGui.QPushButton("turntechCatnip's server"), QtGui.QMessageBox.NoRole)
-        msgBox.addButton(QtGui.QPushButton('kaliope.ddns.net'), QtGui.QMessageBox.RejectRole)
+        msgBox.addButton(QtGui.QPushButton("irc.mindfang.org (Official)"), QtGui.QMessageBox.YesRole)
+        msgBox.addButton(QtGui.QPushButton("pesterchum.xyz (Unofficial)"), QtGui.QMessageBox.NoRole)
+        #msgBox.addButton(QtGui.QPushButton('kaliope.ddns.net'), QtGui.QMessageBox.RejectRole)
         ret = msgBox.exec_()
         reply = msgBox.buttonRole(msgBox.clickedButton())
         
@@ -3063,11 +3063,11 @@ class MainProgram(QtCore.QObject):
             print("Server is: irc.mindfang.org")
             config['SERVER']['server'] = 'irc.mindfang.org'
         if (reply==QtGui.QMessageBox.NoRole):
-            print("Server is: 178.84.124.125")
-            config['SERVER']['server'] = '178.84.124.125'
-        if (reply==QtGui.QMessageBox.RejectRole):
-            print("Server is: kaliope.ddns.net")
-            config['SERVER']['server'] = 'kaliope.ddns.net'
+            print("Server is: pesterchum.xyz")
+            config['SERVER']['server'] = 'pesterchum.xyz'
+        #if (reply==QtGui.QMessageBox.RejectRole):
+        #    print("Server is: kaliope.ddns.net")
+        #    config['SERVER']['server'] = 'kaliope.ddns.net'
     
         #Write result to server.ini
         with open('server.ini', 'w') as configfile:
