@@ -2917,7 +2917,7 @@ class PesterWindow(MovingWindow):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://forum.homestuck.xyz/viewtopic.php?f=7&t=467", QtCore.QUrl.TolerantMode))
     @QtCore.pyqtSlot()
     def reportBug(self):
-		QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/Dpeta/pesterchum-alt-servers/issues", QtCore.QUrl.TolerantMode))
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/Dpeta/pesterchum-alt-servers/issues", QtCore.QUrl.TolerantMode))
         if hasattr(self, 'bugreportwindow') and self.bugreportwindow:
             return
         self.bugreportwindow = BugReporter(self)
