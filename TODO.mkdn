@@ -16,8 +16,6 @@
 * Don't make new windows be all in your face and shit
 * Hide offline friends per group
 
-* LET PEOPLE TURN OFF HONKING - people already rename the soundfile and such to
-    do this manually
 
 * Add support for displaying more verbose information (e.g. Cease messages which
     tell you more than the abbreviation of who left)
@@ -174,6 +172,8 @@ version of the client. There aren't really any other options.
 * Make console users able to check widget theme/style information via mouseover
 	and key combo (for people making themes or debugging)
 	* This is presently Ctrl+Alt+w, after opening the console (Ctrl+~).
+* LET PEOPLE TURN OFF HONKING - people already rename the soundfile and such to
+    do this manually (append "honk":false to the end of pesterchum.js ; that kills it.)
 
 ### Backend
 * Perpetual code cleanup, refactoring, simplification and general improvements

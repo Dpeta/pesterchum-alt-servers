@@ -1821,6 +1821,7 @@ class AboutPesterchum(QtGui.QDialog):
   oakwhiz\n\
   alGore\n\
   Cerxi (binaryCabalist)\n\
+  Arcane (arcaneAgilmente)\n\
   karxi (Midna)\n\
 \n\
 Art by:\n\

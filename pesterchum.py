@@ -2914,9 +2914,10 @@ class PesterWindow(MovingWindow):
         self.newConversation("nickServ")
     @QtCore.pyqtSlot()
     def launchHelp(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://nova.xzibition.com/~illuminatedwax/help.html", QtCore.QUrl.TolerantMode))
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://forum.homestuck.xyz/viewtopic.php?f=7&t=467", QtCore.QUrl.TolerantMode))
     @QtCore.pyqtSlot()
     def reportBug(self):
+		QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/Dpeta/pesterchum-alt-servers/issues", QtCore.QUrl.TolerantMode))
         if hasattr(self, 'bugreportwindow') and self.bugreportwindow:
             return
         self.bugreportwindow = BugReporter(self)
