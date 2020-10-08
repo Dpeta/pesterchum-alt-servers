@@ -9,7 +9,7 @@ Currently promts the user on launch to choose a server. The implementation of th
 Currently lets you choose between:
 * irc.mindfang.org (ghostDunk's server) (Official)
 * pesterchum.xyz (turntechCatnip's server) (Unofficial)
-* kaliope.ddns.net (@chaoticCharacte's server)
+* kaliope.ddns.net (@chaoticCharacte's server) (Unofficial)
 
 ## Building
 Just simply running "python setup.py build" seems to be working for me for building on windows now.
