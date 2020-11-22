@@ -14,8 +14,6 @@ from mood import Mood
 from dataobjs import PesterProfile, pesterQuirk, pesterQuirks
 from parsetools import convertTags, addTimeInitial, themeChecker, ThemeException
 
-import configparser # For loading server.ini
-
 _datadir = ostools.getDataDir()
 
 class PesterLog(object):
@@ -287,10 +285,9 @@ class userConfig(object):
     def server(self):
         if hasattr(self.parent, 'serverOverride'):
             return self.parent.serverOverride
-        # Get chosen server from server.ini
-        config = configparser.ConfigParser()
-        config.read('server.ini')
-        return self.config.get('server', config['SERVER']['server'])
+
+        # This is no longer used for choosing the server.
+        return self.config.get('server', "pesterchum.xyz")
     def port(self):
         if hasattr(self.parent, 'portOverride'):
             return self.parent.portOverride

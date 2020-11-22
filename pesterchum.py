@@ -1,6 +1,5 @@
 # pesterchum
 import os, shutil, sys, getopt
-import configparser
 if os.path.dirname(sys.argv[0]):
     os.chdir(os.path.dirname(sys.argv[0]))
 import logging
@@ -3055,25 +3054,16 @@ class MainProgram(QtCore.QObject):
         msgBox.addButton(QtGui.QPushButton('kaliope.ddns.net (Unofficial)'), QtGui.QMessageBox.RejectRole)
         ret = msgBox.exec_()
         reply = msgBox.buttonRole(msgBox.clickedButton())
-        
-        config = configparser.ConfigParser()
-        config.read('server.ini')
-        
+
         if (reply==QtGui.QMessageBox.YesRole):
             print("Server is: irc.mindfang.org")
-            config['SERVER']['server'] = 'irc.mindfang.org'
+            server = "irc.mindfang.org"
         if (reply==QtGui.QMessageBox.NoRole):
             print("Server is: pesterchum.xyz")
-            config['SERVER']['server'] = 'pesterchum.xyz'
+            server = "pesterchum.xyz"
         if (reply==QtGui.QMessageBox.RejectRole):
             print("Server is: kaliope.ddns.net")
-            config['SERVER']['server'] = 'kaliope.ddns.net'
-    
-        #Write result to server.ini
-        with open('server.ini', 'w') as configfile:
-            config.write(configfile)
-        
-
+            server = "kaliope.ddns.net"
         
         def doSoundInit():
             # TODO: Make this more uniform, adapt it into a general function.
@@ -3149,31 +3139,36 @@ class MainProgram(QtCore.QObject):
 
         self.attempts = 0
 
-        self.irc = PesterIRC(self.widget.config, self.widget)
+        # The way server is passed here now is also not ideal,
+        # but it's at least better than the way it was before.
+        self.irc = PesterIRC(self.widget.config, self.widget, server)
         self.connectWidgets(self.irc, self.widget)
 
         self.connect(self.widget, QtCore.SIGNAL('gainAttention(QWidget*)'),
                      self, QtCore.SLOT('alertWindow(QWidget*)'))
 
+
+        # This doesn't know as far as I'm aware, so it's commented out for now.
+        
         # 0 Once a day
         # 1 Once a week
         # 2 Only on start
         # 3 Never
-        check = self.widget.config.checkForUpdates()
-        if check == 2:
-            self.runUpdateSlot()
-        elif check == 0:
-            seconds = 60 * 60 * 24
-            if int(time()) - self.widget.config.lastUCheck() < seconds:
-                seconds -= int(time()) - self.widget.config.lastUCheck()
-            if seconds < 0: seconds = 0
-            QtCore.QTimer.singleShot(1000*seconds, self, QtCore.SLOT('runUpdateSlot()'))
-        elif check == 1:
-            seconds = 60 * 60 * 24 * 7
-            if int(time()) - self.widget.config.lastUCheck() < seconds:
-                seconds -= int(time()) - self.widget.config.lastUCheck()
-            if seconds < 0: seconds = 0
-            QtCore.QTimer.singleShot(1000*seconds, self, QtCore.SLOT('runUpdateSlot()'))
+        #check = self.widget.config.checkForUpdates()
+        #if check == 2:
+        #    self.runUpdateSlot()
+        #elif check == 0:
+        #    seconds = 60 * 60 * 24
+        #    if int(time()) - self.widget.config.lastUCheck() < seconds:
+        #        seconds -= int(time()) - self.widget.config.lastUCheck()
+        #    if seconds < 0: seconds = 0
+        #    QtCore.QTimer.singleShot(1000*seconds, self, QtCore.SLOT('runUpdateSlot()'))
+        #elif check == 1:
+        #    seconds = 60 * 60 * 24 * 7
+        #    if int(time()) - self.widget.config.lastUCheck() < seconds:
+        #        seconds -= int(time()) - self.widget.config.lastUCheck()
+        #    if seconds < 0: seconds = 0
+        #    QtCore.QTimer.singleShot(1000*seconds, self, QtCore.SLOT('runUpdateSlot()'))
 
     @QtCore.pyqtSlot()
     def runUpdateSlot(self):
@@ -3379,7 +3374,7 @@ Click this message to never see this again.")
         else:
             stop = None
         if stop is None:
-            self.irc = PesterIRC(self.widget.config, self.widget)
+            self.irc = PesterIRC(self.widget.config, self.widget, server)
             self.connectWidgets(self.irc, self.widget)
             self.irc.start()
             if self.attempts == 1:
