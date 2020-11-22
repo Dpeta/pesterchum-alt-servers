@@ -3057,13 +3057,13 @@ class MainProgram(QtCore.QObject):
 
         if (reply==QtGui.QMessageBox.YesRole):
             print("Server is: irc.mindfang.org")
-            server = "irc.mindfang.org"
+            self.server = "irc.mindfang.org"
         if (reply==QtGui.QMessageBox.NoRole):
             print("Server is: pesterchum.xyz")
-            server = "pesterchum.xyz"
+            self.server = "pesterchum.xyz"
         if (reply==QtGui.QMessageBox.RejectRole):
             print("Server is: kaliope.ddns.net")
-            server = "kaliope.ddns.net"
+            self.server = "kaliope.ddns.net"
         
         def doSoundInit():
             # TODO: Make this more uniform, adapt it into a general function.
@@ -3141,7 +3141,7 @@ class MainProgram(QtCore.QObject):
 
         # The way server is passed here now is also not ideal,
         # but it's at least better than the way it was before.
-        self.irc = PesterIRC(self.widget.config, self.widget, server)
+        self.irc = PesterIRC(self.widget.config, self.widget, self.server)
         self.connectWidgets(self.irc, self.widget)
 
         self.connect(self.widget, QtCore.SIGNAL('gainAttention(QWidget*)'),
@@ -3374,7 +3374,7 @@ Click this message to never see this again.")
         else:
             stop = None
         if stop is None:
-            self.irc = PesterIRC(self.widget.config, self.widget, server)
+            self.irc = PesterIRC(self.widget.config, self.widget, self.server)
             self.connectWidgets(self.irc, self.widget)
             self.irc.start()
             if self.attempts == 1:
