@@ -3046,32 +3046,32 @@ class MainProgram(QtCore.QObject):
         # Choose a server by qt message box.
         # Writes the result to server.ini
         
-        msgBox = QtGui.QMessageBox()
-        msgBox.setIcon(QtGui.QMessageBox.Information)
-        msgBox.setWindowTitle("Please choose a server")
-        msgBox.setText("Which server do you want to connect to?")
-        msgBox.addButton(QtGui.QPushButton("irc.mindfang.org (Official)"), QtGui.QMessageBox.YesRole)
-        msgBox.addButton(QtGui.QPushButton("pesterchum.xyz (Unofficial)"), QtGui.QMessageBox.NoRole)
+        #msgBox = QtGui.QMessageBox()
+        #msgBox.setIcon(QtGui.QMessageBox.Information)
+        #msgBox.setWindowTitle("Please choose a server")
+        #msgBox.setText("Which server do you want to connect to?")
+        #msgBox.addButton(QtGui.QPushButton("irc.mindfang.org (Official)"), QtGui.QMessageBox.YesRole)
+        #msgBox.addButton(QtGui.QPushButton("pesterchum.xyz (Unofficial)"), QtGui.QMessageBox.NoRole)
         #msgBox.addButton(QtGui.QPushButton('kaliope.ddns.net'), QtGui.QMessageBox.RejectRole)
-        ret = msgBox.exec_()
-        reply = msgBox.buttonRole(msgBox.clickedButton())
+        #ret = msgBox.exec_()
+        #reply = msgBox.buttonRole(msgBox.clickedButton())
         
-        config = configparser.ConfigParser()
-        config.read('server.ini')
+        #config = configparser.ConfigParser()
+        #config.read('server.ini')
         
-        if (reply==QtGui.QMessageBox.YesRole):
-            print("Server is: irc.mindfang.org")
-            config['SERVER']['server'] = 'irc.mindfang.org'
-        if (reply==QtGui.QMessageBox.NoRole):
-            print("Server is: pesterchum.xyz")
-            config['SERVER']['server'] = 'pesterchum.xyz'
+        #if (reply==QtGui.QMessageBox.YesRole):
+        #    print("Server is: irc.mindfang.org")
+        #    config['SERVER']['server'] = 'irc.mindfang.org'
+        #if (reply==QtGui.QMessageBox.NoRole):
+        #    print("Server is: pesterchum.xyz")
+        #    config['SERVER']['server'] = 'pesterchum.xyz'
         #if (reply==QtGui.QMessageBox.RejectRole):
         #    print("Server is: kaliope.ddns.net")
         #    config['SERVER']['server'] = 'kaliope.ddns.net'
     
         #Write result to server.ini
-        with open('server.ini', 'w') as configfile:
-            config.write(configfile)
+        #with open('server.ini', 'w') as configfile:
+        #    config.write(configfile)
         
 
         
