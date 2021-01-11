@@ -3045,32 +3045,24 @@ class MainProgram(QtCore.QObject):
         # Choose a server by qt message box.
         # Writes the result to server.ini
         
-        #msgBox = QtGui.QMessageBox()
-        #msgBox.setIcon(QtGui.QMessageBox.Information)
-        #msgBox.setWindowTitle("Please choose a server")
-        #msgBox.setText("Which server do you want to connect to?")
-        #msgBox.addButton(QtGui.QPushButton("irc.mindfang.org (Official)"), QtGui.QMessageBox.YesRole)
-        #msgBox.addButton(QtGui.QPushButton("pesterchum.xyz (Unofficial)"), QtGui.QMessageBox.NoRole)
-        # msgBox.addButton(QtGui.QPushButton('kaliope.ddns.net (Unofficial)'), QtGui.QMessageBox.RejectRole)
-        #ret = msgBox.exec_()
-        #reply = msgBox.buttonRole(msgBox.clickedButton())
+        msgBox = QtGui.QMessageBox()
+        msgBox.setIcon(QtGui.QMessageBox.Information)
+        msgBox.setWindowTitle("Please choose a server")
+        msgBox.setText("Which server do you want to connect to?")
+        msgBox.addButton(QtGui.QPushButton("pesterchum.xyz"), QtGui.QMessageBox.NoRole)
+        msgBox.addButton(QtGui.QPushButton('Havoc'), QtGui.QMessageBox.RejectRole)
+        ret = msgBox.exec_()
+        reply = msgBox.buttonRole(msgBox.clickedButton())
 
-        # Since there's currently no other working servers, all of this is commented out for now.
-
-        self.server = "pesterchum.xyz"
-        print("Server is: pesterchum.xyz")
-
-        #if (reply==QtGui.QMessageBox.YesRole):
-        #    print("Server is: irc.mindfang.org")
-        #    self.server = "irc.mindfang.org"
-        #if (reply==QtGui.QMessageBox.NoRole):
-        #    print("Server is: pesterchum.xyz")
-        #    self.server = "pesterchum.xyz"
-        #if (reply==QtGui.QMessageBox.RejectRole):
-        #    print("Server is: kaliope.ddns.net")
-        #    self.server = "kaliope.ddns.net"
-
-        
+        if (reply==QtGui.QMessageBox.YesRole):
+            print("Server is: irc.mindfang.org")
+            self.server = "irc.mindfang.org"
+        if (reply==QtGui.QMessageBox.NoRole):
+            print("Server is: pesterchum.xyz")
+            self.server = "pesterchum.xyz"
+        if (reply==QtGui.QMessageBox.RejectRole):
+            print("Server is: Havoc")
+            self.server = "havoc.ddns.net"
         
         def doSoundInit():
             # TODO: Make this more uniform, adapt it into a general function.
