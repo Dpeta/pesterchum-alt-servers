@@ -4,14 +4,12 @@ A mirror of pesterchum with added functionality to connect to alternative server
 Normal pesterchum documentation is in "README-pesterchum.mkdn" and the one for Karxi's fork is README-karxi.mkdn.
 
 ## Servers
-~~Currently promts the user on launch to choose a server. The implementation of this isn't very pretty, but it seems to function in it's current state.~~
+Currently promts the user on launch to choose a server. The implementation of this isn't very pretty, but it seems to function in it's current state.
 
-~~Currently lets you choose between:~~
-* ~~irc.mindfang.org (ghostDunk's server) (Official)~~
-* ~~pesterchum.xyz (turntechCatnip's server) (Unofficial)~~
-* ~~kaliope.ddns.net (@chaoticCharacte's server) (Unofficial)~~
+Currently lets you choose between:
+* pesterchum.xyz (turntechCatnip's server)
+* havoc.ddns.net (@chaoticCharacte's server)
 
-Since it's currently the only pesterchum server, I removed the prompt (for now) in favor of just connecting to pesterchum.xyz directly.
 
 ## Building
 Just simply running "python setup.py build" seems to be working for me for building on windows as of now.
