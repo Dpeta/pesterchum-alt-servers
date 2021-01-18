@@ -31,18 +31,16 @@ setup(
         options = {"build_exe": build_exe_options},
         executables = [Executable("pesterchum.py",
                                   base=base,
-                                  compress=True,
                                   icon="pesterchum.ico",
                                   ),
                        Executable("pesterchum_debug.py",
                                   base=base,
-                                  compress=True,
                                   icon="pesterchum.ico",
                                   )])
 
 #Replace exe.win-amd64-2.7 with whatever it seems to generate as for you.
 if sys.platform == "win32":
-    os.rename("build/exe.win-amd64-2.7", "build/pesterchum")
+    os.rename("build/exe.win32-2.7", "build/pesterchum")
 
 shutil.copytree("themes", "build/pesterchum/themes")
 shutil.copytree("smilies", "build/pesterchum/smilies")
