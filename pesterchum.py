@@ -1063,10 +1063,19 @@ class PesterWindow(MovingWindow):
         self.setAutoFillBackground(True)
         self.setObjectName("main")
         self.config = userConfig(self)
-        if self.config.defaultprofile():
-            self.userprofile = userProfile(self.config.defaultprofile())
-            self.theme = self.userprofile.getTheme()
-        else:
+        # Trying to fix:
+        #     IOError: [Errno 2]
+        #     No such file or directory:
+        #     u'XXX\\AppData\\Local\\pesterchum/profiles/XXX.js'
+        # Part 1 :(
+        try:
+            if self.config.defaultprofile():
+                self.userprofile = userProfile(self.config.defaultprofile())
+                self.theme = self.userprofile.getTheme()
+            else:
+                self.userprofile = userProfile(PesterProfile("pesterClient%d" % (random.randint(100,999)), QtGui.QColor("black"), Mood(0)))
+                self.theme = self.userprofile.getTheme()
+        except:
             self.userprofile = userProfile(PesterProfile("pesterClient%d" % (random.randint(100,999)), QtGui.QColor("black"), Mood(0)))
             self.theme = self.userprofile.getTheme()
         self.modes = ""

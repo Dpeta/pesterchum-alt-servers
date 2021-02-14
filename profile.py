@@ -99,8 +99,16 @@ class userConfig(object):
         self.filename = _datadir+"pesterchum.js"
         with open(self.filename) as fp:
             self.config = json.load(fp)
+        # Trying to fix:
+        #     IOError: [Errno 2]
+        #     No such file or directory:
+        #     u'XXX\\AppData\\Local\\pesterchum/profiles/XXX.js'
+        # Part 2 :(
         if self.config.has_key("defaultprofile"):
-            self.userprofile = userProfile(self.config["defaultprofile"])
+            try:
+                self.userprofile = userProfile(self.config["defaultprofile"])
+            except:
+                self.userprofile = None
         else:
             self.userprofile = None
 
@@ -364,8 +372,30 @@ class userProfile(object):
                 self.mentions = []
             self.autojoins = []
         else:
-            with open("%s/%s.js" % (self.profiledir, user)) as fp:
-                self.userprofile = json.load(fp)
+            # Trying to fix:
+            #     IOError: [Errno 2]
+            #     No such file or directory:
+            #     u'XXX\\AppData\\Local\\pesterchum/profiles/XXX.js'
+            # Part 3 :(
+            try:
+                with open("%s/%s.js" % (self.profiledir, user)) as fp:
+                    self.userprofile = json.load(fp)
+            except:
+                
+                msgBox = QtGui.QMessageBox()
+                msgBox.setIcon(QtGui.QMessageBox.Information)
+                msgBox.setWindowTitle(":(")
+                self.filename = _datadir+"pesterchum.js"
+                msgBox.setText("Failed to open \"" + \
+                               ("%s/%s.js" % (self.profiledir, user)) + \
+                               "\n You should switch to a different profile and set it as the default.")
+                               #"\" if pesterchum acts oddly you might want to try backing up and then deleting \"" + \
+                               #_datadir+"pesterchum.js" + \
+                               #"\"")
+                msgBox.exec_()
+
+                
+                
             try:
                 self.theme = pesterTheme(self.userprofile["theme"])
             except ValueError:
