@@ -349,10 +349,10 @@ class PesterHandler(DefaultCommandHandler):
         if len(msg) == 0:
             return
         # silently ignore CTCP
-		# Notice IRC /me (The CTCP kind)
-		if msg[0:8] == '\x01ACTION ':
-		    msg = '/me' + msg[7:-1]
-		# silently ignore the rest of the CTCPs
+        # Notice IRC /me (The CTCP kind)
+        if msg[0:8] == '\x01ACTION ':
+            msg = '/me' + msg[7:-1]
+        # silently ignore the rest of the CTCPs
         if msg[0] == '\x01':
             handle = nick[0:nick.find("!")]
             logging.warning("---> recv \"CTCP %s :%s\"" % (handle, msg[1:-1]))
@@ -501,7 +501,7 @@ class PesterHandler(DefaultCommandHandler):
         if channel not in self.channelnames:
             self.channelnames[channel] = []
         self.channelnames[channel].extend(namelist)
-	def ison(self, server, nick, nicks):
+    def ison(self, server, nick, nicks):
         nicklist = nicks.split(" ")
         getglub = "GETMOOD "
         logging.info("---> recv \"ISON :%s\"" % nicks)
@@ -511,7 +511,7 @@ class PesterHandler(DefaultCommandHandler):
                getglub += nick_it
         if getglub != "GETMOOD ":
             helpers.msg(self.client, "#pesterchum", getglub)
-			
+            
     def endofnames(self, server, nick, channel, msg):
         namelist = self.channelnames[channel]
         pl = PesterList(namelist)
@@ -576,16 +576,16 @@ class PesterHandler(DefaultCommandHandler):
                 self.parent.setConnectionBroken()
 
     def isOn(self, *chums):
-	    isonNicks = ""
-		for c in chums:
-		    chandle = c.handle
-			if len(chandle) >= 200:
+        isonNicks = ""
+        for c in chums:
+            chandle = c.handle
+            if len(chandle) >= 200:
                 try:
                     self.client.send("ISON", ":%s" % (isonNicks))
                 except socket.error:
                     self.parent.setConnectionBroken()
                 isonNicks = ""
-			isonNicks += " " + chandle
+            isonNicks += " " + chandle
         if isonNicks != "":
             try:
                 self.client.send("ISON", ":%s" % (isonNicks))
