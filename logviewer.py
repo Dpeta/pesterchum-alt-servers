@@ -307,11 +307,11 @@ class PesterLogText(PesterText):
 
     def contextMenuEvent(self, event):
         textMenu = self.createStandardContextMenu()
-        if self.textSelected:
-            self.submitLogAction = QtGui.QAction("Submit to Pesterchum QDB", self)
-            self.connect(self.submitLogAction, QtCore.SIGNAL('triggered()'),
-                         self, QtCore.SLOT('submitLog()'))
-            textMenu.addAction(self.submitLogAction)
+        #if self.textSelected:
+        #    self.submitLogAction = QtGui.QAction("Submit to Pesterchum QDB", self)
+        #    self.connect(self.submitLogAction, QtCore.SIGNAL('triggered()'),
+        #                 self, QtCore.SLOT('submitLog()'))
+        #    textMenu.addAction(self.submitLogAction)
         a = textMenu.actions()
         a[0].setText("Copy Plain Text")
         a[0].setShortcut(self.tr("Ctrl+C"))

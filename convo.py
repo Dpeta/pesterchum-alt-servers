@@ -517,11 +517,11 @@ class PesterText(QtGui.QTextEdit):
 
     def contextMenuEvent(self, event):
         textMenu = self.createStandardContextMenu()
-        if self.textSelected:
-            self.submitLogAction = QtGui.QAction("Submit to Pesterchum QDB", self)
-            self.connect(self.submitLogAction, QtCore.SIGNAL('triggered()'),
-                         self, QtCore.SLOT('submitLog()'))
-            textMenu.addAction(self.submitLogAction)
+        #if self.textSelected:
+        #    self.submitLogAction = QtGui.QAction("Submit to Pesterchum QDB", self)
+        #    self.connect(self.submitLogAction, QtCore.SIGNAL('triggered()'),
+        #                 self, QtCore.SLOT('submitLog()'))
+        #    textMenu.addAction(self.submitLogAction)
         textMenu.exec_(event.globalPos())
 
     def submitLogTitle(self):
