@@ -115,7 +115,6 @@ from parsetools import convertTags, addTimeInitial, themeChecker, ThemeException
 from memos import PesterMemo, MemoTabWindow, TimeTracker
 from irc import PesterIRC
 from logviewer import PesterLogUserSelect, PesterLogViewer
-from bugreport import BugReporter
 from randomer import RandomHandler, RANDNICK
 import nickservmsgs
 
@@ -2930,11 +2929,7 @@ class PesterWindow(MovingWindow):
     @QtCore.pyqtSlot()
     def reportBug(self):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/Dpeta/pesterchum-alt-servers/issues", QtCore.QUrl.TolerantMode))
-        if hasattr(self, 'bugreportwindow') and self.bugreportwindow:
-            return
-        self.bugreportwindow = BugReporter(self)
-        self.bugreportwindow.exec_()
-        self.bugreportwindow = None
+        return
 
     @QtCore.pyqtSlot(QtCore.QString, QtCore.QString)
     def nickCollision(self, handle, tmphandle):
