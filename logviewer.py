@@ -227,7 +227,8 @@ class PesterLogViewer(QtGui.QDialog):
             self.connect(self.ok, QtCore.SIGNAL('clicked()'),
                          self, QtCore.SLOT('reject()'))
             layout_ok = QtGui.QHBoxLayout()
-            layout_ok.addWidget(self.qdb)
+            # Website is offline so there's no point.
+            #layout_ok.addWidget(self.qdb)
             layout_ok.addWidget(self.ok)
             layout_ok.setAlignment(self.ok, QtCore.Qt.AlignRight)
 
