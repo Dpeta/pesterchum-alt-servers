@@ -14,6 +14,10 @@ import re
 from time import time
 import threading, Queue
 try:
+    import json
+except:
+    pass
+try:
     from pnc.attrdict import AttrDict
 except ImportError:
     # Fall back on the old location - just in case
@@ -3052,35 +3056,27 @@ class MainProgram(QtCore.QObject):
 
         options = self.oppts(sys.argv[1:])
 
-        # Choose a server by qt message box.
-        # Writes the result to server.ini
-        
-        #msgBox = QtGui.QMessageBox()
-        #msgBox.setIcon(QtGui.QMessageBox.Information)
-        #msgBox.setWindowTitle("Please choose a server")
-        #msgBox.setText("Which server do you want to connect to?")
-        #msgBox.addButton(QtGui.QPushButton("irc.mindfang.org (Official)"), QtGui.QMessageBox.YesRole)
-        #msgBox.addButton(QtGui.QPushButton("pesterchum.xyz (Unofficial)"), QtGui.QMessageBox.NoRole)
-        # msgBox.addButton(QtGui.QPushButton('kaliope.ddns.net (Unofficial)'), QtGui.QMessageBox.RejectRole)
-        #ret = msgBox.exec_()
-        #reply = msgBox.buttonRole(msgBox.clickedButton())
 
-        # Since there's currently no other working servers, all of this is commented out for now.
-
-        self.server = "pesterchum.xyz"
-        print("Server is: pesterchum.xyz")
-
-        #if (reply==QtGui.QMessageBox.YesRole):
-        #    print("Server is: irc.mindfang.org")
-        #    self.server = "irc.mindfang.org"
-        #if (reply==QtGui.QMessageBox.NoRole):
-        #    print("Server is: pesterchum.xyz")
-        #    self.server = "pesterchum.xyz"
-        #if (reply==QtGui.QMessageBox.RejectRole):
-        #    print("Server is: kaliope.ddns.net")
-        #    self.server = "kaliope.ddns.net"
-
-        
+        # Tries to load the server to connect to from server.json.
+        # If it fails, create json file with default of pesterchum.xyz & connect to pesterchum.xyz
+        try:
+            with open("server.json", "r") as server_file:
+                read_file = server_file.read()
+                server_file.close()
+            server_obj = json.loads(read_file)
+            self.server = str(server_obj['server'])
+        except:
+            try:
+                with open("server.json", "w") as server_file:
+                    json_server_file = {
+                                          "server": "pesterchum.xyz",
+                                    }
+                    server_file.write(json.dumps(json_server_file, indent = 4) )
+                    server_file.close()
+            except:
+                pass
+            self.server = "pesterchum.xyz"
+        print("Server is: " + self.server)
         
         def doSoundInit():
             # TODO: Make this more uniform, adapt it into a general function.
