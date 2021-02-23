@@ -3,10 +3,6 @@ from cx_Freeze import setup, Executable
 import sys
 import os
 import shutil
-import requests
-import urllib
-import PyQt4
-from Queue import *
 
 if sys.platform == "win32":
     base = "Win32GUI"
@@ -21,7 +17,7 @@ build_exe_options = {
                  'collections._locale',
                  'collections._struct',
                  'collections.array',
-                 'collections._weakref'], # Not excluding these is the only way I could get it to build while using configparser. I don't know why though.
+                 'collections._weakref'],
 }
 
 setup(
@@ -38,7 +34,6 @@ setup(
                                   icon="pesterchum.ico",
                                   )])
 
-#Replace exe.win-amd64-2.7 with whatever it seems to generate as for you.
 if sys.platform == "win32":
     os.rename("build/exe.win32-2.7", "build/pesterchum")
 
