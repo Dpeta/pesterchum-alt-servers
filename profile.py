@@ -428,8 +428,18 @@ class userProfile(object):
         self.autoidentify = False
         self.nickservpass = ""
         if self.chat.handle in self.passwd:
-            self.autoidentify = self.passwd[self.chat.handle]["auto"]
-            self.nickservpass = self.passwd[self.chat.handle]["pw"]
+            # Fix for:
+                # Traceback (most recent call last):
+                # File "pesterchum.py", line 2944, in nickCollision
+                #   File "pesterchum.py", line 1692, in changeProfile
+                #   File "XXX\menus.py", line 795, in init
+                #   File "XXX\profile.py", line 350, in availableProfiles
+                #   File "XXX\profile.py", line 432, in init
+                # KeyError: 'pw'
+            if "auto" in self.passwd[self.chat.handle]:
+                self.autoidentify = self.passwd[self.chat.handle]["auto"]
+            if "pw" in self.passwd[self.chat.handle]:
+                self.nickservpass = self.passwd[self.chat.handle]["pw"]
 
     def setMood(self, mood):
         self.chat.mood = mood
