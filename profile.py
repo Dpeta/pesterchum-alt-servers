@@ -295,7 +295,7 @@ class userConfig(object):
             return self.parent.serverOverride
 
         # This is no longer used for choosing the server.
-        return self.config.get('server', "pesterchum.xyz")
+        return self.config.get('server', "irc.pesterchum.xyz")
     def port(self):
         if hasattr(self.parent, 'portOverride'):
             return self.parent.portOverride

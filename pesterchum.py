@@ -3053,7 +3053,7 @@ class MainProgram(QtCore.QObject):
 
 
         # Tries to load the server to connect to from server.json.
-        # If it fails, create json file with default of pesterchum.xyz & connect to pesterchum.xyz
+        # If it fails, create json file with default of irc.pesterchum.xyz & connect to irc.pesterchum.xyz
         try:
             with open("server.json", "r") as server_file:
                 read_file = server_file.read()
@@ -3064,13 +3064,13 @@ class MainProgram(QtCore.QObject):
             try:
                 with open("server.json", "w") as server_file:
                     json_server_file = {
-                                          "server": "pesterchum.xyz",
+                                          "server": "irc.pesterchum.xyz",
                                     }
                     server_file.write(json.dumps(json_server_file, indent = 4) )
                     server_file.close()
             except:
                 pass
-            self.server = "pesterchum.xyz"
+            self.server = "irc.pesterchum.xyz"
         print("Server is: " + self.server)
         
         def doSoundInit():
