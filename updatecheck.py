@@ -3,7 +3,7 @@
 # karxi: Now that Homestuck is over, this might be removed.
 # Even if it isn't, it needs cleanup; the code is unpleasant.
 
-from libs import feedparser
+import feedparser
 import pickle
 import os
 import sys

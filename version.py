@@ -353,7 +353,7 @@ def updateExtract(url, extension):
             extension = ".zip"
         else:
             try:
-                from libs import magic # :O I'M IMPORTING /MAGIC/!! HOLY SHIT!
+                import magic # :O I'M IMPORTING /MAGIC/!! HOLY SHIT!
                 mime = magic.from_file(fn, mime=True)
                 if mime == 'application/octet-stream':
                     extension = ".exe"
