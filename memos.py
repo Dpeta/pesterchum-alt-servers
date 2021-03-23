@@ -100,7 +100,7 @@ class TimeGrammar(object):
 class TimeTracker(list):
     def __init__(self, time=None):
         self.timerecord = {"P": [], "F": []}
-        self.open = {"": ""}# Needs to be a dictionary :)
+        self.open = {}
         if time is not None:
             self.append(time)
             self.current=0
@@ -548,7 +548,7 @@ class PesterMemo(PesterConvo):
     def updateColor(self, handle, color):
         chums = self.userlist.findItems(handle, QtCore.Qt.MatchFlags(0))
         for c in chums:
-            c.setForeground(0, QtGui.QBrush(color))
+            c.setForeground(QtGui.QBrush(color))
     def addMessage(self, text, handle):
         if type(handle) is bool:
             chum = self.mainwindow.profile()

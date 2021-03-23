@@ -102,9 +102,16 @@ class CommandHandler(object):
 
         logging.debug('f %s' % f)
 
+        # Because more than 5 arguments can be passed by channelmodeis
         try:
-            f(*args)
+            if str(command) == 'channelmodeis':
+                # This might be stupid :)
+                f(*args[0:4])
+            else:
+                f(*args)
         except Exception as e:
+            #logging.error('command raised '+ command + str())
+            logging.error('command args: ' + str([*args]))
             logging.error('command raised %s' % e)
             logging.error(traceback.format_exc())
             raise CommandError(command)
