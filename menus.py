@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
 import re, ostools
 
 from os import remove
@@ -7,17 +7,23 @@ from dataobjs import pesterQuirk, PesterProfile
 from memos import TimeSlider, TimeInput
 from version import _pcVersion
 
+try:
+    QString = unicode
+except NameError:
+    # Python 3
+    QString = str
+
 _datadir = ostools.getDataDir()
 
-class PesterQuirkItem(QtGui.QTreeWidgetItem):
+class PesterQuirkItem(QtWidgets.QTreeWidgetItem):
     def __init__(self, quirk):
         parent = None
-        QtGui.QTreeWidgetItem.__init__(self, parent)
+        QtWidgets.QTreeWidgetItem.__init__(self, parent)
         self.quirk = quirk
-        self.setText(0, unicode(quirk))
+        self.setText(0, str(quirk))
     def update(self, quirk):
         self.quirk = quirk
-        self.setText(0, unicode(quirk))
+        self.setText(0, str(quirk))
     def __lt__(self, quirkitem):
         """Sets the order of quirks if auto-sorted by Qt. Obsolete now."""
         if self.quirk.type == "prefix":
@@ -27,16 +33,15 @@ class PesterQuirkItem(QtGui.QTreeWidgetItem):
             return True
         else:
             return False
-class PesterQuirkList(QtGui.QTreeWidget):
+class PesterQuirkList(QtWidgets.QTreeWidget):
     def __init__(self, mainwindow, parent):
-        QtGui.QTreeWidget.__init__(self, parent)
+        QtWidgets.QTreeWidget.__init__(self, parent)
         self.resize(400, 200)
         # make sure we have access to mainwindow info like profiles
         self.mainwindow = mainwindow
         self.setStyleSheet("background:black; color:white;")
 
-        self.connect(self, QtCore.SIGNAL('itemChanged(QTreeWidgetItem *, int)'),
-                     self, QtCore.SLOT('changeCheckState()'))
+        self.itemChanged[QTreeWidgetItem, int].connect(self.changeCheckState)
 
         for q in mainwindow.userprofile.quirks:
             item = PesterQuirkItem(q)
@@ -64,10 +69,10 @@ class PesterQuirkList(QtGui.QTreeWidget):
         if len(found) > 0:
             found[0].addChild(item)
         else:
-            child_1 = QtGui.QTreeWidgetItem([item.quirk.group])
+            child_1 = QtWidgets.QTreeWidgetItem([item.quirk.group])
             self.addTopLevelItem(child_1)
             child_1.setFlags(child_1.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-            child_1.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.DontShowIndicatorWhenChildless)
+            child_1.setChildIndicatorPolicy(QtWidgets.QTreeWidgetItem.DontShowIndicatorWhenChildless)
             child_1.setCheckState(0,0)
             child_1.setExpanded(True)
             child_1.addChild(item)
@@ -145,15 +150,15 @@ class PesterQuirkList(QtGui.QTreeWidget):
         for f in found:
             if not f.isSelected(): continue
             if not f.parent(): # group
-                msgbox = QtGui.QMessageBox()
+                msgbox = QtWidgets.QMessageBox()
                 msgbox.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
                 msgbox.setObjectName("delquirkwarning")
                 msgbox.setWindowTitle("WARNING!")
                 msgbox.setInformativeText("Are you sure you want to delete the quirk group: %s" % (f.text(0)))
-                msgbox.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+                msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
                 # Find the Cancel button and make it default
                 for b in msgbox.buttons():
-                    if msgbox.buttonRole(b) == QtGui.QMessageBox.RejectRole:
+                    if msgbox.buttonRole(b) == QtWidgets.QMessageBox.RejectRole:
                         # We found the 'OK' button, set it as the default
                         b.setDefault(True)
                         b.setAutoDefault(True)
@@ -162,7 +167,7 @@ class PesterQuirkList(QtGui.QTreeWidget):
                         b.setFocus()
                         break
                 ret = msgbox.exec_()
-                if ret == QtGui.QMessageBox.Ok:
+                if ret == QtWidgets.QMessageBox.Ok:
                     self.takeTopLevelItem(self.indexOfTopLevelItem(f))
             else:
                 f.parent().takeChild(f.parent().indexOfChild(f))
@@ -173,27 +178,27 @@ class PesterQuirkList(QtGui.QTreeWidget):
         if not hasattr(self, 'addgroupdialog'):
             self.addgroupdialog = None
         if not self.addgroupdialog:
-            (gname, ok) = QtGui.QInputDialog.getText(self, "Add Group", "Enter a name for the new quirk group:")
+            (gname, ok) = QtWidgets.QInputDialog.getText(self, "Add Group", "Enter a name for the new quirk group:")
             if ok:
-                gname = unicode(gname)
+                gname = str(gname)
                 if re.search("[^A-Za-z0-9_\s]", gname) is not None:
-                    msgbox = QtGui.QMessageBox()
+                    msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
-                    msgbox.setStandardButtons(QtGui.QMessageBox.Ok)
+                    msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
                     ret = msgbox.exec_()
                     self.addgroupdialog = None
                     return
                 found = self.findItems(gname, QtCore.Qt.MatchExactly)
                 if found:
-                    msgbox = QtGui.QMessageBox()
+                    msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS QUIRK GROUP ALREADY EXISTS")
-                    msgbox.setStandardButtons(QtGui.QMessageBox.Ok)
+                    msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
                     ret = msgbox.exec_()
                     return
-                child_1 = QtGui.QTreeWidgetItem([gname])
+                child_1 = QtWidgets.QTreeWidgetItem([gname])
                 self.addTopLevelItem(child_1)
                 child_1.setFlags(child_1.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-                child_1.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.DontShowIndicatorWhenChildless)
+                child_1.setChildIndicatorPolicy(QtWidgets.QTreeWidgetItem.DontShowIndicatorWhenChildless)
                 child_1.setCheckState(0,0)
                 child_1.setExpanded(True)
 
@@ -224,9 +229,9 @@ from convo import PesterInput, PesterText
 from parsetools import convertTags, lexMessage, splitMessage, mecmd, colorBegin, colorEnd, img2smiley, smiledict
 import parsetools
 from dataobjs import pesterQuirks, PesterHistory
-class QuirkTesterWindow(QtGui.QDialog):
+class QuirkTesterWindow(QtWidgets.QDialog):
     def __init__(self, parent):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self.prnt = parent
         self.mainwindow = parent.mainwindow
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
@@ -237,14 +242,13 @@ class QuirkTesterWindow(QtGui.QDialog):
         self.textInput = PesterInput(self.mainwindow.theme, self)
         self.textInput.setFocus()
 
-        self.connect(self.textInput, QtCore.SIGNAL('returnPressed()'),
-                     self, QtCore.SLOT('sentMessage()'))
+        self.textInput.returnPressed.connect(self.sentMessage)
 
         self.chumopen = True
         self.chum = self.mainwindow.profile()
         self.history = PesterHistory()
 
-        layout_0 = QtGui.QVBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
         layout_0.addWidget(self.textArea)
         layout_0.addWidget(self.textInput)
         self.setLayout(layout_0)
@@ -256,12 +260,12 @@ class QuirkTesterWindow(QtGui.QDialog):
         pass
     @QtCore.pyqtSlot()
     def sentMessage(self):
-        text = unicode(self.textInput.text())
+        text = str(self.textInput.text())
 
         return parsetools.kxhandleInput(self, text, "menus")
 
     def addMessage(self, msg, me=True):
-        if type(msg) in [str, unicode]:
+        if type(msg) in [str, str]:
             lexmsg = lexMessage(msg)
         else:
             lexmsg = msg
@@ -274,174 +278,167 @@ class QuirkTesterWindow(QtGui.QDialog):
     def closeEvent(self, event):
         self.parent().quirktester = None
 
-class PesterQuirkTypes(QtGui.QDialog):
+class PesterQuirkTypes(QtWidgets.QDialog):
     def __init__(self, parent, quirk=None):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self.mainwindow = parent.mainwindow
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
         self.setWindowTitle("Quirk Wizard")
         self.resize(500,310)
 
         self.quirk = quirk
-        self.pages = QtGui.QStackedWidget(self)
+        self.pages = QtWidgets.QStackedWidget(self)
 
-        self.next = QtGui.QPushButton("Next", self)
+        self.next = QtWidgets.QPushButton("Next", self)
         self.next.setDefault(True)
-        self.connect(self.next, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('nextPage()'))
-        self.back = QtGui.QPushButton("Back", self)
+        self.__next__.clicked.connect(self.nextPage)
+        self.back = QtWidgets.QPushButton("Back", self)
         self.back.setEnabled(False)
-        self.connect(self.back, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('backPage()'))
-        self.cancel = QtGui.QPushButton("Cancel", self)
-        self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reject()'))
-        layout_2 = QtGui.QHBoxLayout()
+        self.back.clicked.connect(self.backPage)
+        self.cancel = QtWidgets.QPushButton("Cancel", self)
+        self.cancel.clicked.connect(self.reject)
+        layout_2 = QtWidgets.QHBoxLayout()
         layout_2.setAlignment(QtCore.Qt.AlignRight)
         layout_2.addWidget(self.back)
-        layout_2.addWidget(self.next)
+        layout_2.addWidget(self.__next__)
         layout_2.addSpacing(5)
         layout_2.addWidget(self.cancel)
 
-        vr = QtGui.QFrame()
-        vr.setFrameShape(QtGui.QFrame.VLine)
-        vr.setFrameShadow(QtGui.QFrame.Sunken)
-        vr2 = QtGui.QFrame()
-        vr2.setFrameShape(QtGui.QFrame.VLine)
-        vr2.setFrameShadow(QtGui.QFrame.Sunken)
+        vr = QtWidgets.QFrame()
+        vr.setFrameShape(QtWidgets.QFrame.VLine)
+        vr.setFrameShadow(QtWidgets.QFrame.Sunken)
+        vr2 = QtWidgets.QFrame()
+        vr2.setFrameShape(QtWidgets.QFrame.VLine)
+        vr2.setFrameShadow(QtWidgets.QFrame.Sunken)
 
-        self.funclist = QtGui.QListWidget(self)
+        self.funclist = QtWidgets.QListWidget(self)
         self.funclist.setStyleSheet("color: #000000; background-color: #FFFFFF;")
-        self.funclist2 = QtGui.QListWidget(self)
+        self.funclist2 = QtWidgets.QListWidget(self)
         self.funclist2.setStyleSheet("color: #000000; background-color: #FFFFFF;")
 
         from parsetools import quirkloader
-        funcs = [q+"()" for q in quirkloader.quirks.keys()]
+        funcs = [q+"()" for q in list(quirkloader.quirks.keys())]
         funcs.sort()
         self.funclist.addItems(funcs)
         self.funclist2.addItems(funcs)
 
-        self.reloadQuirkFuncButton = QtGui.QPushButton("RELOAD FUNCTIONS", self)
-        self.connect(self.reloadQuirkFuncButton, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reloadQuirkFuncSlot()'))
-        self.reloadQuirkFuncButton2 = QtGui.QPushButton("RELOAD FUNCTIONS", self)
-        self.connect(self.reloadQuirkFuncButton2, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reloadQuirkFuncSlot()'))
+        self.reloadQuirkFuncButton = QtWidgets.QPushButton("RELOAD FUNCTIONS", self)
+        self.reloadQuirkFuncButton.clicked.connect(self.reloadQuirkFuncSlot)
+        self.reloadQuirkFuncButton2 = QtWidgets.QPushButton("RELOAD FUNCTIONS", self)
+        self.reloadQuirkFuncButton2.clicked.connect(self.reloadQuirkFuncSlot)
 
         self.funclist.setMaximumWidth(160)
         self.funclist.resize(160,50)
         self.funclist2.setMaximumWidth(160)
         self.funclist2.resize(160,50)
-        layout_f = QtGui.QVBoxLayout()
-        layout_f.addWidget(QtGui.QLabel("Available Regexp\nFunctions"))
+        layout_f = QtWidgets.QVBoxLayout()
+        layout_f.addWidget(QtWidgets.QLabel("Available Regexp\nFunctions"))
         layout_f.addWidget(self.funclist)
         layout_f.addWidget(self.reloadQuirkFuncButton)
-        layout_g = QtGui.QVBoxLayout()
-        layout_g.addWidget(QtGui.QLabel("Available Regexp\nFunctions"))
+        layout_g = QtWidgets.QVBoxLayout()
+        layout_g.addWidget(QtWidgets.QLabel("Available Regexp\nFunctions"))
         layout_g.addWidget(self.funclist2)
         layout_g.addWidget(self.reloadQuirkFuncButton2)
 
         # Pages
         # Type select
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
         self.pages.addWidget(widget)
-        layout_select = QtGui.QVBoxLayout(widget)
+        layout_select = QtWidgets.QVBoxLayout(widget)
         layout_select.setAlignment(QtCore.Qt.AlignTop)
         self.radios = []
-        self.radios.append(QtGui.QRadioButton("Prefix", self))
-        self.radios.append(QtGui.QRadioButton("Suffix", self))
-        self.radios.append(QtGui.QRadioButton("Simple Replace", self))
-        self.radios.append(QtGui.QRadioButton("Regexp Replace", self))
-        self.radios.append(QtGui.QRadioButton("Random Replace", self))
-        self.radios.append(QtGui.QRadioButton("Mispeller", self))
+        self.radios.append(QtWidgets.QRadioButton("Prefix", self))
+        self.radios.append(QtWidgets.QRadioButton("Suffix", self))
+        self.radios.append(QtWidgets.QRadioButton("Simple Replace", self))
+        self.radios.append(QtWidgets.QRadioButton("Regexp Replace", self))
+        self.radios.append(QtWidgets.QRadioButton("Random Replace", self))
+        self.radios.append(QtWidgets.QRadioButton("Mispeller", self))
 
-        layout_select.addWidget(QtGui.QLabel("Select Quirk Type:"))
+        layout_select.addWidget(QtWidgets.QLabel("Select Quirk Type:"))
         for r in self.radios:
             layout_select.addWidget(r)
 
         # Prefix
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
         self.pages.addWidget(widget)
-        layout_prefix = QtGui.QVBoxLayout(widget)
+        layout_prefix = QtWidgets.QVBoxLayout(widget)
         layout_prefix.setAlignment(QtCore.Qt.AlignTop)
-        layout_prefix.addWidget(QtGui.QLabel("Prefix"))
-        layout_3 = QtGui.QHBoxLayout()
-        layout_3.addWidget(QtGui.QLabel("Value:"))
-        layout_3.addWidget(QtGui.QLineEdit())
+        layout_prefix.addWidget(QtWidgets.QLabel("Prefix"))
+        layout_3 = QtWidgets.QHBoxLayout()
+        layout_3.addWidget(QtWidgets.QLabel("Value:"))
+        layout_3.addWidget(QtWidgets.QLineEdit())
         layout_prefix.addLayout(layout_3)
 
         # Suffix
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
         self.pages.addWidget(widget)
-        layout_suffix = QtGui.QVBoxLayout(widget)
+        layout_suffix = QtWidgets.QVBoxLayout(widget)
         layout_suffix.setAlignment(QtCore.Qt.AlignTop)
-        layout_suffix.addWidget(QtGui.QLabel("Suffix"))
-        layout_3 = QtGui.QHBoxLayout()
-        layout_3.addWidget(QtGui.QLabel("Value:"))
-        layout_3.addWidget(QtGui.QLineEdit())
+        layout_suffix.addWidget(QtWidgets.QLabel("Suffix"))
+        layout_3 = QtWidgets.QHBoxLayout()
+        layout_3.addWidget(QtWidgets.QLabel("Value:"))
+        layout_3.addWidget(QtWidgets.QLineEdit())
         layout_suffix.addLayout(layout_3)
 
         # Simple Replace
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
         self.pages.addWidget(widget)
-        layout_replace = QtGui.QVBoxLayout(widget)
+        layout_replace = QtWidgets.QVBoxLayout(widget)
         layout_replace.setAlignment(QtCore.Qt.AlignTop)
-        layout_replace.addWidget(QtGui.QLabel("Simple Replace"))
-        layout_3 = QtGui.QHBoxLayout()
-        layout_3.addWidget(QtGui.QLabel("Replace:"))
-        layout_3.addWidget(QtGui.QLineEdit())
+        layout_replace.addWidget(QtWidgets.QLabel("Simple Replace"))
+        layout_3 = QtWidgets.QHBoxLayout()
+        layout_3.addWidget(QtWidgets.QLabel("Replace:"))
+        layout_3.addWidget(QtWidgets.QLineEdit())
         layout_replace.addLayout(layout_3)
-        layout_3 = QtGui.QHBoxLayout()
-        layout_3.addWidget(QtGui.QLabel("With:"))
-        layout_3.addWidget(QtGui.QLineEdit())
+        layout_3 = QtWidgets.QHBoxLayout()
+        layout_3.addWidget(QtWidgets.QLabel("With:"))
+        layout_3.addWidget(QtWidgets.QLineEdit())
         layout_replace.addLayout(layout_3)
 
         # Regexp Replace
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
         self.pages.addWidget(widget)
-        layout_all = QtGui.QHBoxLayout(widget)
-        layout_regexp = QtGui.QVBoxLayout()
+        layout_all = QtWidgets.QHBoxLayout(widget)
+        layout_regexp = QtWidgets.QVBoxLayout()
         layout_regexp.setAlignment(QtCore.Qt.AlignTop)
-        layout_regexp.addWidget(QtGui.QLabel("Regexp Replace"))
-        layout_3 = QtGui.QHBoxLayout()
-        layout_3.addWidget(QtGui.QLabel("Regexp:"))
-        layout_3.addWidget(QtGui.QLineEdit())
+        layout_regexp.addWidget(QtWidgets.QLabel("Regexp Replace"))
+        layout_3 = QtWidgets.QHBoxLayout()
+        layout_3.addWidget(QtWidgets.QLabel("Regexp:"))
+        layout_3.addWidget(QtWidgets.QLineEdit())
         layout_regexp.addLayout(layout_3)
-        layout_3 = QtGui.QHBoxLayout()
-        layout_3.addWidget(QtGui.QLabel("Replace With:"))
-        layout_3.addWidget(QtGui.QLineEdit())
+        layout_3 = QtWidgets.QHBoxLayout()
+        layout_3.addWidget(QtWidgets.QLabel("Replace With:"))
+        layout_3.addWidget(QtWidgets.QLineEdit())
         layout_regexp.addLayout(layout_3)
         layout_all.addLayout(layout_f)
         layout_all.addWidget(vr)
         layout_all.addLayout(layout_regexp)
 
         # Random Replace
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
         self.pages.addWidget(widget)
-        layout_all = QtGui.QHBoxLayout(widget)
-        layout_random = QtGui.QVBoxLayout()
+        layout_all = QtWidgets.QHBoxLayout(widget)
+        layout_random = QtWidgets.QVBoxLayout()
         layout_random.setAlignment(QtCore.Qt.AlignTop)
-        layout_random.addWidget(QtGui.QLabel("Random Replace"))
-        layout_5 = QtGui.QHBoxLayout()
-        regexpl = QtGui.QLabel("Regexp:", self)
-        self.regexp = QtGui.QLineEdit("", self)
+        layout_random.addWidget(QtWidgets.QLabel("Random Replace"))
+        layout_5 = QtWidgets.QHBoxLayout()
+        regexpl = QtWidgets.QLabel("Regexp:", self)
+        self.regexp = QtWidgets.QLineEdit("", self)
         layout_5.addWidget(regexpl)
         layout_5.addWidget(self.regexp)
-        replacewithl = QtGui.QLabel("Replace With:", self)
+        replacewithl = QtWidgets.QLabel("Replace With:", self)
         layout_all.addLayout(layout_g)
         layout_all.addWidget(vr2)
         layout_all.addLayout(layout_random)
 
-        layout_6 = QtGui.QVBoxLayout()
-        layout_7 = QtGui.QHBoxLayout()
-        self.replacelist = QtGui.QListWidget(self)
-        self.replaceinput = QtGui.QLineEdit(self)
-        addbutton = QtGui.QPushButton("ADD", self)
-        self.connect(addbutton, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('addRandomString()'))
-        removebutton = QtGui.QPushButton("REMOVE", self)
-        self.connect(removebutton, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('removeRandomString()'))
+        layout_6 = QtWidgets.QVBoxLayout()
+        layout_7 = QtWidgets.QHBoxLayout()
+        self.replacelist = QtWidgets.QListWidget(self)
+        self.replaceinput = QtWidgets.QLineEdit(self)
+        addbutton = QtWidgets.QPushButton("ADD", self)
+        addbutton.clicked.connect(self.addRandomString)
+        removebutton = QtWidgets.QPushButton("REMOVE", self)
+        removebutton.clicked.connect(self.removeRandomString)
         layout_7.addWidget(addbutton)
         layout_7.addWidget(removebutton)
         layout_6.addLayout(layout_5)
@@ -452,29 +449,28 @@ class PesterQuirkTypes(QtGui.QDialog):
         layout_random.addLayout(layout_6)
 
         # Misspeller
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
         self.pages.addWidget(widget)
-        layout_mispeller = QtGui.QVBoxLayout(widget)
+        layout_mispeller = QtWidgets.QVBoxLayout(widget)
         layout_mispeller.setAlignment(QtCore.Qt.AlignTop)
-        layout_mispeller.addWidget(QtGui.QLabel("Mispeller"))
-        layout_1 = QtGui.QHBoxLayout()
-        zero = QtGui.QLabel("1%", self)
-        hund = QtGui.QLabel("100%", self)
-        self.current = QtGui.QLabel("50%", self)
+        layout_mispeller.addWidget(QtWidgets.QLabel("Mispeller"))
+        layout_1 = QtWidgets.QHBoxLayout()
+        zero = QtWidgets.QLabel("1%", self)
+        hund = QtWidgets.QLabel("100%", self)
+        self.current = QtWidgets.QLabel("50%", self)
         self.current.setAlignment(QtCore.Qt.AlignHCenter)
-        self.slider = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+        self.slider = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.slider.setMinimum(1)
         self.slider.setMaximum(100)
         self.slider.setValue(50)
-        self.connect(self.slider, QtCore.SIGNAL('valueChanged(int)'),
-                     self, QtCore.SLOT('printValue(int)'))
+        self.slider.valueChanged[int].connect(self.printValue)
         layout_1.addWidget(zero)
         layout_1.addWidget(self.slider)
         layout_1.addWidget(hund)
         layout_mispeller.addLayout(layout_1)
         layout_mispeller.addWidget(self.current)
 
-        layout_0 = QtGui.QVBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
         layout_0.addWidget(self.pages)
         layout_0.addLayout(layout_2)
 
@@ -497,7 +493,7 @@ class PesterQuirkTypes(QtGui.QDialog):
             elif q["type"] == "random":
                 self.regexp.setText(q["from"])
                 for v in q["randomlist"]:
-                    item = QtGui.QListWidgetItem(v, self.replacelist)
+                    item = QtWidgets.QListWidgetItem(v, self.replacelist)
             elif q["type"] == "spelling":
                 self.slider.setValue(q["percentage"])
 
@@ -538,8 +534,8 @@ class PesterQuirkTypes(QtGui.QDialog):
         self.current.setText(str(value)+"%")
     @QtCore.pyqtSlot()
     def addRandomString(self):
-        text = unicode(self.replaceinput.text())
-        item = QtGui.QListWidgetItem(text, self.replacelist)
+        text = str(self.replaceinput.text())
+        item = QtWidgets.QListWidgetItem(text, self.replacelist)
         self.replaceinput.setText("")
         self.replaceinput.setFocus()
     @QtCore.pyqtSlot()
@@ -554,16 +550,16 @@ class PesterQuirkTypes(QtGui.QDialog):
     def reloadQuirkFuncSlot(self):
         from parsetools import reloadQuirkFunctions, quirkloader
         reloadQuirkFunctions()
-        funcs = [q+"()" for q in quirkloader.quirks.keys()]
+        funcs = [q+"()" for q in list(quirkloader.quirks.keys())]
         funcs.sort()
         self.funclist.clear()
         self.funclist.addItems(funcs)
         self.funclist2.clear()
         self.funclist2.addItems(funcs)
 
-class PesterChooseQuirks(QtGui.QDialog):
+class PesterChooseQuirks(QtWidgets.QDialog):
     def __init__(self, config, theme, parent):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self.setModal(False)
         self.config = config
         self.theme = theme
@@ -573,61 +569,52 @@ class PesterChooseQuirks(QtGui.QDialog):
 
         self.quirkList = PesterQuirkList(self.mainwindow, self)
 
-        self.addQuirkButton = QtGui.QPushButton("ADD QUIRK", self)
-        self.connect(self.addQuirkButton, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('addQuirkDialog()'))
+        self.addQuirkButton = QtWidgets.QPushButton("ADD QUIRK", self)
+        self.addQuirkButton.clicked.connect(self.addQuirkDialog)
 
-        self.upShiftButton = QtGui.QPushButton("^", self)
-        self.downShiftButton = QtGui.QPushButton("v", self)
+        self.upShiftButton = QtWidgets.QPushButton("^", self)
+        self.downShiftButton = QtWidgets.QPushButton("v", self)
         self.upShiftButton.setToolTip("Move quirk up one")
         self.downShiftButton.setToolTip("Move quirk down one")
-        self.connect(self.upShiftButton, QtCore.SIGNAL('clicked()'),
-                     self.quirkList, QtCore.SLOT('upShiftQuirk()'))
-        self.connect(self.downShiftButton, QtCore.SIGNAL('clicked()'),
-                    self.quirkList, QtCore.SLOT('downShiftQuirk()'))
+        self.upShiftButton.clicked.connect(self.quirkList.upShiftQuirk)
+        self.downShiftButton.clicked.connect(self.quirkList.downShiftQuirk)
 
-        self.newGroupButton = QtGui.QPushButton("*", self)
+        self.newGroupButton = QtWidgets.QPushButton("*", self)
         self.newGroupButton.setToolTip("New Quirk Group")
-        self.connect(self.newGroupButton, QtCore.SIGNAL('clicked()'),
-                     self.quirkList, QtCore.SLOT('addQuirkGroup()'))
+        self.newGroupButton.clicked.connect(self.quirkList.addQuirkGroup)
 
-        layout_quirklist = QtGui.QHBoxLayout() #the nude layout quirklist
-        layout_shiftbuttons = QtGui.QVBoxLayout() #the shift button layout
+        layout_quirklist = QtWidgets.QHBoxLayout() #the nude layout quirklist
+        layout_shiftbuttons = QtWidgets.QVBoxLayout() #the shift button layout
         layout_shiftbuttons.addWidget(self.upShiftButton)
         layout_shiftbuttons.addWidget(self.newGroupButton)
         layout_shiftbuttons.addWidget(self.downShiftButton)
         layout_quirklist.addWidget(self.quirkList)
         layout_quirklist.addLayout(layout_shiftbuttons)
 
-        layout_1 = QtGui.QHBoxLayout()
+        layout_1 = QtWidgets.QHBoxLayout()
         layout_1.addWidget(self.addQuirkButton)
 
-        self.editSelectedButton = QtGui.QPushButton("EDIT", self)
-        self.connect(self.editSelectedButton, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('editSelected()'))
-        self.removeSelectedButton = QtGui.QPushButton("REMOVE", self)
-        self.connect(self.removeSelectedButton, QtCore.SIGNAL('clicked()'),
-                     self.quirkList, QtCore.SLOT('removeCurrent()'))
-        layout_3 = QtGui.QHBoxLayout()
+        self.editSelectedButton = QtWidgets.QPushButton("EDIT", self)
+        self.editSelectedButton.clicked.connect(self.editSelected)
+        self.removeSelectedButton = QtWidgets.QPushButton("REMOVE", self)
+        self.removeSelectedButton.clicked.connect(self.quirkList.removeCurrent)
+        layout_3 = QtWidgets.QHBoxLayout()
         layout_3.addWidget(self.editSelectedButton)
         layout_3.addWidget(self.removeSelectedButton)
 
-        self.ok = QtGui.QPushButton("OK", self)
+        self.ok = QtWidgets.QPushButton("OK", self)
         self.ok.setDefault(True)
-        self.connect(self.ok, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('accept()'))
-        self.test = QtGui.QPushButton("TEST QUIRKS", self)
-        self.connect(self.test, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('testQuirks()'))
-        self.cancel = QtGui.QPushButton("CANCEL", self)
-        self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reject()'))
-        layout_ok = QtGui.QHBoxLayout()
+        self.ok.clicked.connect(self.accept)
+        self.test = QtWidgets.QPushButton("TEST QUIRKS", self)
+        self.test.clicked.connect(self.testQuirks)
+        self.cancel = QtWidgets.QPushButton("CANCEL", self)
+        self.cancel.clicked.connect(self.reject)
+        layout_ok = QtWidgets.QHBoxLayout()
         layout_ok.addWidget(self.cancel)
         layout_ok.addWidget(self.test)
         layout_ok.addWidget(self.ok)
 
-        layout_0 = QtGui.QVBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
         layout_0.addLayout(layout_quirklist)
         layout_0.addLayout(layout_1)
         #layout_0.addLayout(layout_2)
@@ -675,10 +662,8 @@ class PesterChooseQuirks(QtGui.QDialog):
         if self.quirkadd:
             return
         self.quirkadd = PesterQuirkTypes(self, quirk)
-        self.connect(self.quirkadd, QtCore.SIGNAL('accepted()'),
-                     self, QtCore.SLOT('addQuirk()'))
-        self.connect(self.quirkadd, QtCore.SIGNAL('rejected()'),
-                     self, QtCore.SLOT('closeQuirk()'))
+        self.quirkadd.accepted.connect(self.addQuirk)
+        self.quirkadd.rejected.connect(self.closeQuirk)
         self.quirkadd.show()
     @QtCore.pyqtSlot()
     def addQuirk(self):
@@ -687,16 +672,16 @@ class PesterChooseQuirks(QtGui.QDialog):
         vdict["type"] = types[self.quirkadd.pages.currentIndex()-1]
         page = self.quirkadd.pages.currentWidget().layout()
         if vdict["type"] in ("prefix","suffix"):
-            vdict["value"] = unicode(page.itemAt(1).layout().itemAt(1).widget().text())
+            vdict["value"] = str(page.itemAt(1).layout().itemAt(1).widget().text())
         elif vdict["type"] == "replace":
-            vdict["from"] = unicode(page.itemAt(1).layout().itemAt(1).widget().text())
-            vdict["to"] = unicode(page.itemAt(2).layout().itemAt(1).widget().text())
+            vdict["from"] = str(page.itemAt(1).layout().itemAt(1).widget().text())
+            vdict["to"] = str(page.itemAt(2).layout().itemAt(1).widget().text())
         elif vdict["type"] == "regexp":
-            vdict["from"] = unicode(page.itemAt(2).layout().itemAt(1).layout().itemAt(1).widget().text())
-            vdict["to"] = unicode(page.itemAt(2).layout().itemAt(2).layout().itemAt(1).widget().text())
+            vdict["from"] = str(page.itemAt(2).layout().itemAt(1).layout().itemAt(1).widget().text())
+            vdict["to"] = str(page.itemAt(2).layout().itemAt(2).layout().itemAt(1).widget().text())
         elif vdict["type"] == "random":
-            vdict["from"] = unicode(self.quirkadd.regexp.text())
-            randomlist = [unicode(self.quirkadd.replacelist.item(i).text())
+            vdict["from"] = str(self.quirkadd.regexp.text())
+            randomlist = [str(self.quirkadd.replacelist.item(i).text())
                           for i in range(0,self.quirkadd.replacelist.count())]
             vdict["randomlist"] = randomlist
         elif vdict["type"] == "spelling":
@@ -705,8 +690,8 @@ class PesterChooseQuirks(QtGui.QDialog):
         if vdict["type"] in ("regexp", "random"):
             try:
                 re.compile(vdict["from"])
-            except re.error, e:
-                quirkWarning = QtGui.QMessageBox(self)
+            except re.error as e:
+                quirkWarning = QtWidgets.QMessageBox(self)
                 quirkWarning.setText("Not a valid regular expression!")
                 quirkWarning.setInformativeText("H3R3S WHY DUMP4SS: %s" % (e))
                 quirkWarning.exec_()
@@ -724,69 +709,64 @@ class PesterChooseQuirks(QtGui.QDialog):
     def closeQuirk(self):
         self.quirkadd = None
 
-class PesterChooseTheme(QtGui.QDialog):
+class PesterChooseTheme(QtWidgets.QDialog):
     def __init__(self, config, theme, parent):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self.config = config
         self.theme = theme
         self.parent = parent
         self.setStyleSheet(self.theme["main/defaultwindow/style"])
         self.setWindowTitle("Pick a theme")
 
-        instructions = QtGui.QLabel("Pick a theme:")
+        instructions = QtWidgets.QLabel("Pick a theme:")
 
         avail_themes = config.availableThemes()
-        self.themeBox = QtGui.QComboBox(self)
+        self.themeBox = QtWidgets.QComboBox(self)
         for (i, t) in enumerate(avail_themes):
             self.themeBox.addItem(t)
             if t == theme.name:
                 self.themeBox.setCurrentIndex(i)
 
-        self.ok = QtGui.QPushButton("OK", self)
+        self.ok = QtWidgets.QPushButton("OK", self)
         self.ok.setDefault(True)
-        self.connect(self.ok, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('accept()'))
-        self.cancel = QtGui.QPushButton("CANCEL", self)
-        self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reject()'))
-        layout_ok = QtGui.QHBoxLayout()
+        self.ok.clicked.connect(self.accept)
+        self.cancel = QtWidgets.QPushButton("CANCEL", self)
+        self.cancel.clicked.connect(self.reject)
+        layout_ok = QtWidgets.QHBoxLayout()
         layout_ok.addWidget(self.cancel)
         layout_ok.addWidget(self.ok)
 
-        layout_0 = QtGui.QVBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
         layout_0.addWidget(instructions)
         layout_0.addWidget(self.themeBox)
         layout_0.addLayout(layout_ok)
 
         self.setLayout(layout_0)
 
-        self.connect(self, QtCore.SIGNAL('accepted()'),
-                     parent, QtCore.SLOT('themeSelected()'))
-        self.connect(self, QtCore.SIGNAL('rejected()'),
-                     parent, QtCore.SLOT('closeTheme()'))
+        self.accepted.connect(parent.themeSelected)
+        self.rejected.connect(parent.closeTheme)
 
-class PesterChooseProfile(QtGui.QDialog):
+class PesterChooseProfile(QtWidgets.QDialog):
     def __init__(self, userprofile, config, theme, parent, collision=None):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self.userprofile = userprofile
         self.theme = theme
         self.config = config
         self.parent = parent
         self.setStyleSheet(self.theme["main/defaultwindow/style"])
 
-        self.currentHandle = QtGui.QLabel("CHANGING FROM %s" % userprofile.chat.handle)
-        self.chumHandle = QtGui.QLineEdit(self)
+        self.currentHandle = QtWidgets.QLabel("CHANGING FROM %s" % userprofile.chat.handle)
+        self.chumHandle = QtWidgets.QLineEdit(self)
         self.chumHandle.setMinimumWidth(200)
         self.chumHandle.setObjectName("setprofilehandle")
-        self.chumHandleLabel = QtGui.QLabel(self.theme["main/mychumhandle/label/text"], self)
-        self.chumColorButton = QtGui.QPushButton(self)
+        self.chumHandleLabel = QtWidgets.QLabel(self.theme["main/mychumhandle/label/text"], self)
+        self.chumColorButton = QtWidgets.QPushButton(self)
         self.chumColorButton.setObjectName("setprofilecolor")
         self.chumColorButton.resize(50, 20)
         self.chumColorButton.setStyleSheet("background: %s" % (userprofile.chat.colorhtml()))
         self.chumcolor = userprofile.chat.color
-        self.connect(self.chumColorButton, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('openColorDialog()'))
-        layout_1 = QtGui.QHBoxLayout()
+        self.chumColorButton.clicked.connect(self.openColorDialog)
+        layout_1 = QtWidgets.QHBoxLayout()
         layout_1.addWidget(self.chumHandleLabel)
         layout_1.addWidget(self.chumHandle)
         layout_1.addWidget(self.chumColorButton)
@@ -794,63 +774,58 @@ class PesterChooseProfile(QtGui.QDialog):
         # available profiles?
         avail_profiles = self.config.availableProfiles()
         if avail_profiles:
-            self.profileBox = QtGui.QComboBox(self)
+            self.profileBox = QtWidgets.QComboBox(self)
             self.profileBox.addItem("Choose a profile...")
             for p in avail_profiles:
                 self.profileBox.addItem(p.chat.handle)
         else:
             self.profileBox = None
 
-        self.defaultcheck = QtGui.QCheckBox(self)
-        self.defaultlabel = QtGui.QLabel("Set This Profile As Default", self)
-        layout_2 = QtGui.QHBoxLayout()
+        self.defaultcheck = QtWidgets.QCheckBox(self)
+        self.defaultlabel = QtWidgets.QLabel("Set This Profile As Default", self)
+        layout_2 = QtWidgets.QHBoxLayout()
         layout_2.addWidget(self.defaultlabel)
         layout_2.addWidget(self.defaultcheck)
 
-        self.ok = QtGui.QPushButton("OK", self)
+        self.ok = QtWidgets.QPushButton("OK", self)
         self.ok.setDefault(True)
-        self.connect(self.ok, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('validateProfile()'))
-        self.cancel = QtGui.QPushButton("CANCEL", self)
-        self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reject()'))
+        self.ok.clicked.connect(self.validateProfile)
+        self.cancel = QtWidgets.QPushButton("CANCEL", self)
+        self.cancel.clicked.connect(self.reject)
         if not collision and avail_profiles:
-            self.delete = QtGui.QPushButton("DELETE", self)
-            self.connect(self.delete, QtCore.SIGNAL('clicked()'),
-                         self, QtCore.SLOT('deleteProfile()'))
-        layout_ok = QtGui.QHBoxLayout()
+            self.delete = QtWidgets.QPushButton("DELETE", self)
+            self.delete.clicked.connect(self.deleteProfile)
+        layout_ok = QtWidgets.QHBoxLayout()
         layout_ok.addWidget(self.cancel)
         layout_ok.addWidget(self.ok)
 
-        layout_0 = QtGui.QVBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
         if collision:
-            collision_warning = QtGui.QLabel("%s is taken already! Pick a new profile." % (collision))
+            collision_warning = QtWidgets.QLabel("%s is taken already! Pick a new profile." % (collision))
             layout_0.addWidget(collision_warning)
         else:
             layout_0.addWidget(self.currentHandle, alignment=QtCore.Qt.AlignHCenter)
         layout_0.addLayout(layout_1)
         if avail_profiles:
-            profileLabel = QtGui.QLabel("Or choose an existing profile:", self)
+            profileLabel = QtWidgets.QLabel("Or choose an existing profile:", self)
             layout_0.addWidget(profileLabel)
             layout_0.addWidget(self.profileBox)
         layout_0.addLayout(layout_ok)
         if not collision and avail_profiles:
             layout_0.addWidget(self.delete)
         layout_0.addLayout(layout_2)
-        self.errorMsg = QtGui.QLabel(self)
+        self.errorMsg = QtWidgets.QLabel(self)
         self.errorMsg.setObjectName("errormsg")
         self.errorMsg.setStyleSheet("color:red;")
         layout_0.addWidget(self.errorMsg)
         self.setLayout(layout_0)
 
-        self.connect(self, QtCore.SIGNAL('accepted()'),
-                     parent, QtCore.SLOT('profileSelected()'))
-        self.connect(self, QtCore.SIGNAL('rejected()'),
-                     parent, QtCore.SLOT('closeProfile()'))
+        self.accepted.connect(parent.profileSelected)
+        self.rejected.connect(parent.closeProfile)
 
     @QtCore.pyqtSlot()
     def openColorDialog(self):
-        self.colorDialog = QtGui.QColorDialog(self)
+        self.colorDialog = QtWidgets.QColorDialog(self)
         color = self.colorDialog.getColor(initial=self.userprofile.chat.color)
         self.chumColorButton.setStyleSheet("background: %s" % color.name())
         self.chumcolor = color
@@ -859,7 +834,7 @@ class PesterChooseProfile(QtGui.QDialog):
     @QtCore.pyqtSlot()
     def validateProfile(self):
         if not self.profileBox or self.profileBox.currentIndex() == 0:
-            handle = unicode(self.chumHandle.text())
+            handle = str(self.chumHandle.text())
             if not PesterProfile.checkLength(handle):
                 self.errorMsg.setText("PROFILE HANDLE IS TOO LONG")
                 return
@@ -871,74 +846,69 @@ class PesterChooseProfile(QtGui.QDialog):
     @QtCore.pyqtSlot()
     def deleteProfile(self):
         if self.profileBox and self.profileBox.currentIndex() > 0:
-            handle = unicode(self.profileBox.currentText())
+            handle = str(self.profileBox.currentText())
             if handle == self.parent.profile().handle:
-                problem = QtGui.QMessageBox()
+                problem = QtWidgets.QMessageBox()
                 # karxi Will probably change this to its own name later.
                 problem.setObjectName("errmsg")
                 problem.setStyleSheet(self.theme["main/defaultwindow/style"])
                 problem.setWindowTitle("Problem!")
                 problem.setInformativeText("You can't delete the profile you're currently using!")
-                problem.setStandardButtons(QtGui.QMessageBox.Ok)
+                problem.setStandardButtons(QtWidgets.QMessageBox.Ok)
                 problem.exec_()
                 return
             # TODO: Make this select 'no' as the default, as usual.
-            msgbox = QtGui.QMessageBox()
+            msgbox = QtWidgets.QMessageBox()
             msgbox.setStyleSheet(self.theme["main/defaultwindow/style"])
             msgbox.setWindowTitle("WARNING!")
             msgbox.setInformativeText("Are you sure you want to delete the profile: %s" % (handle))
-            msgbox.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
             ret = msgbox.exec_()
-            if ret == QtGui.QMessageBox.Ok:
+            if ret == QtWidgets.QMessageBox.Ok:
                 try:
                     remove(_datadir+"profiles/%s.js" % (handle))
                 except OSError:
-                    problem = QtGui.QMessageBox()
+                    problem = QtWidgets.QMessageBox()
                     problem.setObjectName("errmsg")
                     problem.setStyleSheet(self.theme["main/defaultwindow/style"])
                     problem.setWindowTitle("Problem!")
                     problem.setInformativeText("There was a problem deleting the profile: %s" % (handle))
-                    problem.setStandardButtons(QtGui.QMessageBox.Ok)
+                    problem.setStandardButtons(QtWidgets.QMessageBox.Ok)
                     problem.exec_()
 
-class PesterMentions(QtGui.QDialog):
+class PesterMentions(QtWidgets.QDialog):
     def __init__(self, window, theme, parent):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self.setWindowTitle("Mentions")
         self.setModal(True)
         self.mainwindow = window
         self.theme = theme
         self.setStyleSheet(self.theme["main/defaultwindow/style"])
 
-        self.mentionlist = QtGui.QListWidget(self)
+        self.mentionlist = QtWidgets.QListWidget(self)
         self.mentionlist.addItems(self.mainwindow.userprofile.getMentions())
 
-        self.addBtn = QtGui.QPushButton("ADD MENTION", self)
-        self.connect(self.addBtn, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('addMention()'))
+        self.addBtn = QtWidgets.QPushButton("ADD MENTION", self)
+        self.addBtn.clicked.connect(self.addMention)
 
-        self.editBtn = QtGui.QPushButton("EDIT", self)
-        self.connect(self.editBtn, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('editSelected()'))
-        self.rmBtn = QtGui.QPushButton("REMOVE", self)
-        self.connect(self.rmBtn, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('removeCurrent()'))
-        layout_1 = QtGui.QHBoxLayout()
+        self.editBtn = QtWidgets.QPushButton("EDIT", self)
+        self.editBtn.clicked.connect(self.editSelected)
+        self.rmBtn = QtWidgets.QPushButton("REMOVE", self)
+        self.rmBtn.clicked.connect(self.removeCurrent)
+        layout_1 = QtWidgets.QHBoxLayout()
         layout_1.addWidget(self.editBtn)
         layout_1.addWidget(self.rmBtn)
 
-        self.ok = QtGui.QPushButton("OK", self)
+        self.ok = QtWidgets.QPushButton("OK", self)
         self.ok.setDefault(True)
-        self.connect(self.ok, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('accept()'))
-        self.cancel = QtGui.QPushButton("CANCEL", self)
-        self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reject()'))
-        layout_2 = QtGui.QHBoxLayout()
+        self.ok.clicked.connect(self.accept)
+        self.cancel = QtWidgets.QPushButton("CANCEL", self)
+        self.cancel.clicked.connect(self.reject)
+        layout_2 = QtWidgets.QHBoxLayout()
         layout_2.addWidget(self.cancel)
         layout_2.addWidget(self.ok)
 
-        layout_0 = QtGui.QVBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
         layout_0.addWidget(self.mentionlist)
         layout_0.addWidget(self.addBtn)
         layout_0.addLayout(layout_1)
@@ -963,8 +933,8 @@ class PesterMentions(QtGui.QDialog):
             return
         try:
             re.compile(pdict["value"])
-        except re.error, e:
-            quirkWarning = QtGui.QMessageBox(self)
+        except re.error as e:
+            quirkWarning = QtWidgets.QMessageBox(self)
             quirkWarning.setText("Not a valid regular expression!")
             quirkWarning.setInformativeText("H3R3S WHY DUMP4SS: %s" % (e))
             quirkWarning.exec_()
@@ -980,86 +950,80 @@ class PesterMentions(QtGui.QDialog):
         if i >= 0:
             self.mentionlist.takeItem(i)
 
-class PesterOptions(QtGui.QDialog):
+class PesterOptions(QtWidgets.QDialog):
     def __init__(self, config, theme, parent):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self.setWindowTitle("Options")
         self.setModal(False)
         self.config = config
         self.theme = theme
         self.setStyleSheet(self.theme["main/defaultwindow/style"])
 
-        layout_4 = QtGui.QVBoxLayout()
+        layout_4 = QtWidgets.QVBoxLayout()
 
-        hr = QtGui.QFrame()
-        hr.setFrameShape(QtGui.QFrame.HLine)
-        hr.setFrameShadow(QtGui.QFrame.Sunken)
-        vr = QtGui.QFrame()
-        vr.setFrameShape(QtGui.QFrame.VLine)
-        vr.setFrameShadow(QtGui.QFrame.Sunken)
+        hr = QtWidgets.QFrame()
+        hr.setFrameShape(QtWidgets.QFrame.HLine)
+        hr.setFrameShadow(QtWidgets.QFrame.Sunken)
+        vr = QtWidgets.QFrame()
+        vr.setFrameShape(QtWidgets.QFrame.VLine)
+        vr.setFrameShadow(QtWidgets.QFrame.Sunken)
 
-        self.tabs = QtGui.QButtonGroup(self)
-        self.connect(self.tabs, QtCore.SIGNAL('buttonClicked(int)'),
-                     self, QtCore.SLOT('changePage(int)'))
+        self.tabs = QtWidgets.QButtonGroup(self)
+        self.tabs.buttonClicked[int].connect(self.changePage)
         tabNames = ["Chum List", "Conversations", "Interface", "Sound", "Notifications", "Logging", "Idle/Updates", "Theme", "Connection"]
         if parent.advanced: tabNames.append("Advanced")
         for t in tabNames:
-            button = QtGui.QPushButton(t)
+            button = QtWidgets.QPushButton(t)
             self.tabs.addButton(button)
             layout_4.addWidget(button)
             button.setCheckable(True)
         self.tabs.button(-2).setChecked(True)
-        self.pages = QtGui.QStackedWidget(self)
+        self.pages = QtWidgets.QStackedWidget(self)
 
-        self.bandwidthcheck = QtGui.QCheckBox("Low Bandwidth", self)
+        self.bandwidthcheck = QtWidgets.QCheckBox("Low Bandwidth", self)
         if self.config.lowBandwidth():
             self.bandwidthcheck.setChecked(True)
-        bandwidthLabel = QtGui.QLabel("(Stops you for receiving the flood of MOODS,\n"
+        bandwidthLabel = QtWidgets.QLabel("(Stops you for receiving the flood of MOODS,\n"
                                       " though stops chumlist from working properly)")
         font = bandwidthLabel.font()
         font.setPointSize(8)
         bandwidthLabel.setFont(font)
 
-        self.autonickserv = QtGui.QCheckBox("Auto-Identify with NickServ", self)
+        self.autonickserv = QtWidgets.QCheckBox("Auto-Identify with NickServ", self)
         self.autonickserv.setChecked(parent.userprofile.getAutoIdentify())
-        self.connect(self.autonickserv, QtCore.SIGNAL('stateChanged(int)'),
-                     self, QtCore.SLOT('autoNickServChange(int)'))
-        self.nickservpass = QtGui.QLineEdit(self)
+        self.autonickserv.stateChanged[int].connect(self.autoNickServChange)
+        self.nickservpass = QtWidgets.QLineEdit(self)
         self.nickservpass.setPlaceholderText("NickServ Password")
-        self.nickservpass.setEchoMode(QtGui.QLineEdit.PasswordEchoOnEdit)
+        self.nickservpass.setEchoMode(QtWidgets.QLineEdit.PasswordEchoOnEdit)
         self.nickservpass.setText(parent.userprofile.getNickServPass())
 
-        self.autojoinlist = QtGui.QListWidget(self)
+        self.autojoinlist = QtWidgets.QListWidget(self)
         self.autojoinlist.addItems(parent.userprofile.getAutoJoins())
-        self.addAutoJoinBtn = QtGui.QPushButton("Add", self)
-        self.connect(self.addAutoJoinBtn, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('addAutoJoin()'))
-        self.delAutoJoinBtn = QtGui.QPushButton("Remove", self)
-        self.connect(self.delAutoJoinBtn, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('delAutoJoin()'))
+        self.addAutoJoinBtn = QtWidgets.QPushButton("Add", self)
+        self.addAutoJoinBtn.clicked.connect(self.addAutoJoin)
+        self.delAutoJoinBtn = QtWidgets.QPushButton("Remove", self)
+        self.delAutoJoinBtn.clicked.connect(self.delAutoJoin)
 
-        self.tabcheck = QtGui.QCheckBox("Tabbed Conversations", self)
+        self.tabcheck = QtWidgets.QCheckBox("Tabbed Conversations", self)
         if self.config.tabs():
             self.tabcheck.setChecked(True)
-        self.tabmemocheck = QtGui.QCheckBox("Tabbed Memos", self)
+        self.tabmemocheck = QtWidgets.QCheckBox("Tabbed Memos", self)
         if self.config.tabMemos():
             self.tabmemocheck.setChecked(True)
-        self.hideOffline = QtGui.QCheckBox("Hide Offline Chums", self)
+        self.hideOffline = QtWidgets.QCheckBox("Hide Offline Chums", self)
         if self.config.hideOfflineChums():
             self.hideOffline.setChecked(True)
 
-        self.soundcheck = QtGui.QCheckBox("Sounds On", self)
-        self.connect(self.soundcheck, QtCore.SIGNAL('stateChanged(int)'),
-                     self, QtCore.SLOT('soundChange(int)'))
-        self.chatsoundcheck = QtGui.QCheckBox("Pester Sounds", self)
+        self.soundcheck = QtWidgets.QCheckBox("Sounds On", self)
+        self.soundcheck.stateChanged[int].connect(self.soundChange)
+        self.chatsoundcheck = QtWidgets.QCheckBox("Pester Sounds", self)
         self.chatsoundcheck.setChecked(self.config.chatSound())
-        self.memosoundcheck = QtGui.QCheckBox("Memo Sounds", self)
+        self.memosoundcheck = QtWidgets.QCheckBox("Memo Sounds", self)
         self.memosoundcheck.setChecked(self.config.memoSound())
-        self.connect(self.memosoundcheck, QtCore.SIGNAL('stateChanged(int)'),
-                     self, QtCore.SLOT('memoSoundChange(int)'))
-        self.memopingcheck = QtGui.QCheckBox("Memo Ping", self)
+        self.memosoundcheck.stateChanged[int].connect(self.memoSoundChange)
+        self.memopingcheck = QtWidgets.QCheckBox("Memo Ping", self)
         self.memopingcheck.setChecked(self.config.memoPing())
-        self.namesoundcheck = QtGui.QCheckBox("Memo Mention (initials)", self)
+        self.namesoundcheck = QtWidgets.QCheckBox("Memo Mention (initials)", self)
         self.namesoundcheck.setChecked(self.config.nameSound())
         if self.config.soundOn():
             self.soundcheck.setChecked(True)
@@ -1070,63 +1034,60 @@ class PesterOptions(QtGui.QDialog):
             self.memosoundcheck.setEnabled(False)
             self.memoSoundChange(0)
 
-        self.editMentions = QtGui.QPushButton("Edit Mentions", self)
-        self.connect(self.editMentions, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('openMentions()'))
-        self.editMentions2 = QtGui.QPushButton("Edit Mentions", self)
-        self.connect(self.editMentions2, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('openMentions()'))
+        self.editMentions = QtWidgets.QPushButton("Edit Mentions", self)
+        self.editMentions.clicked.connect(self.openMentions)
+        self.editMentions2 = QtWidgets.QPushButton("Edit Mentions", self)
+        self.editMentions2.clicked.connect(self.openMentions)
 
-        self.volume = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+        self.volume = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.volume.setMinimum(0)
         self.volume.setMaximum(100)
         self.volume.setValue(self.config.volume())
-        self.connect(self.volume, QtCore.SIGNAL('valueChanged(int)'),
-                     self, QtCore.SLOT('printValue(int)'))
+        self.volume.valueChanged[int].connect(self.printValue)
         # Disable the volume slider if we can't actually use it.
         if parent.canSetVolume():
-            self.currentVol = QtGui.QLabel(
+            self.currentVol = QtWidgets.QLabel(
                     "{0!s}%".format(self.config.volume()), self)
             # We don't need to explicitly set this, but it helps drive the
             # point home
             self.volume.setEnabled(True)
         else:
             # We can't set the volume....
-            self.currentVol = QtGui.QLabel(
+            self.currentVol = QtWidgets.QLabel(
                     "(Disabled: Sound Mixer Error)", self)
             self.volume.setEnabled(False)
         self.currentVol.setAlignment(QtCore.Qt.AlignHCenter)
 
 
-        self.timestampcheck = QtGui.QCheckBox("Time Stamps", self)
+        self.timestampcheck = QtWidgets.QCheckBox("Time Stamps", self)
         if self.config.showTimeStamps():
             self.timestampcheck.setChecked(True)
 
-        self.timestampBox = QtGui.QComboBox(self)
+        self.timestampBox = QtWidgets.QComboBox(self)
         self.timestampBox.addItem("12 hour")
         self.timestampBox.addItem("24 hour")
         if self.config.time12Format():
             self.timestampBox.setCurrentIndex(0)
         else:
             self.timestampBox.setCurrentIndex(1)
-        self.secondscheck = QtGui.QCheckBox("Show Seconds", self)
+        self.secondscheck = QtWidgets.QCheckBox("Show Seconds", self)
         if self.config.showSeconds():
             self.secondscheck.setChecked(True)
 
-        self.memomessagecheck = QtGui.QCheckBox("Show OP and Voice Messages in Memos", self)
+        self.memomessagecheck = QtWidgets.QCheckBox("Show OP and Voice Messages in Memos", self)
         if self.config.opvoiceMessages():
             self.memomessagecheck.setChecked(True)
 
         if not ostools.isOSXBundle():
-            self.animationscheck = QtGui.QCheckBox("Use animated smilies", self)
+            self.animationscheck = QtWidgets.QCheckBox("Use animated smilies", self)
             if self.config.animations():
                 self.animationscheck.setChecked(True)
-            animateLabel = QtGui.QLabel("(Disable if you leave chats open for LOOOONG periods of time)")
+            animateLabel = QtWidgets.QLabel("(Disable if you leave chats open for LOOOONG periods of time)")
             font = animateLabel.font()
             font.setPointSize(8)
             animateLabel.setFont(font)
 
-        self.userlinkscheck = QtGui.QCheckBox("Disable #Memo and @User Links", self)
+        self.userlinkscheck = QtWidgets.QCheckBox("Disable #Memo and @User Links", self)
         self.userlinkscheck.setChecked(self.config.disableUserLinks())
         self.userlinkscheck.setVisible(False)
 
@@ -1134,45 +1095,45 @@ class PesterOptions(QtGui.QDialog):
         # Will add ability to turn off groups later
         #self.groupscheck = QtGui.QCheckBox("Use Groups", self)
         #self.groupscheck.setChecked(self.config.useGroups())
-        self.showemptycheck = QtGui.QCheckBox("Show Empty Groups", self)
+        self.showemptycheck = QtWidgets.QCheckBox("Show Empty Groups", self)
         self.showemptycheck.setChecked(self.config.showEmptyGroups())
-        self.showonlinenumbers = QtGui.QCheckBox("Show Number of Online Chums", self)
+        self.showonlinenumbers = QtWidgets.QCheckBox("Show Number of Online Chums", self)
         self.showonlinenumbers.setChecked(self.config.showOnlineNumbers())
 
-        sortLabel = QtGui.QLabel("Sort Chums")
-        self.sortBox = QtGui.QComboBox(self)
+        sortLabel = QtWidgets.QLabel("Sort Chums")
+        self.sortBox = QtWidgets.QComboBox(self)
         self.sortBox.addItem("Alphabetically")
         self.sortBox.addItem("By Mood")
         self.sortBox.addItem("Manually")
         method = self.config.sortMethod()
         if method >= 0 and method < self.sortBox.count():
             self.sortBox.setCurrentIndex(method)
-        layout_3 = QtGui.QHBoxLayout()
+        layout_3 = QtWidgets.QHBoxLayout()
         layout_3.addWidget(sortLabel)
         layout_3.addWidget(self.sortBox, 10)
 
-        self.logpesterscheck = QtGui.QCheckBox("Log all Pesters", self)
+        self.logpesterscheck = QtWidgets.QCheckBox("Log all Pesters", self)
         if self.config.logPesters() & self.config.LOG:
             self.logpesterscheck.setChecked(True)
-        self.logmemoscheck = QtGui.QCheckBox("Log all Memos", self)
+        self.logmemoscheck = QtWidgets.QCheckBox("Log all Memos", self)
         if self.config.logMemos() & self.config.LOG:
             self.logmemoscheck.setChecked(True)
-        self.stamppestercheck = QtGui.QCheckBox("Log Time Stamps for Pesters", self)
+        self.stamppestercheck = QtWidgets.QCheckBox("Log Time Stamps for Pesters", self)
         if self.config.logPesters() & self.config.STAMP:
             self.stamppestercheck.setChecked(True)
-        self.stampmemocheck = QtGui.QCheckBox("Log Time Stamps for Memos", self)
+        self.stampmemocheck = QtWidgets.QCheckBox("Log Time Stamps for Memos", self)
         if self.config.logMemos() & self.config.STAMP:
             self.stampmemocheck.setChecked(True)
 
-        self.idleBox = QtGui.QSpinBox(self)
+        self.idleBox = QtWidgets.QSpinBox(self)
         self.idleBox.setStyleSheet("background:#FFFFFF")
         self.idleBox.setRange(1, 1440)
         self.idleBox.setValue(self.config.idleTime())
-        layout_5 = QtGui.QHBoxLayout()
-        layout_5.addWidget(QtGui.QLabel("Minutes before Idle:"))
+        layout_5 = QtWidgets.QHBoxLayout()
+        layout_5.addWidget(QtWidgets.QLabel("Minutes before Idle:"))
         layout_5.addWidget(self.idleBox)
 
-        self.updateBox = QtGui.QComboBox(self)
+        self.updateBox = QtWidgets.QComboBox(self)
         self.updateBox.addItem("Once a Day")
         self.updateBox.addItem("Once a Week")
         self.updateBox.addItem("Only on Start")
@@ -1180,59 +1141,57 @@ class PesterOptions(QtGui.QDialog):
         check = self.config.checkForUpdates()
         if check >= 0 and check < self.updateBox.count():
             self.updateBox.setCurrentIndex(check)
-        layout_6 = QtGui.QHBoxLayout()
-        layout_6.addWidget(QtGui.QLabel("Check for\nPesterchum Updates:"))
+        layout_6 = QtWidgets.QHBoxLayout()
+        layout_6.addWidget(QtWidgets.QLabel("Check for\nPesterchum Updates:"))
         layout_6.addWidget(self.updateBox)
 
         if not ostools.isOSXLeopard():
-            self.mspaCheck = QtGui.QCheckBox("Check for MSPA Updates", self)
+            self.mspaCheck = QtWidgets.QCheckBox("Check for MSPA Updates", self)
             self.mspaCheck.setChecked(self.config.checkMSPA())
 
-        self.randomscheck = QtGui.QCheckBox("Receive Random Encounters")
+        self.randomscheck = QtWidgets.QCheckBox("Receive Random Encounters")
         self.randomscheck.setChecked(parent.userprofile.randoms)
         if not parent.randhandler.running:
             self.randomscheck.setEnabled(False)
 
         avail_themes = self.config.availableThemes()
-        self.themeBox = QtGui.QComboBox(self)
+        self.themeBox = QtWidgets.QComboBox(self)
         notheme = (theme.name not in avail_themes)
         for (i, t) in enumerate(avail_themes):
             self.themeBox.addItem(t)
             if (not notheme and t == theme.name) or (notheme and t == "pesterchum"):
                 self.themeBox.setCurrentIndex(i)
-        self.refreshtheme = QtGui.QPushButton("Refresh current theme", self)
-        self.connect(self.refreshtheme, QtCore.SIGNAL('clicked()'),
-                     parent, QtCore.SLOT('themeSelectOverride()'))
-        self.ghostchum = QtGui.QCheckBox("Pesterdunk Ghostchum!!", self)
+        self.refreshtheme = QtWidgets.QPushButton("Refresh current theme", self)
+        self.refreshtheme.clicked.connect(parent.themeSelectOverride)
+        self.ghostchum = QtWidgets.QCheckBox("Pesterdunk Ghostchum!!", self)
         self.ghostchum.setChecked(self.config.ghostchum())
 
         self.buttonOptions = ["Minimize to Taskbar", "Minimize to Tray", "Quit"]
-        self.miniBox = QtGui.QComboBox(self)
+        self.miniBox = QtWidgets.QComboBox(self)
         self.miniBox.addItems(self.buttonOptions)
         self.miniBox.setCurrentIndex(self.config.minimizeAction())
-        self.closeBox = QtGui.QComboBox(self)
+        self.closeBox = QtWidgets.QComboBox(self)
         self.closeBox.addItems(self.buttonOptions)
         self.closeBox.setCurrentIndex(self.config.closeAction())
-        layout_mini = QtGui.QHBoxLayout()
-        layout_mini.addWidget(QtGui.QLabel("Minimize"))
+        layout_mini = QtWidgets.QHBoxLayout()
+        layout_mini.addWidget(QtWidgets.QLabel("Minimize"))
         layout_mini.addWidget(self.miniBox)
-        layout_close = QtGui.QHBoxLayout()
-        layout_close.addWidget(QtGui.QLabel("Close"))
+        layout_close = QtWidgets.QHBoxLayout()
+        layout_close.addWidget(QtWidgets.QLabel("Close"))
         layout_close.addWidget(self.closeBox)
 
-        self.pesterBlink = QtGui.QCheckBox("Blink Taskbar on Pesters", self)
+        self.pesterBlink = QtWidgets.QCheckBox("Blink Taskbar on Pesters", self)
         if self.config.blink() & self.config.PBLINK:
             self.pesterBlink.setChecked(True)
-        self.memoBlink = QtGui.QCheckBox("Blink Taskbar on Memos", self)
+        self.memoBlink = QtWidgets.QCheckBox("Blink Taskbar on Memos", self)
         if self.config.blink() & self.config.MBLINK:
             self.memoBlink.setChecked(True)
 
-        self.notifycheck = QtGui.QCheckBox("Toast Notifications", self)
+        self.notifycheck = QtWidgets.QCheckBox("Toast Notifications", self)
         if self.config.notify():
             self.notifycheck.setChecked(True)
-        self.connect(self.notifycheck, QtCore.SIGNAL('stateChanged(int)'),
-                     self, QtCore.SLOT('notifyChange(int)'))
-        self.notifyOptions = QtGui.QComboBox(self)
+        self.notifycheck.stateChanged[int].connect(self.notifyChange)
+        self.notifyOptions = QtWidgets.QComboBox(self)
         types = self.parent().tm.availableTypes()
         cur = self.parent().tm.currentType()
         self.notifyOptions.addItems(types)
@@ -1240,49 +1199,47 @@ class PesterOptions(QtGui.QDialog):
             if t == cur:
                 self.notifyOptions.setCurrentIndex(i)
                 break
-        self.notifyTypeLabel = QtGui.QLabel("Type", self)
-        layout_type = QtGui.QHBoxLayout()
+        self.notifyTypeLabel = QtWidgets.QLabel("Type", self)
+        layout_type = QtWidgets.QHBoxLayout()
         layout_type.addWidget(self.notifyTypeLabel)
         layout_type.addWidget(self.notifyOptions)
-        self.notifySigninCheck   = QtGui.QCheckBox("Chum signs in", self)
+        self.notifySigninCheck   = QtWidgets.QCheckBox("Chum signs in", self)
         if self.config.notifyOptions() & self.config.SIGNIN:
             self.notifySigninCheck.setChecked(True)
-        self.notifySignoutCheck  = QtGui.QCheckBox("Chum signs out", self)
+        self.notifySignoutCheck  = QtWidgets.QCheckBox("Chum signs out", self)
         if self.config.notifyOptions() & self.config.SIGNOUT:
             self.notifySignoutCheck.setChecked(True)
-        self.notifyNewMsgCheck   = QtGui.QCheckBox("New messages", self)
+        self.notifyNewMsgCheck   = QtWidgets.QCheckBox("New messages", self)
         if self.config.notifyOptions() & self.config.NEWMSG:
             self.notifyNewMsgCheck.setChecked(True)
-        self.notifyNewConvoCheck = QtGui.QCheckBox("Only new conversations", self)
+        self.notifyNewConvoCheck = QtWidgets.QCheckBox("Only new conversations", self)
         if self.config.notifyOptions() & self.config.NEWCONVO:
             self.notifyNewConvoCheck.setChecked(True)
-        self.notifyMentionsCheck = QtGui.QCheckBox("Memo Mentions (initials)", self)
+        self.notifyMentionsCheck = QtWidgets.QCheckBox("Memo Mentions (initials)", self)
         if self.config.notifyOptions() & self.config.INITIALS:
             self.notifyMentionsCheck.setChecked(True)
         self.notifyChange(self.notifycheck.checkState())
 
         if parent.advanced:
             # NOTE: This doesn't do anything right now - so change it!
-            self.modechange = QtGui.QLineEdit(self)
-            layout_change = QtGui.QHBoxLayout()
-            layout_change.addWidget(QtGui.QLabel("Change:"))
+            self.modechange = QtWidgets.QLineEdit(self)
+            layout_change = QtWidgets.QHBoxLayout()
+            layout_change.addWidget(QtWidgets.QLabel("Change:"))
             layout_change.addWidget(self.modechange)
 
-        self.ok = QtGui.QPushButton("OK", self)
+        self.ok = QtWidgets.QPushButton("OK", self)
         self.ok.setDefault(True)
-        self.connect(self.ok, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('accept()'))
-        self.cancel = QtGui.QPushButton("CANCEL", self)
-        self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reject()'))
-        layout_2 = QtGui.QHBoxLayout()
+        self.ok.clicked.connect(self.accept)
+        self.cancel = QtWidgets.QPushButton("CANCEL", self)
+        self.cancel.clicked.connect(self.reject)
+        layout_2 = QtWidgets.QHBoxLayout()
         layout_2.addWidget(self.cancel)
         layout_2.addWidget(self.ok)
 
         # Tab layouts
         # Chum List
-        widget = QtGui.QWidget()
-        layout_chumlist = QtGui.QVBoxLayout(widget)
+        widget = QtWidgets.QWidget()
+        layout_chumlist = QtWidgets.QVBoxLayout(widget)
         layout_chumlist.setAlignment(QtCore.Qt.AlignTop)
         layout_chumlist.addWidget(self.hideOffline)
         #layout_chumlist.addWidget(self.groupscheck)
@@ -1292,8 +1249,8 @@ class PesterOptions(QtGui.QDialog):
         self.pages.addWidget(widget)
 
         # Conversations
-        widget = QtGui.QWidget()
-        layout_chat = QtGui.QVBoxLayout(widget)
+        widget = QtWidgets.QWidget()
+        layout_chat = QtWidgets.QVBoxLayout(widget)
         layout_chat.setAlignment(QtCore.Qt.AlignTop)
         layout_chat.addWidget(self.timestampcheck)
         layout_chat.addWidget(self.timestampBox)
@@ -1310,8 +1267,8 @@ class PesterOptions(QtGui.QDialog):
         self.pages.addWidget(widget)
 
         # Interface
-        widget = QtGui.QWidget()
-        layout_interface = QtGui.QVBoxLayout(widget)
+        widget = QtWidgets.QWidget()
+        layout_interface = QtWidgets.QVBoxLayout(widget)
         layout_interface.setAlignment(QtCore.Qt.AlignTop)
         layout_interface.addWidget(self.tabcheck)
         layout_interface.addWidget(self.tabmemocheck)
@@ -1322,14 +1279,14 @@ class PesterOptions(QtGui.QDialog):
         self.pages.addWidget(widget)
 
         # Sound
-        widget = QtGui.QWidget()
-        layout_sound = QtGui.QVBoxLayout(widget)
+        widget = QtWidgets.QWidget()
+        layout_sound = QtWidgets.QVBoxLayout(widget)
         layout_sound.setAlignment(QtCore.Qt.AlignTop)
         layout_sound.addWidget(self.soundcheck)
-        layout_indent = QtGui.QVBoxLayout()
+        layout_indent = QtWidgets.QVBoxLayout()
         layout_indent.addWidget(self.chatsoundcheck)
         layout_indent.addWidget(self.memosoundcheck)
-        layout_doubleindent = QtGui.QVBoxLayout()
+        layout_doubleindent = QtWidgets.QVBoxLayout()
         layout_doubleindent.addWidget(self.memopingcheck)
         layout_doubleindent.addWidget(self.namesoundcheck)
         layout_doubleindent.addWidget(self.editMentions)
@@ -1338,7 +1295,7 @@ class PesterOptions(QtGui.QDialog):
         layout_indent.setContentsMargins(22,0,0,0)
         layout_sound.addLayout(layout_indent)
         layout_sound.addSpacing(15)
-        mvol = QtGui.QLabel("Master Volume:", self)
+        mvol = QtWidgets.QLabel("Master Volume:", self)
         # If we can't set the volume, grey this out as well
         #~mvol.setEnabled(parent.canSetVolume())
         # Normally we'd grey this out, but that presently makes things
@@ -1350,17 +1307,17 @@ class PesterOptions(QtGui.QDialog):
         self.pages.addWidget(widget)
 
         # Notifications
-        widget = QtGui.QWidget()
-        layout_notify = QtGui.QVBoxLayout(widget)
+        widget = QtWidgets.QWidget()
+        layout_notify = QtWidgets.QVBoxLayout(widget)
         layout_notify.setAlignment(QtCore.Qt.AlignTop)
         layout_notify.addWidget(self.notifycheck)
-        layout_indent = QtGui.QVBoxLayout()
+        layout_indent = QtWidgets.QVBoxLayout()
         layout_indent.addLayout(layout_type)
         layout_indent.setContentsMargins(22,0,0,0)
         layout_indent.addWidget(self.notifySigninCheck)
         layout_indent.addWidget(self.notifySignoutCheck)
         layout_indent.addWidget(self.notifyNewMsgCheck)
-        layout_doubleindent = QtGui.QVBoxLayout()
+        layout_doubleindent = QtWidgets.QVBoxLayout()
         layout_doubleindent.addWidget(self.notifyNewConvoCheck)
         layout_doubleindent.setContentsMargins(22,0,0,0)
         layout_indent.addLayout(layout_doubleindent)
@@ -1370,8 +1327,8 @@ class PesterOptions(QtGui.QDialog):
         self.pages.addWidget(widget)
 
         # Logging
-        widget = QtGui.QWidget()
-        layout_logs = QtGui.QVBoxLayout(widget)
+        widget = QtWidgets.QWidget()
+        layout_logs = QtWidgets.QVBoxLayout(widget)
         layout_logs.setAlignment(QtCore.Qt.AlignTop)
         layout_logs.addWidget(self.logpesterscheck)
         layout_logs.addWidget(self.logmemoscheck)
@@ -1380,8 +1337,8 @@ class PesterOptions(QtGui.QDialog):
         self.pages.addWidget(widget)
 
         # Idle/Updates
-        widget = QtGui.QWidget()
-        layout_idle = QtGui.QVBoxLayout(widget)
+        widget = QtWidgets.QWidget()
+        layout_idle = QtWidgets.QVBoxLayout(widget)
         layout_idle.setAlignment(QtCore.Qt.AlignTop)
         layout_idle.addLayout(layout_5)
         layout_idle.addLayout(layout_6)
@@ -1390,29 +1347,29 @@ class PesterOptions(QtGui.QDialog):
         self.pages.addWidget(widget)
 
         # Theme
-        widget = QtGui.QWidget()
-        layout_theme = QtGui.QVBoxLayout(widget)
+        widget = QtWidgets.QWidget()
+        layout_theme = QtWidgets.QVBoxLayout(widget)
         layout_theme.setAlignment(QtCore.Qt.AlignTop)
-        layout_theme.addWidget(QtGui.QLabel("Pick a Theme:"))
+        layout_theme.addWidget(QtWidgets.QLabel("Pick a Theme:"))
         layout_theme.addWidget(self.themeBox)
         layout_theme.addWidget(self.refreshtheme)
         layout_theme.addWidget(self.ghostchum)
         self.pages.addWidget(widget)
 
         # Connection
-        widget = QtGui.QWidget()
-        layout_connect = QtGui.QVBoxLayout(widget)
+        widget = QtWidgets.QWidget()
+        layout_connect = QtWidgets.QVBoxLayout(widget)
         layout_connect.setAlignment(QtCore.Qt.AlignTop)
         layout_connect.addWidget(self.bandwidthcheck)
         layout_connect.addWidget(bandwidthLabel)
         layout_connect.addWidget(self.autonickserv)
-        layout_indent = QtGui.QVBoxLayout()
+        layout_indent = QtWidgets.QVBoxLayout()
         layout_indent.addWidget(self.nickservpass)
         layout_indent.setContentsMargins(22,0,0,0)
         layout_connect.addLayout(layout_indent)
-        layout_connect.addWidget(QtGui.QLabel("Auto-Join Memos:"))
+        layout_connect.addWidget(QtWidgets.QLabel("Auto-Join Memos:"))
         layout_connect.addWidget(self.autojoinlist)
-        layout_8 = QtGui.QHBoxLayout()
+        layout_8 = QtWidgets.QHBoxLayout()
         layout_8.addWidget(self.addAutoJoinBtn)
         layout_8.addWidget(self.delAutoJoinBtn)
         layout_connect.addLayout(layout_8)
@@ -1420,15 +1377,15 @@ class PesterOptions(QtGui.QDialog):
 
         # Advanced
         if parent.advanced:
-            widget = QtGui.QWidget()
-            layout_advanced = QtGui.QVBoxLayout(widget)
+            widget = QtWidgets.QWidget()
+            layout_advanced = QtWidgets.QVBoxLayout(widget)
             layout_advanced.setAlignment(QtCore.Qt.AlignTop)
-            layout_advanced.addWidget(QtGui.QLabel("Current User Mode: %s" % parent.modes))
+            layout_advanced.addWidget(QtWidgets.QLabel("Current User Mode: %s" % parent.modes))
             layout_advanced.addLayout(layout_change)
             self.pages.addWidget(widget)
 
-        layout_0 = QtGui.QVBoxLayout()
-        layout_1 = QtGui.QHBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
+        layout_1 = QtWidgets.QHBoxLayout()
         layout_1.addLayout(layout_4)
         layout_1.addWidget(vr)
         layout_1.addWidget(self.pages)
@@ -1519,10 +1476,8 @@ class PesterOptions(QtGui.QDialog):
             self.mentionmenu = None
         if not self.mentionmenu:
             self.mentionmenu = PesterMentions(self.parent(), self.theme, self)
-            self.connect(self.mentionmenu, QtCore.SIGNAL('accepted()'),
-                         self, QtCore.SLOT('updateMentions()'))
-            self.connect(self.mentionmenu, QtCore.SIGNAL('rejected()'),
-                         self, QtCore.SLOT('closeMentions()'))
+            self.mentionmenu.accepted.connect(self.updateMentions)
+            self.mentionmenu.rejected.connect(self.closeMentions)
             self.mentionmenu.show()
             self.mentionmenu.raise_()
             self.mentionmenu.activateWindow()
@@ -1538,9 +1493,9 @@ class PesterOptions(QtGui.QDialog):
         self.parent().userprofile.setMentions(m)
         self.mentionmenu = None
 
-class PesterUserlist(QtGui.QDialog):
+class PesterUserlist(QtWidgets.QDialog):
     def __init__(self, config, theme, parent):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self.setModal(False)
         self.config = config
         self.theme = theme
@@ -1548,31 +1503,28 @@ class PesterUserlist(QtGui.QDialog):
         self.setStyleSheet(self.theme["main/defaultwindow/style"])
         self.resize(200, 600)
 
-        self.searchbox = QtGui.QLineEdit(self)
+        self.searchbox = QtWidgets.QLineEdit(self)
         #self.searchbox.setStyleSheet(theme["convo/input/style"]) # which style is better?
         self.searchbox.setPlaceholderText("Search")
-        self.connect(self.searchbox, QtCore.SIGNAL("textChanged(QString)"), self, QtCore.SLOT("updateUsers()"))
+        self.searchbox.textChanged['QString'].connect(self.updateUsers)
 
-        self.label = QtGui.QLabel("USERLIST")
+        self.label = QtWidgets.QLabel("USERLIST")
         self.userarea = RightClickList(self)
         self.userarea.setStyleSheet(self.theme["main/chums/style"])
-        self.userarea.optionsMenu = QtGui.QMenu(self)
+        self.userarea.optionsMenu = QtWidgets.QMenu(self)
 
-        self.addChumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
-        self.connect(self.addChumAction, QtCore.SIGNAL('triggered()'),
-                     self, QtCore.SLOT('addChumSlot()'))
-        self.pesterChumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
-        self.connect(self.pesterChumAction, QtCore.SIGNAL('triggered()'),
-                     self, QtCore.SLOT('pesterChumSlot()'))
+        self.addChumAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
+        self.addChumAction.triggered.connect(self.addChumSlot)
+        self.pesterChumAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
+        self.pesterChumAction.triggered.connect(self.pesterChumSlot)
         self.userarea.optionsMenu.addAction(self.addChumAction)
         self.userarea.optionsMenu.addAction(self.pesterChumAction)
 
-        self.ok = QtGui.QPushButton("OK", self)
+        self.ok = QtWidgets.QPushButton("OK", self)
         self.ok.setDefault(True)
-        self.connect(self.ok, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('accept()'))
+        self.ok.clicked.connect(self.accept)
 
-        layout_0 = QtGui.QVBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
         layout_0.addWidget(self.label)
         layout_0.addWidget(self.userarea)
         layout_0.addWidget(self.searchbox)
@@ -1580,13 +1532,9 @@ class PesterUserlist(QtGui.QDialog):
 
         self.setLayout(layout_0)
 
-        self.connect(self.mainwindow, QtCore.SIGNAL('namesUpdated()'),
-                     self, QtCore.SLOT('updateUsers()'))
+        self.mainwindow.namesUpdated.connect(self.updateUsers)
 
-        self.connect(self.mainwindow,
-                     QtCore.SIGNAL('userPresentSignal(QString, QString, QString)'),
-                     self,
-                     QtCore.SLOT('updateUserPresent(QString, QString, QString)'))
+        self.mainwindow.userPresentSignal['QString', 'QString', 'QString'].connect(self.updateUserPresent)
         self.updateUsers()
 
         self.searchbox.setFocus()
@@ -1596,14 +1544,14 @@ class PesterUserlist(QtGui.QDialog):
         self.userarea.clear()
         for n in names:
             if str(self.searchbox.text()) == "" or n.lower().find(str(self.searchbox.text()).lower()) != -1:
-                item = QtGui.QListWidgetItem(n)
+                item = QtWidgets.QListWidgetItem(n)
                 item.setTextColor(QtGui.QColor(self.theme["main/chums/userlistcolor"]))
                 self.userarea.addItem(item)
         self.userarea.sortItems()
-    @QtCore.pyqtSlot(QtCore.QString, QtCore.QString, QtCore.QString)
+    @QtCore.pyqtSlot(QString, QString, QString)
     def updateUserPresent(self, handle, channel, update):
-        h = unicode(handle)
-        c = unicode(channel)
+        h = str(handle)
+        c = str(channel)
         if update == "quit":
             self.delUser(h)
         elif update == "left" and c == "#pesterchum":
@@ -1612,7 +1560,7 @@ class PesterUserlist(QtGui.QDialog):
             if str(self.searchbox.text()) == "" or h.lower().find(str(self.searchbox.text()).lower()) != -1:
                 self.addUser(h)
     def addUser(self, name):
-        item = QtGui.QListWidgetItem(name)
+        item = QtWidgets.QListWidgetItem(name)
         item.setTextColor(QtGui.QColor(self.theme["main/chums/userlistcolor"]))
         self.userarea.addItem(item)
         self.userarea.sortItems()
@@ -1642,13 +1590,13 @@ class PesterUserlist(QtGui.QDialog):
             return
         self.pesterChum.emit(cur.text())
 
-    addChum = QtCore.pyqtSignal(QtCore.QString)
-    pesterChum = QtCore.pyqtSignal(QtCore.QString)
+    addChum = QtCore.pyqtSignal('QString')
+    pesterChum = QtCore.pyqtSignal('QString')
 
 
-class MemoListItem(QtGui.QTreeWidgetItem):
+class MemoListItem(QtWidgets.QTreeWidgetItem):
     def __init__(self, channel, usercount):
-        QtGui.QTreeWidgetItem.__init__(self, [channel, str(usercount)])
+        QtWidgets.QTreeWidgetItem.__init__(self, [channel, str(usercount)])
         self.target = channel
     def __lt__(self, other):
         column = self.treeWidget().sortColumn()
@@ -1656,20 +1604,20 @@ class MemoListItem(QtGui.QTreeWidgetItem):
             return int(self.text(column)) < int(other.text(column))
         return self.text(column) < other.text(column)
 
-class PesterMemoList(QtGui.QDialog):
+class PesterMemoList(QtWidgets.QDialog):
     def __init__(self, parent, channel=""):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self.setModal(False)
         self.theme = parent.theme
         self.mainwindow = parent
         self.setStyleSheet(self.theme["main/defaultwindow/style"])
         self.resize(460, 300)
 
-        self.label = QtGui.QLabel("MEMOS")
+        self.label = QtWidgets.QLabel("MEMOS")
         self.channelarea = RightClickTree(self)
-        self.channelarea.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+        self.channelarea.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.channelarea.setStyleSheet(self.theme["main/chums/style"])
-        self.channelarea.optionsMenu = QtGui.QMenu(self)
+        self.channelarea.optionsMenu = QtWidgets.QMenu(self)
         self.channelarea.setColumnCount(2)
         self.channelarea.setHeaderLabels(["Memo", "Users"])
         self.channelarea.setIndentation(0)
@@ -1677,35 +1625,31 @@ class PesterMemoList(QtGui.QDialog):
         self.channelarea.setColumnWidth(1,10)
         self.channelarea.setSortingEnabled(True)
         self.channelarea.sortByColumn(0, QtCore.Qt.AscendingOrder)
-        self.connect(self.channelarea,
-                     QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'),
-                     self, QtCore.SLOT('AcceptSelection()'))
+        self.channelarea.itemDoubleClicked[QTreeWidgetItem, int].connect(self.AcceptSelection)
 
-        self.orjoinlabel = QtGui.QLabel("OR MAKE A NEW MEMO:")
-        self.newmemo = QtGui.QLineEdit(channel, self)
-        self.secretChannel = QtGui.QCheckBox("HIDDEN CHANNEL?", self)
-        self.inviteChannel = QtGui.QCheckBox("INVITATION ONLY?", self)
+        self.orjoinlabel = QtWidgets.QLabel("OR MAKE A NEW MEMO:")
+        self.newmemo = QtWidgets.QLineEdit(channel, self)
+        self.secretChannel = QtWidgets.QCheckBox("HIDDEN CHANNEL?", self)
+        self.inviteChannel = QtWidgets.QCheckBox("INVITATION ONLY?", self)
 
-        self.timelabel = QtGui.QLabel("TIMEFRAME:")
+        self.timelabel = QtWidgets.QLabel("TIMEFRAME:")
         self.timeslider = TimeSlider(QtCore.Qt.Horizontal, self)
         self.timeinput = TimeInput(self.timeslider, self)
 
-        self.cancel = QtGui.QPushButton("CANCEL", self)
-        self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reject()'))
-        self.join = QtGui.QPushButton("JOIN", self)
+        self.cancel = QtWidgets.QPushButton("CANCEL", self)
+        self.cancel.clicked.connect(self.reject)
+        self.join = QtWidgets.QPushButton("JOIN", self)
         self.join.setDefault(True)
-        self.connect(self.join, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('AcceptIfSelectionMade()'))
-        layout_ok = QtGui.QHBoxLayout()
+        self.join.clicked.connect(self.AcceptIfSelectionMade)
+        layout_ok = QtWidgets.QHBoxLayout()
         layout_ok.addWidget(self.cancel)
         layout_ok.addWidget(self.join)
 
-        layout_left  = QtGui.QVBoxLayout()
-        layout_right = QtGui.QVBoxLayout()
+        layout_left  = QtWidgets.QVBoxLayout()
+        layout_right = QtWidgets.QVBoxLayout()
         layout_right.setAlignment(QtCore.Qt.AlignTop)
-        layout_0 = QtGui.QVBoxLayout()
-        layout_1 = QtGui.QHBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
+        layout_1 = QtWidgets.QHBoxLayout()
         layout_left.addWidget(self.label)
         layout_left.addWidget(self.channelarea)
         layout_right.addWidget(self.orjoinlabel)
@@ -1756,27 +1700,27 @@ class PesterMemoList(QtGui.QDialog):
         self.accept()
 
 
-class LoadingScreen(QtGui.QDialog):
+class LoadingScreen(QtWidgets.QDialog):
+    tryAgain = QtCore.pyqtSignal()
+
     def __init__(self, parent=None):
-        QtGui.QDialog.__init__(self, parent, (QtCore.Qt.CustomizeWindowHint |
+        QtWidgets.QDialog.__init__(self, parent, (QtCore.Qt.CustomizeWindowHint |
                                               QtCore.Qt.FramelessWindowHint))
         self.mainwindow = parent
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
 
-        self.loadinglabel = QtGui.QLabel("CONN3CT1NG", self)
-        self.cancel = QtGui.QPushButton("QU1T >:?", self)
-        self.ok = QtGui.QPushButton("R3CONN3CT >:]", self)
+        self.loadinglabel = QtWidgets.QLabel("CONN3CT1NG", self)
+        self.cancel = QtWidgets.QPushButton("QU1T >:?", self)
+        self.ok = QtWidgets.QPushButton("R3CONN3CT >:]", self)
         # Help reduce the number of accidental Pesterchum closures... :|
         self.cancel.setAutoDefault(False)
         self.ok.setAutoDefault(True)
-        self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reject()'))
-        self.connect(self.ok, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SIGNAL('tryAgain()'))
+        self.cancel.clicked.connect(self.reject)
+        self.ok.clicked.connect(self.tryAgain)
 
-        self.layout = QtGui.QVBoxLayout()
+        self.layout = QtWidgets.QVBoxLayout()
         self.layout.addWidget(self.loadinglabel)
-        layout_1 = QtGui.QHBoxLayout()
+        layout_1 = QtWidgets.QHBoxLayout()
         layout_1.addWidget(self.cancel)
         layout_1.addWidget(self.ok)
         self.layout.addLayout(layout_1)
@@ -1807,14 +1751,14 @@ class LoadingScreen(QtGui.QDialog):
 
     tryAgain = QtCore.pyqtSignal()
 
-class AboutPesterchum(QtGui.QDialog):
+class AboutPesterchum(QtWidgets.QDialog):
     def __init__(self, parent=None):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self.mainwindow = parent
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
 
-        self.title = QtGui.QLabel("P3ST3RCHUM V. %s" % (_pcVersion))
-        self.credits = QtGui.QLabel("Programming by:\n\
+        self.title = QtWidgets.QLabel("P3ST3RCHUM V. %s" % (_pcVersion))
+        self.credits = QtWidgets.QLabel("Programming by:\n\
   illuminatedwax (ghostDunk)\n\
   Kiooeht (evacipatedBox)\n\
   Lexi (lexicalNuance)\n\
@@ -1833,39 +1777,36 @@ Special Thanks:\n\
   gamblingGenocider\n\
   Eco-Mono")
 
-        self.ok = QtGui.QPushButton("OK", self)
-        self.connect(self.ok, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reject()'))
+        self.ok = QtWidgets.QPushButton("OK", self)
+        self.ok.clicked.connect(self.reject)
 
-        layout_0 = QtGui.QVBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
         layout_0.addWidget(self.title)
         layout_0.addWidget(self.credits)
         layout_0.addWidget(self.ok)
 
         self.setLayout(layout_0)
 
-class UpdatePesterchum(QtGui.QDialog):
+class UpdatePesterchum(QtWidgets.QDialog):
     def __init__(self, ver, url, parent=None):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self.url = url
         self.mainwindow = parent
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
         self.setWindowTitle("Pesterchum v%s Update" % (ver))
         self.setModal(False)
 
-        self.title = QtGui.QLabel("An update to Pesterchum is available!")
+        self.title = QtWidgets.QLabel("An update to Pesterchum is available!")
 
-        layout_0 = QtGui.QVBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
         layout_0.addWidget(self.title)
 
-        self.ok = QtGui.QPushButton("D0WNL04D 4ND 1NST4LL N0W", self)
+        self.ok = QtWidgets.QPushButton("D0WNL04D 4ND 1NST4LL N0W", self)
         self.ok.setDefault(True)
-        self.connect(self.ok, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('accept()'))
-        self.cancel = QtGui.QPushButton("CANCEL", self)
-        self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reject()'))
-        layout_2 = QtGui.QHBoxLayout()
+        self.ok.clicked.connect(self.accept)
+        self.cancel = QtWidgets.QPushButton("CANCEL", self)
+        self.cancel.clicked.connect(self.reject)
+        layout_2 = QtWidgets.QHBoxLayout()
         layout_2.addWidget(self.cancel)
         layout_2.addWidget(self.ok)
 
@@ -1873,41 +1814,39 @@ class UpdatePesterchum(QtGui.QDialog):
 
         self.setLayout(layout_0)
 
-class AddChumDialog(QtGui.QDialog):
+class AddChumDialog(QtWidgets.QDialog):
     def __init__(self, avail_groups, parent=None):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
 
         self.mainwindow = parent
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
         self.setWindowTitle("Enter Chum Handle")
         self.setModal(True)
 
-        self.title = QtGui.QLabel("Enter Chum Handle")
-        self.chumBox = QtGui.QLineEdit(self)
-        self.groupBox = QtGui.QComboBox(self)
+        self.title = QtWidgets.QLabel("Enter Chum Handle")
+        self.chumBox = QtWidgets.QLineEdit(self)
+        self.groupBox = QtWidgets.QComboBox(self)
         avail_groups.sort()
         avail_groups.pop(avail_groups.index("Chums"))
         avail_groups.insert(0, "Chums")
         for g in avail_groups:
             self.groupBox.addItem(g)
-        self.newgrouplabel = QtGui.QLabel("Or make a new group:")
-        self.newgroup = QtGui.QLineEdit(self)
+        self.newgrouplabel = QtWidgets.QLabel("Or make a new group:")
+        self.newgroup = QtWidgets.QLineEdit(self)
 
-        layout_0 = QtGui.QVBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
         layout_0.addWidget(self.title)
         layout_0.addWidget(self.chumBox)
         layout_0.addWidget(self.groupBox)
         layout_0.addWidget(self.newgrouplabel)
         layout_0.addWidget(self.newgroup)
 
-        self.ok = QtGui.QPushButton("OK", self)
+        self.ok = QtWidgets.QPushButton("OK", self)
         self.ok.setDefault(True)
-        self.connect(self.ok, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('accept()'))
-        self.cancel = QtGui.QPushButton("CANCEL", self)
-        self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reject()'))
-        layout_2 = QtGui.QHBoxLayout()
+        self.ok.clicked.connect(self.accept)
+        self.cancel = QtWidgets.QPushButton("CANCEL", self)
+        self.cancel.clicked.connect(self.reject)
+        layout_2 = QtWidgets.QHBoxLayout()
         layout_2.addWidget(self.cancel)
         layout_2.addWidget(self.ok)
 

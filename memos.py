@@ -1,7 +1,7 @@
 from string import Template
 import re
 from copy import copy
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
 from datetime import time, timedelta, datetime
 
 from mood import Mood
@@ -12,6 +12,12 @@ from parsetools import convertTags, addTimeInitial, timeProtocol, \
     lexMessage, colorBegin, colorEnd, mecmd, smiledict
 import parsetools
 from logviewer import PesterLogViewer
+
+try:
+    QString = unicode
+except NameError:
+    # Python 3
+    QString = str
 
 def delta2txt(d, format="pc"):
     if type(d) is mysteryTime:
@@ -153,7 +159,7 @@ class TimeTracker(list):
         except ValueError:
             return None
     def openTime(self, time):
-        if self.open.has_key(time):
+        if time in self.open:
             self.open[time] = True
     def openCurrentTime(self):
         timed = self.getTime()
@@ -179,21 +185,19 @@ class TimeTracker(list):
             return TimeGrammar(temporal, pcf, when, 0)
         return TimeGrammar(temporal, pcf, when, self.getRecord(timed))
 
-class TimeInput(QtGui.QLineEdit):
+class TimeInput(QtWidgets.QLineEdit):
     def __init__(self, timeslider, parent):
         super(TimeInput, self).__init__(parent)
         self.timeslider = timeslider
         self.setText("+0:00")
-        self.connect(self.timeslider, QtCore.SIGNAL('valueChanged(int)'),
-                     self, QtCore.SLOT('setTime(int)'))
-        self.connect(self, QtCore.SIGNAL('editingFinished()'),
-                    self, QtCore.SLOT('setSlider()'))
+        self.timeslider.valueChanged[int].connect(self.setTime)
+        self.editingFinished.connect(self.setSlider)
     @QtCore.pyqtSlot(int)
     def setTime(self, sliderval):
         self.setText(self.timeslider.getTime())
     @QtCore.pyqtSlot()
     def setSlider(self):
-        value = unicode(self.text())
+        value = str(self.text())
         timed = txt2delta(value)
         if type(timed) is mysteryTime:
             self.timeslider.setValue(0)
@@ -210,7 +214,7 @@ class TimeInput(QtGui.QLineEdit):
         text = delta2txt(timed)
         self.setText(text)
 
-class TimeSlider(QtGui.QSlider):
+class TimeSlider(QtWidgets.QSlider):
     def __init__(self, orientation, parent):
         super(TimeSlider, self).__init__(orientation, parent)
         self.setTracking(True)
@@ -258,22 +262,20 @@ class MemoText(PesterText):
         self.setReadOnly(True)
         self.setMouseTracking(True)
         self.textSelected = False
-        self.connect(self, QtCore.SIGNAL('copyAvailable(bool)'),
-                     self, QtCore.SLOT('textReady(bool)'))
+        self.copyAvailable[bool].connect(self.textReady)
         self.urls = {}
         for k in smiledict:
             self.addAnimation(QtCore.QUrl("smilies/%s" % (smiledict[k])), "smilies/%s" % (smiledict[k]))
-        self.connect(self.mainwindow, QtCore.SIGNAL('animationSetting(bool)'),
-                     self, QtCore.SLOT('animateChanged(bool)'))
+        self.mainwindow.animationSetting[bool].connect(self.animateChanged)
 
     def initTheme(self, theme):
-        if theme.has_key("memos/scrollbar"):
+        if "memos/scrollbar" in theme:
             self.setStyleSheet("QTextEdit { %s } QScrollBar:vertical { %s } QScrollBar::handle:vertical { %s } QScrollBar::add-line:vertical { %s } QScrollBar::sub-line:vertical { %s } QScrollBar:up-arrow:vertical { %s } QScrollBar:down-arrow:vertical { %s }" % (theme["memos/textarea/style"], theme["memos/scrollbar/style"], theme["memos/scrollbar/handle"], theme["memos/scrollbar/downarrow"], theme["memos/scrollbar/uparrow"], theme["memos/scrollbar/uarrowstyle"], theme["memos/scrollbar/darrowstyle"] ))
         else:
             self.setStyleSheet("QTextEdit { %s }" % theme["memos/textarea/style"])
 
     def addMessage(self, msg, chum):
-        if type(msg) in [str, unicode]:
+        if type(msg) in [str, str]:
             lexmsg = lexMessage(msg)
         else:
             lexmsg = msg
@@ -304,7 +306,7 @@ class MemoText(PesterText):
         chum.color = color
         systemColor = QtGui.QColor(window.theme["memos/systemMsgColor"])
         if chum is not me:
-            if parent.times.has_key(chum.handle):
+            if chum.handle in parent.times:
                 time = parent.times[chum.handle]
                 if time.getTime() is None:
                     # MY WAY OR THE HIGHWAY
@@ -352,81 +354,67 @@ class MemoInput(PesterInput):
 class PesterMemo(PesterConvo):
     # TODO: Clean up inheritance between these!! The inits are ugly.
     def __init__(self, channel, timestr, mainwindow, parent=None):
-        QtGui.QFrame.__init__(self, parent)
+        QtWidgets.QFrame.__init__(self, parent)
         self.setAttribute(QtCore.Qt.WA_QuitOnClose, False)
         self.channel = channel
         self.setObjectName(self.channel)
         self.mainwindow = mainwindow
         self.time = TimeTracker(txt2delta(timestr))
         self.setWindowTitle(channel)
-        self.channelLabel = QtGui.QLabel(self)
-        self.channelLabel.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Expanding))
+        self.channelLabel = QtWidgets.QLabel(self)
+        self.channelLabel.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding))
 
         self.textArea = MemoText(self.mainwindow.theme, self)
         self.textInput = MemoInput(self.mainwindow.theme, self)
         self.textInput.setFocus()
 
-        self.miniUserlist = QtGui.QPushButton(">\n>", self)
+        self.miniUserlist = QtWidgets.QPushButton(">\n>", self)
         #self.miniUserlist.setStyleSheet("border:1px solid #a68168; border-width: 2px 0px 2px 2px; height: 90px; width: 10px; color: #cd8f9d; font-family: 'Arial'; background: white; margin-left: 2px;")
-        self.connect(self.miniUserlist, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('toggleUserlist()'))
+        self.miniUserlist.clicked.connect(self.toggleUserlist)
 
 
         self.userlist = RightClickList(self)
-        self.userlist.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding))
-        self.userlist.optionsMenu = QtGui.QMenu(self)
-        self.pesterChumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
-        self.connect(self.pesterChumAction, QtCore.SIGNAL('triggered()'),
-                     self, QtCore.SLOT('newPesterSlot()'))
-        self.addchumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
-        self.connect(self.addchumAction, QtCore.SIGNAL('triggered()'),
-                     self, QtCore.SLOT('addChumSlot()'))
-        self.banuserAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/banuser"], self)
-        self.connect(self.banuserAction, QtCore.SIGNAL('triggered()'),
-                     self, QtCore.SLOT('banSelectedUser()'))
-        self.opAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/opuser"], self)
-        self.connect(self.opAction, QtCore.SIGNAL('triggered()'),
-                     self, QtCore.SLOT('opSelectedUser()'))
-        self.voiceAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/voiceuser"], self)
-        self.connect(self.voiceAction, QtCore.SIGNAL('triggered()'),
-                     self, QtCore.SLOT('voiceSelectedUser()'))
-        self.quirkDisableAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirkkill"], self)
-        self.connect(self.quirkDisableAction, QtCore.SIGNAL('triggered()'),
-                     self, QtCore.SLOT('killQuirkUser()'))
+        self.userlist.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding))
+        self.userlist.optionsMenu = QtWidgets.QMenu(self)
+        self.pesterChumAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
+        self.pesterChumAction.triggered.connect(self.newPesterSlot)
+        self.addchumAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
+        self.addchumAction.triggered.connect(self.addChumSlot)
+        self.banuserAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/banuser"], self)
+        self.banuserAction.triggered.connect(self.banSelectedUser)
+        self.opAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/opuser"], self)
+        self.opAction.triggered.connect(self.opSelectedUser)
+        self.voiceAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/voiceuser"], self)
+        self.voiceAction.triggered.connect(self.voiceSelectedUser)
+        self.quirkDisableAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirkkill"], self)
+        self.quirkDisableAction.triggered.connect(self.killQuirkUser)
         self.userlist.optionsMenu.addAction(self.pesterChumAction)
         self.userlist.optionsMenu.addAction(self.addchumAction)
         # ban & op list added if we are op
 
-        self.optionsMenu = QtGui.QMenu(self)
-        self.oocToggle = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/ooc"], self)
+        self.optionsMenu = QtWidgets.QMenu(self)
+        self.oocToggle = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/ooc"], self)
         self.oocToggle.setCheckable(True)
-        self.connect(self.oocToggle, QtCore.SIGNAL('toggled(bool)'),
-                     self, QtCore.SLOT('toggleOOC(bool)'))
-        self.quirksOff = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirksoff"], self)
+        self.oocToggle.toggled[bool].connect(self.toggleOOC)
+        self.quirksOff = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirksoff"], self)
         self.quirksOff.setCheckable(True)
-        self.connect(self.quirksOff, QtCore.SIGNAL('toggled(bool)'),
-                     self, QtCore.SLOT('toggleQuirks(bool)'))
-        self.logchum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/viewlog"], self)
-        self.connect(self.logchum, QtCore.SIGNAL('triggered()'),
-                     self, QtCore.SLOT('openChumLogs()'))
-        self.invitechum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/invitechum"], self)
-        self.connect(self.invitechum, QtCore.SIGNAL('triggered()'),
-                     self, QtCore.SLOT('inviteChums()'))
+        self.quirksOff.toggled[bool].connect(self.toggleQuirks)
+        self.logchum = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/viewlog"], self)
+        self.logchum.triggered.connect(self.openChumLogs)
+        self.invitechum = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/invitechum"], self)
+        self.invitechum.triggered.connect(self.inviteChums)
 
-        self._beepToggle = QtGui.QAction("Beep on Message", self)
+        self._beepToggle = QtWidgets.QAction("Beep on Message", self)
         self._beepToggle.setCheckable(True)
-        self.connect(self._beepToggle, QtCore.SIGNAL('toggled(bool)'),
-                    self, QtCore.SLOT('toggleBeep(bool)'))
+        self._beepToggle.toggled[bool].connect(self.toggleBeep)
 
-        self._flashToggle = QtGui.QAction("Flash on Message", self)
+        self._flashToggle = QtWidgets.QAction("Flash on Message", self)
         self._flashToggle.setCheckable(True)
-        self.connect(self._flashToggle, QtCore.SIGNAL('toggled(bool)'),
-                    self, QtCore.SLOT('toggleFlash(bool)'))
+        self._flashToggle.toggled[bool].connect(self.toggleFlash)
 
-        self._muteToggle = QtGui.QAction("Mute Notifications", self)
+        self._muteToggle = QtWidgets.QAction("Mute Notifications", self)
         self._muteToggle.setCheckable(True)
-        self.connect(self._muteToggle, QtCore.SIGNAL('toggled(bool)'),
-                    self, QtCore.SLOT('toggleMute(bool)'))
+        self._muteToggle.toggled[bool].connect(self.toggleMute)
 
         self.optionsMenu.addAction(self.quirksOff)
         self.optionsMenu.addAction(self.oocToggle)
@@ -438,23 +426,19 @@ class PesterMemo(PesterConvo):
         self.optionsMenu.addAction(self.logchum)
         self.optionsMenu.addAction(self.invitechum)
 
-        self.chanModeMenu = QtGui.QMenu(self.mainwindow.theme["main/menus/rclickchumlist/memosetting"], self)
-        self.chanNoquirks = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memonoquirk"], self)
+        self.chanModeMenu = QtWidgets.QMenu(self.mainwindow.theme["main/menus/rclickchumlist/memosetting"], self)
+        self.chanNoquirks = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memonoquirk"], self)
         self.chanNoquirks.setCheckable(True)
-        self.connect(self.chanNoquirks, QtCore.SIGNAL('toggled(bool)'),
-                     self, QtCore.SLOT('noquirksChan(bool)'))
-        self.chanHide = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memohidden"], self)
+        self.chanNoquirks.toggled[bool].connect(self.noquirksChan)
+        self.chanHide = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memohidden"], self)
         self.chanHide.setCheckable(True)
-        self.connect(self.chanHide, QtCore.SIGNAL('toggled(bool)'),
-                     self, QtCore.SLOT('hideChan(bool)'))
-        self.chanInvite = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memoinvite"], self)
+        self.chanHide.toggled[bool].connect(self.hideChan)
+        self.chanInvite = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memoinvite"], self)
         self.chanInvite.setCheckable(True)
-        self.connect(self.chanInvite, QtCore.SIGNAL('toggled(bool)'),
-                     self, QtCore.SLOT('inviteChan(bool)'))
-        self.chanMod = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memomute"], self)
+        self.chanInvite.toggled[bool].connect(self.inviteChan)
+        self.chanMod = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memomute"], self)
         self.chanMod.setCheckable(True)
-        self.connect(self.chanMod, QtCore.SIGNAL('toggled(bool)'),
-                     self, QtCore.SLOT('modChan(bool)'))
+        self.chanMod.toggled[bool].connect(self.modChan)
         self.chanModeMenu.addAction(self.chanNoquirks)
         self.chanModeMenu.addAction(self.chanHide)
         self.chanModeMenu.addAction(self.chanInvite)
@@ -464,33 +448,28 @@ class PesterMemo(PesterConvo):
         self.timeinput = TimeInput(self.timeslider, self)
         self.timeinput.setText(timestr)
         self.timeinput.setSlider()
-        self.timetravel = QtGui.QPushButton("GO", self)
-        self.timeclose = QtGui.QPushButton("CLOSE", self)
-        self.timeswitchl = QtGui.QPushButton(self)
-        self.timeswitchr = QtGui.QPushButton(self)
+        self.timetravel = QtWidgets.QPushButton("GO", self)
+        self.timeclose = QtWidgets.QPushButton("CLOSE", self)
+        self.timeswitchl = QtWidgets.QPushButton(self)
+        self.timeswitchr = QtWidgets.QPushButton(self)
 
-        self.connect(self.timetravel, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('sendtime()'))
-        self.connect(self.timeclose, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('smashclock()'))
-        self.connect(self.timeswitchl, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('prevtime()'))
-        self.connect(self.timeswitchr, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('nexttime()'))
+        self.timetravel.clicked.connect(self.sendtime)
+        self.timeclose.clicked.connect(self.smashclock)
+        self.timeswitchl.clicked.connect(self.prevtime)
+        self.timeswitchr.clicked.connect(self.nexttime)
 
         self.times = {}
 
         self.initTheme(self.mainwindow.theme)
 
         # connect
-        self.connect(self.textInput, QtCore.SIGNAL('returnPressed()'),
-                     self, QtCore.SLOT('sentMessage()'))
+        self.textInput.returnPressed.connect(self.sentMessage)
 
-        layout_0 = QtGui.QVBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
         layout_0.addWidget(self.textArea)
         layout_0.addWidget(self.textInput)
 
-        layout_1 = QtGui.QHBoxLayout()
+        layout_1 = QtWidgets.QHBoxLayout()
         layout_1.addLayout(layout_0)
         layout_1.addWidget(self.miniUserlist)
         layout_1.addWidget(self.userlist)
@@ -498,14 +477,14 @@ class PesterMemo(PesterConvo):
 #        layout_1 = QtGui.QGridLayout()
 #        layout_1.addWidget(self.timeslider, 0, 1, QtCore.Qt.AlignHCenter)
 #        layout_1.addWidget(self.timeinput, 1, 0, 1, 3)
-        layout_2 = QtGui.QHBoxLayout()
+        layout_2 = QtWidgets.QHBoxLayout()
         layout_2.addWidget(self.timeslider)
         layout_2.addWidget(self.timeinput)
         layout_2.addWidget(self.timetravel)
         layout_2.addWidget(self.timeclose)
         layout_2.addWidget(self.timeswitchl)
         layout_2.addWidget(self.timeswitchr)
-        self.layout = QtGui.QVBoxLayout()
+        self.layout = QtWidgets.QVBoxLayout()
 
         self.layout.addWidget(self.channelLabel)
         self.layout.addLayout(layout_1)
@@ -595,9 +574,9 @@ class PesterMemo(PesterConvo):
 
         self.userlist.optionsMenu.setStyleSheet(theme["main/defaultwindow/style"])
         scrolls = "width: 12px; height: 12px; border: 0; padding: 0;"
-        if theme.has_key("main/chums/scrollbar"):
+        if "main/chums/scrollbar" in theme:
             self.userlist.setStyleSheet("QListWidget { %s } QScrollBar { %s } QScrollBar::handle { %s } QScrollBar::add-line { %s } QScrollBar::sub-line { %s } QScrollBar:up-arrow { %s } QScrollBar:down-arrow { %s }" % (theme["memos/userlist/style"], theme["main/chums/scrollbar/style"] + scrolls, theme["main/chums/scrollbar/handle"], theme["main/chums/scrollbar/downarrow"], theme["main/chums/scrollbar/uparrow"], theme["main/chums/scrollbar/uarrowstyle"], theme["main/chums/scrollbar/darrowstyle"] ))
-        elif theme.has_key("convo/scrollbar"):
+        elif "convo/scrollbar" in theme:
             self.userlist.setStyleSheet("QListWidget { %s } QScrollBar { %s } QScrollBar::handle { %s } QScrollBar::add-line { %s } QScrollBar::sub-line { %s } QScrollBar:up-arrow { %s } QScrollBar:down-arrow { %s }" % (theme["memos/userlist/style"], theme["convo/scrollbar/style"] + scrolls, theme["convo/scrollbar/handle"], "display:none;", "display:none;", "display:none;", "display:none;" ))
         else:
             self.userlist.setStyleSheet("QListWidget { %s } QScrollBar { %s } QScrollBar::handle { %s }" % (theme["memos/userlist/style"], scrolls, "background-color: black;"))
@@ -684,7 +663,7 @@ class PesterMemo(PesterConvo):
         elif handle[0] == '&':
             admin = True
             handle = handle[1:]
-        item = QtGui.QListWidgetItem(handle)
+        item = QtWidgets.QListWidgetItem(handle)
         if handle == self.mainwindow.profile().handle:
             color = self.mainwindow.profile().color
         else:
@@ -720,7 +699,7 @@ class PesterMemo(PesterConvo):
             systemColor = QtGui.QColor(self.mainwindow.theme["memos/systemMsgColor"])
             chum = self.mainwindow.profile()
             opchum = PesterProfile(op)
-            if self.times.has_key(op):
+            if op in self.times:
                 opgrammar = self.times[op].getGrammar()
             elif op == self.mainwindow.profile().handle:
                 opgrammar = self.time.getGrammar()
@@ -815,7 +794,7 @@ class PesterMemo(PesterConvo):
                 else:
                     timed = timeProtocol(cmd)
 
-        if self.times.has_key(handle):
+        if handle in self.times:
             if close is not None:
                 if close in self.times[handle]:
                     self.times[handle].setCurrent(close)
@@ -835,13 +814,13 @@ class PesterMemo(PesterConvo):
 
     @QtCore.pyqtSlot()
     def sentMessage(self):
-        text = unicode(self.textInput.text())
+        text = str(self.textInput.text())
         
         return parsetools.kxhandleInput(self, text, flavor="memos")
         
-    @QtCore.pyqtSlot(QtCore.QString)
+    @QtCore.pyqtSlot(QString)
     def namesUpdated(self, channel):
-        c = unicode(channel)
+        c = str(channel)
         if c.lower() != self.channel.lower(): return
         # get namesdb
         namesdb = self.mainwindow.namesdb
@@ -849,28 +828,27 @@ class PesterMemo(PesterConvo):
         self.userlist.clear()
         for n in self.mainwindow.namesdb[self.channel]:
             self.addUser(n)
-    @QtCore.pyqtSlot(QtCore.QString, QtCore.QString)
+    @QtCore.pyqtSlot(QString, QString)
     def modesUpdated(self, channel, modes):
-        c = unicode(channel)
+        c = str(channel)
         if c.lower() == self.channel.lower():
             self.updateChanModes(modes, None)
 
-    @QtCore.pyqtSlot(QtCore.QString)
+    @QtCore.pyqtSlot(QString)
     def closeInviteOnly(self, channel):
-        c = unicode(channel)
+        c = str(channel)
         if c.lower() == self.channel.lower():
-            self.disconnect(self.mainwindow, QtCore.SIGNAL('inviteOnlyChan(QString)'),
-                     self, QtCore.SLOT('closeInviteOnly(QString)'))
+            self.mainwindow.inviteOnlyChan['QString'].disconnect(self.closeInviteOnly)
             if self.parent():
-                print self.channel
+                print(self.channel)
                 i = self.parent().tabIndices[self.channel]
                 self.parent().tabClose(i)
             else:
                 self.close()
-            msgbox = QtGui.QMessageBox()
+            msgbox = QtWidgets.QMessageBox()
             msgbox.setText("%s: Invites only!" % (c))
             msgbox.setInformativeText("This channel is invite-only. You must get an invitation from someone on the inside before entering.")
-            msgbox.setStandardButtons(QtGui.QMessageBox.Ok)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             ret = msgbox.exec_()
 
     def quirkDisable(self, op, msg):
@@ -883,7 +861,7 @@ class PesterMemo(PesterConvo):
                     systemColor = QtGui.QColor(self.mainwindow.theme["memos/systemMsgColor"])
                     chum = self.mainwindow.profile()
                     opchum = PesterProfile(op)
-                    if self.times.has_key(op):
+                    if op in self.times:
                         opgrammar = self.times[op].getGrammar()
                     elif op == self.mainwindow.profile().handle:
                         opgrammar = self.time.getGrammar()
@@ -899,12 +877,12 @@ class PesterMemo(PesterConvo):
             chum = self.mainwindow.profile()
             ttracker = self.time
             curtime = self.time.getTime()
-        elif self.times.has_key(h):
+        elif h in self.times:
             ttracker = self.times[h]
         else:
             ttracker = TimeTracker(timedelta(0))
         opchum = PesterProfile(op)
-        if self.times.has_key(op):
+        if op in self.times:
             opgrammar = self.times[op].getGrammar()
         elif op == self.mainwindow.profile().handle:
             opgrammar = self.time.getGrammar()
@@ -933,11 +911,11 @@ class PesterMemo(PesterConvo):
             self.mainwindow.chatlog.log(self.channel, msg)
         del self.netsplit
 
-    @QtCore.pyqtSlot(QtCore.QString, QtCore.QString, QtCore.QString)
+    @QtCore.pyqtSlot(QString, QString, QString)
     def userPresentChange(self, handle, channel, update):
-        h = unicode(handle)
-        c = unicode(channel)
-        update = unicode(update)
+        h = str(handle)
+        c = str(channel)
+        update = str(update)
         if update[0:4] == "kick": # yeah, i'm lazy.
             l = update.split(":")
             update = l[0]
@@ -968,7 +946,7 @@ class PesterMemo(PesterConvo):
             for c in chums:
                 chum = PesterProfile(h)
                 self.userlist.takeItem(self.userlist.row(c))
-                if not self.times.has_key(h):
+                if h not in self.times:
                     self.times[h] = TimeTracker(timedelta(0))
                 allinitials = []
                 while self.times[h].getTime() is not None:
@@ -1002,13 +980,13 @@ class PesterMemo(PesterConvo):
                 chum = self.mainwindow.profile()
                 ttracker = self.time
                 curtime = self.time.getTime()
-            elif self.times.has_key(h):
+            elif h in self.times:
                 ttracker = self.times[h]
             else:
                 ttracker = TimeTracker(timedelta(0))
             allinitials = []
             opchum = PesterProfile(op)
-            if self.times.has_key(op):
+            if op in self.times:
                 opgrammar = self.times[op].getGrammar()
             elif op == self.mainwindow.profile().handle:
                 opgrammar = self.time.getGrammar()
@@ -1024,13 +1002,13 @@ class PesterMemo(PesterConvo):
 
             if chum is self.mainwindow.profile():
                 # are you next?
-                msgbox = QtGui.QMessageBox()
+                msgbox = QtWidgets.QMessageBox()
                 msgbox.setText(self.mainwindow.theme["convo/text/kickedmemo"])
                 msgbox.setInformativeText("press 0k to rec0nnect or cancel to absc0nd")
-                msgbox.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+                msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
                 # Find the OK button and make it default
                 for b in msgbox.buttons():
-                    if msgbox.buttonRole(b) == QtGui.QMessageBox.AcceptRole:
+                    if msgbox.buttonRole(b) == QtWidgets.QMessageBox.AcceptRole:
                         # We found the 'OK' button, set it as the default
                         b.setDefault(True)
                         b.setAutoDefault(True)
@@ -1039,7 +1017,7 @@ class PesterMemo(PesterConvo):
                         b.setFocus()
                         break
                 ret = msgbox.exec_()
-                if ret == QtGui.QMessageBox.Ok:
+                if ret == QtWidgets.QMessageBox.Ok:
                     self.userlist.clear()
                     self.time = TimeTracker(curtime)
                     self.resetSlider(curtime)
@@ -1049,7 +1027,7 @@ class PesterMemo(PesterConvo):
                     msg = me.memoopenmsg(systemColor, self.time.getTime(), self.time.getGrammar(), self.mainwindow.theme["convo/text/openmemo"], self.channel)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
-                elif ret == QtGui.QMessageBox.Cancel:
+                elif ret == QtWidgets.QMessageBox.Cancel:
                     if self.parent():
                         i = self.parent().tabIndices[self.channel]
                         self.parent().tabClose(i)
@@ -1082,7 +1060,7 @@ class PesterMemo(PesterConvo):
             for c in chums:
                 c.op = True
                 self.iconCrap(c)
-                if unicode(c.text()) == self.mainwindow.profile().handle:
+                if str(c.text()) == self.mainwindow.profile().handle:
                     self.userlist.optionsMenu.addAction(self.opAction)
                     self.userlist.optionsMenu.addAction(self.voiceAction)
                     self.userlist.optionsMenu.addAction(self.banuserAction)
@@ -1099,7 +1077,7 @@ class PesterMemo(PesterConvo):
             for c in chums:
                 c.op = False
                 self.iconCrap(c)
-                if unicode(c.text()) == self.mainwindow.profile().handle:
+                if str(c.text()) == self.mainwindow.profile().handle:
                     self.userlist.optionsMenu.removeAction(self.opAction)
                     self.userlist.optionsMenu.removeAction(self.voiceAction)
                     self.userlist.optionsMenu.removeAction(self.banuserAction)
@@ -1115,7 +1093,7 @@ class PesterMemo(PesterConvo):
             for c in chums:
                 c.halfop = True
                 self.iconCrap(c)
-                if unicode(c.text()) == self.mainwindow.profile().handle:
+                if str(c.text()) == self.mainwindow.profile().handle:
                     self.userlist.optionsMenu.addAction(self.opAction)
                     self.userlist.optionsMenu.addAction(self.voiceAction)
                     self.userlist.optionsMenu.addAction(self.banuserAction)
@@ -1132,7 +1110,7 @@ class PesterMemo(PesterConvo):
             for c in chums:
                 c.halfop = False
                 self.iconCrap(c)
-                if unicode(c.text()) == self.mainwindow.profile().handle:
+                if str(c.text()) == self.mainwindow.profile().handle:
                     self.userlist.optionsMenu.removeAction(self.opAction)
                     self.userlist.optionsMenu.removeAction(self.voiceAction)
                     self.userlist.optionsMenu.removeAction(self.banuserAction)
@@ -1180,40 +1158,40 @@ class PesterMemo(PesterConvo):
         user = self.userlist.currentItem()
         if not user:
             return
-        user = unicode(user.text())
+        user = str(user.text())
         self.mainwindow.newConversation(user)
 
     @QtCore.pyqtSlot()
     def addChumSlot(self):
         if not self.userlist.currentItem():
             return
-        currentChum = PesterProfile(unicode(self.userlist.currentItem().text()))
+        currentChum = PesterProfile(str(self.userlist.currentItem().text()))
         self.mainwindow.addChum(currentChum)
     @QtCore.pyqtSlot()
     def banSelectedUser(self):
         if not self.userlist.currentItem():
             return
-        currentHandle = unicode(self.userlist.currentItem().text())
-        (reason, ok) = QtGui.QInputDialog.getText(self, "Ban User", "Enter the reason you are banning this user (optional):")
+        currentHandle = str(self.userlist.currentItem().text())
+        (reason, ok) = QtWidgets.QInputDialog.getText(self, "Ban User", "Enter the reason you are banning this user (optional):")
         if ok:
             self.mainwindow.kickUser.emit("%s:%s" % (currentHandle, reason), self.channel)
     @QtCore.pyqtSlot()
     def opSelectedUser(self):
         if not self.userlist.currentItem():
             return
-        currentHandle = unicode(self.userlist.currentItem().text())
+        currentHandle = str(self.userlist.currentItem().text())
         self.mainwindow.setChannelMode.emit(self.channel, "+o", currentHandle)
     @QtCore.pyqtSlot()
     def voiceSelectedUser(self):
         if not self.userlist.currentItem():
             return
-        currentHandle = unicode(self.userlist.currentItem().text())
+        currentHandle = str(self.userlist.currentItem().text())
         self.mainwindow.setChannelMode.emit(self.channel, "+v", currentHandle)
     @QtCore.pyqtSlot()
     def killQuirkUser(self):
         if not self.userlist.currentItem():
             return
-        currentHandle = unicode(self.userlist.currentItem().text())
+        currentHandle = str(self.userlist.currentItem().text())
         self.mainwindow.killSomeQuirks.emit(self.channel, currentHandle)
 
     def resetSlider(self, time, send=True):
@@ -1226,8 +1204,7 @@ class PesterMemo(PesterConvo):
     def openChumLogs(self):
         currentChum = self.channel
         self.mainwindow.chumList.pesterlogviewer = PesterLogViewer(currentChum, self.mainwindow.config, self.mainwindow.theme, self.mainwindow)
-        self.connect(self.mainwindow.chumList.pesterlogviewer, QtCore.SIGNAL('rejected()'),
-                     self.mainwindow.chumList, QtCore.SLOT('closeActiveLog()'))
+        self.mainwindow.chumList.pesterlogviewer.rejected.connect(self.mainwindow.chumList.closeActiveLog)
         self.mainwindow.chumList.pesterlogviewer.show()
         self.mainwindow.chumList.pesterlogviewer.raise_()
         self.mainwindow.chumList.pesterlogviewer.activateWindow()
@@ -1237,9 +1214,9 @@ class PesterMemo(PesterConvo):
         if not hasattr(self, 'invitechums'):
             self.invitechums = None
         if not self.invitechums:
-            (chum, ok) = QtGui.QInputDialog.getText(self, "Invite to Chat", "Enter the chumhandle of the user you'd like to invite:")
+            (chum, ok) = QtWidgets.QInputDialog.getText(self, "Invite to Chat", "Enter the chumhandle of the user you'd like to invite:")
             if ok:
-                chum = unicode(chum)
+                chum = str(chum)
                 self.mainwindow.inviteChum.emit(chum, self.channel)
             self.invitechums = None
 
@@ -1303,7 +1280,7 @@ class PesterMemo(PesterConvo):
         self.mainwindow.waitingMessages.messageAnswered(self.channel)
         self.windowClosed.emit(self.title())
 
-    windowClosed = QtCore.pyqtSignal(QtCore.QString)
+    windowClosed = QtCore.pyqtSignal('QString')
 
 
 timelist = ["0:00", "0:01", "0:02", "0:04", "0:06", "0:10", "0:14", "0:22", "0:30", "0:41", "1:00", "1:34", "2:16", "3:14", "4:13", "4:20", "5:25", "6:12", "7:30", "8:44", "10:25", "11:34", "14:13", "16:12", "17:44", "22:22", "25:10", "33:33", "42:00", "43:14", "50:00", "62:12", "75:00", "88:44", "100", "133", "143", "188", "200", "222", "250", "314", "333", "413", "420", "500", "600", "612", "888", "1000", "1025"]

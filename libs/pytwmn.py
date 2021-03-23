@@ -45,8 +45,8 @@ def init(host="127.0.0.1", port=None):
 
 class Notification(object):
     def __init__(self, title="", msg="", icon=""):
-        self.title = unicode(title)
-        self.msg = unicode(msg)
+        self.title = str(title)
+        self.msg = str(msg)
         if icon.startswith("file://"):
             icon = icon[7:]
         self.icon = icon

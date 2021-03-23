@@ -111,7 +111,7 @@ def _addNumerics():
             cli.send(cmd_num, *args)
         return f
     m = sys.modules[__name__]
-    for num, name in ircevents.numeric_events.iteritems():
+    for num, name in ircevents.numeric_events.items():
         setattr(m, name, numericcmd(num, name))
 
 _addNumerics()

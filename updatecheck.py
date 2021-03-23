@@ -9,12 +9,12 @@ import os
 import sys
 import threading
 from time import mktime
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import logging
 logging.basicConfig(level=logging.WARNING)
 
-class MSPAChecker(QtGui.QWidget):
+class MSPAChecker(QtWidgets.QWidget):
     def __init__(self, parent=None):
         #~QtCore.QObject.__init__(self, parent)
         # karxi: Why would you do that?
@@ -24,8 +24,7 @@ class MSPAChecker(QtGui.QWidget):
         self.status = None
         self.lock = False
         self.timer = QtCore.QTimer(self)
-        self.connect(self.timer, QtCore.SIGNAL('timeout()'),
-                self, QtCore.SLOT('check_site_wrapper()'))
+        self.timer.timeout.connect(self.check_site_wrapper)
         self.timer.start(1000*self.refreshRate)
 
     def save_state(self):
@@ -46,7 +45,7 @@ class MSPAChecker(QtGui.QWidget):
                 os.remove("status_old.pkl")
         except Exception as e:
             logging.error("Error: %s", e, exc_info=sys.exc_info())
-            msg = QtGui.QMessageBox(self)
+            msg = QtWidgets.QMessageBox(self)
             msg.setText("Problems writing save file.")
             msg.show()
 
@@ -87,10 +86,8 @@ class MSPAChecker(QtGui.QWidget):
                 self.mspa = None
             if not self.mspa:
                 self.mspa = MSPAUpdateWindow(self.parent())
-                self.connect(self.mspa, QtCore.SIGNAL('accepted()'),
-                             self, QtCore.SLOT('visit_site()'))
-                self.connect(self.mspa, QtCore.SIGNAL('rejected()'),
-                             self, QtCore.SLOT('nothing()'))
+                self.mspa.accepted.connect(self.visit_site)
+                self.mspa.rejected.connect(self.nothing)
                 self.mspa.show()
         else:
             #logging.info("No new updates :(")
@@ -111,7 +108,7 @@ class MSPAChecker(QtGui.QWidget):
     def nothing(self):
         self.mspa = None
 
-class MSPAUpdateWindow(QtGui.QDialog):
+class MSPAUpdateWindow(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(MSPAUpdateWindow, self).__init__(parent)
         self.mainwindow = parent
@@ -119,19 +116,17 @@ class MSPAUpdateWindow(QtGui.QDialog):
         self.setWindowTitle("MSPA Update!")
         self.setModal(False)
 
-        self.title = QtGui.QLabel("You have an unread MSPA update! :o)")
+        self.title = QtWidgets.QLabel("You have an unread MSPA update! :o)")
 
-        layout_0 = QtGui.QVBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
         layout_0.addWidget(self.title)
 
-        self.ok = QtGui.QPushButton("GO READ NOW!", self)
+        self.ok = QtWidgets.QPushButton("GO READ NOW!", self)
         self.ok.setDefault(True)
-        self.connect(self.ok, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('accept()'))
-        self.cancel = QtGui.QPushButton("LATER", self)
-        self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reject()'))
-        layout_2 = QtGui.QHBoxLayout()
+        self.ok.clicked.connect(self.accept)
+        self.cancel = QtWidgets.QPushButton("LATER", self)
+        self.cancel.clicked.connect(self.reject)
+        layout_2 = QtWidgets.QHBoxLayout()
         layout_2.addWidget(self.cancel)
         layout_2.addWidget(self.ok)
 

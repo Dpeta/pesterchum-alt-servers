@@ -4,7 +4,7 @@ import ostools
 import collections
 from copy import copy
 from datetime import timedelta
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from generic import mysteryTime
 from quirks import ScriptQuirks
@@ -17,6 +17,12 @@ import pnc.lexercon as lexercon
 
 # I'll clean up the things that are no longer needed once the transition is
 # actually finished.
+try:
+    QString = unicode
+except NameError:
+    # Python 3
+    QString = str
+
 _ctag_begin = re.compile(r'(?i)<c=(.*?)>')
 _gtag_begin = re.compile(r'(?i)<g[a-f]>')
 _ctag_end = re.compile(r'(?i)</c>')
@@ -36,7 +42,7 @@ quirkloader = ScriptQuirks()
 quirkloader.add(PythonQuirks())
 quirkloader.add(LuaQuirks())
 quirkloader.loadAll()
-print quirkloader.funcre()
+print(quirkloader.funcre())
 _functionre = re.compile(r"%s" % quirkloader.funcre())
 _groupre = re.compile(r"\\([0-9]+)")
 
@@ -51,7 +57,7 @@ def lexer(string, objlist):
     for (oType, regexp) in objlist:
         newstringlist = []
         for (stri, s) in enumerate(stringlist):
-            if type(s) not in [str, unicode]:
+            if type(s) not in [str, str]:
                 newstringlist.append(s)
                 continue
             lasti = 0
@@ -220,7 +226,7 @@ kxpclexer = lexercon.Pesterchum()
 
 def kxlexMsg(string):
     # Do a bit of sanitization.
-    msg = unicode(string)
+    msg = str(string)
     # TODO: Let people paste line-by-line normally. Maybe have a mass-paste
     # right-click option?
     msg = msg.replace('\n', ' ').replace('\r', ' ')
@@ -247,9 +253,9 @@ def lexMessage(string):
                (smiley, _smilere),
                (honker, _honk)]
 
-    string = unicode(string)
+    string = str(string)
     string = string.replace("\n", " ").replace("\r", " ")
-    lexed = lexer(unicode(string), lexlist)
+    lexed = lexer(str(string), lexlist)
 
     balanced = []
     beginc = 0
@@ -271,7 +277,7 @@ def lexMessage(string):
             balanced.append(colorEnd("</c>"))
     if len(balanced) == 0:
         balanced.append("")
-    if type(balanced[len(balanced)-1]) not in [str, unicode]:
+    if type(balanced[len(balanced)-1]) not in [str, str]:
         balanced.append("")
     return balanced
 
@@ -279,12 +285,12 @@ def convertTags(lexed, format="html"):
     if format not in ["html", "bbcode", "ctag", "text"]:
         raise ValueError("Color format not recognized")
 
-    if type(lexed) in [str, unicode]:
+    if type(lexed) in [str, str]:
         lexed = lexMessage(lexed)
     escaped = ""
     firststr = True
     for (i, o) in enumerate(lexed):
-        if type(o) in [str, unicode]:
+        if type(o) in [str, str]:
             if format == "html":
                 escaped += o.replace("&", "&amp;").replace(">", "&gt;").replace("<","&lt;")
             else:
@@ -392,7 +398,7 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
     while len(lexed) > 0:
         rounds += 1
         if debug:
-            print "[Starting round {}...]".format(rounds)
+            print("[Starting round {}...]".format(rounds))
         msg = lexed.popleft()
         msglen = 0
         is_text = False
@@ -433,9 +439,9 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
                     # instead?
                     subround += 1
                     if debug:
-                        print "[Splitting round {}-{}...]".format(
+                        print("[Splitting round {}-{}...]".format(
                                 rounds, subround
-                                )
+                                ))
                     point = msg.rfind(' ', 0, lenl)
                     if point < 0:
                         # No spaces to break on...ugh. Break at the last space
@@ -448,12 +454,12 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
                     # Remove what we just added.
                     msg = msg[point:]
                     if debug:
-                        print "msg = {!r}".format(msg)
+                        print("msg = {!r}".format(msg))
                 else:
                     # Catch the remainder.
                     stack.append(msg)
                     if debug:
-                        print "msg caught; stack = {!r}".format(stack)
+                        print("msg caught; stack = {!r}".format(stack))
                 # Done processing. Pluck out the first portion so we can
                 # continue processing, clean it up a bit, then add the rest to
                 # our waiting list.
@@ -494,16 +500,16 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
             cte = lexercon.CTagEnd("</c>", fmt, None)
             working.extend([cte] * len(open_ctags))
             if debug:
-                print "\tRound {0} linebreak: Added {1} closing ctags".format(
+                print("\tRound {0} linebreak: Added {1} closing ctags".format(
                         rounds, len(open_ctags)
-                        )
+                        ))
 
             # Run it through the lexer again to render it.
-            working = u''.join(kxpclexer.list_convert(working))
+            working = ''.join(kxpclexer.list_convert(working))
             if debug:
-                print "\tRound {0} add: len == {1} (of {2})".format(
+                print("\tRound {0} add: len == {1} (of {2})".format(
                         rounds, len(working), maxlen
-                        )
+                        ))
             # Now that it's done the work for us, append and resume.
             output.append(working)
 
@@ -518,7 +524,7 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
                 # We have more to go.
                 # Reset working, starting it with the unclosed ctags.
                 if debug:
-                    print "\tRound {0}: More to lex".format(rounds)
+                    print("\tRound {0}: More to lex".format(rounds))
                 working = open_ctags[:]
                 # Calculate the length of the starting tags, add it before
                 # anything else.
@@ -533,7 +539,7 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
                 if debug or True:
                     # This probably shouldn't happen, and if it does, I want to
                     # know if it *works* properly.
-                    print "\tRound {0}: No more to lex".format(rounds)
+                    print("\tRound {0}: No more to lex".format(rounds))
                 # Clean up, just in case.
                 working = []
                 open_ctags = []
@@ -582,8 +588,8 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
         working = kxpclexer.list_convert(working)
         if len(working) > 0:
             if debug:
-                print "Adding end trails: {!r}".format(working)
-            working = u''.join(working)
+                print("Adding end trails: {!r}".format(working))
+            working = ''.join(working)
             output.append(working)
 
     # We're...done?
@@ -596,7 +602,7 @@ def splitMessage(msg, format="ctag"):
     # split long text lines
     buf = []
     for o in msg:
-        if type(o) in [str, unicode] and len(o) > 200:
+        if type(o) in [str, str] and len(o) > 200:
             # Split with a step of 200. I.e., cut long segments into chunks of
             # 200 characters.
             # I'm...not sure why this is done. I'll probably factor it out
@@ -614,7 +620,7 @@ def splitMessage(msg, format="ctag"):
     cbegintags = []
     # This is the final result.
     output = []
-    print repr(msg)
+    print(repr(msg))
     for o in msg:
         oldctag = None
         # Add to the working segment.
@@ -687,9 +693,7 @@ def _is_ooc(msg, strict=True):
         # We have a match....
         ooc1, ooc2 = oocDetected.group(1, 2)
         # Make sure the appropriate braces are used.
-        mbraces = map(
-                lambda br: ooc1 == br[0] and ooc2 == br[1],
-                braces)
+        mbraces = [ooc1 == br[0] and ooc2 == br[1] for br in braces]
         if any(mbraces):
             # If any of those passes matched, we're good to go; it's OOC.
             return True
@@ -711,7 +715,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
     if text is None:
         # Fetch the raw text from the input box.
         text = ctx.textInput.text()
-        text = unicode(ctx.textInput.text())
+        text = str(ctx.textInput.text())
 
     # Preprocessing stuff.
     msg = text.strip()
@@ -731,7 +735,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
         # Determine if the line actually *is* OOC.
         if is_ooc and not oocDetected:
             # If we're supposed to be OOC, apply it artificially.
-            msg = u"(( {} ))".format(msg)
+            msg = "(( {} ))".format(msg)
         # Also, quirk stuff.
         should_quirk = ctx.applyquirks
     else:
@@ -764,7 +768,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
         except Exception as err:
             # Tell the user we couldn't do quirk things.
             # TODO: Include the actual error...and the quirk it came from?
-            msgbox = QtGui.QMessageBox()
+            msgbox = QtWidgets.QMessageBox()
             msgbox.setText("Whoa there! There seems to be a problem.")
             err_info = "A quirk seems to be having a problem. (Error: {!s})"
             err_info = err_info.format(err)
@@ -776,9 +780,9 @@ def kxhandleInput(ctx, text=None, flavor=None):
     try:
         # Turns out that Windows consoles can't handle unicode, heh...who'da
         # thunk. We have to repr() this, as such.
-        print repr(msg)
+        print(repr(msg))
     except Exception as err:
-        print "(Couldn't print processed message: {!s})".format(err)
+        print("(Couldn't print processed message: {!s})".format(err))
 
     # karxi: We have a list...but I'm not sure if we ever get anything else, so
     # best to play it safe. I may remove this during later refactoring.
@@ -790,26 +794,23 @@ def kxhandleInput(ctx, text=None, flavor=None):
                 # an object type I provided - just so I could pluck them out
                 # later.
                 msg[i] = m.convert(format="ctag")
-        msg = u''.join(msg)
+        msg = ''.join(msg)
 
     # Quirks have been applied. Lex the messages (finally).
     msg = kxlexMsg(msg)
 
     # Debug output.
     try:
-        print repr(msg)
+        print(repr(msg))
     except Exception as err:
-        print "(Couldn't print lexed message: {!s})".format(err)
+        print("(Couldn't print lexed message: {!s})".format(err))
 
     # Remove coloring if this is a /me!
     if is_action:
         # Filter out formatting specifiers (just ctags, at the moment).
-        msg = filter(
-                lambda m: not isinstance(m,
+        msg = [m for m in msg if not isinstance(m,
                     (lexercon.CTag, lexercon.CTagEnd)
-                    ),
-                msg
-                )
+                    )]
         # We'll also add /me to the beginning of any new messages, later.
 
     # Put what's necessary in before splitting.
@@ -850,7 +851,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
         # if ceased, rebegin
         if hasattr(ctx, 'chumopen') and not ctx.chumopen:
             ctx.mainwindow.newConvoStarted.emit(
-                    QtCore.QString(ctx.title()), True
+                    QString(ctx.title()), True
                     )
             ctx.setChumOpen(True)
 
@@ -859,7 +860,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
         # If we're working with an action and we split, it should have /mes.
         if is_action and i > 0:
             # Add them post-split.
-            lm = u"/me " + lm
+            lm = "/me " + lm
             # NOTE: No reason to reassign for now, but...why not?
             lexmsgs[i] = lm
 
@@ -876,11 +877,11 @@ def kxhandleInput(ctx, text=None, flavor=None):
             # We fetched the information outside of the loop, so just
             # construct the messages.
 
-            clientMsg = u"<c={1}>{2}{3}{4}: {0}</c>".format(
+            clientMsg = "<c={1}>{2}{3}{4}: {0}</c>".format(
                     clientMsg, colorcmd, grammar.pcf, initials, grammar.number
                     )
             # Not sure if this needs a space at the end...?
-            serverMsg = u"<c={1}>{2}: {0}</c>".format(
+            serverMsg = "<c={1}>{2}: {0}</c>".format(
                     serverMsg, colorcmd, initials)
 
         ctx.addMessage(clientMsg, True)
@@ -984,7 +985,7 @@ def parseRegexpFunctions(to):
             backr = _groupre.search(mo.group())
             if backr is not None:
                 current.append(backreference(backr.group(1)))
-            elif mo.group()[:-1] in functiondict.keys():
+            elif mo.group()[:-1] in list(functiondict.keys()):
                 p = parseLeaf(functiondict[mo.group()[:-1]], current)
                 current.append(p)
                 current = p
@@ -1001,7 +1002,7 @@ def parseRegexpFunctions(to):
 
 
 def img2smiley(string):
-    string = unicode(string)
+    string = str(string)
     def imagerep(mo):
         return reverse_smiley[mo.group(1)]
     string = re.sub(r'<img src="smilies/(\S+)" />', imagerep, string)
@@ -1082,8 +1083,8 @@ if ostools.isOSXBundle():
 
 
 
-reverse_smiley = dict((v,k) for k, v in smiledict.iteritems())
-_smilere = re.compile("|".join(smiledict.keys()))
+reverse_smiley = dict((v,k) for k, v in smiledict.items())
+_smilere = re.compile("|".join(list(smiledict.keys())))
 
 class ThemeException(Exception):
     def __init__(self, value):

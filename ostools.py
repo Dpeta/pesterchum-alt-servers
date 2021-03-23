@@ -1,6 +1,7 @@
 import os, sys
 import platform
-from PyQt4.QtGui import QDesktopServices
+from PyQt5.QtGui import QDesktopServices
+from PyQt5.QtCore import QStandardPaths
 
 def isOSX():
     return sys.platform == "darwin"
@@ -32,10 +33,10 @@ def getDataDir():
     # in the Pesterchum install directory (like before)
     try:
         if isOSX():
-            return os.path.join(unicode(QDesktopServices.storageLocation(QDesktopServices.DataLocation)), "Pesterchum/")
+            return os.path.join(str(QStandardPaths.writableLocation(QStandardPaths.DataLocation)), "Pesterchum/")
         elif isLinux():
-            return os.path.join(unicode(QDesktopServices.storageLocation(QDesktopServices.HomeLocation)), ".pesterchum/")
+            return os.path.join(str(QStandardPaths.writableLocation(QStandardPaths.HomeLocation)), ".pesterchum/")
         else:
-            return os.path.join(unicode(QDesktopServices.storageLocation(QDesktopServices.DataLocation)), "pesterchum/")
+            return os.path.join(str(QStandardPaths.writableLocation(QStandardPaths.DataLocation)), "pesterchum/")
     except UnicodeDecodeError:
         return ''

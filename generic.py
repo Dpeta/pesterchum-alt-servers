@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
 from datetime import timedelta
 
 class mysteryTime(timedelta):
@@ -17,7 +17,7 @@ class CaseInsensitiveDict(dict):
     def __contains__(self, key):
         return super(CaseInsensitiveDict, self).__contains__(key.lower())
     def has_key(self, key):
-        return super(CaseInsensitiveDict, self).has_key(key.lower())
+        return key.lower() in super(CaseInsensitiveDict, self)
     def __delitem__(self, key):
         super(CaseInsensitiveDict, self).__delitem__(key.lower())
 
@@ -28,7 +28,7 @@ class PesterList(list):
 class PesterIcon(QtGui.QIcon):
     def __init__(self, *x):
         super(PesterIcon, self).__init__(x[0])
-        if type(x[0]) in [str, unicode]:
+        if type(x[0]) in [str, str]:
             self.icon_pixmap = QtGui.QPixmap(x[0])
         else:
             self.icon_pixmap = None
@@ -41,7 +41,7 @@ class PesterIcon(QtGui.QIcon):
             except IndexError:
                 return None
 
-class RightClickList(QtGui.QListWidget):
+class RightClickList(QtWidgets.QListWidget):
     def contextMenuEvent(self, event):
         #fuckin Qt
         if event.reason() == QtGui.QContextMenuEvent.Mouse:
@@ -53,7 +53,7 @@ class RightClickList(QtGui.QListWidget):
     def getOptionsMenu(self):
         return self.optionsMenu
 
-class RightClickTree(QtGui.QTreeWidget):
+class RightClickTree(QtWidgets.QTreeWidget):
     def contextMenuEvent(self, event):
         if event.reason() == QtGui.QContextMenuEvent.Mouse:
             listing = self.itemAt(event.pos())
@@ -64,49 +64,47 @@ class RightClickTree(QtGui.QTreeWidget):
     def getOptionsMenu(self):
         return self.optionsMenu
 
-class MultiTextDialog(QtGui.QDialog):
+class MultiTextDialog(QtWidgets.QDialog):
     def __init__(self, title, parent, *queries):
         super(MultiTextDialog, self).__init__(parent)
         self.setWindowTitle(title)
         if len(queries) == 0:
             return
         self.inputs = {}
-        layout_1 = QtGui.QHBoxLayout()
+        layout_1 = QtWidgets.QHBoxLayout()
         for d in queries:
             label = d["label"]
             inputname = d["inputname"]
             value = d.get("value", "")
-            l = QtGui.QLabel(label, self)
+            l = QtWidgets.QLabel(label, self)
             layout_1.addWidget(l)
-            self.inputs[inputname] = QtGui.QLineEdit(value, self)
+            self.inputs[inputname] = QtWidgets.QLineEdit(value, self)
             layout_1.addWidget(self.inputs[inputname])
-        self.ok = QtGui.QPushButton("OK", self)
+        self.ok = QtWidgets.QPushButton("OK", self)
         self.ok.setDefault(True)
-        self.connect(self.ok, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('accept()'))
-        self.cancel = QtGui.QPushButton("CANCEL", self)
-        self.connect(self.cancel, QtCore.SIGNAL('clicked()'),
-                     self, QtCore.SLOT('reject()'))
-        layout_ok = QtGui.QHBoxLayout()
+        self.ok.clicked.connect(self.accept)
+        self.cancel = QtWidgets.QPushButton("CANCEL", self)
+        self.cancel.clicked.connect(self.reject)
+        layout_ok = QtWidgets.QHBoxLayout()
         layout_ok.addWidget(self.cancel)
         layout_ok.addWidget(self.ok)
 
-        layout_0 = QtGui.QVBoxLayout()
+        layout_0 = QtWidgets.QVBoxLayout()
         layout_0.addLayout(layout_1)
         layout_0.addLayout(layout_ok)
 
         self.setLayout(layout_0)
     def getText(self):
         r = self.exec_()
-        if r == QtGui.QDialog.Accepted:
+        if r == QtWidgets.QDialog.Accepted:
             retval = {}
-            for (name, widget) in self.inputs.iteritems():
-                retval[name] = unicode(widget.text())
+            for (name, widget) in self.inputs.items():
+                retval[name] = str(widget.text())
             return retval
         else:
             return None
 
-class MovingWindow(QtGui.QFrame):
+class MovingWindow(QtWidgets.QFrame):
     def __init__(self, *x, **y):
         super(MovingWindow, self).__init__(*x, **y)
         self.moving = None
@@ -133,7 +131,7 @@ class NoneSound(object):
     def play(self): pass
     def setVolume(self, v): pass
 
-class WMButton(QtGui.QPushButton):
+class WMButton(QtWidgets.QPushButton):
     def __init__(self, icon, parent=None):
         super(WMButton, self).__init__(icon, "", parent)
         self.setIconSize(icon.realsize())

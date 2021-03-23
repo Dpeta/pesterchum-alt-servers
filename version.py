@@ -1,4 +1,4 @@
-import json, logging, re, time, urllib, zipfile
+import json, logging, re, time, urllib.request, urllib.parse, urllib.error, zipfile
 try:
     import tarfile
 except:
@@ -48,52 +48,8 @@ jsodeco = json.JSONDecoder()
 has_updated = False
 
 def _py_version_check():
-    import sys
-    # == Python Version Checking ==
-    # Check that we're running the right version of Python.
-    # This is the version we need.
-    pyreq = {"major": 2, "minor": 7}
-
-    # Just some preprocessing to make formatting the version info a little
-    # easier. Note that the sys.version_info type doesn't convert to dict,
-    # despite having named indices like a namedtuple, so we have to do it
-    # manually.
-    # This is the version we have.
-    pyver = dict(zip(("major", "minor"), sys.version_info[:2]))
-
-    # Compose the base of an error message that we may use in the future.
-    errmsg = "ERROR: Pesterchum is designed to be run on Python " + \
-             "{major}.{minor}.".format(**pyreq)
-    errmsg = [ errmsg ]
-    errmsg.append("It is not designed for use with Python {major}.{minor}.")
-    # Now we have a list that we can further process into a more specific
-    # error message.
-    if pyver["major"] > pyreq["major"]:
-        # We're using Python 3, which this script won't work with.
-        errmsg = errmsg.extend([
-                "Due to syntax differences,",
-                "it cannot be run with this version of Python."
-                ])
-        errmsg = ' '.join(errmsg)
-        errmsg = errmsg.format(**pyver)
-        logger.critical(errmsg)
-        sys.exit()
-    elif pyver["major"] != pyreq["major"] or pyver["minor"] < pyreq["minor"]:
-        # We're either not running Python 2 (we have something earlier?!) or
-        # we're below the minimum required minor version (e.g. 2.6 or 2.4 or
-        # similar).
-        # This means that we wouldn't have certain syntax improvements that we
-        # need - like inline generators, 'with' statements, lambdas, etc.
-        # NOTE: This MAY be lowered to 2.6 later, since there's little
-        # difference.
-        errmsg = errmsg.extend([
-                "This version of Python lacks certain features",
-                "that are necessary for it to run."
-                ])
-        errmsg = ' '.join(errmsg)
-        errmsg = errmsg.format(**pyver)
-        logger.critical(errmsg)
-        sys.exit()
+    pass
+    # We are using python 3 rn :)
 
 # Not 100% finished - certain output formats seem odd
 def get_pchum_ver(raw=0, pretty=False, file=None, use_hard_coded=None):
@@ -119,7 +75,7 @@ def get_pchum_ver(raw=0, pretty=False, file=None, use_hard_coded=None):
         # Now that we have the actual version, we can just set everything up
         # neatly.
         ver = jsodeco.decode(raw_ver)
-        ver = AttrDict( (k.encode('ascii'), v) for k, v in ver.items() )
+        ver = AttrDict( (k.encode('ascii'), v) for k, v in list(ver.items()) )
         # Do a bit of compensation for the unicode part of JSON.
         ver.status, ver.utype = str(ver.status), str(ver.utype)
     except:
@@ -210,12 +166,12 @@ def lexVersion(short=False):
 
 # Naughty I know, but it lets me grab it from the bash script.
 if __name__ == "__main__":
-    print lexVersion()
+    print(lexVersion())
 
 def verStrToNum(ver):
     w = re.match("(\d+\.?\d+)\.(\d+)-?([A-Za-z]{0,2})\.?(\d*):(\S+)", ver)
     if not w:
-        print "Update check Failure: 3"; return
+        print("Update check Failure: 3"); return
     full = ver[:ver.find(":")]
     return full,w.group(1),w.group(2),w.group(3),w.group(4),w.group(5)
 
@@ -227,7 +183,7 @@ def is_outdated(url=None):
     # karxi: Do we really need to sleep here? Why?
     time.sleep(3)
     try:
-        jsfile = urllib.urlopen(_updateCheckURL)
+        jsfile = urllib.request.urlopen(_updateCheckURL)
         gitver = get_pchum_ver(raw=2, file=jsfile)
     except:
         # No error handling yet....
@@ -262,8 +218,8 @@ def updatePesterchum(url=None):
 
     try:
         # Try to fetch the update.
-        fn, fninfo = urllib.urlretrieve(url)
-    except urllib.ContentTooShortError:
+        fn, fninfo = urllib.request.urlretrieve(url)
+    except urllib.error.ContentTooShortError:
         # Our download was interrupted; there's not really anything we can do
         # here.
         raise
@@ -324,21 +280,21 @@ def updateCheck(q):
     return q.put((False,0))
 
     time.sleep(3)
-    data = urllib.urlencode({"type" : USER_TYPE, "os" : OS_TYPE, "install" : INSTALL_TYPE})
+    data = urllib.parse.urlencode({"type" : USER_TYPE, "os" : OS_TYPE, "install" : INSTALL_TYPE})
     try:
-        f = urllib.urlopen("http://distantsphere.com/pesterchum.php?" + data)
+        f = urllib.request.urlopen("http://distantsphere.com/pesterchum.php?" + data)
     except:
-        print "Update check Failure: 1"; return q.put((False,1))
+        print("Update check Failure: 1"); return q.put((False,1))
     newest = f.read()
     f.close()
     if not newest or newest[0] == "<":
-        print "Update check Failure: 2"; return q.put((False,2))
+        print("Update check Failure: 2"); return q.put((False,2))
     try:
         (full, major, minor, status, revision, url) = verStrToNum(newest)
     except TypeError:
         return q.put((False,3))
-    print full
-    print repr(verStrToNum(newest))
+    print(full)
+    print(repr(verStrToNum(newest)))
 
     if major <= _pcMajor:
         if minor <= _pcMinor:
@@ -350,7 +306,7 @@ def updateCheck(q):
                 if not _pcStatus:
                     if revision <= _pcRevision:
                         return q.put((False,0))
-    print "A new version of Pesterchum is avaliable!"
+    print("A new version of Pesterchum is avaliable!")
     q.put((full,url))
 
 
@@ -388,9 +344,9 @@ def copyUpdate(path):
 def updateExtract(url, extension):
     if extension:
         fn = "update" + extension
-        urllib.urlretrieve(url, fn)
+        urllib.request.urlretrieve(url, fn)
     else:
-        fn = urllib.urlretrieve(url)[0]
+        fn = urllib.request.urlretrieve(url)[0]
         if tarfile and tarfile.is_tarfile(fn):
             extension = ".tar.gz"
         elif zipfile.is_zipfile(fn):
@@ -404,17 +360,17 @@ def updateExtract(url, extension):
             except:
                 pass
 
-    print url, fn, extension
+    print(url, fn, extension)
 
     if extension == ".exe":
         pass
     elif extension == ".zip" or extension.startswith(".tar"):
         if extension == ".zip":
             from zipfile import is_zipfile as is_updatefile, ZipFile as openupdate
-            print "Opening .zip"
+            print("Opening .zip")
         elif tarfile and extension.startswith(".tar"):
             from tarfile import is_tarfile as is_updatefile, open as openupdate
-            print "Opening .tar"
+            print("Opening .tar")
         else:
             return
 

@@ -1,5 +1,5 @@
 # -*- coding=UTF-8; tab-width: 4 -*-
-from __future__ import division
+
 
 __all__ = ["Color"]
 
@@ -16,7 +16,7 @@ import sys
 
 # Python 3 checking
 if sys.version_info[0] == 2:
-    basestr = basestring
+    basestr = str
 else:
     basestr = str
 
@@ -119,7 +119,7 @@ class Color(object):
         ##      self.red, self.green, self.blue
         ##  ])
         # 2012-12-08T13:34-07:00: This should improve accuracy
-        result = map(hash, self.cielab)
+        result = list(map(hash, self.cielab))
         result = functools.reduce(lambda x, y: x ^ y, result)
         return result
 
@@ -201,7 +201,7 @@ class Color(object):
         closest, cldist = None, None
         targs = _irc_colors
 
-        for code, other in targs.items():
+        for code, other in list(targs.items()):
             dist = self - other
             ##if (not strict and dist > self.jnd) or dist == 0:
             if dist == 0:
@@ -217,7 +217,7 @@ class Color(object):
         closest, cldist = None, None
         targs = _svg_colors
 
-        for name, other in targs.items():
+        for name, other in list(targs.items()):
             dist = self - other
             if (not strict and dist > self.jnd) or dist == 0:
                 # The difference is below the Just-Noticeable Difference
@@ -236,7 +236,7 @@ class Color(object):
         # http://en.wikipedia.org/wiki/Color_difference
         slab, olab = self.to_cielab_tuple(), other.to_cielab_tuple()
         # Calculate the distance between the points for each
-        dist = map(lambda p1, p2: (p2 - p1)**2, slab, olab)
+        dist = list(map(lambda p1, p2: (p2 - p1)**2, slab, olab))
         # Add the results up, and sqrt to compensate for earlier squaring
         dist = sum(dist) ** .5
         return dist
@@ -252,7 +252,7 @@ class Color(object):
         ### Square the results from the above
         ##dist = [x**2 for x in dist]
         # Do what we WOULD have done in those two lines with a single one
-        dist = map(lambda x1, x2: (x1 - x2)**2, srgb, orgb)
+        dist = list(map(lambda x1, x2: (x1 - x2)**2, srgb, orgb))
         # Add the results up
         dist = sum(dist)
         # Fetch the square root to compensate for the earlier squaring
@@ -284,7 +284,7 @@ class Color(object):
     @staticmethod
     def rgb_to_hexstr(red, green, blue, compress=False):
         rgb = [red, green, blue]
-        rgb = map(abs, rgb)
+        rgb = list(map(abs, rgb))
         result = []
         for c in rgb:
             c = "%02X" % c
@@ -547,7 +547,7 @@ _svg_colors.update({
     "yellow":               Color(255, 255,   0),
     "yellowgreen":          Color(154, 205,  50)
     })
-for k, v in _svg_colors.items():
+for k, v in list(_svg_colors.items()):
     v.closest_name = v.name = k
 
 # 2012-12-08T14:29-07:00: Copied over from Colors.hexstr_for_ccodes in the main
@@ -594,7 +594,7 @@ _irc_colors.update({
 
     99: Color(0x999999)         # Until I think of a better solution to this
     })
-for k, v in _irc_colors.items():
+for k, v in list(_irc_colors.items()):
     v.ccode = "%02d" % k
 del k, v
 

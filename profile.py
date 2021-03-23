@@ -7,7 +7,7 @@ import codecs
 import platform
 from datetime import *
 from time import strftime, time
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import ostools
 from mood import Mood
@@ -48,22 +48,22 @@ class PesterLog(object):
         html = time + convertTags(msg, "html")+"<br />"
         msg = time +convertTags(msg, "text")
         modes = {"bbcode": bbcodemsg, "html": html, "text": msg}
-        if not self.convos.has_key(handle):
+        if handle not in self.convos:
             time = datetime.now().strftime("%Y-%m-%d.%H.%M")
             self.convos[handle] = {}
-            for (format, t) in modes.iteritems():
+            for (format, t) in modes.items():
                 if not os.path.exists("%s/%s/%s/%s" % (self.logpath, self.handle, handle, format)):
                     os.makedirs("%s/%s/%s/%s" % (self.logpath, self.handle, handle, format))
                 try:
                     fp = codecs.open("%s/%s/%s/%s/%s.%s.txt" % (self.logpath, self.handle, handle, format, handle, time), encoding='utf-8', mode='a')
                 except IOError:
-                    errmsg = QtGui.QMessageBox(self)
+                    errmsg = QtWidgets.QMessageBox(self)
                     errmsg.setText("Warning: Pesterchum could not open the log file for %s!" % (handle))
                     errmsg.setInformativeText("Your log for %s will not be saved because something went wrong. We suggest restarting Pesterchum. Sorry :(" % (handle))
                     errmsg.show()
                     continue
                 self.convos[handle][format] = fp
-        for (format, t) in modes.iteritems():
+        for (format, t) in modes.items():
             f = self.convos[handle][format]
             if platform.system() == "Windows":
                 f.write(t+"\r\n")
@@ -71,14 +71,14 @@ class PesterLog(object):
                 f.write(t+"\r\n")
             f.flush()
     def finish(self, handle):
-        if not self.convos.has_key(handle):
+        if handle not in self.convos:
             return
-        for f in self.convos[handle].values():
+        for f in list(self.convos[handle].values()):
             f.close()
         del self.convos[handle]
     def close(self):
-        for h in self.convos.keys():
-            for f in self.convos[h].values():
+        for h in list(self.convos.keys()):
+            for f in list(self.convos[h].values()):
                 f.close()
 
 class userConfig(object):
@@ -104,7 +104,7 @@ class userConfig(object):
         #     No such file or directory:
         #     u'XXX\\AppData\\Local\\pesterchum/profiles/XXX.js'
         # Part 2 :(
-        if self.config.has_key("defaultprofile"):
+        if "defaultprofile" in self.config:
             try:
                 self.userprofile = userProfile(self.config["defaultprofile"])
             except:
@@ -125,7 +125,7 @@ class userConfig(object):
                 json.dump(self.groups, fp)
 
     def chums(self):
-        if not self.config.has_key('chums'):
+        if 'chums' not in self.config:
             self.set("chums", [])
         return self.config.get('chums', [])
     def setChums(self, newchums):
@@ -148,19 +148,19 @@ class userConfig(object):
     def tabs(self):
         return self.config.get("tabs", True)
     def tabMemos(self):
-        if not self.config.has_key('tabmemos'):
+        if 'tabmemos' not in self.config:
             self.set("tabmemos", self.tabs())
         return self.config.get("tabmemos", True)
     def showTimeStamps(self):
-        if not self.config.has_key('showTimeStamps'):
+        if 'showTimeStamps' not in self.config:
             self.set("showTimeStamps", True)
         return self.config.get('showTimeStamps', True)
     def time12Format(self):
-        if not self.config.has_key('time12Format'):
+        if 'time12Format' not in self.config:
             self.set("time12Format", True)
         return self.config.get('time12Format', True)
     def showSeconds(self):
-        if not self.config.has_key('showSeconds'):
+        if 'showSeconds' not in self.config:
             self.set("showSeconds", False)
         return self.config.get('showSeconds', False)
     def sortMethod(self):
@@ -174,11 +174,11 @@ class userConfig(object):
                 return g[1]
         return True
     def showEmptyGroups(self):
-        if not self.config.has_key('emptyGroups'):
+        if 'emptyGroups' not in self.config:
             self.set("emptyGroups", False)
         return self.config.get('emptyGroups', False)
     def showOnlineNumbers(self):
-        if not self.config.has_key('onlineNumbers'):
+        if 'onlineNumbers' not in self.config:
             self.set("onlineNumbers", False)
         return self.config.get('onlineNumbers', False)
     def logPesters(self):
@@ -238,7 +238,7 @@ class userConfig(object):
         newchums = [c for c in self.config['chums'] if c != handle]
         self.set("chums", newchums)
     def getBlocklist(self):
-        if not self.config.has_key('block'):
+        if 'block' not in self.config:
             self.set('block', [])
         return self.config['block']
     def addBlocklist(self, handle):
@@ -251,7 +251,7 @@ class userConfig(object):
         l.pop(l.index(handle))
         self.set('block', l)
     def getGroups(self):
-        if not self.groups.has_key('groups'):
+        if 'groups' not in self.groups:
             self.saveGroups([["Chums", True]])
         return self.groups.get('groups', [["Chums", True]])
     def addGroup(self, group, open=True):
@@ -301,7 +301,7 @@ class userConfig(object):
             return self.parent.portOverride
         return self.config.get('port', '6667')
     def soundOn(self):
-        if not self.config.has_key('soundon'):
+        if 'soundon' not in self.config:
             self.set('soundon', True)
         return self.config['soundon']
     def chatSound(self):
@@ -356,7 +356,7 @@ class userProfile(object):
         if type(user) is PesterProfile:
             self.chat = user
             self.userprofile = {"handle":user.handle,
-                                "color": unicode(user.color.name()),
+                                "color": str(user.color.name()),
                                 "quirks": [],
                                 "theme": "pesterchum"}
             self.theme = pesterTheme("pesterchum")
@@ -382,8 +382,8 @@ class userProfile(object):
                     self.userprofile = json.load(fp)
             except:
                 
-                msgBox = QtGui.QMessageBox()
-                msgBox.setIcon(QtGui.QMessageBox.Information)
+                msgBox = QtWidgets.QMessageBox()
+                msgBox.setIcon(QtWidgets.QMessageBox.Information)
                 msgBox.setWindowTitle(":(")
                 self.filename = _datadir+"pesterchum.js"
                 msgBox.setText("Failed to open \"" + \
@@ -449,7 +449,7 @@ class userProfile(object):
         self.save()
     def setColor(self, color):
         self.chat.color = color
-        self.userprofile["color"] = unicode(color.name())
+        self.userprofile["color"] = str(color.name())
         self.save()
     def setQuirks(self, quirks):
         self.quirks = quirks
@@ -467,7 +467,7 @@ class userProfile(object):
         try:
             for (i,m) in enumerate(mentions):
                 re.compile(m)
-        except re.error, e:
+        except re.error as e:
             logging.error("#%s Not a valid regular expression: %s" % (i, e))
         else:
             self.mentions = mentions
@@ -516,7 +516,7 @@ class userProfile(object):
             fp.write(jsonoutput)
     def saveNickServPass(self):
         # remove profiles with no passwords
-        for h,t in self.passwd.items():
+        for h,t in list(self.passwd.items()):
             if "auto" not in t and ("pw" not in t or t["pw"] == ""):
                 del self.passwd[h]
         try:
@@ -550,7 +550,7 @@ class PesterProfileDB(dict):
                 json.dump(chumdict, fp)
 
         u = []
-        for (handle, c) in chumdict.iteritems():
+        for (handle, c) in chumdict.items():
             options = dict()
             if 'group' in c:
                 options['group'] = c['group']
@@ -567,38 +567,38 @@ class PesterProfileDB(dict):
     def save(self):
         try:
             with open("%s/chums.js" % (self.logpath), 'w') as fp:
-                chumdict = dict([p.plaindict() for p in self.itervalues()])
+                chumdict = dict([p.plaindict() for p in self.values()])
                 json.dump(chumdict, fp)
         except Exception as e:
             raise e
     def getColor(self, handle, default=None):
-        if not self.has_key(handle):
+        if handle not in self:
             return default
         else:
             return self[handle].color
     def setColor(self, handle, color):
-        if self.has_key(handle):
+        if handle in self:
             self[handle].color = color
         else:
             self[handle] = PesterProfile(handle, color)
     def getGroup(self, handle, default="Chums"):
-        if not self.has_key(handle):
+        if handle not in self:
             return default
         else:
             return self[handle].group
     def setGroup(self, handle, theGroup):
-        if self.has_key(handle):
+        if handle in self:
             self[handle].group = theGroup
         else:
             self[handle] = PesterProfile(handle, group=theGroup)
         self.save()
     def getNotes(self, handle, default=""):
-        if not self.has_key(handle):
+        if handle not in self:
             return default
         else:
             return self[handle].notes
     def setNotes(self, handle, notes):
-        if self.has_key(handle):
+        if handle in self:
             self[handle].notes = notes
         else:
             self[handle] = PesterProfile(handle, notes=notes)
@@ -626,7 +626,7 @@ class pesterTheme(dict):
         except IOError:
             theme = json.loads("{}")
         self.update(theme)
-        if self.has_key("inherits"):
+        if "inherits" in self:
             self.inheritedTheme = pesterTheme(self["inherits"])
         if not default:
             self.defaultTheme = pesterTheme("pesterchum", default=True)
@@ -653,8 +653,8 @@ class pesterTheme(dict):
                     raise e
         return v
     def pathHook(self, d):
-        for (k, v) in d.iteritems():
-            if isinstance(v, unicode):
+        for (k, v) in d.items():
+            if isinstance(v, str):
                 s = Template(v)
                 d[k] = s.safe_substitute(path=self.path)
         return d
@@ -680,6 +680,6 @@ class pesterTheme(dict):
             return (v is not None)
         except KeyError:
             if hasattr(self, 'inheritedTheme'):
-                return self.inheritedTheme.has_key(key)
+                return key in self.inheritedTheme
             else:
                 return False

@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui
 from datetime import *
 import re
 import random
@@ -111,7 +111,7 @@ class pesterQuirks(object):
 
         newlist = []
         for (i, o) in enumerate(lexed):
-            if type(o) not in [str, unicode]:
+            if type(o) not in [str, str]:
                 if i == 0:
                     string = " "
                     for p in prefix:
@@ -135,7 +135,7 @@ class pesterQuirks(object):
 
         final = []
         for n in newlist:
-            if type(n) in [str, unicode]:
+            if type(n) in [str, str]:
                 final.extend(lexMessage(n))
             else:
                 final.append(n)
@@ -191,9 +191,9 @@ class PesterProfile(object):
     def plaindict(self):
         return (self.handle, {"handle": self.handle,
                               "mood": self.mood.name(),
-                              "color": unicode(self.color.name()),
-                              "group": unicode(self.group),
-                              "notes": unicode(self.notes)})
+                              "color": str(self.color.name()),
+                              "group": str(self.group),
+                              "notes": str(self.notes)})
     def blocked(self, config):
         return self.handle in config.getBlocklist()
 
@@ -238,7 +238,7 @@ class PesterProfile(object):
                     (opchum.colorhtml(), opinit, self.colorhtml(), ", ".join(initials))
             else:
                 return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>." % \
-                    (opchum.colorhtml(), opinit, self.colorhtml(), ", ".join(initials), unicode(reason))
+                    (opchum.colorhtml(), opinit, self.colorhtml(), ", ".join(initials), str(reason))
         else:
             initials = timeGrammar.pcf+self.initials()+timeGrammar.number
             if opchum.handle == reason:
@@ -246,7 +246,7 @@ class PesterProfile(object):
                     (opchum.colorhtml(), opinit, self.colorhtml(), initials)
             else:
                 return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>." % \
-                    (opchum.colorhtml(), opinit, self.colorhtml(), initials, unicode(reason))
+                    (opchum.colorhtml(), opinit, self.colorhtml(), initials, str(reason))
     def memopermabanmsg(self, opchum, opgrammar, syscolor, timeGrammar):
         initials = timeGrammar.pcf+self.initials()+timeGrammar.number
         opinit = opgrammar.pcf+opchum.initials()+opgrammar.number

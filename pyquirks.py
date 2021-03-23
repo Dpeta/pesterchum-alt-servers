@@ -1,6 +1,6 @@
 import os, sys, imp, re, ostools
 from quirks import ScriptQuirks
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class PythonQuirks(ScriptQuirks):
     def loadModule(self, name, filename):
@@ -12,21 +12,21 @@ class PythonQuirks(ScriptQuirks):
     def modHas(self, module, attr):
         if attr == 'commands':
             variables = vars(module)
-            for name, obj in variables.iteritems():
+            for name, obj in variables.items():
                 if self.modHas(obj, 'command'):
                     return True
         return hasattr(module, attr)
 
     def register(self, module):
         variables = vars(module)
-        for name, obj in variables.iteritems():
+        for name, obj in variables.items():
             if self.modHas(obj, 'command'):
                 try:
-                    if not isinstance(obj("test"), basestring):
+                    if not isinstance(obj("test"), str):
                         raise Exception
                 except:
-                    print "Quirk malformed: %s" % (obj.command)
-                    msgbox = QtGui.QMessageBox()
+                    print("Quirk malformed: %s" % (obj.command))
+                    msgbox = QtWidgets.QMessageBox()
                     msgbox.setWindowTitle("Error!")
                     msgbox.setText("Quirk malformed: %s" % (obj.command))
                     msgbox.exec_()

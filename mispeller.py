@@ -21,12 +21,12 @@ def mispeller(word):
         num = 1
     else:
         num = random.choice([1,2])
-    wordseq = range(0, len(word))
+    wordseq = list(range(0, len(word)))
     random.shuffle(wordseq)
     letters = wordseq[0:num]
     def mistype(string, i):
         l = string[i]
-        if not kbdict.has_key(l):
+        if l not in kbdict:
             return string
         lpos = kbdict[l]
         newpos = lpos

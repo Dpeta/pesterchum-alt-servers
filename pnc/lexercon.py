@@ -1,5 +1,5 @@
 # -*- coding=UTF-8; tab-width: 4 -*-
-from __future__ import division
+
 
 from .unicolor import Color
 
@@ -8,7 +8,7 @@ import re
 global basestr
 basestr = str
 try:
-    basestr = basestring
+    basestr = str
 except NameError:
     # We're running Python 3. Leave it be.
     pass
@@ -160,7 +160,7 @@ class CTag(Specifier):
                 cmatch = Pesterchum._ctag_rgb.match(text)
                 if cmatch:
                     working = cmatch.groups()
-                    working = map(int, working)
+                    working = list(map(int, working))
                     inst.color = Color(*working)
                 else:
                     try:
