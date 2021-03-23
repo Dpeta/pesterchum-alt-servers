@@ -1286,7 +1286,7 @@ class PesterWindow(MovingWindow):
 
         # Fuck you some more OSX leopard! >:(
         if not ostools.isOSXLeopard():
-            QtCore.QTimer.singleShot(1000, self, QtCore.SLOT('mspacheck()'))
+            QtCore.QTimer.singleShot(1000, self.mspacheck)
 
         self.pcUpdate['QString', 'QString'].connect(self.updateMsg)
 
@@ -3051,7 +3051,7 @@ class MainProgram(QtCore.QObject):
 
         self.trayicon.setContextMenu(self.traymenu)
         self.trayicon.show()
-        self.trayicon.activated[QSystemTrayIcon.ActivationReason].connect(self.widget.systemTrayActivated)
+        self.trayicon.activated[QtWidgets.QSystemTrayIcon.ActivationReason].connect(self.widget.systemTrayActivated)
         self.widget.trayIconSignal[int].connect(self.trayicon.changeTrayIcon)
         self.widget.closeToTraySignal.connect(self.trayiconShow)
         self.widget.closeSignal.connect(self.trayicon.mainWindowClosed)
@@ -3064,7 +3064,7 @@ class MainProgram(QtCore.QObject):
         self.irc = PesterIRC(self.widget.config, self.widget, self.server)
         self.connectWidgets(self.irc, self.widget)
 
-        self.widget.gainAttention[QWidget].connect(self.alertWindow)
+        self.widget.gainAttention[QtWidgets.QWidget].connect(self.alertWindow)
 
 
         # This doesn't know as far as I'm aware, so it's commented out for now.
@@ -3195,18 +3195,58 @@ Click this message to never see this again.")
                   ('quirkDisable(QString, QString, QString)',
                    'quirkDisable(QString, QString, QString)')
                   ]
+    def ircQtConnections(self, irc, widget):
+        # IRC --> Main window
+         return ((widget.sendMessage, irc.sendMessage),
+                (widget.sendNotice, irc.sendNotice),
+                (widget.newConvoStarted, irc.startConvo),
+                (widget.convoClosed, irc.endConvo),
+                (widget.profileChanged, irc.updateProfile),
+                (widget.moodRequest, irc.getMood),
+                (widget.moodsRequest, irc.getMoods),
+                (widget.moodUpdated, irc.updateMood),
+                (widget.mycolorUpdated, irc.updateColor),
+                (widget.blockedChum, irc.blockedChum),
+                (widget.unblockedChum, irc.unblockedChum),
+                (widget.requestNames, irc.requestNames),
+                (widget.requestChannelList, irc.requestChannelList),
+                (widget.joinChannel, irc.joinChannel),
+                (widget.leftChannel, irc.leftChannel),
+                (widget.kickUser, irc.kickUser),
+                (widget.setChannelMode, irc.setChannelMode),
+                (widget.channelNames, irc.channelNames),
+                (widget.inviteChum, irc.inviteChum),
+                (widget.pingServer, irc.pingServer),
+                (widget.setAway, irc.setAway),
+                (widget.killSomeQuirks, irc.killSomeQuirks),
+                (widget.reconnectIRC, irc.reconnectIRC),
+                 # Main window --> IRC    
+                (irc.connected, widget.connected),
+                (irc.moodUpdated, widget.updateMoodSlot),
+                (irc.messageReceived, widget.deliverMessage),
+                (irc.memoReceived, widget.deliverMemo),
+                (irc.noticeReceived, widget.deliverNotice),
+                (irc.inviteReceived, widget.deliverInvite),
+                (irc.nickCollision, widget.nickCollision),
+                (irc.myHandleChanged, widget.myHandleChanged),
+                (irc.namesReceived, widget.updateNames),
+                (irc.userPresentUpdate, widget.userPresentUpdate),
+                (irc.channelListReceived, widget.updateChannelList),
+                (irc.timeCommand, widget.timeCommand),
+                (irc.chanInviteOnly, widget.chanInviteOnly),
+                (irc.modesUpdated, widget.modesUpdated),
+                (irc.cannotSendToChan, widget.cannotSendToChan),
+                (irc.tooManyPeeps, widget.tooManyPeeps),
+                (irc.quirkDisable, widget.quirkDisable))
     def connectWidgets(self, irc, widget):
         irc.finished.connect(self.restartIRC)
         irc.connected.connect(self.connected)
-        for c in self.widget2irc:
-            widget.c[0].connect(irc.c[1])
-        for c in self.irc2widget:
-            irc.c[0].connect(widget.c[1])
+        for sig, slot in self.ircQtConnections(irc, widget):
+            sig.connect(slot)
+
     def disconnectWidgets(self, irc, widget):
-        for c in self.widget2irc:
-            widget.c[0].disconnect(irc.c[1])
-        for c in self.irc2widget:
-            irc.c[0].disconnect(widget.c[1])
+        for sig, slot in self.ircQtConnections(irc, widget):
+            sig.disconnect(slot)
         irc.connected.disconnect(self.connected)
         self.irc.finished.disconnect(self.restartIRC)
 

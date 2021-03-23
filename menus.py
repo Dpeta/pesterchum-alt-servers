@@ -1737,8 +1737,7 @@ class LoadingScreen(QtWidgets.QDialog):
             # Set a timer so that we don't immediately disconnect anyway.
             self.cancel.setEnabled(False)
             # A few seconds should be enough.
-            self.timer = QtCore.QTimer.singleShot(2000, self,
-                    QtCore.SLOT('enableQuit()'))
+            self.timer = QtCore.QTimer.singleShot(2000, self.enableQuit)
 
     def showReconnect(self):
         self.ok.show()

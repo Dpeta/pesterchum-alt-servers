@@ -340,6 +340,8 @@ class PesterHandler(DefaultCommandHandler):
             msg = msg.decode('utf-8')
         except UnicodeDecodeError:
             msg = msg.decode('iso-8859-1', 'ignore')
+        nick = nick.decode('utf-8')
+        chan = chan.decode('utf-8')
         handle = nick[0:nick.find("!")]
         logging.info("---> recv \"NOTICE %s :%s\"" % (handle, msg))
         if handle == "ChanServ" and chan == self.parent.mainwindow.profile().handle and msg[0:2] == "[#":
@@ -458,8 +460,9 @@ class PesterHandler(DefaultCommandHandler):
                 self.parent.mainwindow.randhandler.setRunning(True)
             self.parent.moodUpdated.emit(handle, Mood("chummy"))
     def mode(self, op, channel, mode, *handles):
+        channel = channel.decode('utf-8')
         if len(handles) <= 0: handles = [""]
-        opnick = op[0:op.find("!")]
+        opnick = op.decode('utf-8')[0:op.decode('utf-8').find("!")]
         if op == channel or channel == self.parent.mainwindow.profile().handle:
             modes = list(self.parent.mainwindow.modes)
             if modes and modes[0] == "+": modes = modes[1:]

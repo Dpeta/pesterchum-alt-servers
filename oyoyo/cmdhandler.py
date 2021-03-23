@@ -66,12 +66,12 @@ class CommandHandler(object):
         ["command", "sub", "func"].
         """
         if isinstance(in_command_parts, (str, bytes)):
-            in_command_parts = in_command_parts.split(bytes('.', 'ascii'))
+            in_command_parts = in_command_parts.split('.')
         command_parts = in_command_parts[:]
 
         p = self
         while command_parts:
-            cmd = command_parts.pop(0).decode('ascii')
+            cmd = command_parts.pop(0)
             if cmd.startswith('_'):
                 raise ProtectedCommandError(in_command_parts)
 
