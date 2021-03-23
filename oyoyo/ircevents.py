@@ -125,6 +125,7 @@ numeric_events = {
     "393": "users",
     "394": "endofusers",
     "395": "nousers",
+    "396": "hosthidden",
     "401": "nosuchnick",
     "402": "nosuchserver",
     "403": "nosuchchannel",

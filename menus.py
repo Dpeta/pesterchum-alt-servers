@@ -41,7 +41,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
         self.mainwindow = mainwindow
         self.setStyleSheet("background:black; color:white;")
 
-        self.itemChanged[QTreeWidgetItem, int].connect(self.changeCheckState)
+        self.itemChanged[QtWidgets.QTreeWidgetItem, int].connect(self.changeCheckState)
 
         for q in mainwindow.userprofile.quirks:
             item = PesterQuirkItem(q)
@@ -291,7 +291,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
 
         self.next = QtWidgets.QPushButton("Next", self)
         self.next.setDefault(True)
-        self.__next__.clicked.connect(self.nextPage)
+        self.next.clicked.connect(self.nextPage)
         self.back = QtWidgets.QPushButton("Back", self)
         self.back.setEnabled(False)
         self.back.clicked.connect(self.backPage)
@@ -300,7 +300,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         layout_2 = QtWidgets.QHBoxLayout()
         layout_2.setAlignment(QtCore.Qt.AlignRight)
         layout_2.addWidget(self.back)
-        layout_2.addWidget(self.__next__)
+        layout_2.addWidget(self.next)
         layout_2.addSpacing(5)
         layout_2.addWidget(self.cancel)
 
