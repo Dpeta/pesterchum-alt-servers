@@ -548,7 +548,7 @@ class PesterMemo(PesterConvo):
     def updateColor(self, handle, color):
         chums = self.userlist.findItems(handle, QtCore.Qt.MatchFlags(0))
         for c in chums:
-            c.setTextColor(color)
+            c.setForeground(0, QtGui.QBrush(color))
     def addMessage(self, text, handle):
         if type(handle) is bool:
             chum = self.mainwindow.profile()
@@ -669,7 +669,7 @@ class PesterMemo(PesterConvo):
         else:
             color = chumdb.getColor(handle, defaultcolor)
         item.box = (handle == "evacipatedBox")
-        item.setTextColor(color)
+        item.setForeground(QtGui.QBrush(color))
         item.founder = founder
         item.op = op
         item.halfop = halfop

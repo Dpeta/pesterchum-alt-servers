@@ -336,12 +336,12 @@ class PesterIRC(QtCore.QThread):
 
 class PesterHandler(DefaultCommandHandler):
     def notice(self, nick, chan, msg):
-        try:
-            msg = msg.decode('utf-8')
-        except UnicodeDecodeError:
-            msg = msg.decode('iso-8859-1', 'ignore')
-        nick = nick.decode('utf-8')
-        chan = chan.decode('utf-8')
+        #try:
+        #    msg = msg.decode('utf-8')
+        #except UnicodeDecodeError:
+        #    msg = msg.decode('iso-8859-1', 'ignore')
+        #nick = nick.decode('utf-8')
+        #chan = chan.decode('utf-8')
         handle = nick[0:nick.find("!")]
         logging.info("---> recv \"NOTICE %s :%s\"" % (handle, msg))
         if handle == "ChanServ" and chan == self.parent.mainwindow.profile().handle and msg[0:2] == "[#":
@@ -349,10 +349,10 @@ class PesterHandler(DefaultCommandHandler):
         else:
             self.parent.noticeReceived.emit(handle, msg)
     def privmsg(self, nick, chan, msg):
-        try:
-            msg = msg.decode('utf-8')
-        except UnicodeDecodeError:
-            msg = msg.decode('iso-8859-1', 'ignore')
+        #try:
+        #    msg = msg.decode('utf-8')
+        #except UnicodeDecodeError:
+        #    msg = msg.decode('iso-8859-1', 'ignore')
         # display msg, do other stuff
         if len(msg) == 0:
             return
@@ -460,9 +460,10 @@ class PesterHandler(DefaultCommandHandler):
                 self.parent.mainwindow.randhandler.setRunning(True)
             self.parent.moodUpdated.emit(handle, Mood("chummy"))
     def mode(self, op, channel, mode, *handles):
-        channel = channel.decode('utf-8')
+        #channel = channel.decode('utf-8')
         if len(handles) <= 0: handles = [""]
-        opnick = op.decode('utf-8')[0:op.decode('utf-8').find("!")]
+        #opnick = op.decode('utf-8')[0:op.decode('utf-8').find("!")]
+        opnick = op[0:op.find("!")]
         if op == channel or channel == self.parent.mainwindow.profile().handle:
             modes = list(self.parent.mainwindow.modes)
             if modes and modes[0] == "+": modes = modes[1:]

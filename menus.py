@@ -1545,7 +1545,7 @@ class PesterUserlist(QtWidgets.QDialog):
         for n in names:
             if str(self.searchbox.text()) == "" or n.lower().find(str(self.searchbox.text()).lower()) != -1:
                 item = QtWidgets.QListWidgetItem(n)
-                item.setTextColor(QtGui.QColor(self.theme["main/chums/userlistcolor"]))
+                item.setForeground(0, QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"])))
                 self.userarea.addItem(item)
         self.userarea.sortItems()
     @QtCore.pyqtSlot(QString, QString, QString)
@@ -1561,7 +1561,7 @@ class PesterUserlist(QtWidgets.QDialog):
                 self.addUser(h)
     def addUser(self, name):
         item = QtWidgets.QListWidgetItem(name)
-        item.setTextColor(QtGui.QColor(self.theme["main/chums/userlistcolor"]))
+        item.setForeground(0, QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"])))
         self.userarea.addItem(item)
         self.userarea.sortItems()
     def delUser(self, name):
@@ -1575,7 +1575,7 @@ class PesterUserlist(QtWidgets.QDialog):
         self.userarea.setStyleSheet(theme["main/chums/style"])
         self.addChumAction.setText(theme["main/menus/rclickchumlist/addchum"])
         for item in [self.userarea.item(i) for i in range(0, self.userarea.count())]:
-            item.setTextColor(QtGui.QColor(theme["main/chums/userlistcolor"]))
+            item.setForeground(0, QtGui.QBrush(QtGui.QColor(theme["main/chums/userlistcolor"])))
 
     @QtCore.pyqtSlot()
     def addChumSlot(self):
@@ -1625,7 +1625,7 @@ class PesterMemoList(QtWidgets.QDialog):
         self.channelarea.setColumnWidth(1,10)
         self.channelarea.setSortingEnabled(True)
         self.channelarea.sortByColumn(0, QtCore.Qt.AscendingOrder)
-        self.channelarea.itemDoubleClicked[QTreeWidgetItem, int].connect(self.AcceptSelection)
+        self.channelarea.itemDoubleClicked[QtWidgets.QTreeWidgetItem, int].connect(self.AcceptSelection)
 
         self.orjoinlabel = QtWidgets.QLabel("OR MAKE A NEW MEMO:")
         self.newmemo = QtWidgets.QLineEdit(channel, self)
@@ -1678,8 +1678,8 @@ class PesterMemoList(QtWidgets.QDialog):
     def updateChannels(self, channels):
         for c in channels:
             item = MemoListItem(c[0][1:],c[1])
-            item.setTextColor(0, QtGui.QColor(self.theme["main/chums/userlistcolor"]))
-            item.setTextColor(1, QtGui.QColor(self.theme["main/chums/userlistcolor"]))
+            item.setForeground(0, QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"])))
+            item.setForeground(1, QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"])))
             item.setIcon(0, QtGui.QIcon(self.theme["memos/memoicon"]))
             self.channelarea.addTopLevelItem(item)
 
@@ -1687,7 +1687,7 @@ class PesterMemoList(QtWidgets.QDialog):
         self.theme = theme
         self.setStyleSheet(theme["main/defaultwindow/style"])
         for item in [self.userarea.item(i) for i in range(0, self.channelarea.count())]:
-            item.setTextColor(QtGui.QColor(theme["main/chums/userlistcolor"]))
+            item.setForeground(0, QtGui.QBrush(QtGui.QColor(theme["main/chums/userlistcolor"])))
             item.setIcon(QtGui.QIcon(theme["memos/memoicon"]))
 
     @QtCore.pyqtSlot()
