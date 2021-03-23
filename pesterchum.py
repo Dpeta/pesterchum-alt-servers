@@ -1765,12 +1765,19 @@ class PesterWindow(MovingWindow):
             if (pygame and pygame.mixer):
                 # We have pygame, so we may as well use it.
                 soundclass = pygame.mixer.Sound
-            elif QtMultimedia.QSound.isAvailable():
-                # We don't have pygame; try to use QSound.
-                soundclass = QtMultimedia.QSound
+            # QSound.isAvailable no longer exists in pyqt5 :(
+            # This deserves a better solution
+            #elif QtMultimedia.QSound.isAvailable():
+            #    # We don't have pygame; try to use QSound.
+            #    soundclass = QtMultimedia.QSound
+            #else:
+            #    # We don't have any options...just use fillers.
+            #    soundclass = NoneSound
             else:
-                # We don't have any options...just use fillers.
-                soundclass = NoneSound
+                try:
+                    soundclass = QtMultimedia.QSound
+                except:
+                    soundclass = NoneSound
 
         self.sound_type = soundclass
 
@@ -3008,11 +3015,15 @@ class MainProgram(QtCore.QObject):
             # ... Other alternatives here. ...
 
             # Last resort. (Always 'works' on Windows, no volume control.)
-            if QtMultimedia.QSound.isAvailable():
-                # Sound works, we're done.
-                return
-            else:
-                print("Warning: No sound! (No pygame/QSound)")
+
+            # QSound.isAvailable is no longer a thing :(
+            # Maybe fix.
+
+            #if QtMultimedia.QSound.isAvailable():
+            #    # Sound works, we're done.
+            #    return
+            #else:
+            #    print("Warning: No sound! (No pygame/QSound)")
 
         doSoundInit()
         self.widget = PesterWindow(options, app=self.app)
