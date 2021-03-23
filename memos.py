@@ -100,7 +100,7 @@ class TimeGrammar(object):
 class TimeTracker(list):
     def __init__(self, time=None):
         self.timerecord = {"P": [], "F": []}
-        self.open = {}
+        self.open = {"": ""}# Needs to be a dictionary :)
         if time is not None:
             self.append(time)
             self.current=0
