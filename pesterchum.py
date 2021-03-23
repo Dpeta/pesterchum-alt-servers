@@ -259,7 +259,7 @@ class chumArea(RightClickTree):
     def __init__(self, chums, parent=None):
         super(chumArea, self).__init__(parent)
         self.notify = False
-        QtCore.QTimer.singleShot(30000, self, QtCore.SLOT('beginNotify()'))
+        QtCore.QTimer.singleShot(30000, self.beginNotify)
         self.mainwindow = parent
         theme = self.mainwindow.theme
         self.chums = chums
@@ -326,7 +326,7 @@ class chumArea(RightClickTree):
         self.setAnimated(True)
         self.setRootIsDecorated(False)
 
-        self.itemDoubleClicked[QTreeWidgetItem, int].connect(self.expandGroup)
+        self.itemDoubleClicked[QtWidgets.QTreeWidgetItem, int].connect(self.expandGroup)
 
     @QtCore.pyqtSlot()
     def beginNotify(self):
@@ -468,7 +468,7 @@ class chumArea(RightClickTree):
                 continue
             movegroup = self.moveMenu.addAction(gtext)
             actGroup.addAction(movegroup)
-        actGroup.triggered[QAction].connect(self.moveToGroup)
+        actGroup.triggered[QtWidgets.QAction].connect(self.moveToGroup)
 
     def addChum(self, chum):
         if len([c for c in self.chums if c.handle == chum.handle]) != 0:
@@ -1232,7 +1232,7 @@ class PesterWindow(MovingWindow):
 
         chums = [PesterProfile(c, chumdb=self.chumdb) for c in set(self.config.chums())]
         self.chumList = chumArea(chums, self)
-        self.chumList.itemActivated[QTreeWidgetItem, int].connect(self.pesterSelectedChum)
+        self.chumList.itemActivated[QtWidgets.QTreeWidgetItem, int].connect(self.pesterSelectedChum)
         self.chumList.removeChumSignal['QString'].connect(self.removeChum)
         self.chumList.blockChumSignal['QString'].connect(self.blockChum)
 
