@@ -299,7 +299,7 @@ class userConfig(object):
     def port(self):
         if hasattr(self.parent, 'portOverride'):
             return self.parent.portOverride
-        return self.config.get('port', '6667')
+        return self.config.get('port', '6697')
     def soundOn(self):
         if 'soundon' not in self.config:
             self.set('soundon', True)

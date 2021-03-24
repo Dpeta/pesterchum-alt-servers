@@ -24,6 +24,7 @@ import time
 import threading
 import os
 import traceback
+import ssl
 
 from oyoyo.parse import *
 from oyoyo import helpers
@@ -81,7 +82,10 @@ class IRCClient:
         ...     cli_con.next()
         ...
         """
+        self.context = ssl.create_default_context()
+        self.context.check_hostname = False
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket = self.context.wrap_socket(self.socket)
         self.nick = None
         self.real_name = None
         self.host = None
@@ -123,10 +127,10 @@ class IRCClient:
                 raise IRCClientError('Refusing to send one of the args from provided: %s'
                                      % repr([(type(arg), arg) for arg in args]))
 
-        msg = bytes(" ", "ascii").join(bargs)
+        msg = bytes(" ", "UTF-8").join(bargs)
         logging.info('---> send "%s"' % msg)
         try:
-            self.socket.send(msg + bytes("\r\n", "ascii"))
+            self.socket.send(msg + bytes("\r\n", "UTF-8"))
         except socket.error as se:
             try:  # a little dance of compatibility to get the errno
                 errno = se.errno
@@ -183,7 +187,7 @@ class IRCClient:
                     if len(buffer) == 0 and self.blocking:
                         raise socket.error("Connection closed")
 
-                    data = buffer.split(bytes("\n", "ascii"))
+                    data = buffer.split(bytes("\n", "UTF-8"))
                     buffer = data.pop()
 
                     for el in data:
