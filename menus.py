@@ -1133,21 +1133,21 @@ class PesterOptions(QtWidgets.QDialog):
         layout_5.addWidget(QtWidgets.QLabel("Minutes before Idle:"))
         layout_5.addWidget(self.idleBox)
 
-        self.updateBox = QtWidgets.QComboBox(self)
-        self.updateBox.addItem("Once a Day")
-        self.updateBox.addItem("Once a Week")
-        self.updateBox.addItem("Only on Start")
-        self.updateBox.addItem("Never")
-        check = self.config.checkForUpdates()
-        if check >= 0 and check < self.updateBox.count():
-            self.updateBox.setCurrentIndex(check)
+        #self.updateBox = QtWidgets.QComboBox(self)
+        #self.updateBox.addItem("Once a Day")
+        #self.updateBox.addItem("Once a Week")
+        #self.updateBox.addItem("Only on Start")
+        #self.updateBox.addItem("Never")
+        #check = self.config.checkForUpdates()
+        #if check >= 0 and check < self.updateBox.count():
+        #    self.updateBox.setCurrentIndex(check)
         layout_6 = QtWidgets.QHBoxLayout()
-        layout_6.addWidget(QtWidgets.QLabel("Check for\nPesterchum Updates:"))
-        layout_6.addWidget(self.updateBox)
+        #layout_6.addWidget(QtWidgets.QLabel("Check for\nPesterchum Updates:"))
+        #layout_6.addWidget(self.updateBox)
 
-        if not ostools.isOSXLeopard():
-            self.mspaCheck = QtWidgets.QCheckBox("Check for MSPA Updates", self)
-            self.mspaCheck.setChecked(self.config.checkMSPA())
+        #if not ostools.isOSXLeopard():
+        #    self.mspaCheck = QtWidgets.QCheckBox("Check for MSPA Updates", self)
+        #    self.mspaCheck.setChecked(self.config.checkMSPA())
 
         self.randomscheck = QtWidgets.QCheckBox("Receive Random Encounters")
         self.randomscheck.setChecked(parent.userprofile.randoms)
@@ -1342,8 +1342,8 @@ class PesterOptions(QtWidgets.QDialog):
         layout_idle.setAlignment(QtCore.Qt.AlignTop)
         layout_idle.addLayout(layout_5)
         layout_idle.addLayout(layout_6)
-        if not ostools.isOSXLeopard():
-            layout_idle.addWidget(self.mspaCheck)
+        #if not ostools.isOSXLeopard():
+        #    layout_idle.addWidget(self.mspaCheck)
         self.pages.addWidget(widget)
 
         # Theme

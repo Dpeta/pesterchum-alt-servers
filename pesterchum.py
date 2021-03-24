@@ -123,8 +123,8 @@ from randomer import RandomHandler, RANDNICK
 import nickservmsgs
 
 # Rawr, fuck you OSX leopard
-if not ostools.isOSXLeopard():
-    from updatecheck import MSPAChecker
+#if not ostools.isOSXLeopard():
+#    from updatecheck import MSPAChecker
 
 from toast import PesterToastMachine, PesterToast
 from libs import pytwmn
@@ -1286,8 +1286,8 @@ class PesterWindow(MovingWindow):
             self.changeProfile()
 
         # Fuck you some more OSX leopard! >:(
-        if not ostools.isOSXLeopard():
-            QtCore.QTimer.singleShot(1000, self.mspacheck)
+        #if not ostools.isOSXLeopard():
+        #    QtCore.QTimer.singleShot(1000, self.mspacheck)
 
         self.pcUpdate['QString', 'QString'].connect(self.updateMsg)
 
@@ -1296,11 +1296,11 @@ class PesterWindow(MovingWindow):
         self.lastping = int(time())
         self.pingtimer.start(1000*90)
 
-    @QtCore.pyqtSlot()
-    def mspacheck(self):
-        # Fuck you EVEN more OSX leopard! >:((((
-        if not ostools.isOSXLeopard():
-            checker = MSPAChecker(self)
+    #@QtCore.pyqtSlot()
+    #def mspacheck(self):
+    #    # Fuck you EVEN more OSX leopard! >:((((
+    #    if not ostools.isOSXLeopard():
+    #        checker = MSPAChecker(self)
 
     @QtCore.pyqtSlot(QString, QString)
     def updateMsg(self, ver, url):
@@ -2652,18 +2652,18 @@ class PesterWindow(MovingWindow):
                 self.config.set('animations', animatesetting)
                 self.animationSetting.emit(animatesetting)
             # update checked
-            updatechecksetting = self.optionmenu.updateBox.currentIndex()
-            curupdatecheck = self.config.checkForUpdates()
-            if updatechecksetting != curupdatecheck:
-                self.config.set('checkUpdates', updatechecksetting)
+            #updatechecksetting = self.optionmenu.updateBox.currentIndex()
+            #curupdatecheck = self.config.checkForUpdates()
+            #if updatechecksetting != curupdatecheck:
+            #    self.config.set('checkUpdates', updatechecksetting)
             # mspa update check
-            if ostools.isOSXLeopard():
-                mspachecksetting = false
-            else:
-                mspachecksetting = self.optionmenu.mspaCheck.isChecked()
-            curmspacheck = self.config.checkMSPA()
-            if mspachecksetting != curmspacheck:
-                self.config.set('mspa', mspachecksetting)
+            #if ostools.isOSXLeopard():
+            #    mspachecksetting = false
+            #else:
+            #    mspachecksetting = self.optionmenu.mspaCheck.isChecked()
+            #curmspacheck = self.config.checkMSPA()
+            #if mspachecksetting != curmspacheck:
+            #    self.config.set('mspa', mspachecksetting)
             # Taskbar blink
             blinksetting = 0
             if self.optionmenu.pesterBlink.isChecked():
