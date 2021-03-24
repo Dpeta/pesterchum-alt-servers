@@ -1255,6 +1255,10 @@ class PesterWindow(MovingWindow):
         self.mychumcolor = QtWidgets.QPushButton(self)
         self.mychumcolor.clicked.connect(self.changeMyColor)
 
+        # self.show() before self.initTheme() fixes a
+        # layering issue on windows... for some reason...
+        self.show()
+
         self.initTheme(self.theme)
 
         self.waitingMessages = waitingMessageHolder(self)
