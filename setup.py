@@ -4,6 +4,12 @@ import sys
 import os
 import shutil
 
+if sys.version_info < (3, 0, 0):
+    sys.exit("Python3 versions lower than 3 are not supported.")
+
+def is_64bit() -> bool:
+    return sys.maxsize > 2**32
+
 if sys.platform == "win32":
     base = "Win32GUI"
 else:
@@ -19,26 +25,24 @@ build_exe_options = {
                  'collections.array',
                  'collections._weakref'],
 }
-
-setup(
-        name = "PESTERCHUM",
-        version = "3.41",
-        description = "P3ST3RCHUM",
-        options = {"build_exe": build_exe_options},
-        executables = [Executable("pesterchum.py",
-                                  base=base,
-                                  compress=True,
-                                  icon="pesterchum.ico",
-                                  ),
-                       Executable("pesterchum_debug.py",
-                                  base=base,
-                                  compress=True,
-                                  icon="pesterchum.ico",
-                                  )])
-
+if is_64bit() == true:
+    setup(
+            name = "PESTERCHUM",
+            version = "3.41",
+            description = "P3ST3RCHUM",
+            options = {"build_exe": build_exe_options},
+            executables = [Executable("pesterchum.py",
+                                      base=base,
+                                      compress=True,
+                                      icon="pesterchum.ico",
+                                      build_exe: 'build\Pesterchum\'
+                                      )])
+    if sys.platform == "win32":
+        os.rename("build/exe.win-amd64-2.7", "build/pesterchum")
+else:
+    pass
 #Replace exe.win-amd64-2.7 with whatever it seems to generate as for you.
-if sys.platform == "win32":
-    os.rename("build/exe.win-amd64-2.7", "build/pesterchum")
+
 
 shutil.copytree("themes", "build/pesterchum/themes")
 shutil.copytree("smilies", "build/pesterchum/smilies")
