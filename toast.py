@@ -147,7 +147,7 @@ class ToastMachine(object):
                     return
                     #self.type = type = "default"
             elif type == "twmn":
-                from libs import pytwmn
+                import pytwmn
                 try:
                     pytwmn.init()
                 except pytwmn.ERROR as e:

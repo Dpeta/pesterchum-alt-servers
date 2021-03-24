@@ -1756,7 +1756,7 @@ class AboutPesterchum(QtWidgets.QDialog):
         self.mainwindow = parent
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
 
-        self.title = QtWidgets.QLabel("P3ST3RCHUM V. %s" % (_pcVersion))
+        self.title = QtWidgets.QLabel("P3ST3RCHUM %s" % (_pcVersion))
         self.credits = QtWidgets.QLabel("Programming by:\n\
   illuminatedwax (ghostDunk)\n\
   Kiooeht (evacipatedBox)\n\
@@ -1766,6 +1766,7 @@ class AboutPesterchum(QtWidgets.QDialog):
   Cerxi (binaryCabalist)\n\
   Arcane (arcaneAgilmente)\n\
   karxi (Midna)\n\
+  Shou :)\n\
 \n\
 Art by:\n\
   Grimlive (aquaMarinist)\n\

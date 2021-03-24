@@ -1,11 +1,11 @@
 # Windows-only cx_freeze setup file
 from cx_Freeze import setup, Executable
 import sys
-import os
-import shutil
+
+from version import buildVersion
 
 if sys.version_info < (3, 0, 0):
-    sys.exit("Python3 versions lower than 3 are not supported.")
+    sys.exit("Python versions lower than 3 are not supported.")
 
 def is_64bit() -> bool:
     return sys.maxsize > 2**32
@@ -13,47 +13,41 @@ def is_64bit() -> bool:
 if sys.platform == "win32":
     base = "Win32GUI"
 else:
-    base = "Console"
+    sys.exit("This script won't work on this platform </3")
 
+includefiles = ["quirks",
+                "smilies",
+                "themes",
+                "README.md",
+                "README-karxi.mkdn",
+                "README-pesterchum.mkdn",
+                "themes.txt",
+                "server.json",
+                "PCskins.png",
+                "Pesterchum.png"]
 build_exe_options = {
-    "includes": ["requests","urllib"],
-    'excludes': ['collections.sys',
-                 'collections._sre',
-                 'collections._json',
-                 'collections._locale',
-                 'collections._struct',
-                 'collections.array',
-                 'collections._weakref'],
+    "includes": ["requests","urllib","pytwmn"],
+    "excludes": ["collections.sys",
+                 "collections._sre",
+                 "collections._json",
+                 "collections._locale",
+                 "collections._struct",
+                 "collections.array",
+                 "collections._weakref"],
+    'include_files': includefiles
+    #'build_exe': ["build"]
 }
-if is_64bit() == true:
+#print("type(includefiles) = " + str(type(includefiles)))
+#print("type(build_exe_options) = " + str(type(build_exe_options))
+
+if is_64bit() == True:
     setup(
-            name = "PESTERCHUM",
-            version = "3.41",
-            description = "P3ST3RCHUM",
+            name = "PESTERCHUM ALT.",
+            version = buildVersion,
+            url = "https://github.com/Dpeta/pesterchum-alt-servers",
+            description = "P3ST3RCHUM ALT.",
             options = {"build_exe": build_exe_options},
             executables = [Executable("pesterchum.py",
                                       base=base,
-                                      compress=True,
-                                      icon="pesterchum.ico",
-                                      build_exe: 'build\Pesterchum\'
+                                      icon="pesterchum.ico"
                                       )])
-    if sys.platform == "win32":
-        os.rename("build/exe.win-amd64-2.7", "build/pesterchum")
-else:
-    pass
-#Replace exe.win-amd64-2.7 with whatever it seems to generate as for you.
-
-
-shutil.copytree("themes", "build/pesterchum/themes")
-shutil.copytree("smilies", "build/pesterchum/smilies")
-shutil.copytree("quirks", "build/pesterchum/quirks")
-shutil.copy("pesterchum.nsi", "build/pesterchum/")
-shutil.copy("pesterchum-update.nsi", "build/pesterchum/")
-os.mkdir("build/pesterchum/profiles")
-os.mkdir("build/pesterchum/logs")
-
-#Readme & txt
-shutil.copy("README.md", "build/pesterchum/")
-shutil.copy("README-pesterchum.mkdn", "build/pesterchum/")
-shutil.copy("README-karxi.mkdn", "build/pesterchum/")
-shutil.copy("themes.txt", "build/pesterchum/")

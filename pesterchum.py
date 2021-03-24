@@ -74,6 +74,8 @@ if not ((major > 5) or (major == 5 and minor >= 0)):
     print("You currently have version " + vnum + ". Please upgrade Qt.")
     exit()
 
+from version import _pcVersion
+
 import ostools
 # Placed here before importing the rest of pesterchum, since bits of it need
 #  OSX's data directory and it doesn't hurt to have everything set up before
@@ -127,7 +129,7 @@ import nickservmsgs
 #    from updatecheck import MSPAChecker
 
 from toast import PesterToastMachine, PesterToast
-from libs import pytwmn
+import pytwmn
 from profile import *
 
 canon_handles = ["apocalypseArisen", "arsenicCatnip", "arachnidsGrip", "adiosToreador", \
@@ -2975,7 +2977,7 @@ class MainProgram(QtCore.QObject):
             # Back to our scheduled program.
 
         self.app = QtWidgets.QApplication(sys.argv)
-        self.app.setApplicationName("Pesterchum 3.14")
+        self.app.setApplicationName("Pesterchum " + _pcVersion)
         self.app.setQuitOnLastWindowClosed(False)
 
         options = self.oppts(sys.argv[1:])
