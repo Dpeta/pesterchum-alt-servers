@@ -1545,7 +1545,7 @@ class PesterUserlist(QtWidgets.QDialog):
         for n in names:
             if str(self.searchbox.text()) == "" or n.lower().find(str(self.searchbox.text()).lower()) != -1:
                 item = QtWidgets.QListWidgetItem(n)
-                item.setForeground(0, QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"])))
+                item.setForeground(QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"])))
                 self.userarea.addItem(item)
         self.userarea.sortItems()
     @QtCore.pyqtSlot(QString, QString, QString)
@@ -1561,7 +1561,7 @@ class PesterUserlist(QtWidgets.QDialog):
                 self.addUser(h)
     def addUser(self, name):
         item = QtWidgets.QListWidgetItem(name)
-        item.setForeground(0, QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"])))
+        item.setForeground(QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"])))
         self.userarea.addItem(item)
         self.userarea.sortItems()
     def delUser(self, name):

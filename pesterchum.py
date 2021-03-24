@@ -2402,6 +2402,7 @@ class PesterWindow(MovingWindow):
         self.quirkmenu = None
     @QtCore.pyqtSlot()
     def openChat(self):
+        self.setStyleSheet("QInputDialog {" + self.theme["convo/tabwindow/style"] + "}")
         if not hasattr(self, "openchatdialog"):
             self.openchatdialog = None
         if not self.openchatdialog:
