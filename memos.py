@@ -69,7 +69,7 @@ def txt2delta(txt):
     return sign*timed
 
 def pcfGrammar(td):
-    if type(td) is mysteryTime:
+    if td == timedelta(weeks=1): # Replacement for mysteryTime </3
         when = "???"
         temporal = "???"
         pcf = "?"
@@ -99,6 +99,10 @@ class TimeGrammar(object):
 
 class TimeTracker(list):
     def __init__(self, time=None):
+        # mysteryTime breaks stuff now, so, uh
+        # I'm replacing it with 1 day...
+        if type(time)==mysteryTime:
+            time = timedelta(weeks=1)
         self.timerecord = {"P": [], "F": []}
         self.open = {}
         if time is not None:
@@ -109,6 +113,9 @@ class TimeTracker(list):
         else:
             self.current=-1
     def addTime(self, timed):
+        # mysteryTime </3
+        if type(timed)==mysteryTime:
+            timed = timedelta(weeks=1)
         try:
             i = self.index(timed)
             self.current = i

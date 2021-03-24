@@ -917,7 +917,7 @@ def timeProtocol(cmd):
     return timed
 
 def timeDifference(td):
-    if type(td) is mysteryTime:
+    if td == timedelta(weeks=1): # mysteryTime replacement :(
         return "??:?? FROM ????"
     if td < timedelta(0):
         when = "AGO"
