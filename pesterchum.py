@@ -10,9 +10,6 @@ if os.path.dirname(sys.argv[0]):
     os.chdir(os.path.dirname(sys.argv[0]))
 import logging
 logging.basicConfig(level=logging.WARNING)
-import version
-version.pcVerCalc()
-version._py_version_check()
 
 from datetime import *
 import random
