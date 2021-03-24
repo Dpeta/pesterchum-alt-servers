@@ -3067,22 +3067,22 @@ class MainProgram(QtCore.QObject):
 
         self.widget.gainAttention[QtWidgets.QWidget].connect(self.alertWindow)
 
-    @QtCore.pyqtSlot()
-    def runUpdateSlot(self):
-        q = queue.Queue(1)
-        s = threading.Thread(target=version.updateCheck, args=(q,))
-        w = threading.Thread(target=self.showUpdate, args=(q,))
-        w.start()
-        s.start()
-        self.widget.config.set('lastUCheck', int(time()))
-        check = self.widget.config.checkForUpdates()
-        if check == 0:
-            seconds = 60 * 60 * 24
-        elif check == 1:
-            seconds = 60 * 60 * 24 * 7
-        else:
-            return
-        QtCore.QTimer.singleShot(1000*seconds, self, QtCore.SLOT('runUpdateSlot()'))
+    #@QtCore.pyqtSlot()
+    #def runUpdateSlot(self):
+    #    q = queue.Queue(1)
+    #    s = threading.Thread(target=version.updateCheck, args=(q,))
+    #    w = threading.Thread(target=self.showUpdate, args=(q,))
+    #    w.start()
+    #    s.start()
+    #    self.widget.config.set('lastUCheck', int(time()))
+    #    check = self.widget.config.checkForUpdates()
+    #    if check == 0:
+    #        seconds = 60 * 60 * 24
+    #    elif check == 1:
+    #        seconds = 60 * 60 * 24 * 7
+    #    else:
+    #        return
+    #    QtCore.QTimer.singleShot(1000*seconds, self, QtCore.SLOT('runUpdateSlot()'))
 
     @QtCore.pyqtSlot(QtWidgets.QWidget)
     def alertWindow(self, widget):
