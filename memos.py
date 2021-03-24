@@ -559,7 +559,9 @@ class PesterMemo(PesterConvo):
 
     def initTheme(self, theme):
         self.resize(*theme["memos/size"])
-        self.setStyleSheet("QFrame#%s { %s }" % (self.channel, theme["memos/style"]))
+        #self.setStyleSheet("QFrame#%s { %s }" % (self.channel, theme["memos/style"]))
+        # Kind of broken
+        self.setStyleSheet(theme["memos/style"])
         self.setWindowIcon(PesterIcon(theme["memos/memoicon"]))
 
         t = Template(theme["memos/label/text"])

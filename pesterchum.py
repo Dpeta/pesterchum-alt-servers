@@ -228,9 +228,9 @@ class chumListing(QtWidgets.QTreeWidgetItem):
         icon = self.mood.icon(theme)
         self.setIcon(0, icon)
         try:
-            self.self.setForeground(0, QtGui.QBrush(QtGui.QColor((self.mainwindow.theme["main/chums/moods"][self.mood.name()]["color"]))))
+            self.setForeground(0, QtGui.QBrush(QtGui.QColor((self.mainwindow.theme["main/chums/moods"][self.mood.name()]["color"]))))
         except KeyError:
-            self.self.setForeground(0, QtGui.QBrush(QtGui.QColor((self.mainwindow.theme["main/chums/moods/chummy/color"]))))
+            self.setForeground(0, QtGui.QBrush(QtGui.QColor((self.mainwindow.theme["main/chums/moods/chummy/color"]))))
     def login(self):
         self.setIcon(0, PesterIcon("themes/arrow_right.png"))
         self.status = "in"
