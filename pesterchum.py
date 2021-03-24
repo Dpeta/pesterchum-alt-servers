@@ -3063,29 +3063,6 @@ class MainProgram(QtCore.QObject):
 
         self.widget.gainAttention[QtWidgets.QWidget].connect(self.alertWindow)
 
-
-        # This doesn't know as far as I'm aware, so it's commented out for now.
-        
-        # 0 Once a day
-        # 1 Once a week
-        # 2 Only on start
-        # 3 Never
-        #check = self.widget.config.checkForUpdates()
-        #if check == 2:
-        #    self.runUpdateSlot()
-        #elif check == 0:
-        #    seconds = 60 * 60 * 24
-        #    if int(time()) - self.widget.config.lastUCheck() < seconds:
-        #        seconds -= int(time()) - self.widget.config.lastUCheck()
-        #    if seconds < 0: seconds = 0
-        #    QtCore.QTimer.singleShot(1000*seconds, self, QtCore.SLOT('runUpdateSlot()'))
-        #elif check == 1:
-        #    seconds = 60 * 60 * 24 * 7
-        #    if int(time()) - self.widget.config.lastUCheck() < seconds:
-        #        seconds -= int(time()) - self.widget.config.lastUCheck()
-        #    if seconds < 0: seconds = 0
-        #    QtCore.QTimer.singleShot(1000*seconds, self, QtCore.SLOT('runUpdateSlot()'))
-
     @QtCore.pyqtSlot()
     def runUpdateSlot(self):
         q = queue.Queue(1)
