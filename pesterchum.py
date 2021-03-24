@@ -69,8 +69,8 @@ if vnum.find(".", vnum.find(".")+1) != -1:
     minor = int(vnum[vnum.find(".")+1:vnum.find(".", vnum.find(".")+1)])
 else:
     minor = int(vnum[vnum.find(".")+1:])
-if not ((major > 4) or (major == 4 and minor >= 6)):
-    print("ERROR: Pesterchum requires Qt version >= 4.6")
+if not ((major > 5) or (major == 5 and minor >= 0)):
+    print("ERROR: Pesterchum requires at least Qt version >= 5.0")
     print("You currently have version " + vnum + ". Please upgrade Qt.")
     exit()
 

@@ -2,6 +2,7 @@ import inspect
 import threading
 import time, os
 import ostools
+import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 try:
@@ -178,7 +179,9 @@ class ToastMachine(object):
 
 class PesterToast(QtWidgets.QWidget, DefaultToast):
     def __init__(self, machine, title, msg, icon, time=3000, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
+        logging.info(isinstance(parent, QtWidgets.QWidget))
+        kwds = dict(machine=machine, title=title, msg=msg, icon=icon)
+        super().__init__(parent, **kwds)
 
         self.machine = machine
         self.time = time
@@ -243,7 +246,7 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
         o = QtWidgets.QApplication.desktop().screenGeometry(self).bottomRight()
         anim.setStartValue(p.y() - o.y())
         anim.setEndValue(100)
-        anim.valueChanged[QVariant].connect(self.updateBottomLeftAnimation)
+        anim.valueChanged[QtCore.QVariant].connect(self.updateBottomLeftAnimation)
 
         self.byebye = False
 
@@ -266,7 +269,7 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
     @QtCore.pyqtSlot()
     def reverseTrigger(self):
         if self.time >= 0:
-            QtCore.QTimer.singleShot(self.time, self, QtCore.SLOT('reverseStart()'))
+            QtCore.QTimer.singleShot(self.time, self.reverseStart)
 
     @QtCore.pyqtSlot()
     def reverseStart(self):
@@ -283,7 +286,7 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
     def updateBottomLeftAnimation(self, value):
         p = QtWidgets.QApplication.desktop().availableGeometry(self).bottomRight()
         val = float(self.height())/100
-        self.move(p.x()-self.width(), p.y() - (value.toInt()[0] * val) +1)
+        self.move(p.x()-self.width(), p.y() - (value * val) +1)
         self.layout().setSpacing(0)
         QtWidgets.QWidget.show(self)
 
