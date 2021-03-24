@@ -67,7 +67,7 @@ class PesterLogUserSelect(QtWidgets.QDialog):
 
         for (i, t) in enumerate(chumMemoList):
             item = QtWidgets.QListWidgetItem(t)
-            item.setTextColor(QtGui.QColor(self.theme["main/chums/userlistcolor"]))
+            item.setForeground(QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"])))
             self.chumsBox.addItem(item)
 
         self.search = PesterLogSearchInput(theme, self)
