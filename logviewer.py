@@ -13,7 +13,7 @@ _datadir = ostools.getDataDir()
 class PesterLogSearchInput(QtWidgets.QLineEdit):
     def __init__(self, theme, parent=None):
         QtWidgets.QLineEdit.__init__(self, parent)
-        self.setStyleSheet(theme["convo/input/style"] + "margin-right:0px;")
+        self.setStyleSheet(theme["convo/input/style"] + "; margin-right:0px;")
     def keyPressEvent(self, event):
         QtWidgets.QLineEdit.keyPressEvent(self, event)
         if hasattr(self.parent(), 'textArea'):
