@@ -2934,10 +2934,12 @@ class PesterWindow(MovingWindow):
         # This seriously needs to be fixed but I don't feel like it </3
         pesterchum.irc.quit_dc()    # Actually send QUIT to server
         pesterchum.trayicon.hide()  # Hopefully,
-        pesterchum.app.quit()       # stop the trayicon from sticking around :/
+        #pesterchum.app.quit()       # stop the trayicon from sticking around :/
 
+        #from time import sleep
+        #sleep(5)
         # Just in case.
-        sys.exit()
+        sys.exit() # Actually, just gonna use this, 'cuz sockets are dumb :'3
 
     pcUpdate = QtCore.pyqtSignal('QString', 'QString')
     closeToTraySignal = QtCore.pyqtSignal()

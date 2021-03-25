@@ -420,6 +420,8 @@ class PesterHandler(DefaultCommandHandler):
         mychumhandle = self.mainwindow.profile().handle
         mymood = self.mainwindow.profile().mood.value()
         if not self.mainwindow.config.lowBandwidth():
+            from time import sleep
+            sleep(0.5) # To prevent TLS from dying </3
             helpers.join(self.client, "#pesterchum")
             helpers.msg(self.client, "#pesterchum", "MOOD >%d" % (mymood))
             

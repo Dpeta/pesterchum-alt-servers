@@ -84,8 +84,8 @@ class IRCClient:
         """
         self.context = ssl.create_default_context()
         self.context.check_hostname = False
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket = self.context.wrap_socket(self.socket)
+        self.bare_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket = self.context.wrap_socket(self.bare_socket)
         self.nick = None
         self.real_name = None
         self.host = None
@@ -221,9 +221,22 @@ class IRCClient:
         # with extreme prejudice
         if self.socket:
             logging.info('shutdown socket')
+            #print("shutdown socket")
             self._end = True
-            self.socket.shutdown(socket.SHUT_RDWR)
+            self.socket.shutdown(socket.SHUT_WR)
+            self.socket.close()
+            
+    def simple_send(self, message):
+        self.socket.send(bytes(message, "UTF-8"))
 
+    def quit(self, msg):
+        # I am going mad :)
+        # Why does this only work 33% of the time </3
+
+        # Somehow, kinda fixed :')
+        print("QUIT")
+        self.socket.send(bytes(msg + "\n", "UTF-8"))
+        
 class IRCApp:
     """ This class manages several IRCClient instances without the use of threads.
     (Non-threaded) Timer functionality is also included.

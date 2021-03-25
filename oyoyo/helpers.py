@@ -77,9 +77,10 @@ def cs(cli, *args):
 def identify(cli, passwd, authuser="NickServ"):
     msg(cli, authuser, "IDENTIFY %s" % passwd)
 
-def quit(cli, msg='gone'):
-    #print(msg)
-    cli.send("QUIT :%s" % msg)
+def quit(cli, msg):
+    msg = "QUIT :%s" % msg
+    cli.quit(msg)
+    cli.close()
     cli._end = 1
 
 def user(cli, username, realname=None):

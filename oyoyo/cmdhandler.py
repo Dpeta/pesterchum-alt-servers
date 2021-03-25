@@ -101,6 +101,7 @@ class CommandHandler(object):
             return
 
         logging.debug('f %s' % f)
+        #logging.info(*args)
 
         # Because more than 5 arguments can be passed by channelmodeis
         try:

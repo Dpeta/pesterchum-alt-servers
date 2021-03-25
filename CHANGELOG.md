@@ -7,6 +7,7 @@
 - Added styleing/markup to "PESTER" and "ADD GROUP" menu options and some other previously unstyled elements :)
 - Added pesterchum.spec for use with pyinstaller.
 - Wrapped socket in SSL context and changed the port appropriately, hostname verification is turned off.
+- Pesterchum now sends a ``QUIT :reason`` to the server when shutting down instead of just quitting instantly.
 
 ### Changed
 - Transitioned to Python 3.
@@ -17,6 +18,7 @@
 ### Fixed
 - Fixed sRGB profile issue with certain images.
 - Fixed issue where Pesterchum crashed if a quirk was malformed.
+- Fixed Pesterchum icon getting stuck on the system tray even after shutdown on windows.
 
 ### Deprecated
 - Removed update system (it seemed to be non-functional).
