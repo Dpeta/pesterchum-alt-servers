@@ -18,7 +18,7 @@ Download the appropriate release for your platform from [releases][releases], ex
 ## BUILDING
 Building Pesterchum yourself is not required to run it!!! This is only relevant if you know what you're doing >:3c
 
-### PYTHON :)
+### REQUIREMENTS:
 
  - [Python 3]
 

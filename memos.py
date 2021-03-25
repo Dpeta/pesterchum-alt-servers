@@ -855,6 +855,7 @@ class PesterMemo(PesterConvo):
             else:
                 self.close()
             msgbox = QtWidgets.QMessageBox()
+            msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
             msgbox.setText("%s: Invites only!" % (c))
             msgbox.setInformativeText("This channel is invite-only. You must get an invitation from someone on the inside before entering.")
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
@@ -1012,6 +1013,7 @@ class PesterMemo(PesterConvo):
             if chum is self.mainwindow.profile():
                 # are you next?
                 msgbox = QtWidgets.QMessageBox()
+                msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
                 msgbox.setText(self.mainwindow.theme["convo/text/kickedmemo"])
                 msgbox.setInformativeText("press 0k to rec0nnect or cancel to absc0nd")
                 msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)

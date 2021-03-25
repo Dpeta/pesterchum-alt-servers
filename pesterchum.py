@@ -703,7 +703,20 @@ class chumArea(RightClickTree):
         self.resize(*theme["main/chums/size"])
         self.move(*theme["main/chums/loc"])
         if "main/chums/scrollbar" in theme:
-            self.setStyleSheet("QListWidget { %s } QScrollBar { %s } QScrollBar::handle { %s } QScrollBar::add-line { %s } QScrollBar::sub-line { %s } QScrollBar:up-arrow { %s } QScrollBar:down-arrow { %s }" % (theme["main/chums/style"], theme["main/chums/scrollbar/style"], theme["main/chums/scrollbar/handle"], theme["main/chums/scrollbar/downarrow"], theme["main/chums/scrollbar/uparrow"], theme["main/chums/scrollbar/uarrowstyle"], theme["main/chums/scrollbar/darrowstyle"] ))
+            self.setStyleSheet("QListWidget { %s } \
+                QScrollBar { %s } \
+                QScrollBar::handle { %s } \
+                QScrollBar::add-line { %s } \
+                QScrollBar::sub-line { %s } \
+                QScrollBar:up-arrow { %s } \
+                QScrollBar:down-arrow { %s }" % \
+                               (theme["main/chums/style"], \
+                                theme["main/chums/scrollbar/style"], \
+                                theme["main/chums/scrollbar/handle"], \
+                                theme["main/chums/scrollbar/downarrow"], \
+                                theme["main/chums/scrollbar/uparrow"], \
+                                theme["main/chums/scrollbar/uarrowstyle"], \
+                                theme["main/chums/scrollbar/darrowstyle"] ))
         else:
             self.setStyleSheet(theme["main/chums/style"])
         self.pester.setText(theme["main/menus/rclickchumlist/pester"])
@@ -822,6 +835,7 @@ class chumArea(RightClickTree):
                 gname = str(gname)
                 if re.search("[^A-Za-z0-9_\s]", gname) is not None:
                     msgbox = QtWidgets.QMessageBox()
+                    msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
                     msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
                     ret = msgbox.exec_()
@@ -1076,6 +1090,7 @@ class PesterWindow(MovingWindow):
         except:
             self.userprofile = userProfile(PesterProfile("pesterClient%d" % (random.randint(100,999)), QtGui.QColor("black"), Mood(0)))
             self.theme = self.userprofile.getTheme()
+        
         self.modes = ""
 
         self.sound_type = None
@@ -1746,11 +1761,16 @@ class PesterWindow(MovingWindow):
                 self.currentMoodIcon.hide()
             self.currentMoodIcon = None
 
+        # This is a better spot to put this :)
+        # Setting QMessageBox's style usually doesn't do anything.
+        self.setStyleSheet("QInputDialog { %s } QMessageBox { %s }" % (self.theme["main/defaultwindow/style"], self.theme["main/defaultwindow/style"]))
 
         if theme["main/mychumhandle/colorswatch/text"]:
             self.mychumcolor.setText(theme["main/mychumhandle/colorswatch/text"])
         else:
             self.mychumcolor.setText("")
+
+        
 
         if _CONSOLE:
             if self.console.window:
@@ -1996,6 +2016,7 @@ class PesterWindow(MovingWindow):
         if h.upper() == "NICKSERV" and m.startswith("Your nickname is now being changed to"):
             changedto = m[39:-1]
             msgbox = QtWidgets.QMessageBox()
+            msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
             msgbox.setText("This chumhandle has been registered; you may not use it.")
             msgbox.setInformativeText("Your handle is now being changed to %s." % (changedto))
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
@@ -2013,6 +2034,7 @@ class PesterWindow(MovingWindow):
     def deliverInvite(self, handle, channel):
         msgbox = QtWidgets.QMessageBox()
         msgbox.setText("You're invited!")
+        msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
         msgbox.setInformativeText("%s has invited you to the memo: %s\nWould you like to join them?" % (handle, channel))
         msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
         # Find the Cancel button and make it default
@@ -2405,7 +2427,6 @@ class PesterWindow(MovingWindow):
         self.quirkmenu = None
     @QtCore.pyqtSlot()
     def openChat(self):
-        self.setStyleSheet("QInputDialog {" + self.theme["convo/tabwindow/style"] + "}")
         if not hasattr(self, "openchatdialog"):
             self.openchatdialog = None
         if not self.openchatdialog:
@@ -2445,6 +2466,7 @@ class PesterWindow(MovingWindow):
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
                     msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                    msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")#Style :) (memos/style or convo/style works :3 )
                     ret = msgbox.exec_()
                     self.addgroupdialog = None
                     return
