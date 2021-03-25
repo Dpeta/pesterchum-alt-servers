@@ -949,7 +949,11 @@ class trollSlum(chumArea):
         for c in chumlistings:
             c.changeTheme(theme)
 
-    unblockChumSignal = QtCore.pyqtSignal('QString')
+    # This causes:
+    #     TypeError: connect() failed between triggered(bool) and unblockChumSignal()
+    # I'm not sure why this was here in the first place-
+    # Does removing it break anything else...?
+    #unblockChumSignal = QtCore.pyqtSignal('QString')
 
 class TrollSlumWindow(QtWidgets.QFrame):
     def __init__(self, trolls, mainwindow, parent=None):

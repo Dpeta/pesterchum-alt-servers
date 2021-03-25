@@ -4,7 +4,7 @@
 ## [v2.0] - 2021-3-25
 
 ### Added
-- Added markup to "PESTER" and "ADD GROUP" menu options.
+- Added styleing/markup to "PESTER" and "ADD GROUP" menu options and some other previously unstyled elements :)
 - Added pesterchum.spec for use with pyinstaller.
 - Wrapped socket in SSL context and changed the port appropriately, hostname verification is turned off.
 
@@ -16,6 +16,7 @@
 
 ### Fixed
 - Fixed sRGB profile issue with certain images.
+- Fixed issue where Pesterchum crashed if a quirk was malformed.
 
 ### Deprecated
 - Removed update system (it seemed to be non-functional).
