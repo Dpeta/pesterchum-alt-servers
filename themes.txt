@@ -1,0 +1,474 @@
+HOW TO MAKE YOUR OWN THEMES:
+
+Pesterchum 3.14 themes are very flexible and allow you to create
+almost any kind of main window you can imagine (notable exception
+being animation). This document should help you make your own themes
+or make adjustments to existing themes!
+
+Try following along with existing themes -- it'll make this document
+much less confusing!
+
+A note on editing existing themes: Don't edit current themes! If you
+make changes in the existing themes directory, they *will* be
+overwritten when you install any updates. 
+
+CREATING A THEME
+----------------
+Every theme is just a separate directory in the "themes"
+directory. That directory contains all the images used in that theme
+as well as a "style.js" file which is the configuration file for the
+theme.
+
+FORMAT
+------
+The theme file is unlike most configuration files. It uses a format
+called JSON, which at its core looks like this:
+
+{"option": "value", "option2": 5, "category": {"option1": [10, 50] } }
+
+The idea is that it's basically a list of: "name": "value"
+separated by commas, inside brackets. So to give another example:
+
+{"color": "red", "size": 50 }
+
+means "color" is "red, and "size" is 50. Note that strings should have
+quotes around them and numbers should not. You can also make certain
+values into categories by making the value a bracketed list, like so:
+
+{"memos": {"color": "red", "size": 50}, "convos": {"color": "green", "size": 50 } } 
+
+This creates two categories: memos and convos, each with their own
+color and size value. Also note that spaces don't really matter. It
+helps to indent each category:
+
+{"memos": {"color": "red", "size": 50"}, 
+ "convos": {"color": "green", "size": 50" } 
+}
+
+or even
+
+{"memos": {"color": "red", 
+           "size": 50" }, 
+ "convos": {"color": "green", 
+            "size": 50" } 
+}
+
+SETTINGS
+--------
+
+INHERITS: You can make writing themes easier on yourself by using the
+"inherits" setting. This sets all the settings to be the same as the
+inherited theme unless you change it. So you only need to set the
+settings you want to change!
+
+When specifying file locations, you use the term "$path" to represent
+the path to the current theme. The program will automatically
+subtitute the correct location. 
+
+A note about styles:
+
+PC3.14 uses Qt's Stylesheets. That means that there are several
+options in the style file that use CSS-like options. Most CSS options
+are actually available in these settings. See this page for details
+about Qt's stylesheets:
+
+http://doc.qt.nokia.com/latest/stylesheet.html
+
+and here for how CSS works:
+
+http://www.w3schools.com/css/default.asp
+
+If you know CSS, note that there is no cascading or need to type in
+tag names. The program does this for you.
+
+CSS values are like this:
+
+background:#000000; font: bold;
+
+with name:value; separated by ";".
+
+NOTE that if you change a style from a theme you inherited, you MUST
+put in all the options the old style had if you want to keep them!
+
+I'll go over some of the most commonly used options in styles:
+
+background-color: Self-explanatory. A note, though: colors can be
+color names ("black"), standard HTML colors ("#000000") or rgba 
+(red, green, blue, alpha) values ("rgba(0, 34, 151, 75%)").
+
+background-image: Sets the background image to be this image. You
+specify the location of the image by using "url(location)". So it
+could be: "url($path/background.png)". 
+
+background-repeat: Sets how the background should repeat if the area
+is larger than the image. Values are repeat-x, repeat-y, repeat, and
+no-repeat.
+
+border: Sets the border of the item. Should be in the form "Xpx style
+color". Example: "border: 2px solid black;" See reference for styles.
+
+border-top/right/left/bottom: You can specify values for individual
+borders the same way by using these. Example: "border-right: 1px solid
+#ffff00;"
+
+border-image: This one is complicated. Basically it's a good way of
+having a resizable image with borders. See this page for a good
+tutorial: http://www.lrbabe.com/sdoms/borderImage/ 
+
+border-radius: Set this to a certain pixel length to get a rounded
+border. Example: "border-radius: 4px;"
+
+color: The color to make text. Example: "color: #ff0000;"
+
+font: A shortcut. You can specify most different font properties from
+this setting. Read on...
+
+font-family: A string representing the font name. Be careful as
+everyone's computer may not have the same fonts! Popular fonts like
+"Arial" are fine. Example: "font-family: 'Arial';" Don't forget the
+quotes!
+
+font-size: A font's size in pixels. Example: "font-size: 12px;"
+
+font-style: Basically italic or not. Example: "font-style: italic;"
+
+font-weight: Basically bold or not. Example: "font-weight: bold;"
+
+margin: Sets the amount of space between this object and other
+objects. This is really only useful in memo and conversation
+settings. You can set individual margins for right/left/top/bottom
+by margin-top/left/right/bottom. Examples: "margin-top: 15px;" "margin:
+5px;"
+
+max/min-height/width: Sets the maximum/minimum height/width for something.
+
+padding: Same thing as margin, kinda... basically this sets the space
+between the outside of the box and the stuff inside it. See
+http://doc.qt.nokia.com/latest/stylesheet-customizing.html#the-box-model
+for more detail.
+
+selection-color: The color of the text when an item is
+selected. Example: "selection-color: black;"
+
+selection-background-color: The color of the background of an item
+when it is selected. Example: "selection-background-color: white;"
+
+text-align: Centers, left-justifies, and right-justifies
+text. Example: "text-align: center;"
+
+--------
+
+A note about sizes and coordinates:
+
+Wherever it says "size", Pesterchum expects a value of the form [width,
+height], where width and height are NUMBERS. No quotes should be
+involved. Example: 
+
+"size": [232,280]
+
+Same with coordinates, and with coordinates, they are always the
+distance away from the top left corner. So [50, 60] would be 50 pixels
+to the right and 60 pixels down.
+
+
+OK, onto the main event:
+
+MAIN
+----
+
+"main": { .... }
+
+This is the section that controls the main chum window.
+
+"style": Sets the style of the main window (as above). This value will
+affect other parts of the window. DO NOT put a background image
+here. You must set that separately; this is necessary to support
+themes that are not square (e.g. gold xl). 
+
+"background-image": Sets the background image. This will define the
+shape of your pesterchum! This is your canvas! See the included themes
+for examples of what background images look like. 
+
+"size": The size of the window. Usually this is the same as the size
+of your background image. 
+
+"icon": The file name of the image you want to appear in the tray and
+your taskbar. Example: "icon": "$path/trayicon.png"
+
+"newmsgicon": The file name of the image that will appear in the tray
+when you have a new message.
+
+"windowtitle": The title of the window.
+
+"close": Category:
+  "image": Location of the image of the "X" button.
+  "loc": The coordinates of the "X" button.
+Example:
+"close": {"image": "$path/x.png", "loc": [210,2]}
+
+"minimize": Category. Same as "close" but for the minimize button.
+
+"menubar": Category. Contains one element:
+  "style": Style of the main menubar.
+
+"menu": Category.
+  "style": Style of each individual menu.
+  "menuitem": Affects each menu item on the main menu. Usually used
+  for spacing.
+  "selected": Style information for when you hover over a menu option.
+  "loc": Location of the main menubar.
+
+"sounds": Category.
+  "alertsound": Path to the alert sound. Should be a wav.
+  "ceasesound": Path to the sound when people cease pestering.
+
+"menus": Category. This is where you change the text of the menus.
+  "client": Category. The client menu.
+    "_name": The text for the client menu header.
+    (These are self explanatory:)
+    "options"
+    "memos"
+    "userlist"
+    "import"
+    "reconnect"
+    "idle"
+    "exit"
+  "profile": Category. Profile menu.
+    "_name": Text of the profile menu header.
+    "switch"
+    "color"
+    "theme"
+    "block"
+    "quirks"
+  "help": Category. Help menu.
+    "_name": Text of the help menu header
+    "about"
+  "rclickchumlist": Category. Text for right click menus.
+    "pester"
+    "removechum"
+    "blockchum"
+    "addchum"
+    "unblockchum"
+    "banuser"
+    "opuser"
+    "quirksoff"
+
+"chums": Category. Creates your chumroll, where all the users are. All
+of them.
+
+  "style": Style for the chumroll
+  "loc": Location of the chumroll
+  "size": Size of the chumroll
+  "userlistcolor": Default text color of the users
+  "moods": Category. Contains a list of mood icons and colors; when a
+  user has that mood, their handle will appear with that icon and text
+  color. Basically follows the form "mood": { "icon": "$path/file.png", "color": "colorname" }
+  Moods are:
+    "chummy", "rancorous", "offline", "pleasant", "distraught",
+    "pranky", "smooth", "mystified", "amazed", "insolent", "bemused",
+    "ecstatic", "relaxed", "discontent", "devious", "sleek",
+    "detestful", "mirthful", "manipulative", "vigorous", "perky",
+    "acceptant", "protective", "blocked"
+    (Note: blocked is not technically a "mood", but the icon is used
+    when you block someone.)
+
+  "trollslum": Category. The settings for the trollslum.
+    "style": Style for the trollslum.
+    "size": Size of the window.
+    "label": Category. Sets the label of the trollslum.
+      "style": Style of the label.
+      "text": The text displayed.
+    "chumroll": Category.
+      "style": Sets the style for the list of users.
+  
+  "mychumhandle": Category. Settings for the text label, the user's
+  current handle, and color swatch.
+    "label": Category.
+      "text": Text of label indicating chumhandle.
+      "loc": Location of label.
+      "style": Style of label.
+    "handle": Category. User's current handle.
+      "style": Style of handle.
+      "loc": Location of handle.
+      "size": Size of handle.
+    "colorswatch": Category. Color swatch.
+      "loc": Location of swatch.
+      "size": Size of swatch.
+      "text": Text displayed inside swatch.
+    "currentmood": Location of icon of user's current mood.
+
+  "defaultwindow": Category.
+    "style": Style of the default window. (Quirks, profile changer,
+    etc)
+
+  "addchum": Category. Add chum button.
+    "style": Style of button.
+    "pressed": Style of button when pressed down.
+    "loc": Location of button.
+    "size": Size of button.
+    "text": Text of button.
+  The same attributes apply for these categories:
+  "pester": Button to pester selected user.
+  "block": Button to block selected user.
+
+  "defaultmood": Default mood of this theme.
+  "moodlabel": Category. Text label indicating mood buttons.
+    "style": Style of label.
+    "loc": Location of label.
+    "text": Text of label.
+
+  "moods": OK this can get complicated. Basically this is a list of
+  categories, one for each mood button present in the interface. You
+  make a list like this example:
+
+"moods": [{"style": "", "option": "value"}, {"style": "", "option": "value"}]
+
+  The square brackets are important!
+  Anyway, for each mood, here are the possible settings:
+    "style": Style of the mood button.
+    "selected": Style of the mood button when selected.
+    "loc": Location of the mood button.
+    "size": Size of the mood button.
+    "text": Text displayed on the mood button.
+    "icon": Path to icon displayed on the mood button.
+    "mood": Mood # of the button. See mood numbers -> mood names index
+    at the end of this document.
+
+CONVO SECTION
+-------------
+
+{"main": { ... },
+ "convo": { ... }
+
+This controls the conversation windows.
+
+  "style": Style of the conversation window. Only affects the main
+  window; does not cascade to the other parts.
+  "scrollbar": Category. This item is OPTIONAL. It can be a little
+  complicated: if you add this item, you MUST specify ALL of the
+  settings yourself. If you don't add this item, it will use default
+  system scrollbars. If you are inheriting a theme that does have
+  scrollbar customization and you want to remove it, enter "scrollbar: null".
+
+    Anyway, onto the scrollbar options:
+    "style": General style of whole scrollbar.
+    "handle": Style for the handle of the scrollbar.
+    "downarrow": Style for the down arrow.
+    "darrowstyle": Generally this is where you set the image of the
+    down arrow with "image:url($path/downarrow.png)".
+    "uparrow": Same as down arrow.
+    "uarrowstyle": Same as darrowstyle but for up arrow.
+
+  "margins": Category. Sets the margins around the contents of the
+  conversation window.
+    "top": Top margin
+    "bottom", "left", "right"
+
+  "size": Initial size of the conversation window.
+  "chumlabel": Category. The part that says who youre chatting with.
+    "style": Style for the chumlabel.
+    "align": Category.
+      "h": Horizontal alignment
+      "v": Vertical alignment
+    "minheight": The minimum height the chum label can be.
+    "maxheight": The tallest the chum label can be.
+    "text": The text of the label. Use $handle to represent the name
+    of the person you're talking to. Example: ":: $handle ::"
+
+  "textarea": Category. The window with the pesterlog in it.
+    "style": Style of the window.
+
+  "input": Category. The place where you type.
+    "style": Style of the input area.
+
+  "tabwindow": Category. The window that holds the tabs.
+    "style": Style of the window.
+
+  "tabs": Category. Style of the tabs in tabbed conversation.
+    "style": Style of the tabs.
+    "selectedstyle": Style of the currently selected tabs.
+    "newmsgcolor": The color the text should turn when you get a new
+    msg.
+    "tabstyle": Usually 0. See the Qt Stylesheets for more
+    information.
+
+  "text": Category. Flavor text for system messages. In the following
+    examples, the text in all caps will be replaced with these values:
+    "beganpester": "<user> BEGAN PESTERING <you> at <time>"
+    "ceasepester": "<user> CEASED PESTERING <you> at <time>"
+    "blocked": "<user> BLOCKED <user>"
+    "unblocked": "<user> UNBLOCKED <user>"
+    "blockedmsg": "<user> DID NOT RECEIVE MESSAGE FROM <you>"
+    "openmemo": "<user> OPENED MEMO ON BOARD <memo>"
+    "joinmemo": "<user> RESPONDED TO MEMO <memo>"
+    "closememo": "<user> CEASED RESPONDING TO MEMO"
+    "kickedmemo": "YOU HAVE BEEN BANNED FROM THIS MEMO!"
+    "idle": "<user> IS NOW AN IDLE CHUM!"
+
+  "systemMsgColor": The color of system messages.
+
+MEMOS SECTION
+------------
+
+{"main": { .... }
+ "convo": { .... }
+ "memos": { .... }
+
+This controls the memos. It is almost identical to conversations,
+with a few additions.
+
+  "style": Same as convos.
+  "size": Same as convos.
+  "tabs": Same as convos.
+  "scrollbar": Same as convos.
+  "label": Same as convos.
+  "input": Same as convos.
+  "textarea": Same as convos.
+  "margins": Same as convos.
+  "userlist": Category. The list of users currently in the memo.
+    "width": Width.
+    "style": Style of the userlist.
+  "time": Category. The time slider area.
+    "text": Category.
+      "width": Width of time text.
+      "style": Style of time text.
+    "slider": Category. Time slider.
+      "style": Style of slider.
+      "groove": Style of the groove of the slider.
+      "handle": Style of the handle of the slider.
+    "buttons": Category. Controls the time buttons.
+      "style": Style of the buttons.
+    "arrows": Category. Controls the time arrows.
+      "left": Path to image of left arrow.
+      "right" Path to image of right arrow.
+      "style": Style of arrow boxes.
+
+  "systemMsgColor": Color of system messges.
+  "op": Category. 
+    "icon": Icon that is shown next to the ops of the memo in the userlist.
+
+Number -> Mood List
+-------------------
+0: "chummy"
+1: "rancorous"
+2: "offline"
+3: "pleasant"
+4: "distraught"
+5: "pranky"
+6: "smooth"
+7: "ecstatic"
+8: "relaxed"
+9: "discontent"
+10: "devious"
+11: "sleek"
+12: "detestful"
+13: "mirthful"
+14: "manipulative"
+15: "vigorous"
+16: "perky"
+17: "acceptant"
+18: "protective"
+19: "mystified"
+20: "amazed"
+21: "insolent"
+22: "bemused"
