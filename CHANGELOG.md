@@ -21,7 +21,7 @@
 ### Deprecated
 - Removed update system (it seemed to be non-functional).
 - Removed MSPA update checking (non-functional since Homestuck ended).
-- Removed feedparser.py (feedparser) and magic.py (python-magic) from libs and changed them to be normal imports. (Because we're not running Python 3 anymore)
+- Removed feedparser.py (feedparser) and magic.py (python-magic) from libs and changed them to be normal imports. (Because we're not running Python 2 anymore)
 
 ## [pre-v1.20] - 2021-2-25
 ### Added
