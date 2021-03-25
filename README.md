@@ -4,11 +4,13 @@ Maintained repository of ghostDunk's Pesterchum. Connects to irc.pesterchum.xyz 
 This repository builds on (and was mirrored from!) from pesterchum-karxi + Hydrothermal's nickserv fix.
 
 Check out [CHANGELOG.md] file to see what's changed!
+Check out [TODO.md] to see this repo's current goals >:3c
 
 For the old READMEs and guides, view the [docs] folder. (I removed Lexicality's macBuilds since it's no longer applicable)
 
 [CHANGELOG.md]: https://github.com/Dpeta/pesterchum-alt-servers/blob/py3_pyqt5/CHANGELOG.md
 [docs]: https://github.com/Dpeta/pesterchum-alt-servers/tree/py3_pyqt5/docs/
+[TODO.md]: https://github.com/Dpeta/pesterchum-alt-servers/blob/py3_pyqt5/TODO.md
 
 ## INSTALATION
 Download the appropriate release for your platform from [releases][releases], extract the zip file to any directory, and run the executable : )

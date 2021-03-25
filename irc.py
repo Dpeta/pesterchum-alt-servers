@@ -419,8 +419,7 @@ class PesterHandler(DefaultCommandHandler):
         if not self.mainwindow.config.lowBandwidth():
             helpers.join(self.client, "#pesterchum")
             helpers.msg(self.client, "#pesterchum", "MOOD >%d" % (mymood))
-            # +T is not set by default anymore :)
-
+            
     def nicknameinuse(self, server, cmd, nick, msg):
         newnick = "pesterClient%d" % (random.randint(100,999))
         helpers.nick(self.client, newnick)
