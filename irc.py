@@ -313,6 +313,9 @@ class PesterIRC(QtCore.QThread):
             helpers.ctcp(self.cli, c, "NOQUIRKS", h)
         except socket.error:
             self.setConnectionBroken()
+            
+    def quit_dc(self):
+        helpers.quit(self.cli, _pcVersion + " <3")
 
     moodUpdated = QtCore.pyqtSignal('QString', Mood)
     colorUpdated = QtCore.pyqtSignal('QString', QtGui.QColor)

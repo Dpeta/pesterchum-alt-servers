@@ -1137,7 +1137,7 @@ class PesterWindow(MovingWindow):
         opts.triggered.connect(self.openOpts)
         exitaction = QtWidgets.QAction(self.theme["main/menus/client/exit"], self)
         self.exitaction = exitaction
-        exitaction.triggered.connect(self.app.quit)
+        exitaction.triggered.connect(self.quit)
         userlistaction = QtWidgets.QAction(self.theme["main/menus/client/userlist"], self)
         self.userlistaction = userlistaction
         userlistaction.triggered.connect(self.showAllUsers)
@@ -1322,7 +1322,7 @@ class PesterWindow(MovingWindow):
     #    # Fuck you EVEN more OSX leopard! >:((((
     #    if not ostools.isOSXLeopard():
     #        checker = MSPAChecker(self)
-
+    
     @QtCore.pyqtSlot(QString, QString)
     def updateMsg(self, ver, url):
         if not hasattr(self, 'updatemenu'):
@@ -2928,6 +2928,17 @@ class PesterWindow(MovingWindow):
         msg.setInformativeText("The server has hit max capacity. Please try again later.")
         msg.show()
 
+    @QtCore.pyqtSlot()
+    def quit(self):
+        # girl help how do i scope
+        # This seriously needs to be fixed but I don't feel like it </3
+        pesterchum.irc.quit_dc()    # Actually send QUIT to server
+        pesterchum.trayicon.hide()  # Hopefully,
+        pesterchum.app.quit()       # stop the trayicon from sticking around :/
+
+        # Just in case.
+        sys.exit()
+
     pcUpdate = QtCore.pyqtSignal('QString', 'QString')
     closeToTraySignal = QtCore.pyqtSignal()
     newConvoStarted = QtCore.pyqtSignal('QString', bool, name="newConvoStarted")
@@ -3077,7 +3088,7 @@ class MainProgram(QtCore.QObject):
         miniAction = QtWidgets.QAction("MINIMIZE", self)
         miniAction.triggered.connect(self.widget.showMinimized)
         exitAction = QtWidgets.QAction("EXIT", self)
-        exitAction.triggered.connect(self.app.quit)
+        exitAction.triggered.connect(PesterWindow.quit)
         self.traymenu.addAction(miniAction)
         self.traymenu.addAction(exitAction)
 
@@ -3114,6 +3125,7 @@ class MainProgram(QtCore.QObject):
     #    else:
     #        return
     #    QtCore.QTimer.singleShot(1000*seconds, self, QtCore.SLOT('runUpdateSlot()'))
+        
 
     @QtCore.pyqtSlot(QtWidgets.QWidget)
     def alertWindow(self, widget):
