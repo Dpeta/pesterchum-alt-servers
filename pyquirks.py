@@ -1,6 +1,7 @@
 import os, sys, imp, re, ostools
 from quirks import ScriptQuirks
 from PyQt5 import QtCore, QtGui, QtWidgets
+import logging
 
 class PythonQuirks(ScriptQuirks):
     def loadModule(self, name, filename):
@@ -25,11 +26,18 @@ class PythonQuirks(ScriptQuirks):
                     if not isinstance(obj("test"), str):
                         raise Exception
                 except:
-                    print("Quirk malformed: %s" % (obj.command))
-                    msgbox = QtWidgets.QMessageBox()
-                    msgbox.setWindowTitle("Error!")
-                    msgbox.setText("Quirk malformed: %s" % (obj.command))
-                    msgbox.exec_()
+                    #print("Quirk malformed: %s" % (obj.command))
+                    logging.error("Quirk malformed: %s" % (obj.command))
+
+                    # Since this is executed before QApplication is constructed,
+                    # This prevented pesterchum from starting entirely when a quirk was malformed :/
+                    # (QWidget: Must construct a QApplication before a QWidget)
+                    
+                    if QtWidgets.QApplication.instance() != None:
+                        msgbox = QtWidgets.QMessageBox()
+                        msgbox.setWindowTitle("Error!")
+                        msgbox.setText("Quirk malformed: %s" % (obj.command))
+                        msgbox.exec_()
                 else:
                     self.quirks[obj.command] = obj
 

@@ -1,4 +1,4 @@
-import os, sys, re, ostools
+import os, sys, re, ostools, logging
 try:
     import lua
 except ImportError:
@@ -51,11 +51,18 @@ class LuaQuirks(ScriptQuirks):
                 if not isinstance(CommandWrapper("test"), str):
                     raise Exception
             except:
-                print("Quirk malformed: %s" % (name))
-                msgbox = QtWidgets.QMessageBox()
-                msgbox.setWindowTitle("Error!")
-                msgbox.setText("Quirk malformed: %s" % (name))
-                msgbox.exec_()
+                #print("Quirk malformed: %s" % (name))
+                logging.error("Quirk malformed: %s" % (name))
+                
+                # Since this is executed before QApplication is constructed,
+                # This prevented pesterchum from starting entirely when a quirk was malformed :/
+                # (QWidget: Must construct a QApplication before a QWidget)
+                    
+                if QtWidgets.QApplication.instance() != None:
+                    msgbox = QtWidgets.QMessageBox()
+                    msgbox.setWindowTitle("Error!")
+                    msgbox.setText("Quirk malformed: %s" % (name))
+                    msgbox.exec_()
             else:
                 self.quirks[name] = CommandWrapper
 
