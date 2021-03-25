@@ -1139,7 +1139,7 @@ class PesterWindow(MovingWindow):
 
         self.console = AttrDict(dict(
             window = None,
-            action = QtWidgets.QAction("Console", self),
+            action = QtWidgets.QAction("Console".upper(), self),
             is_open = False
             ))
         self.console.shortcuts = AttrDict(dict(
@@ -1519,10 +1519,11 @@ class PesterWindow(MovingWindow):
         win = self.console.window
         if win is None:
             # We have no console window; make one.
-            logging.warning("Making a console....")
+            logging.info("Making a console....")
             self.console.window = win = console.ConsoleWindow(parent=self)
-            logging.warning("Console made.")
-            win.windowClosed.connect(self.consoleWindowClosed)
+            logging.info("Console made.")
+            # 'ConsoleWindow' object has no attribute 'windowClosed'
+            win.finished.connect(self.consoleWindowClosed)
             self.console.shortcuts.curwgt.activated.connect(win.designateCurrentWidget)
 
         if self.console.is_open:
@@ -1575,7 +1576,7 @@ class PesterWindow(MovingWindow):
     def consoleWindowClosed(self):
         self.console.is_open = False
         self.console.window = None
-        logging.warning("Console closed.")
+        logging.info("Console closed.")
 
     def newMemo(self, channel, timestr, secret=False, invite=False):
         if channel == "#pesterchum":
@@ -3346,6 +3347,7 @@ Click this message to never see this again.")
 def _retrieveGlobals():
     # NOTE: Yes, this is a terrible kludge so that the console can work
     # properly. I'm open to alternatives.
+    # 👁️👁️
     return globals()
 
 if __name__ == "__main__":

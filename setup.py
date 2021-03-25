@@ -18,10 +18,10 @@ else:
 includefiles = ["quirks",
                 "smilies",
                 "themes",
+                "docs",
                 "README.md",
-                "README-karxi.mkdn",
-                "README-pesterchum.mkdn",
-                "themes.txt",
+                "LICENSE",
+                "CHANGELOG.md",
                 "server.json",
                 "PCskins.png",
                 "Pesterchum.png"]

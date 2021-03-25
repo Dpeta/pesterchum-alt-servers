@@ -13,3 +13,4 @@ quirks/*
 !quirks/defaults.py
 *.pkl
 Pesterchum.dmg
+*.md.backup

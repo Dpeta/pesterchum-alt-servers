@@ -6,10 +6,10 @@ added_files = [
          ( "quirks", 'quirks' ),
          ( "smilies", 'smilies' ),
          ( "themes", 'themes' ),
+         ( "docs", 'docs' ),
          ( "README.md", '.' ),
-         ( "README-karxi.mkdn", '.' ),
-         ( "README-pesterchum.mkdn", '.' ),
-         ( "themes.txt", '.' ),
+         ( "LICENSE", '.' ),
+         ( "CHANGELOG.md", '.' ),
          ( "server.json", '.' ),
          ( "PCskins.png", '.' ),
          ( "Pesterchum.png", '.' )

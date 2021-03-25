@@ -1,0 +1,88 @@
+Python Quirk Functions
+===============
+
+Table of Contents
+-----------------
+1. Introduction
+2. Create A Module
+3. Functions In A Module
+4. Command Requirements
+5. Completed Quirk Function
+
+Introduction
+---------------
+Over the course of this short tutorial you will learn:
+
+* How to create your own Quirk Functions
+* VERY basic Python syntax
+
+You will not learn:
+
+* How to write Python
+* How to bake a cake
+
+Throughout this tutorial there will be
+<pre>
+Instructions in special boxes.
+If you follow the instructions in these boxes, by the end of this tutorial
+you will have recreated the default reverse() Quirk Function.
+</pre>
+
+Create A Module
+-------------------
+All Quirk Function Modules should be created in the 'quirks/' directory. File names <b>must</b> end in '.py'.
+You can have multiple Quirk Functions per Module.
+
+Each Module can also have a 'setup' function which will be called once, the moment the Module is loaded.
+
+<pre>
+Create 'reverse.py' in the 'quirks/' directory.
+</pre>
+
+Functions In A Module
+--------------------------
+If you've ever done programming before, you should know what a function is. If not, I suggest picking up a good programming book (or e-book).
+
+In Python, function syntax looks like this:
+
+def function_name(myvar1, myvar2):
+
+'def' is used to declare that this is a function, and 'function_name' is obviously the name of your function.
+'myvar1' and 'myvar2' are variables coming into your function. For most of your functions, the only variable being passed will be 'text'.
+
+In Python, curly braces ({}) are not used to declare the beginning and end of a function. Instead, a colon (:) is used to declare the beginning of a function. After that, indentation is used to declare the body and end of a function.
+
+```python
+def reverserep(text):
+    return text[::-1]
+```
+
+Command Requirements
+------------------------
+For a function to be registered as a Quirk Function, it must conform to three simple rules:
+
+1.  It must have a command name.
+2.  It must take exactly one arguement.
+3.  It must return a string.
+
+What is meant by having a command name, is that a name for the Quirk Function has to be defined. This is done by defining the 'command' variable for a function.
+
+function_name.command = "name"
+
+```python
+reverserep.command = "reverse"
+```
+
+Completed Quirk Function
+---------------------------
+Below is the completed, fully working, reverse Quirk Function. After it I will break down the pieces of each line.
+
+```python
+def reverserep(text):
+    return text[::-1]
+reverserep.command = "reverse"
+```
+
+As stated before, to start a function, you need to use the keyword 'def'. All Quirk Functions must take exactly one argument (in this case 'text').
+In this example, the text is reversed and returned all in one line. 'text[::-1]' is the Pythonic way of reversing a list or string.
+The last line is the most important part. This tells Pesterchum to call this function whenever 'reverse()' is used in a quirk.

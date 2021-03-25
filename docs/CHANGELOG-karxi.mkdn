@@ -1,0 +1,167 @@
+Pesterchum 3.41
+===============
+
+Visit http://nova.xzibition.com/~illuminatedwax/help.html for tutorial.
+
+**Stable**: Visit https://github.com/illuminatedwax/pesterchum for git access and source code.
+
+**Bleeding Edge**: Visit https://github.com/kiooeht/pesterchum for git access and source code.
+
+**Mac**: For Mac specific git access and source code visit https://github.com/Lexicality/pesterchum.
+
+(Note: Bleeding Edge is up-to-date with all Mac specific changes.)
+
+CHANGELOG
+---------
+## 3.41.4
+* Makefile for Linux installing - Kiooeht [evacipatedBox]
+* Recognize www. as link - Kiooeht [evacipatedBox]
+* Pester menu option to just pester a handle - Kiooeht [evacipatedBox]
+* Update to randomEncounter interface - Kiooeht [evacipatedBox]
+* Italics, bold, and underline - Kiooeht [evacipatedBox]
+* FTP and Magnet links - oakwhiz
+* Userlist search - oakwhiz
+* Chanserv in menus - Cerxi [binaryCabalist]
+* Lua quirks
+* Multi-select memo chooser - [alGore]
+* Auto-identify with NickServ - Kiooeht [evacipatedBox]
+* Auto-join memos - Kiooeht [evacipatedBox]
+* Bug fixes
+    * Don't require pygame (it's kind of optional, you just don't get sound) - Kiooeht [evacipatedBox]
+    * Allow add chum dialog to open after adding an existing chum - Kiooeht [evacipatedBox]
+    * Unicode everything - ghostDunk
+    * Delete groups when using online numbers - Kiooeht [evacipatedBox]
+    * Add chums when using manual sorting - Kiooeht [evacipatedBox]
+    * Memo case insensitive for userlist and modes - Kiooeht [evacipatedBox]
+    * Move hidden chums when deleting group - Kiooeht [evacipatedBox]
+    * Don't allow rename groups with parenthesis - Kiooeht [evacipatedBox]
+    * Wrap long error messages - Kiooeht [evacipatedBox]
+    * chdir into quirks folder for Lua quirks - [alGore]
+    * Toast notifications don't require sound to be on - Kiooeht [evacipatedBox]
+    * Don't close Pesterchum if a window is closed while main window minimized - Kiooeht [evacipatedBox]
+
+
+### 3.41.3
+* Add group option when adding chum - ghostDunk
+* OOC Mode - ghostDunk
+* Improve animated gifs - ghostDunk
+* Set IRC away on idle - Kiooeht [evacipatedBox]
+* Remote quirk shutoff in memos - Kiooeht [evacipatedBox]
+* Compress exit dumps into one line - Kiooeht [evacipatedBox] (Idea: Lexi [lexicalNuance])
+* Display channel mode change message - Kiooeht [evacipatedBox]
+* Disable quirks in +c memos - Lexi [lexicalNuance]
+* Founder, admin, and halfop support - Kiooeht [evacipatedBox]
+* Button for direct access to logs directory - Kiooeht [evacipatedBox]
+* Auto-update from zip and tar - Kiooeht [evacipatedBox]
+* Minimizable memo userlist - Kiooeht [evacipatedBox] (Idea: [alGore], [lostGash])
+* Chumroll notifications on chum sign-in/out - Kiooeht [evacipatedBox]
+* Chum notes - Kiooeht [evacipatedBox]
+* Customizable name alerts - Kiooeht [evacipatedBox]
+* Update bug reporter - Kiooeht [evacipatedBox]
+* Explain why a chumhandle is invalid - Kiooeht [evacipatedBox] (Idea: Lexi [lexicalNuance])
+* Netsplit notification in memos - Kiooeht [evacipatedBox]
+* Toast Notifications - Kiooeht [evacipatedBox]
+* Disable randomEncounter options when it's offline - Kiooeht [evacipatedBox] (Idea: Lexi [lexicalNuance])
+* Sort list of memos alphabetically or by number of users - Kiooeht [evacipatedBox] (Idea: [lostGash])
+* Low-bandwidth mode - Kiooeht [evacipatedBox] (Idea: [canLover])
+* New smilies - Kiooeht [evacipatedBox]
+* Refresh theme in options - Kiooeht [evacipatedBox]
+* Separate tabbed/untabbed windows for conversaions and memos - Kiooeht [evacipatedBox]
+* Manually rearrange chumroll - Kiooeht [evacipatedBox] (Idea: [turntableAbbess (aka. TA of SGRILL)])
+* Using user data directory for all OSs - Kiooeht [evacipatedBox]
+* Lots more user created themes - ghostDunk
+* Bug fixes
+    * Don't delete random chum when blocking someone not on chumroll - Kiooeht [evacipatedBox]
+    * Openning global userlist doesn't reset OP status of memo users - Kiooeht [evacipatedBox]
+    * Alt characters don't break on random replace - Kiooeht [evacipatedBox]
+    * Trollian 2.5 tray icon is now Trollian icon - Kiooeht [evacipatedBox]
+    * Don't screw up <c> tags with the mispeller - Kiooeht [evacipatedBox]
+    * Don't break if profile uses non-existant theme - Kiooeht [evacipatedBox]
+    * Properly rearrange groups when not displaying number of online chums - Kiooeht [evacipatedBox]
+* Mac Bug fixes
+    * Create all datadir stuff - Lexi [lexicalNuance]
+
+### 3.41
+* Individually turn quirks on and off - Kiooeht [evacipatedBox]
+* More canon trollian theme timeline indicators - [binaryCabalist]
+* By mood chum sorting - Kiooeht [evacipatedBox]
+* Chum groups - Kiooeht [evacipatedBox]
+* Turn logging on and off - Kiooeht [evacipatedBox]
+* Customizable idle time - Kiooeht [evacipatedBox]
+* Different sound for memos - Kiooeht [evacipatedBox]
+* Animated smilies - Kiooeht [evacipatedBox]
+* Delete profiles - Kiooeht [evacipatedBox]
+* Customize minimize and close button actions - Kiooeht [evacipatedBox]
+* Receive notices from services you're talking to - Kiooeht [evacipatedBox]
+* Automatically turn off quirks when talking to bots - Kiooeht [evacipatedBox]
+* Rearrange options menu, make tabbed - Kiooeht [evacipatedBox]
+* Rearrange memos window for readability - Kiooeht [evacipatedBox]
+* Give voice to memo users - Kiooeht [evacipatedBox]
+* Theme checking - Kiooeht [evacipatedBox]
+* Display (De)OP/Voice messages in memos - Kiooeht [evacipatedBox]
+* Advanced Mode: Alter IRC user mode - Kiooeht [evacipatedBox]
+* Logviewer chum search - Kiooeht [evacipatedBox]
+* Logviewer log search - Kiooeht [evacipatedBox]
+* Set server and port from command line - Kiooeht [evacipatedBox]
+* Invite-only memos, invite chums to memos - Kiooeht [evacipatedBox]
+* Check Pyqt4 and pygame are installed and correct versions - Kiooeht [evacipatedBox]
+* Advanced Mode: View memo (channel) modes - Kiooeht [evacipatedBox]
+* Quirk groups - Kiooeht [evacipatedBox]
+* CTCP Version reply - Kiooeht [evacipatedBox]
+* Check for Pesterchum updates - Kiooeht [evacipatedBox]
+* Memo OP options: Secret, Invite-only, Mute - Kiooeht [evacipatedBox]
+* Notify user if channel blocks message - Kiooeht [evacipatedBox]
+* Bug reporter - Kiooeht [evacipatedBox]
+* Python quirks (users can create own quirk functions) - Kiooeht [evacipatedBox] (Idea: Lexi [lexicalNuance])
+* Incorporate support for the new randomEncounter - Kiooeht [evacipatedBox] (Idea: Lexi [lexicalNuance])
+* Only GETMOOD for people online (less spam!) - Kiooeht [evacipatedBox] (Idea: Lexi [lexicalNuance])
+* Quirk tester in quirk window - Kiooeht [evacipatedBox] (Idea: [alGore])
+* Show and support giving kick reasons - Kiooeht [evacipatedBox] (Idea: Lexi [lexicalNuance])
+* Make adding quirks into multi-page wizard - Kiooeht [evacipatedBox]
+* Flash the taskbar on new messages - Kiooeht [evacipatedBox]
+* Third beep sound for when your initials are mentioned in memos - Kiooeht [evacipatedBox] (Idea: Lexi [lexicalNuance])
+* Ctrl + click to copy links - Kiooeht [evacipatedBox]
+* Say something when server is full - Kiooeht [evacipatedBox]
+* Ping server if no ping from server to test connection - Kiooeht [evacipatedBox] (Idea: Lexi [lexicalNuance])
+* MSPA comic update notifier - Kiooeht [evacipatedBox]
+* Volume control - Kiooeht [evacipatedBox]
+* Debug mode - illuminatedwax [ghostDunk]
+* Bug fixes
+    * Logviewer updates - Kiooeht [evacipatedBox]
+    * Memo scrollbar thing - Kiooeht [evacipatedBox]
+    * Time arrows in enamel - Kiooeht [evacipatedBox]
+    * Quirk order actually works - Kiooeht [evacipatedBox]
+    * Stay in memos on profile switch - Kiooeht [evacipatedBox]
+    * Auto rejoin memos on reconnect - Kiooeht [evacipatedBox]
+    * De-Op in memos correctly - Kiooeht [evacipatedBox]
+    * Don't blow up if someone's not using Pesterchum in a memo - Kiooeht [evacipatedBox]
+    * Make 'logs' and 'profiles' directories if non-existant - Kiooeht [evacipatedBox]
+    * Don't split messages in bad places - Kiooeht [evacipatedBox]
+    * Chumhandles must match EXACTLY to register mood changes - Kiooeht [evacipatedBox]
+    * Menu bar text colour correct when default system colour isn't black - Kiooeht [evacipatedBox]
+    * End all colour tags and restart them on split messages - Kiooeht [evacipatedBox]
+    * Chat input box right-click menus - Kiooeht [evacipatedBox]
+    * Don't overflow random colours into colourless messages - Kiooeht [evacipatedBox]
+    * Only open links on left click - Kiooeht [evacipatedBox]
+
+### 3.14.1
+* Pesterchum 3.14 - illuminatedwax [ghostDunk]
+* Art - Grimlive [aquaMarinist]
+* Quirks lower() function - Kiooeht [evacipatedBox]
+* Quirks scrabble() function - Kiooeht [evacipatedBox]
+* Quirks reverse() function - illuminatedwax [ghostDunk]
+* Timestamps - Kiooeht [evacipatedBox]
+* Logviewer - Kiooeht [evacipatedBox]
+* Quirk ordering - [alGore]
+* # of users in a memo - [alGore]
+* @links to users - illuminatedwax [ghostDunk]
+* Support for REPORT and ALT to calSprite built in - illuminatedwax [ghostDunk]
+* Bug fixes:
+    * mixer bug fixed
+    * "flags" bug fixed
+    * incorrect characters in memos no longer break log file names
+    * memos now do not break on case-sensitivity
+    * fixed QDB address
+    * now lines too long to send in a single message are split up correctly
+    * quirk replace bug fixed
+    * pesterClientXXX profiles no longer saved
