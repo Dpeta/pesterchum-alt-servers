@@ -48,7 +48,7 @@ Building Pesterchum yourself is not required to run it!!! This is only relevant 
 
 ### PYINSTALLER METHOD
 #### Linux (might also work on other platforms!!): 
-``python pyinstaller pesterchum.spec``
+``pyinstaller pesterchum.spec``
 
 ## SMILIES
 Just for easy reference. :3 (Taken from docs/README-karxi.mkdn)
