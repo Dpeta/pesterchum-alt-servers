@@ -3387,7 +3387,6 @@ Click this message to never see this again.")
 def _retrieveGlobals():
     # NOTE: Yes, this is a terrible kludge so that the console can work
     # properly. I'm open to alternatives.
-    # 👁️👁️
     return globals()
 
 if __name__ == "__main__":
