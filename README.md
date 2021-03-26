@@ -13,7 +13,7 @@ For the old READMEs and guides, view the [docs] folder. (I removed Lexicality's 
 [TODO.md]: https://github.com/Dpeta/pesterchum-alt-servers/blob/py3_pyqt5/TODO.md
 
 ## INSTALATION
-Download the appropriate release for your platform from [releases][releases], extract the zip file to any directory, and run the executable : )
+Download the appropriate release for your platform from [releases][releases]. If you're on windows you can use the installer, for a manual install download the zip file and extract it to any directory, and run the executable : )
  
 [releases]: https://github.com/Dpeta/pesterchum-alt-servers/releases
 
