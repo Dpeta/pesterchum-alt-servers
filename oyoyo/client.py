@@ -84,6 +84,7 @@ class IRCClient:
         """
         self.context = ssl.create_default_context()
         self.context.check_hostname = False
+        self.context.verify_mode = ssl.CERT_NONE
         self.bare_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket = self.context.wrap_socket(self.bare_socket)
         self.nick = None
