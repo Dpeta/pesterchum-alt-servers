@@ -459,6 +459,7 @@ class PesterMemo(PesterConvo):
         self.chanModeMenu.addAction(self.chanHide)
         self.chanModeMenu.addAction(self.chanInvite)
         self.chanModeMenu.addAction(self.chanMod)
+        self.chanModeMenu.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"]) # BWAH BWAH FLOATING "PESTERLOG:"
 
         self.timeslider = TimeSlider(QtCore.Qt.Horizontal, self)
         self.timeinput = TimeInput(self.timeslider, self)
