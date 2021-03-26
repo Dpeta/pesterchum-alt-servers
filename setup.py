@@ -37,6 +37,14 @@ build_exe_options = {
     "include_files": includefiles
 }
 
+bdist_mac_options = {
+    'iconfile': 'trayicon32.icns',
+    'bundle_name': "Pesterchum",
+    'plist': {
+        'NSHumanReadableCopyright':   'GPL v3',
+    }
+}
+
 description = "Instant messaging client copying the look and feel of clients from Andrew Hussie's webcomic Homestuck."
 icon = "pesterchum.ico"
 
@@ -90,7 +98,8 @@ setup(
             url = "https://github.com/Dpeta/pesterchum-alt-servers",
             description = description,#"P3ST3RCHUM",
             options = {"build_exe": build_exe_options,
-                       "bdist_msi": bdist_msi_options,},
+                       "bdist_msi": bdist_msi_options,
+                       "bdist_mac": bdist_mac_options},
             executables = [Executable("pesterchum.py",
                                       base=base,
                                       icon=icon#,
