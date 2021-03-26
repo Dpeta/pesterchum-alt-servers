@@ -1,5 +1,5 @@
 # Windows-only cx_freeze setup file
-from cx_Freeze import setup, Executable
+from cx_Freeze import *
 import sys
 
 from version import buildVersion
@@ -34,20 +34,66 @@ build_exe_options = {
                  "collections._struct",
                  "collections.array",
                  "collections._weakref"],
-    'include_files': includefiles
-    #'build_exe': ["build"]
+    "include_files": includefiles
 }
+
+description = "Instant messaging client copying the look and feel of clients from Andrew Hussie's webcomic Homestuck."
+icon = "pesterchum.ico"
+
+# See https://stackoverflow.com/questions/15734703/use-cx-freeze-to-create-an-msi-that-adds-a-shortcut-to-the-desktop
+shortcut_table = [
+    ("DesktopShortcut",        # Shortcut
+     "DesktopFolder",          # Directory_
+     "Pesterchum",             # Name
+     "TARGETDIR",              # Component_
+     "[TARGETDIR]pesterchum.exe",# Target
+     None,                     # Arguments
+     description,              # Description
+     None,                     # Hotkey
+     None,                     # Icon (Is inherited from pesterchum.exe)
+     None,                     # IconIndex
+     None,                     # ShowCmd
+     'TARGETDIR'               # WkDir
+     ),
+    ("StartMenuShortcut",        # Shortcut
+     "StartMenuFolder",          # Directory_
+     "Pesterchum",             # Name
+     "TARGETDIR",              # Component_
+     "[TARGETDIR]pesterchum.exe",# Target
+     None,                     # Arguments
+     description,              # Description
+     None,                     # Hotkey
+     None,                     # Icon
+     None,                     # IconIndex
+     None,                     # ShowCmd
+     'TARGETDIR'               # WkDir
+     )
+    ]
+
+msi_data = {"Shortcut": shortcut_table}
+bdist_msi_options = {'data': msi_data,
+                     'summary_data': {
+                         'comments': "FL1P",
+                         'keywords': "Pesterchum"},
+                     'upgrade_code': "{86740d75-f1f2-48e8-8266-f36395a2d77f}",
+                     'add_to_path': False, # !!!
+                     'all_users': True,
+                     'install_icon': "pesterchum.ico"}
+
 #print("type(includefiles) = " + str(type(includefiles)))
 #print("type(build_exe_options) = " + str(type(build_exe_options))
 
-if is_64bit() == True:
-    setup(
-            name = "PESTERCHUM ALT.",
+
+setup(
+            name = "Pesterchum",
             version = buildVersion,
             url = "https://github.com/Dpeta/pesterchum-alt-servers",
-            description = "P3ST3RCHUM ALT.",
-            options = {"build_exe": build_exe_options},
+            description = description,#"P3ST3RCHUM",
+            options = {"build_exe": build_exe_options,
+                       "bdist_msi": bdist_msi_options,},
             executables = [Executable("pesterchum.py",
                                       base=base,
-                                      icon="pesterchum.ico"
+                                      icon=icon#,
+                                      #shortcut_name="Pesterchum",
+                                      #shortcut_dir="DesktopFolder"
                                       )])

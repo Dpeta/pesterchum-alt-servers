@@ -30,6 +30,7 @@ Building Pesterchum yourself is not required to run it!!! This is only relevant 
  - [feedparser]
  - [python-magic]
  - [ostools]
+ - [requests]
 
 [Python 3]: https://www.python.org/downloads/
 [PyQt5]: https://pypi.org/project/PyQt5/
@@ -37,11 +38,13 @@ Building Pesterchum yourself is not required to run it!!! This is only relevant 
 [feedparser]: https://pypi.org/project/feedparser/
 [python-magic]: https://pypi.org/project/python-magic/
 [ostools]: https://pypi.org/project/ostools/
-
+[requests]: https://pypi.org/project/requests/
 ### CX_FREEZE METHOD
 
 #### Windows:
 ``python setup.py build``
+or
+``python setup.py bdist_msi``
 
 #### Mac:
 ~~``python setup.py py2app``~~ Currently doesn't work!! Give me a few days, it's hard to test this kind of stuff since I don't have a mac :(

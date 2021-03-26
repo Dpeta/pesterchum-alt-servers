@@ -13,12 +13,13 @@
 - Transitioned to Python 3.
 - Transitioned to PyQt5.
 - Changed character encoding in some placed from ascii to UTF-8 (Emojis should work now)
-- Rewrote setup.py file
+- Rewrote setup.py file & added bdist_msi
 
 ### Fixed
 - Fixed sRGB profile issue with certain images.
 - Fixed issue where Pesterchum crashed if a quirk was malformed.
 - Fixed Pesterchum icon getting stuck on the system tray even after shutdown on windows.
+- Fixed floating "PESTERLOGS:" in pesterchum & pesterchum2.5 themes.
 
 ### Deprecated
 - Removed update system (it seemed to be non-functional).
