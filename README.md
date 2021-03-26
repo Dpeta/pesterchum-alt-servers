@@ -26,7 +26,7 @@ Building Pesterchum yourself is not required to run it!!! This is only relevant 
 
 #### PYTHON DEPENDENCIES
  - [pygame]
- - [PyQt5]
+ - [PyQt5] (And, depending on your package manager & platform, python3-pyqt5.qtmultimedia)
  - [feedparser]
  - [python-magic]
  - [ostools]
