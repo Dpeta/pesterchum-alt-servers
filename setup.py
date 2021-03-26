@@ -10,10 +10,9 @@ if sys.version_info < (3, 0, 0):
 def is_64bit() -> bool:
     return sys.maxsize > 2**32
 
-#if sys.platform == "win32":
-base = "Win32GUI"
-#else:
-#    sys.exit("This script won't work on this platform </3")
+base = None
+if sys.platform == "win32":
+    base = "Win32GUI"
 
 includefiles = ["quirks",
                 "smilies",
@@ -39,10 +38,7 @@ build_exe_options = {
 
 bdist_mac_options = {
     'iconfile': 'trayicon32.icns',
-    'bundle_name': "Pesterchum",
-    'plist': {
-        'NSHumanReadableCopyright':   'GPL v3',
-    }
+    'bundle_name': "Pesterchum"
 }
 
 description = "Instant messaging client copying the look and feel of clients from Andrew Hussie's webcomic Homestuck."
@@ -88,10 +84,6 @@ bdist_msi_options = {'data': msi_data,
                      'all_users': True,
                      'install_icon': "pesterchum.ico"}
 
-#print("type(includefiles) = " + str(type(includefiles)))
-#print("type(build_exe_options) = " + str(type(build_exe_options))
-
-
 setup(
             name = "Pesterchum",
             version = buildVersion,
@@ -102,7 +94,5 @@ setup(
                        "bdist_mac": bdist_mac_options},
             executables = [Executable("pesterchum.py",
                                       base=base,
-                                      icon=icon#,
-                                      #shortcut_name="Pesterchum",
-                                      #shortcut_dir="DesktopFolder"
+                                      icon=icon
                                       )])
