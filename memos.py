@@ -281,6 +281,13 @@ class MemoText(PesterText):
         else:
             self.setStyleSheet("QTextEdit { %s }" % theme["memos/textarea/style"])
 
+        # So it doesn't inherit the memo's background image.
+        # Fixes floating "PESTERLOG:"
+        try:
+            self.setStyleSheet(self.styleSheet() + " QMenu{" + theme["main/defaultwindow/style"] + "}")
+        except:
+            pass
+
     def addMessage(self, msg, chum):
         if type(msg) in [str, str]:
             lexmsg = lexMessage(msg)
@@ -400,6 +407,8 @@ class PesterMemo(PesterConvo):
         # ban & op list added if we are op
 
         self.optionsMenu = QtWidgets.QMenu(self)
+        self.optionsMenu.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"]) # So it doesn't inherit the memo's background image.
+                                                                                          # Fixes floating "PESTERLOG:"
         self.oocToggle = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/ooc"], self)
         self.oocToggle.setCheckable(True)
         self.oocToggle.toggled[bool].connect(self.toggleOOC)

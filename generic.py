@@ -43,7 +43,7 @@ class PesterIcon(QtGui.QIcon):
 
 class RightClickList(QtWidgets.QListWidget):
     def contextMenuEvent(self, event):
-        #fuckin Qt
+        #fuckin Qt <--- I feel that </3
         if event.reason() == QtGui.QContextMenuEvent.Mouse:
             listing = self.itemAt(event.pos())
             self.setCurrentItem(listing)
