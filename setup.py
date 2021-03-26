@@ -25,7 +25,17 @@ includefiles = ["quirks",
                 "PCskins.png",
                 "Pesterchum.png"]
 build_exe_options = {
-    "includes": ["requests","urllib","pytwmn"],
+    "includes": ["PyQt5",
+                 "pygame",
+                 "feedparser",
+                 "magic",
+                 "ostools",
+                 "requests",
+                 "urllib",
+                 "pytwmn",
+                 "re",
+                 "oyoyo",
+                 "ssl"],
     "excludes": ["collections.sys",
                  "collections._sre",
                  "collections._json",
@@ -33,7 +43,8 @@ build_exe_options = {
                  "collections._struct",
                  "collections.array",
                  "collections._weakref"],
-    "include_files": includefiles
+    "include_files": includefiles,
+    "include_msvcr": True
 }
 
 bdist_mac_options = {

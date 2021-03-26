@@ -1372,9 +1372,14 @@ class PesterWindow(MovingWindow):
                 else:
                     m.sendtime()
     def paintEvent(self, event):
-        palette = QtGui.QPalette()
-        palette.setBrush(QtGui.QPalette.Window, QtGui.QBrush(self.backgroundImage))
-        self.setPalette(palette)
+        try:
+            self.backgroundImage
+        except:
+            pass
+        else:
+            palette = QtGui.QPalette()
+            palette.setBrush(QtGui.QPalette.Window, QtGui.QBrush(self.backgroundImage))
+            self.setPalette(palette)
 
     @QtCore.pyqtSlot()
     def closeToTray(self):
