@@ -47,7 +47,7 @@ or
 ``python setup.py bdist_msi``
 
 #### Mac:
-``python setup.py bdist_msi`` (I, can't get it working, but this *should* work...)
+``python setup.py bdist_mac`` (I, can't get it working, but this *should* work...)
 
 ### PYINSTALLER METHOD
 #### Linux (might also work on other platforms!!): 
