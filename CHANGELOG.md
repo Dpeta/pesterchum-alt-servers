@@ -1,6 +1,9 @@
 # Changelog
 (This document uses YYYY-MM-DD as per ISO 8601)
 
+## [v2.0.1] - 2021-4-1
+- Fixed encoding-related crash
+
 ## [v2.0] - 2021-3-25
 
 ### Added

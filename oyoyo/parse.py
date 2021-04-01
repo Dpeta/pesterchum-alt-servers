@@ -46,7 +46,15 @@ def parse_raw_irc_command(element):
 
     <crlf>     ::= CR LF
     """
-    element = element.decode("utf-8")
+    try:
+        element = element.decode("utf-8")
+    except:
+        try:
+            element = element.decode("latin-1")
+        except:
+            # This shouldn't happen, but if it does:
+            element = ""
+    
     parts = element.strip().split(" ")
     if parts[0].startswith(':'):
         prefix = parts[0][1:]
