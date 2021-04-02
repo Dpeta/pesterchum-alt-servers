@@ -3022,7 +3022,7 @@ class MainProgram(QtCore.QObject):
             # Back to our scheduled program.
 
         self.app = QtWidgets.QApplication(sys.argv)
-        self.app.setApplicationName("Pesterchum " + _pcVersion)
+        self.app.setApplicationName("Pesterchum")
         self.app.setQuitOnLastWindowClosed(False)
 
         options = self.oppts(sys.argv[1:])

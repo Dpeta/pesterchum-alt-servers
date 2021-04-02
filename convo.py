@@ -243,7 +243,14 @@ class PesterTabWindow(QtWidgets.QFrame):
     def tabClose(self, i):
         handle = str(self.tabs.tabText(i))
         self.mainwindow.waitingMessages.messageAnswered(handle)
-        convo = self.convos[handle]
+        #print(self.convos.keys())
+        # I, legit don' t know why this is an issue, but, uh, yeah-
+        try:
+            convo = self.convos[handle]
+        except:
+            #handle = handle.replace("&","")
+            handle = ''.join(handle.split('&', 1))
+            convo = self.convos[handle]
         del self.convos[handle]
         del self.tabIndices[handle]
         self.tabs.removeTab(i)

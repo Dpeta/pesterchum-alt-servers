@@ -1,2 +1,2 @@
-_pcVersion = "Alt. v2.0.1"
-buildVersion = "v2.0.1"
+_pcVersion = "Alt. v2.0.2"
+buildVersion = "v2.0.2"
