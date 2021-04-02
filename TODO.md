@@ -6,3 +6,6 @@
 - Audio mixer slider in options doesn't always work.
 - Any remaining unicode-related crashes.
 - Exclude unnecessary imports for builds.
+- Icon is crusty...?
+- Mood doesn't show up next to handle
+- "CHUMHANDLE" is cut off on pchum2.5 theme.
