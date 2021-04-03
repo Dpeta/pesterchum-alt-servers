@@ -6,25 +6,41 @@ This repository builds on (and was mirrored from!) from pesterchum-karxi + Hydro
 Check out [CHANGELOG.md] file to see what's changed!
 Check out [TODO.md] to see this repo's current goals >:3c
 
-For the old READMEs and guides, view the [docs] folder. (I removed Lexicality's macBuilds since it's no longer applicable)
-
 [CHANGELOG.md]: https://github.com/Dpeta/pesterchum-alt-servers/blob/py3_pyqt5/CHANGELOG.md
-[docs]: https://github.com/Dpeta/pesterchum-alt-servers/tree/py3_pyqt5/docs/
 [TODO.md]: https://github.com/Dpeta/pesterchum-alt-servers/blob/py3_pyqt5/TODO.md
+
+## GUIDES
+
+The old READMEs and guides can be viewed in the [docs] folder.
+I'd highly recommend you take a look at the following files if you're new to Pesterchum:
+- [README-pesterchum.mkdn]
+- [trollquirks.mkdn]
+
+Guides for python quirks and themes are also in the [docs] folder. If you want to set up a gradient quirk you should take a look at [these guides][gradient-guide].
+
+[gradient-guide]: https://paste.0xfc.de/?e60df5a155e93583#AmcgN9cRnCcBycmVMvw6KJ1YLKPXGbaSzZLbgAhoNCQD
+[trollquirks.mkdn]: https://github.com/Dpeta/pesterchum-alt-servers/blob/py3_pyqt5/docs/trollquirks.mkdn
+[README-pesterchum.mkdn]: https://github.com/Dpeta/pesterchum-alt-servers/blob/py3_pyqt5/docs/README-pesterchum.mkdn
+[docs]: https://github.com/Dpeta/pesterchum-alt-servers/tree/py3_pyqt5/docs/
+
 
 ## INSTALATION
 Download the appropriate release for your platform from [releases][releases]. If you're on windows you can use the installer, for a manual install download the zip file and extract it to any directory, and run the executable : )
+
+Because of the nature of cx_freeze & pyinstaller, some libraries (like glibc) are dynamically linked. If the executeable for your platform is uncompatible with the version of your operating system, see the next section for running Pesterchum directly.
  
 [releases]: https://github.com/Dpeta/pesterchum-alt-servers/releases
 
-## BUILDING
-Building Pesterchum yourself is not required to run it!!! This is only relevant if you know what you're doing >:3c
+## RUNNING & BUILDING
+Here's a quick guide on what to do to run Pesterchum from the command line, and to build it if you so desire (that is, generating an executable). Running Pesterchum directly or building Pesterchum yourself is not required to run it!!! This is only relevant if you know what you're doing >:3c
 
+If you have Python and Pesterchum's dependencies installed, you can simply run Pesterchum from the commandline with ```python pesterchum.py```.
 ### REQUIREMENTS:
 
  - [Python 3]
 
 #### PYTHON DEPENDENCIES
+You can install them with Python's pip or your package manager if you're on linux :)
  - [pygame]
  - [PyQt5] (And, depending on your package manager & platform, python3-pyqt5.qtmultimedia)
  - [feedparser]
@@ -39,7 +55,7 @@ Building Pesterchum yourself is not required to run it!!! This is only relevant 
 [python-magic]: https://pypi.org/project/python-magic/
 [ostools]: https://pypi.org/project/ostools/
 [requests]: https://pypi.org/project/requests/
-### CX_FREEZE METHOD
+### CX_FREEZE BUILDING
 
 #### Windows:
 ``python setup.py build``
@@ -49,7 +65,7 @@ or
 #### Mac:
 ``python setup.py bdist``
 
-### PYINSTALLER METHOD
+### PYINSTALLER BUILDING
 #### Linux (might also work on other platforms!!): 
 ``pyinstaller pesterchum.spec``
 
