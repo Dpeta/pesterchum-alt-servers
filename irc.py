@@ -317,6 +317,10 @@ class PesterIRC(QtCore.QThread):
     def quit_dc(self):
         helpers.quit(self.cli, _pcVersion + " <3")
 
+    #def getMask(self):
+        # This needs to be updated when our hostname is changed.
+        # Nevermind this entire thing, actually.
+
     moodUpdated = QtCore.pyqtSignal('QString', Mood)
     colorUpdated = QtCore.pyqtSignal('QString', QtGui.QColor)
     messageReceived = QtCore.pyqtSignal('QString', 'QString')

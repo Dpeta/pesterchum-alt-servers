@@ -1,11 +1,23 @@
 # Changelog
 (This document uses YYYY-MM-DD as per ISO 8601)
 
+## [v2.1.0] - 2021-4-4
+
+### Changed
+- Made it so handle and ident are passed to ``_max_msg_len``, so, hopefully the text cutoff will be *slightly* less restrictive.
+
+### Deprecated
+- Removed splitMessage function.
+
 ## [v2.0.2] - 2021-4-2
+
+### Fixed
 - "Fixed" crash when closing certain windows on certain platforms.
 
 ## [v2.0.1] - 2021-4-1
-- Fixed encoding-related crash
+
+### Fixed
+- Added a fallback for non-unicode characters, and for when decoding fails completely, so hopefully they won't cause a crash anymore.
 
 ## [v2.0] - 2021-3-25
 

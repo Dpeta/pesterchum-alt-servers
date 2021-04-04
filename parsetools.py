@@ -300,7 +300,7 @@ def convertTags(lexed, format="html"):
 
     return escaped
 
-def _max_msg_len(mask=None, target=None):
+def _max_msg_len(mask=None, target=None, nick=None, ident=None):
     # karxi: Copied from another file of mine, and modified to work with
     # Pesterchum.
     # Note that this effectively assumes the worst when not provided the
@@ -321,14 +321,14 @@ def _max_msg_len(mask=None, target=None):
         # Since we should always be able to fetch this
         # karxi: ... Which we can't, right now, unlike in the old script.
         # TODO: Resolve this issue, give it the necessary information.
-        nick = None
+        
         # If we CAN'T, stick with a length of 30, since that seems to be
         # the average maximum nowadays
         limit -= len(nick) if nick is not None else 30
         # '!', '@'
         limit -= 2
-        # Maximum ident length
-        limit -= 10
+        # ident length
+        limit -= len(ident) if nick is not None else 10
         # Maximum (?) host length
         limit -= 63				# RFC 2812
     # The target is the place this is getting sent to - a channel or a nick
@@ -342,7 +342,7 @@ def _max_msg_len(mask=None, target=None):
 
     return limit
 
-def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
+def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
     """Split messages so that they don't go over the length limit.
     Returns a list of the messages, neatly split.
     
@@ -375,11 +375,11 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
     curlen = 0
     # Maximum number of characters *to* use.
     if not maxlen:
-        maxlen = _max_msg_len()
+        maxlen = __max_msg_len(None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.real_name)
     elif maxlen < 0:
         # Subtract the (negative) length, giving us less leeway in this
         # function.
-        maxlen = _max_msg_len() + maxlen
+        maxlen = _max_msg_len(None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.real_name) + maxlen
 
     # Defined here, but modified in the loop.
     msglen = 0
@@ -595,84 +595,6 @@ def kxsplitMsg(lexed, fmt="pchum", maxlen=None, debug=False):
     # We're...done?
     return output
 
-def splitMessage(msg, format="ctag"):
-    """Splits message if it is too long.
-    This is the older version of this function, kept for compatibility.
-    It will eventually be phased out."""
-    # split long text lines
-    buf = []
-    for o in msg:
-        if type(o) in [str, str] and len(o) > 200:
-            # Split with a step of 200. I.e., cut long segments into chunks of
-            # 200 characters.
-            # I'm...not sure why this is done. I'll probably factor it out
-            # later on.
-            for i in range(0, len(o), 200):
-                buf.append(o[i:i+200])
-        else:
-            # Add non-text tags or 'short' segments without processing.
-            buf.append(o)
-    # Copy the iterative variable.
-    msg = list(buf)
-    # This is the working segment.
-    working = []
-    # Keep a stack of open color tags.
-    cbegintags = []
-    # This is the final result.
-    output = []
-    print(repr(msg))
-    for o in msg:
-        oldctag = None
-        # Add to the working segment.
-        working.append(o)
-        if type(o) is colorBegin:
-            # Track the open tag.
-            cbegintags.append(o)
-        elif type(o) is colorEnd:
-            try:
-                # Remove the last open tag, since we've closed it.
-                oldctag = cbegintags.pop()
-            except IndexError:
-                pass
-        # THIS part is the part I don't get. I'll revise it later....
-        # It doesn't seem to catch ending ctags properly...or beginning ones.
-        # It's pretty much just broken, likely due to the line below.
-        # Maybe I can convert the tags, save the beginning tags, check their
-        # lengths and apply them after a split - or even iterate over each set,
-        # applying old tags before continuing...I don't know.
-        # yeah normally i'd do binary search but im lazy
-        # Get length of beginning tags, and the end tags that'd be applied.
-        msglen = len(convertTags(working, format)) + 4*(len(cbegintags))
-        # Previously this used 400.
-        if msglen > _max_msg_len():
-            working.pop()
-            if type(o) is colorBegin:
-                cbegintags.pop()
-            elif type(o) is colorEnd and oldctag is not None:
-                cbegintags.append(oldctag)
-            if len(working) == 0:
-                output.append([o])
-            else:
-                tmp = []
-                for color in cbegintags:
-                    working.append(colorEnd("</c>"))
-                    tmp.append(color)
-                output.append(working)
-                if type(o) is colorBegin:
-                    cbegintags.append(o)
-                elif type(o) is colorEnd:
-                    try:
-                        cbegintags.pop()
-                    except IndexError:
-                        pass
-                tmp.append(o)
-                working = tmp
-
-    if len(working) > 0:
-        # Add any stragglers.
-        output.append(working)
-    return output
-
 def _is_ooc(msg, strict=True):
     """Check if a line is OOC. Note that Pesterchum *is* kind enough to strip
     trailing spaces for us, even in the older versions, but we don't do that in
@@ -828,7 +750,9 @@ def kxhandleInput(ctx, text=None, flavor=None):
         # We'll use those later.
 
     # Split the messages so we don't go over the buffer and lose text.
-    maxlen = _max_msg_len()
+    maxlen = _max_msg_len(None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.real_name)
+         # ctx.mainwindow.profile().handle ==> Get handle
+         # ctx.mainwindow.irc.cli.real_name  ==> Get ident (Same as realname in this case.)
     # Since we have to do some post-processing, we need to adjust the maximum
     # length we can use.
     if flavor == "convo":
@@ -841,7 +765,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
 
     # Split the message. (Finally.)
     # This is also set up to parse it into strings.
-    lexmsgs = kxsplitMsg(msg, "pchum", maxlen=maxlen)
+    lexmsgs = kxsplitMsg(msg, ctx, "pchum", maxlen=maxlen)
     # Strip off the excess.
     for i, m in enumerate(lexmsgs):
         lexmsgs[i] = m.strip()

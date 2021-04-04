@@ -10,7 +10,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from mood import Mood
 from dataobjs import PesterProfile, PesterHistory
 from generic import PesterIcon
-from parsetools import convertTags, lexMessage, splitMessage, mecmd, colorBegin, colorEnd, \
+from parsetools import convertTags, lexMessage, mecmd, colorBegin, colorEnd, \
     img2smiley, smiledict
 import parsetools
 

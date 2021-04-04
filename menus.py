@@ -226,7 +226,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
 
 from copy import copy
 from convo import PesterInput, PesterText
-from parsetools import convertTags, lexMessage, splitMessage, mecmd, colorBegin, colorEnd, img2smiley, smiledict
+from parsetools import convertTags, lexMessage, mecmd, colorBegin, colorEnd, img2smiley, smiledict
 import parsetools
 from dataobjs import pesterQuirks, PesterHistory
 class QuirkTesterWindow(QtWidgets.QDialog):

@@ -2946,6 +2946,11 @@ class PesterWindow(MovingWindow):
         # Just in case.
         sys.exit() # Actually, just gonna use this, 'cuz sockets are dumb :'3
 
+    def passIRC(self, irc):
+        # If this is a bad solution *PLEASE TELL ME A BETTER ONE*
+        # I just want to be able to access variables like our ident in this scope- hsjshdj
+        self.irc = irc
+
     pcUpdate = QtCore.pyqtSignal('QString', 'QString')
     closeToTraySignal = QtCore.pyqtSignal()
     newConvoStarted = QtCore.pyqtSignal('QString', bool, name="newConvoStarted")
@@ -3114,6 +3119,7 @@ class MainProgram(QtCore.QObject):
         self.irc = PesterIRC(self.widget.config, self.widget, self.server)
         self.connectWidgets(self.irc, self.widget)
 
+        self.widget.passIRC(self.irc) # Maybe this is absolutely terrible in practice, but screw it.
         self.widget.gainAttention[QtWidgets.QWidget].connect(self.alertWindow)
 
     #@QtCore.pyqtSlot()
