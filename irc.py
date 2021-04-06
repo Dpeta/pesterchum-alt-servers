@@ -26,18 +26,18 @@ else:
     logging.basicConfig(level=logging.WARNING)
 
 class PesterIRC(QtCore.QThread):
-    def __init__(self, config, window, server):
+    def __init__(self, config, window):
         QtCore.QThread.__init__(self)
         self.mainwindow = window
         self.config = config
-        self.server = server
         self.registeredIRC = False
         self.stopIRC = None
         self.NickServ = services.NickServ()
         self.ChanServ = services.ChanServ()
     def IRCConnect(self):
+        server = self.config.server()
         port = self.config.port()
-        self.cli = IRCClient(PesterHandler, host=self.server, port=int(port), nick=self.mainwindow.profile().handle, real_name='pcc31', blocking=True, timeout=120)
+        self.cli = IRCClient(PesterHandler, host=server, port=int(port), nick=self.mainwindow.profile().handle, real_name='pcc31', blocking=True, timeout=120)
         self.cli.command_handler.parent = self
         self.cli.command_handler.mainwindow = self.mainwindow
         self.cli.connect()

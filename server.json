@@ -1,3 +1,5 @@
 {
-    "server": "irc.pesterchum.xyz"
+    "server": "irc.pesterchum.xyz",
+    "port": "6697",
+    "TLS": true
 }

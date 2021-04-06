@@ -3,6 +3,9 @@
 
 ## [v2.1.0] - 2021-4-4
 
+### Added
+- Server prompt
+
 ### Changed
 - Made it so handle and ident are passed to ``_max_msg_len``, so, hopefully the text cutoff will be *slightly* less restrictive.
 

@@ -1,6 +1,7 @@
 # TODO LIST : )
 ## ADD
  - A proper prompt for choosing a server.
+ - Memoserv support.
 
 ## FIX
 - Audio mixer slider in options doesn't always work.

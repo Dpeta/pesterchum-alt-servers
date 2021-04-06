@@ -1058,23 +1058,6 @@ class PesterWindow(MovingWindow):
         self.tabconvo = None
         self.tabmemo = None
         self.shortcuts = AttrDict()
-        # karxi: For the record, these are set via commandline arguments. By
-        # default, they aren't usable any other way - you can't set them via
-        # the config files.
-        # ...which means the flag for disabling honking is also hidden and
-        # impossible to set via pesterchum.js.
-        #
-        # This was almost certainly intentional.
-        if "advanced" in options:
-              self.advanced = options["advanced"]
-        else: self.advanced = False
-        if "server" in options:
-            self.serverOverride = options["server"]
-        if "port" in options:
-            self.portOverride = options["port"]
-        if "honk" in options:
-              self.honk = options["honk"]
-        else: self.honk = True
 
         self.setAutoFillBackground(True)
         self.setObjectName("main")
@@ -1094,7 +1077,24 @@ class PesterWindow(MovingWindow):
         except:
             self.userprofile = userProfile(PesterProfile("pesterClient%d" % (random.randint(100,999)), QtGui.QColor("black"), Mood(0)))
             self.theme = self.userprofile.getTheme()
-        
+            
+        # karxi: For the record, these are set via commandline arguments. By
+        # default, they aren't usable any other way - you can't set them via
+        # the config files.
+        # ...which means the flag for disabling honking is also hidden and
+        # impossible to set via pesterchum.js.
+        #
+        # This was almost certainly intentional.
+        if "advanced" in options:
+              self.advanced = options["advanced"]
+        else: self.advanced = False
+        if "server" in options:
+            self.serverOverride = options["server"]
+        if "port" in options:
+            self.portOverride = options["port"]
+        if "honk" in options:
+              self.honk = options["honk"]
+        else: self.honk = True
         self.modes = ""
 
         self.sound_type = None
@@ -1276,10 +1276,6 @@ class PesterWindow(MovingWindow):
         self.mychumcolor = QtWidgets.QPushButton(self)
         self.mychumcolor.clicked.connect(self.changeMyColor)
 
-        # self.show() before self.initTheme() fixes a
-        # layering issue on windows... for some reason...
-        self.show()
-
         self.initTheme(self.theme)
 
         self.waitingMessages = waitingMessageHolder(self)
@@ -1317,11 +1313,8 @@ class PesterWindow(MovingWindow):
         self.lastping = int(time())
         self.pingtimer.start(1000*90)
 
-    #@QtCore.pyqtSlot()
-    #def mspacheck(self):
-    #    # Fuck you EVEN more OSX leopard! >:((((
-    #    if not ostools.isOSXLeopard():
-    #        checker = MSPAChecker(self)
+        self.changeServerAskedToReset = False
+        self.changeServer()
     
     @QtCore.pyqtSlot(QString, QString)
     def updateMsg(self, ver, url):
@@ -2935,21 +2928,225 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot()
     def quit(self):
-        # girl help how do i scope
-        # This seriously needs to be fixed but I don't feel like it </3
-        pesterchum.irc.quit_dc()    # Actually send QUIT to server
-        pesterchum.trayicon.hide()  # Hopefully,
-        #pesterchum.app.quit()       # stop the trayicon from sticking around :/
-
-        #from time import sleep
-        #sleep(5)
-        # Just in case.
-        sys.exit() # Actually, just gonna use this, 'cuz sockets are dumb :'3
+        try:
+            pesterchum.irc.quit_dc()    # Actually send QUIT to server
+        except:
+            # Not connected.
+            pass
+        pesterchum.trayicon.hide()  #
+        pesterchum.app.quit()       #
 
     def passIRC(self, irc):
-        # If this is a bad solution *PLEASE TELL ME A BETTER ONE*
-        # I just want to be able to access variables like our ident in this scope- hsjshdj
         self.irc = irc
+
+    def updateServerJson(self):
+        print(self.customServerPrompt_qline.text() + " chosen")
+
+        server_and_port = self.customServerPrompt_qline.text().split(':')
+
+        try:
+            server = {
+                "server": server_and_port[0],
+                "port": server_and_port[1],
+                "TLS": self.TLS_checkbox.isChecked()
+                }
+            print("server:    "+str(server))
+        except:
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
+            msgbox.setWindowIcon(PesterIcon(self.theme["main/icon"]))
+            msgbox.setInformativeText("Incorrect format :(")
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            ret = msgbox.exec_()
+            self.changeServer()
+            return 1
+        
+##        try:
+        with open("serverlist.json", "r") as server_file:
+            read_file = server_file.read()
+            server_file.close()
+            server_list_obj = json.loads(read_file)
+        print(server_list_obj)
+        server_list_obj.append(server)
+        print(server_list_obj)
+        try:
+            with open("serverlist.json", "w") as server_file:
+                server_file.write(json.dumps(server_list_obj, indent = 4))
+                server_file.close()
+        except:
+                logging.error("failed")
+
+        # Go back to original screen
+        self.changeServer()
+        
+    def resetServerlist(self):
+        default_server_list = [{
+                                        "server": "irc.pesterchum.xyz",
+                                        "port": "6697",
+                                        "TLS": True
+                                    }]
+        msgbox = QtWidgets.QMessageBox()
+        msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
+        msgbox.setWindowIcon(PesterIcon(self.theme["main/icon"]))
+        msgbox.setInformativeText("Failed to load from serverlist.json, do you want to revert to defaults?")
+        msgbox.addButton(QtWidgets.QPushButton("Yes"), QtWidgets.QMessageBox.YesRole)
+        msgbox.addButton(QtWidgets.QPushButton("No"), QtWidgets.QMessageBox.NoRole)
+        ret = msgbox.exec_()
+        reply = msgbox.buttonRole(msgbox.clickedButton())
+
+        if (reply==QtWidgets.QMessageBox.YesRole):
+            with open("serverlist.json", "w") as server_file:
+                server_file.write(json.dumps(default_server_list, indent = 4) )
+                server_file.close()
+        self.changeServer()
+
+    def setServer(self):
+        if self.serverBox.currentText() == "Add a server [Prompt]":
+            # Text input
+            self.customServerPrompt_qline = QtWidgets.QLineEdit(self)
+            self.customServerPrompt_qline.setMinimumWidth(200)
+            
+            # Widget 1
+            self.customServerDialog = QtWidgets.QDialog()
+            
+            # Buttons
+            cancel = QtWidgets.QPushButton("CANCEL")
+            ok = QtWidgets.QPushButton("OK")
+            
+            ok.setDefault(True)
+            ok.clicked.connect(self.customServerDialog.accept)
+            cancel.clicked.connect(self.customServerDialog.reject)
+            
+            #Layout
+            layout = QtWidgets.QHBoxLayout()
+            
+            self.TLS_checkbox = QtWidgets.QCheckBox(self)
+            self.TLS_checkbox.setChecked(True)
+            TLS_checkbox_label = QtWidgets.QLabel(":33 < Check if you want to connect over TLS!!")
+            TLS_checkbox_label.setStyleSheet("QLabel { color : #416600;font-weight: bold; }")
+            TLS_layout = QtWidgets.QHBoxLayout()
+            TLS_layout.addWidget(TLS_checkbox_label)
+            TLS_layout.addWidget(self.TLS_checkbox)
+            
+            layout.addWidget(cancel)
+            layout.addWidget(ok)
+            main_layout = QtWidgets.QVBoxLayout()
+            nep_prompt = QtWidgets.QLabel(":33 < Please put in the server's address in the format HOSTNAME:PORT\n:33 < Fur example, irc.pesterchum.xyz:6697")
+            nep_prompt.setStyleSheet("QLabel { color : #416600;font-weight: bold; }")
+            main_layout.addWidget(nep_prompt)
+            main_layout.addWidget(self.customServerPrompt_qline)
+            main_layout.addLayout(TLS_layout)
+            main_layout.addLayout(layout)
+            
+            self.customServerDialog.setLayout(main_layout)
+            
+            # Theme
+            self.customServerDialog.setStyleSheet(self.theme["main/defaultwindow/style"])
+            self.customServerDialog.setWindowIcon(PesterIcon(self.theme["main/icon"]))
+            
+            # Connect
+            self.customServerDialog.accepted.connect(self.updateServerJson)
+            self.customServerDialog.rejected.connect(self.changeServer)
+
+            # Show
+            self.customServerDialog.show()
+        else:
+            print(self.serverBox.currentText() + " chosen")
+
+            with open("serverlist.json", "r") as server_file:
+                read_file = server_file.read()
+                server_file.close()
+                server_obj = json.loads(read_file)
+
+            selected_entry = None
+            
+            for i in range(len(server_obj)):
+                if server_obj[i]["server"] == self.serverBox.currentText():
+                    selected_entry = i
+            
+            try:
+                with open("server.json", "w") as server_file:
+                    json_server_file = {
+                                        "server": server_obj[selected_entry]["server"],
+                                        "port": server_obj[selected_entry]["port"],
+                                        "TLS": server_obj[selected_entry]["TLS"]
+                                    }
+                    server_file.write(json.dumps(json_server_file, indent = 4) )
+                    server_file.close()
+            except:
+                    print("failed")
+
+            # Continue running Pesterchum as usual
+            pesterchum.irc.start()
+            pesterchum.reconnectok = False
+            pesterchum.showLoading(pesterchum.widget)
+            self.show() # Not required?
+
+    def changeServer(self):
+        # Read servers.
+        server_list_items = []
+##        xyz = {
+##                                        "server": "irc.pesterchum.xyz",
+##                                        "port": "6697",
+##                                        "TLS": True
+##                                    }
+        #default_server_list.append(xyz)
+        try:
+            with open("serverlist.json", "r") as server_file:
+                read_file = server_file.read()
+                server_file.close()
+                server_obj = json.loads(read_file)
+            for i in range(len(server_obj)):
+                server_list_items.append(server_obj[i]["server"])
+        except:
+            if self.changeServerAskedToReset == False:
+                print("Failed to load.")
+                self.changeServerAskedToReset = True
+                self.resetServerlist()
+                return 1
+    
+        print("server_list_items:    " + str(server_list_items))
+        
+        # Widget 1
+        self.chooseServerWidged = QtWidgets.QDialog()
+        
+        # Serverbox
+        self.serverBox = QtWidgets.QComboBox()
+
+        for i in range(len(server_list_items)):
+            self.serverBox.addItem(server_list_items[i])
+        
+        self.serverBox.addItem("Add a server [Prompt]")
+        
+        # Buttons
+        cancel = QtWidgets.QPushButton("CANCEL")
+        ok = QtWidgets.QPushButton("OK")
+        
+        ok.setDefault(True)
+        ok.clicked.connect(self.chooseServerWidged.accept)
+        cancel.clicked.connect(self.chooseServerWidged.reject)
+        
+        #Layout
+        layout = QtWidgets.QHBoxLayout()
+        layout.addWidget(cancel)
+        layout.addWidget(ok)
+        main_layout = QtWidgets.QVBoxLayout()
+        main_layout.addWidget(QtWidgets.QLabel("Please choose a server."))
+        main_layout.addWidget(self.serverBox)
+        main_layout.addLayout(layout)
+        
+        self.chooseServerWidged.setLayout(main_layout)
+        
+        # Theme
+        self.chooseServerWidged.setStyleSheet(self.theme["main/defaultwindow/style"])
+        self.chooseServerWidged.setWindowIcon(PesterIcon(self.theme["main/icon"]))
+        
+        # Connect
+        self.chooseServerWidged.accepted.connect(self.setServer)
+        self.chooseServerWidged.rejected.connect(self.quit)
+
+        # Show
+        self.chooseServerWidged.show()
 
     pcUpdate = QtCore.pyqtSignal('QString', 'QString')
     closeToTraySignal = QtCore.pyqtSignal()
@@ -3032,27 +3229,28 @@ class MainProgram(QtCore.QObject):
 
         options = self.oppts(sys.argv[1:])
 
+        
 
         # Tries to load the server to connect to from server.json.
         # If it fails, create json file with default of irc.pesterchum.xyz & connect to irc.pesterchum.xyz
-        try:
-            with open("server.json", "r") as server_file:
-                read_file = server_file.read()
-                server_file.close()
-            server_obj = json.loads(read_file)
-            self.server = str(server_obj['server'])
-        except:
-            try:
-                with open("server.json", "w") as server_file:
-                    json_server_file = {
-                                          "server": "irc.pesterchum.xyz",
-                                    }
-                    server_file.write(json.dumps(json_server_file, indent = 4) )
-                    server_file.close()
-            except:
-                pass
-            self.server = "irc.pesterchum.xyz"
-        print(("Server is: " + self.server))
+##        try:
+##            with open("server.json", "r") as server_file:
+##                read_file = server_file.read()
+##                server_file.close()
+##            server_obj = json.loads(read_file)
+##            self.server = str(server_obj['server'])
+##        except:
+##            try:
+##                with open("server.json", "w") as server_file:
+##                    json_server_file = {
+##                                          "server": "irc.pesterchum.xyz",
+##                                    }
+##                    server_file.write(json.dumps(json_server_file, indent = 4) )
+##                    server_file.close()
+##            except:
+##                pass
+##            self.server = "irc.pesterchum.xyz"
+##        print(("Server is: " + self.server))
         
         def doSoundInit():
             # TODO: Make this more uniform, adapt it into a general function.
@@ -3082,10 +3280,11 @@ class MainProgram(QtCore.QObject):
 
         doSoundInit()
         self.widget = PesterWindow(options, app=self.app)
-        self.widget.show()
+        #self.widget.show() <== moved to function
 
         self.trayicon = PesterTray(PesterIcon(self.widget.theme["main/icon"]), self.widget, self.app)
         self.traymenu = QtWidgets.QMenu()
+        
         moodMenu = self.traymenu.addMenu("SET MOOD")
         moodCategories = {}
         for k in Mood.moodcats:
@@ -3113,31 +3312,13 @@ class MainProgram(QtCore.QObject):
         self.trayicon.messageClicked.connect(self.trayMessageClick)
 
         self.attempts = 0
-
-        # The way server is passed here now is also not ideal,
+        
         # but it's at least better than the way it was before.
-        self.irc = PesterIRC(self.widget.config, self.widget, self.server)
+        self.irc = PesterIRC(self.widget.config, self.widget)
         self.connectWidgets(self.irc, self.widget)
 
         self.widget.passIRC(self.irc) # Maybe this is absolutely terrible in practice, but screw it.
         self.widget.gainAttention[QtWidgets.QWidget].connect(self.alertWindow)
-
-    #@QtCore.pyqtSlot()
-    #def runUpdateSlot(self):
-    #    q = queue.Queue(1)
-    #    s = threading.Thread(target=version.updateCheck, args=(q,))
-    #    w = threading.Thread(target=self.showUpdate, args=(q,))
-    #    w.start()
-    #    s.start()
-    #    self.widget.config.set('lastUCheck', int(time()))
-    #    check = self.widget.config.checkForUpdates()
-    #    if check == 0:
-    #        seconds = 60 * 60 * 24
-    #    elif check == 1:
-    #        seconds = 60 * 60 * 24 * 7
-    #    else:
-    #        return
-    #    QtCore.QTimer.singleShot(1000*seconds, self, QtCore.SLOT('runUpdateSlot()'))
         
 
     @QtCore.pyqtSlot(QtWidgets.QWidget)
@@ -3357,7 +3538,7 @@ Click this message to never see this again.")
         else:
             stop = None
         if stop is None:
-            self.irc = PesterIRC(self.widget.config, self.widget, self.server)
+            self.irc = PesterIRC(self.widget.config, self.widget)
             self.connectWidgets(self.irc, self.widget)
             self.irc.start()
             if self.attempts == 1:
@@ -3390,9 +3571,6 @@ Click this message to never see this again.")
         return options
 
     def run(self):
-        self.irc.start()
-        self.reconnectok = False
-        self.showLoading(self.widget)
         sys.exit(self.app.exec_())
 
 def _retrieveGlobals():
