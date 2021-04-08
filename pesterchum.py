@@ -2988,8 +2988,7 @@ class PesterWindow(MovingWindow):
             ret = msgbox.exec_()
             self.changeServer()
             return 1
-        
-##        try:
+
         with open("serverlist.json", "r") as server_file:
             read_file = server_file.read()
             server_file.close()
@@ -3028,6 +3027,39 @@ class PesterWindow(MovingWindow):
                 server_file.close()
         self.changeServer()
 
+    def removeServer(self):
+        server_list_items = []
+        try:
+            with open("serverlist.json", "r") as server_file:
+                read_file = server_file.read()
+                server_file.close()
+                server_list_obj = json.loads(read_file)
+            for i in range(len(server_list_obj)):
+                server_list_items.append(server_list_obj[i]["server"])
+        except:
+            if self.changeServerAskedToReset == False:
+                print("Failed to load.")
+                self.changeServerAskedToReset = True
+                self.resetServerlist()
+                return 1
+        
+        for i in range(len(server_list_obj)):
+            print(server_list_obj[i])
+            if server_list_obj[i]["server"] == self.removeServerBox.currentText():
+                selected_entry = i
+
+        server_list_obj.pop(selected_entry)
+        
+        try:
+            with open("serverlist.json", "w") as server_file:
+                server_file.write(json.dumps(server_list_obj, indent = 4))
+                server_file.close()
+        except:
+                logging.error("failed")
+
+
+        self.changeServer()
+
     def setServer(self):
         if self.serverBox.currentText() == "Add a server [Prompt]":
             # Text input
@@ -3051,7 +3083,7 @@ class PesterWindow(MovingWindow):
             self.TLS_checkbox = QtWidgets.QCheckBox(self)
             self.TLS_checkbox.setChecked(True)
             TLS_checkbox_label = QtWidgets.QLabel(":33 < Check if you want to connect over TLS!!")
-            TLS_checkbox_label.setStyleSheet("QLabel { color : #416600;font-weight: bold; }")
+            TLS_checkbox_label.setStyleSheet("QLabel { color: #416600; font-weight: bold;}")
             TLS_layout = QtWidgets.QHBoxLayout()
             TLS_layout.addWidget(TLS_checkbox_label)
             TLS_layout.addWidget(self.TLS_checkbox)
@@ -3060,7 +3092,7 @@ class PesterWindow(MovingWindow):
             layout.addWidget(ok)
             main_layout = QtWidgets.QVBoxLayout()
             nep_prompt = QtWidgets.QLabel(":33 < Please put in the server's address in the format HOSTNAME:PORT\n:33 < Fur example, irc.pesterchum.xyz:6697")
-            nep_prompt.setStyleSheet("QLabel { color : #416600;font-weight: bold; }")
+            nep_prompt.setStyleSheet("QLabel { color: #416600; font-weight: bold;}")
             main_layout.addWidget(nep_prompt)
             main_layout.addWidget(self.customServerPrompt_qline)
             main_layout.addLayout(TLS_layout)
@@ -3078,6 +3110,63 @@ class PesterWindow(MovingWindow):
 
             # Show
             self.customServerDialog.show()
+        elif self.serverBox.currentText() == "Remove a server [Prompt]":
+            # Read servers.
+            server_list_items = []
+            try:
+                with open("serverlist.json", "r") as server_file:
+                    read_file = server_file.read()
+                    server_file.close()
+                    server_obj = json.loads(read_file)
+                for i in range(len(server_obj)):
+                    server_list_items.append(server_obj[i]["server"])
+            except:
+                if self.changeServerAskedToReset == False:
+                    print("Failed to load.")
+                    self.changeServerAskedToReset = True
+                    self.resetServerlist()
+                    return 1
+        
+            print("server_list_items:    " + str(server_list_items))
+            
+            # Widget 1
+            self.chooseRemoveServerWidged = QtWidgets.QDialog()
+            
+            # removeServerBox
+            self.removeServerBox = QtWidgets.QComboBox()
+
+            for i in range(len(server_list_items)):
+                self.removeServerBox.addItem(server_list_items[i])
+            
+            # Buttons
+            cancel = QtWidgets.QPushButton("CANCEL")
+            ok = QtWidgets.QPushButton("OK")
+            
+            ok.setDefault(True)
+            ok.clicked.connect(self.chooseRemoveServerWidged.accept)
+            cancel.clicked.connect(self.chooseRemoveServerWidged.reject)
+            
+            #Layout
+            layout = QtWidgets.QHBoxLayout()
+            layout.addWidget(cancel)
+            layout.addWidget(ok)
+            main_layout = QtWidgets.QVBoxLayout()
+            main_layout.addWidget(QtWidgets.QLabel("Please choose a server to remove."))
+            main_layout.addWidget(self.removeServerBox)
+            main_layout.addLayout(layout)
+            
+            self.chooseRemoveServerWidged.setLayout(main_layout)
+            
+            # Theme
+            self.chooseRemoveServerWidged.setStyleSheet(self.theme["main/defaultwindow/style"])
+            self.chooseRemoveServerWidged.setWindowIcon(PesterIcon(self.theme["main/icon"]))
+            
+            # Connect
+            self.chooseRemoveServerWidged.accepted.connect(self.removeServer)
+            self.chooseRemoveServerWidged.rejected.connect(self.changeServer)
+
+            # Show
+            self.chooseRemoveServerWidged.show()
         else:
             print(self.serverBox.currentText() + " chosen")
 
@@ -3113,12 +3202,6 @@ class PesterWindow(MovingWindow):
     def changeServer(self):
         # Read servers.
         server_list_items = []
-##        xyz = {
-##                                        "server": "irc.pesterchum.xyz",
-##                                        "port": "6697",
-##                                        "TLS": True
-##                                    }
-        #default_server_list.append(xyz)
         try:
             with open("serverlist.json", "r") as server_file:
                 read_file = server_file.read()
@@ -3145,6 +3228,7 @@ class PesterWindow(MovingWindow):
             self.serverBox.addItem(server_list_items[i])
         
         self.serverBox.addItem("Add a server [Prompt]")
+        self.serverBox.addItem("Remove a server [Prompt]")
         
         # Buttons
         cancel = QtWidgets.QPushButton("CANCEL")
