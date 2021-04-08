@@ -20,7 +20,7 @@
   "mychumhandle": { "label":
                     { "text": "CHUMHANDLE:",
                       "loc": [12,415],
-                      "style": "color: black ;font:bold; font-family: 'Courier';"
+                      "style": "color: black; font:bold; font-family: 'Courier';"
                     },
                     "handle": { "loc": [15,435],
                                 "size": [240, 25],

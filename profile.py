@@ -299,7 +299,7 @@ class userConfig(object):
                 server_file.close()
                 server_obj = json.loads(read_file)
             server = str(server_obj['server'])
-            print("Server is: " + server)
+            #print("Server is: " + server)
             return server
         except:
             try:
@@ -312,7 +312,7 @@ class userConfig(object):
                     server_file.write(json.dumps(json_server_file, indent = 4) )
                     server_file.close()
                 server = "irc.pesterchum.xyz"
-                print("Failed to read server, defaulting to irc.pesterchum.xyz")
+                #print("Failed to read server, defaulting to irc.pesterchum.xyz")
             except:
                 return self.config.get('server', "irc.pesterchum.xyz")
     def port(self):
@@ -324,7 +324,7 @@ class userConfig(object):
                 server_file.close()
                 server_obj = json.loads(read_file)
             port = str(server_obj['port'])
-            print("Port is: " + port)
+            #print("Port is: " + port)
             return port
         except:
             return self.config.get('port', '6697')

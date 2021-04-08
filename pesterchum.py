@@ -1156,11 +1156,18 @@ class PesterWindow(MovingWindow):
         self.menu.setNativeMenuBar(False)
         self.menu.setObjectName("mainmenu")
 
-        self.console = AttrDict(dict(
-            window = None,
-            action = QtWidgets.QAction("Console".upper(), self),
-            is_open = False
-            ))
+        if self.theme.has_key("main/menus/client/console"):
+            self.console = AttrDict(dict(
+                window = None,
+                action = QtWidgets.QAction(self.theme["main/menus/client/console"], self),
+                is_open = False
+                ))
+        else:
+            self.console = AttrDict(dict(
+                window = None,
+                action = QtWidgets.QAction("Console", self),
+                is_open = False
+                ))
         self.console.shortcuts = AttrDict(dict(
             conkey = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+`"), self,
                 context=QtCore.Qt.ApplicationShortcut),
@@ -1266,8 +1273,8 @@ class PesterWindow(MovingWindow):
 
         self.moodsLabel = QtWidgets.QLabel(self.theme["main/moodlabel/text"], self)
         self.moodsLabel.setObjectName("moodlabel")
-
-        self.mychumhandleLabel = QtWidgets.QLabel(self.theme["main/mychumhandle/label/text"], self)
+        # Padding so it fits. I, don't know how to fix this properly :/
+        self.mychumhandleLabel = QtWidgets.QLabel(self.theme["main/mychumhandle/label/text"] + "     ", self)
         self.mychumhandleLabel.setObjectName("myhandlelabel")
         self.mychumhandle = QtWidgets.QPushButton(self.profile().handle, self)
         self.mychumhandle.setFlat(True)
@@ -1281,6 +1288,8 @@ class PesterWindow(MovingWindow):
         self.show()
 
         self.initTheme(self.theme)
+
+        #self.mychumhandleLabel.setStyleSheet("QLabel {);};")
 
         self.hide()
         
@@ -1710,6 +1719,17 @@ class PesterWindow(MovingWindow):
         self.nickServAction.setText(self.theme["main/menus/help/nickserv"])
         self.helpmenu.setTitle(self.theme["main/menus/help/_name"])
 
+        # Console
+##        if self.theme.has_key("main/menus/client/console"):
+##            self.console.action.setText(self.theme["main/menus/client/console"])
+##        else:
+##            self.console.action.setText("Console")
+        # has_key doesn't work out here for some reason, possibly because of inherits?
+        try:
+            self.console.action.setText(self.theme["main/menus/client/console"])
+        except:
+            self.console.action.setText("Console")
+
         # moods
         self.moodsLabel.setText(theme["main/moodlabel/text"])
         self.moodsLabel.move(*theme["main/moodlabel/loc"])
@@ -1755,7 +1775,9 @@ class PesterWindow(MovingWindow):
         self.mychumcolor.resize(*theme["main/mychumhandle/colorswatch/size"])
         self.mychumcolor.move(*theme["main/mychumhandle/colorswatch/loc"])
         self.mychumcolor.setStyleSheet("background: %s" % (self.profile().colorhtml()))
-        if "main/mychumhandle/currentMood" in self.theme:
+        # I don't know why "if "main/mychumhandle/currentMood" in self.theme:" doesn't work,
+        # But this seems to work just as well :3c
+        if self.theme.has_key("main/mychumhandle/currentMood"):
             moodicon = self.profile().mood.icon(theme)
             if hasattr(self, 'currentMoodIcon') and self.currentMoodIcon:
                 self.currentMoodIcon.hide()

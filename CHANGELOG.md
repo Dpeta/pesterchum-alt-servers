@@ -3,6 +3,11 @@
 
 ## [v2.1.0] - 2021-4-4
 
+### Fixed
+- Fixed current mood icon not showing up.
+- Fixed "CHUMHANDLE:" not fitting on some themes.
+- Fixed console capitalization.
+
 ### Added
 - Server prompt
 
