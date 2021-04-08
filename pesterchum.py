@@ -1276,8 +1276,14 @@ class PesterWindow(MovingWindow):
         self.mychumcolor = QtWidgets.QPushButton(self)
         self.mychumcolor.clicked.connect(self.changeMyColor)
 
+        # self.show() before self.initTheme() fixes a
+        # layering issue on windows... for some reason...
+        self.show()
+
         self.initTheme(self.theme)
 
+        self.hide()
+        
         self.waitingMessages = waitingMessageHolder(self)
 
         self.idler = AttrDict(dict(
@@ -3280,7 +3286,7 @@ class MainProgram(QtCore.QObject):
 
         doSoundInit()
         self.widget = PesterWindow(options, app=self.app)
-        #self.widget.show() <== moved to function
+        #self.widget.show() <== Already called in showLoading()
 
         self.trayicon = PesterTray(PesterIcon(self.widget.theme["main/icon"]), self.widget, self.app)
         self.traymenu = QtWidgets.QMenu()
