@@ -2968,7 +2968,7 @@ class PesterWindow(MovingWindow):
         self.irc = irc
 
     def updateServerJson(self):
-        print(self.customServerPrompt_qline.text() + " chosen")
+        logging.info(self.customServerPrompt_qline.text() + " chosen")
 
         server_and_port = self.customServerPrompt_qline.text().split(':')
 
@@ -2978,7 +2978,7 @@ class PesterWindow(MovingWindow):
                 "port": server_and_port[1],
                 "TLS": self.TLS_checkbox.isChecked()
                 }
-            print("server:    "+str(server))
+            logging.info("server:    "+str(server))
         except:
             msgbox = QtWidgets.QMessageBox()
             msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
@@ -2989,15 +2989,13 @@ class PesterWindow(MovingWindow):
             self.changeServer()
             return 1
 
-        with open("serverlist.json", "r") as server_file:
+        with open(_datadir + "serverlist.json", "r") as server_file:
             read_file = server_file.read()
             server_file.close()
             server_list_obj = json.loads(read_file)
-        print(server_list_obj)
         server_list_obj.append(server)
-        print(server_list_obj)
         try:
-            with open("serverlist.json", "w") as server_file:
+            with open(_datadir + "serverlist.json", "w") as server_file:
                 server_file.write(json.dumps(server_list_obj, indent = 4))
                 server_file.close()
         except:
@@ -3012,25 +3010,36 @@ class PesterWindow(MovingWindow):
                                         "port": "6697",
                                         "TLS": True
                                     }]
-        msgbox = QtWidgets.QMessageBox()
-        msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
-        msgbox.setWindowIcon(PesterIcon(self.theme["main/icon"]))
-        msgbox.setInformativeText("Failed to load from serverlist.json, do you want to revert to defaults?")
-        msgbox.addButton(QtWidgets.QPushButton("Yes"), QtWidgets.QMessageBox.YesRole)
-        msgbox.addButton(QtWidgets.QPushButton("No"), QtWidgets.QMessageBox.NoRole)
-        ret = msgbox.exec_()
-        reply = msgbox.buttonRole(msgbox.clickedButton())
+        if os.path.isfile(_datadir + "serverlist.json"):
+            logging.error("Failed to load server list from serverlist.json.")
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
+            msgbox.setWindowIcon(PesterIcon(self.theme["main/icon"]))
+            msgbox.setInformativeText("Failed to load server list, do you wish to revert to defaults?\n" \
+                                      + "If you choose no, Pesterchum will most likely crash unless you manually fix serverlist.json\n" \
+                                      + "Please tell me if this error occurs :'3")
+            msgbox.addButton(QtWidgets.QPushButton("Yes"), QtWidgets.QMessageBox.YesRole)
+            msgbox.addButton(QtWidgets.QPushButton("No"), QtWidgets.QMessageBox.NoRole)
+            ret = msgbox.exec_()
+            reply = msgbox.buttonRole(msgbox.clickedButton())
 
-        if (reply==QtWidgets.QMessageBox.YesRole):
-            with open("serverlist.json", "w") as server_file:
-                server_file.write(json.dumps(default_server_list, indent = 4) )
-                server_file.close()
+            if (reply==QtWidgets.QMessageBox.YesRole):
+                with open(_datadir + "serverlist.json", "w") as server_file:
+                    server_file.write(json.dumps(default_server_list, indent = 4) )
+                    server_file.close()
+
+        else:
+            logging.warning("Failed to load server list because serverlist.json doesn't exist, " \
+                + "this isn't an issue if this is the first time Pesterchum has been started.")
+            with open(_datadir + "serverlist.json", "w") as server_file:
+                    server_file.write(json.dumps(default_server_list, indent = 4) )
+                    server_file.close()
         self.changeServer()
 
     def removeServer(self):
         server_list_items = []
         try:
-            with open("serverlist.json", "r") as server_file:
+            with open(_datadir + "serverlist.json", "r") as server_file:
                 read_file = server_file.read()
                 server_file.close()
                 server_list_obj = json.loads(read_file)
@@ -3038,20 +3047,18 @@ class PesterWindow(MovingWindow):
                 server_list_items.append(server_list_obj[i]["server"])
         except:
             if self.changeServerAskedToReset == False:
-                print("Failed to load.")
                 self.changeServerAskedToReset = True
                 self.resetServerlist()
                 return 1
         
         for i in range(len(server_list_obj)):
-            print(server_list_obj[i])
             if server_list_obj[i]["server"] == self.removeServerBox.currentText():
                 selected_entry = i
 
         server_list_obj.pop(selected_entry)
         
         try:
-            with open("serverlist.json", "w") as server_file:
+            with open(_datadir + "serverlist.json", "w") as server_file:
                 server_file.write(json.dumps(server_list_obj, indent = 4))
                 server_file.close()
         except:
@@ -3110,11 +3117,12 @@ class PesterWindow(MovingWindow):
 
             # Show
             self.customServerDialog.show()
+            
         elif self.serverBox.currentText() == "Remove a server [Prompt]":
             # Read servers.
             server_list_items = []
             try:
-                with open("serverlist.json", "r") as server_file:
+                with open(_datadir + "serverlist.json", "r") as server_file:
                     read_file = server_file.read()
                     server_file.close()
                     server_obj = json.loads(read_file)
@@ -3122,12 +3130,11 @@ class PesterWindow(MovingWindow):
                     server_list_items.append(server_obj[i]["server"])
             except:
                 if self.changeServerAskedToReset == False:
-                    print("Failed to load.")
                     self.changeServerAskedToReset = True
                     self.resetServerlist()
                     return 1
         
-            print("server_list_items:    " + str(server_list_items))
+            logging.info("server_list_items:    " + str(server_list_items))
             
             # Widget 1
             self.chooseRemoveServerWidged = QtWidgets.QDialog()
@@ -3168,9 +3175,9 @@ class PesterWindow(MovingWindow):
             # Show
             self.chooseRemoveServerWidged.show()
         else:
-            print(self.serverBox.currentText() + " chosen")
+            logging.info(self.serverBox.currentText() + " chosen")
 
-            with open("serverlist.json", "r") as server_file:
+            with open(_datadir + "serverlist.json", "r") as server_file:
                 read_file = server_file.read()
                 server_file.close()
                 server_obj = json.loads(read_file)
@@ -3182,7 +3189,7 @@ class PesterWindow(MovingWindow):
                     selected_entry = i
             
             try:
-                with open("server.json", "w") as server_file:
+                with open(_datadir + "server.json", "w") as server_file:
                     json_server_file = {
                                         "server": server_obj[selected_entry]["server"],
                                         "port": server_obj[selected_entry]["port"],
@@ -3191,7 +3198,7 @@ class PesterWindow(MovingWindow):
                     server_file.write(json.dumps(json_server_file, indent = 4) )
                     server_file.close()
             except:
-                    print("failed")
+                    logging.error("Failed to set server :(")
 
             # Continue running Pesterchum as usual
             pesterchum.irc.start()
@@ -3203,7 +3210,7 @@ class PesterWindow(MovingWindow):
         # Read servers.
         server_list_items = []
         try:
-            with open("serverlist.json", "r") as server_file:
+            with open(_datadir + "serverlist.json", "r") as server_file:
                 read_file = server_file.read()
                 server_file.close()
                 server_obj = json.loads(read_file)
@@ -3211,12 +3218,11 @@ class PesterWindow(MovingWindow):
                 server_list_items.append(server_obj[i]["server"])
         except:
             if self.changeServerAskedToReset == False:
-                print("Failed to load.")
                 self.changeServerAskedToReset = True
                 self.resetServerlist()
                 return 1
     
-        print("server_list_items:    " + str(server_list_items))
+        logging.info("server_list_items:    " + str(server_list_items))
         
         # Widget 1
         self.chooseServerWidged = QtWidgets.QDialog()
@@ -3340,29 +3346,6 @@ class MainProgram(QtCore.QObject):
         self.app.setQuitOnLastWindowClosed(False)
 
         options = self.oppts(sys.argv[1:])
-
-        
-
-        # Tries to load the server to connect to from server.json.
-        # If it fails, create json file with default of irc.pesterchum.xyz & connect to irc.pesterchum.xyz
-##        try:
-##            with open("server.json", "r") as server_file:
-##                read_file = server_file.read()
-##                server_file.close()
-##            server_obj = json.loads(read_file)
-##            self.server = str(server_obj['server'])
-##        except:
-##            try:
-##                with open("server.json", "w") as server_file:
-##                    json_server_file = {
-##                                          "server": "irc.pesterchum.xyz",
-##                                    }
-##                    server_file.write(json.dumps(json_server_file, indent = 4) )
-##                    server_file.close()
-##            except:
-##                pass
-##            self.server = "irc.pesterchum.xyz"
-##        print(("Server is: " + self.server))
         
         def doSoundInit():
             # TODO: Make this more uniform, adapt it into a general function.

@@ -294,7 +294,7 @@ class userConfig(object):
         if hasattr(self.parent, 'serverOverride'):
             return self.parent.serverOverride
         try:
-            with open("server.json", "r") as server_file:
+            with open(_datadir + "server.json", "r") as server_file:
                 read_file = server_file.read()
                 server_file.close()
                 server_obj = json.loads(read_file)
@@ -303,7 +303,7 @@ class userConfig(object):
             return server
         except:
             try:
-                with open("server.json", "w") as server_file:
+                with open(_datadir + "server.json", "w") as server_file:
                     json_server_file = {
                                         "server": "irc.pesterchum.xyz",
                                         "port": "6697",
@@ -319,7 +319,7 @@ class userConfig(object):
         if hasattr(self.parent, 'portOverride'):
             return self.parent.portOverride
         try:
-            with open("server.json", "r") as server_file:
+            with open(_datadir + "server.json", "r") as server_file:
                 read_file = server_file.read()
                 server_file.close()
                 server_obj = json.loads(read_file)
@@ -332,7 +332,7 @@ class userConfig(object):
 ##        if hasattr(self.parent, 'tlsOverride'):
 ##            return self.parent.tlsOverride
 ##        try:
-##            with open("server.json", "r") as server_file:
+##            with open(_datadir + "server.json", "r") as server_file:
 ##                read_file = server_file.read()
 ##                server_file.close()
 ##                server_obj = json.loads(read_file)

@@ -87,7 +87,7 @@ class IRCClient:
         import json
         
         try:
-            with open("server.json", "r") as server_file:
+            with open(_datadir + "server.json", "r") as server_file:
                 read_file = server_file.read()
                 server_file.close()
                 server_obj = json.loads(read_file)
