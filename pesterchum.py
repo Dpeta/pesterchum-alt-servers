@@ -350,13 +350,20 @@ class chumArea(RightClickTree):
                 return self.optionsMenu
 
     def startDrag(self, dropAction):
-        # create mime data object
-        mime = QtCore.QMimeData()
-        mime.setData('application/x-item', '???')
-        # start drag
-        drag = QtGui.QDrag(self)
-        drag.setMimeData(mime)
-        drag.start(QtCore.Qt.MoveAction)
+##        Traceback (most recent call last):
+##            File "pesterchum.py", line 355, in startDrag
+##            mime.setData('application/x-item', '???')
+##            TypeErroreError: setData(self, str, Union[QByteArray, bytes, bytearray]): argument 2 has unexpected type 'str'
+        try:
+            # create mime data object
+            mime = QtCore.QMimeData()
+            mime.setData('application/x-item', '???')
+            # start drag
+            drag = QtGui.QDrag(self)
+            drag.setMimeData(mime)
+            drag.start(QtCore.Qt.MoveAction)
+        except:
+            logging.exception('')
 
     def dragMoveEvent(self, event):
         if event.mimeData().hasFormat("application/x-item"):
@@ -1236,7 +1243,13 @@ class PesterWindow(MovingWindow):
         self.chanServAction.triggered.connect(self.loadChanServ)
         self.aboutAction = QtWidgets.QAction(self.theme["main/menus/help/about"], self)
         self.aboutAction.triggered.connect(self.aboutPesterchum)
-        self.reportBugAction = QtWidgets.QAction("REPORT BUG", self)
+
+        # Because I can't expect all themes to have this included.
+        if self.theme.has_key("main/menus/help/reportbug"):
+            self.reportBugAction = QtWidgets.QAction(self.theme["main/menus/help/reportbug"], self)
+        else:
+            self.reportBugAction = QtWidgets.QAction("REPORT BUG", self)
+        
         self.reportBugAction.triggered.connect(self.reportBug)
         helpmenu = self.menu.addMenu(self.theme["main/menus/help/_name"])
         self.helpmenu = helpmenu
@@ -1729,6 +1742,11 @@ class PesterWindow(MovingWindow):
             self.console.action.setText(self.theme["main/menus/client/console"])
         except:
             self.console.action.setText("Console")
+
+        try:
+            self.reportBugAction.setText(self.theme["main/menus/help/reportbug"])
+        except:
+            self.reportBugAction.setText("REPORT BUG")
 
         # moods
         self.moodsLabel.setText(theme["main/moodlabel/text"])
@@ -2975,7 +2993,7 @@ class PesterWindow(MovingWindow):
         try:
             server = {
                 "server": server_and_port[0],
-                "port": server_and_port[1],
+                "port": int(server_and_port[1]),# to make sure port is a valid integer, and raise an exception if it cannot be converted.
                 "TLS": self.TLS_checkbox.isChecked()
                 }
             logging.info("server:    "+str(server))
@@ -3050,19 +3068,21 @@ class PesterWindow(MovingWindow):
                 self.changeServerAskedToReset = True
                 self.resetServerlist()
                 return 1
+
+        selected_entry = None
         
         for i in range(len(server_list_obj)):
             if server_list_obj[i]["server"] == self.removeServerBox.currentText():
                 selected_entry = i
-
-        server_list_obj.pop(selected_entry)
-        
-        try:
-            with open(_datadir + "serverlist.json", "w") as server_file:
-                server_file.write(json.dumps(server_list_obj, indent = 4))
-                server_file.close()
-        except:
-                logging.error("failed")
+        if selected_entry != None:
+            server_list_obj.pop(selected_entry)
+            
+            try:
+                with open(_datadir + "serverlist.json", "w") as server_file:
+                    server_file.write(json.dumps(server_list_obj, indent = 4))
+                    server_file.close()
+            except:
+                    logging.error("failed")
 
 
         self.changeServer()

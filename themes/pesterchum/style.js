@@ -66,7 +66,10 @@
                                "memonoquirk": "DISABLE QUIRKS",
                                "memohidden": "HIDDEN",
                                "memoinvite": "INVITE-ONLY",
-                               "memomute": "MUTE"
+                               "memomute": "MUTE",
+							   "beeponmessage": "BEEP ON MESSAGE",
+							   "flashonmessage": "FLASH ON MESSAGE",
+							   "mutenotifications": "MUTE NOTIFICATIONS"
                               }
            },
   "chums": { "style": "border:2px solid yellow; background-color: black;color: white;font: bold;font-family: 'Courier';selection-background-color:#646464; ",

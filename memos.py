@@ -420,15 +420,27 @@ class PesterMemo(PesterConvo):
         self.invitechum = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/invitechum"], self)
         self.invitechum.triggered.connect(self.inviteChums)
 
-        self._beepToggle = QtWidgets.QAction("Beep on Message", self)
+        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/beeponmessage"):
+        try:
+            self._beepToggle = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/beeponmessage"], self)
+        except:
+            self._beepToggle = QtWidgets.QAction("BEEP ON MESSAGE", self)
         self._beepToggle.setCheckable(True)
         self._beepToggle.toggled[bool].connect(self.toggleBeep)
 
-        self._flashToggle = QtWidgets.QAction("Flash on Message", self)
+        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/flashonmessage"):
+        try:
+            self._flashToggle = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/flashonmessage"], self)
+        except:
+            self._flashToggle = QtWidgets.QAction("FLASH ON MESSAGE", self)
         self._flashToggle.setCheckable(True)
         self._flashToggle.toggled[bool].connect(self.toggleFlash)
 
-        self._muteToggle = QtWidgets.QAction("Mute Notifications", self)
+        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/mutenotifications"):
+        try:
+            self._muteToggle = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/mutenotifications"], self)
+        except:
+            self._muteToggle = QtWidgets.QAction("MUTE NOTIFICATIONS", self)
         self._muteToggle.setCheckable(True)
         self._muteToggle.toggled[bool].connect(self.toggleMute)
 
@@ -638,6 +650,29 @@ class PesterMemo(PesterConvo):
         self.timeswitchr.setIconSize(rarrow.realsize())
         self.timeswitchr.setStyleSheet(self.mainwindow.theme["memos/time/arrows/style"])
 
+        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/beeponmessage"):
+        try:
+            self._beepToggle.setText(self.mainwindow.theme["main/menus/rclickchumlist/beeponmessage"])
+        except:
+            self._beepToggle.setText("BEEP ON MESSAGE")
+
+        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/flashonmessage"):
+        try:
+            self._flashToggle.setText(self.mainwindow.theme["main/menus/rclickchumlist/flashonmessage"])
+        except:
+            self._flashToggle.setText("FLASH ON MESSAGE")
+
+        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/mutenotifications"):
+        try:
+            self._muteToggle.setText(self.mainwindow.theme["main/menus/rclickchumlist/mutenotifications"])
+        except:
+            self._muteToggle.setText("MUTE NOTIFICATIONS")
+
+        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/pester"):
+        try:
+            self.pesterChumAction.setText(self.mainwindow.theme["main/menus/rclickchumlist/pester"])
+        except:
+            pass
 
     def changeTheme(self, theme):
         self.initTheme(theme)

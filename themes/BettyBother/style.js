@@ -54,7 +54,10 @@
                                "opuser": "MAKE OP",
                                "voiceuser": "GIVE VOICE",
                                "quirksoff": "QUIRKS OFF",
-                               "invitechum": "INVITE CHUM"
+                               "invitechum": "INVITE CHUM",
+							   "beeponmessage": "BEEP ON MESSAGE",
+							   "flashonmessage": "FLASH ON MESSAGE",
+							   "mutenotifications": "MUTE NOTIFICATIONS"
                               }
            },
   "chums": { "style": "border:0px; background-image:url($path/chumbg.png); background-color: rgb(102,102,102); background-repeat: no-repeat; color: white;font: bold;font-family: 'Arial';selection-background-color:#646464; ",

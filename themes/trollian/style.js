@@ -41,7 +41,8 @@
                       "help": "Help",
                       "calsprite": "CalSprite",
                       "chanserv": "ChanServ",
-                      "nickserv": "NickServ" },
+                      "nickserv": "NickServ",
+					  "reportbug": "Report Bug"},
             "rclickchumlist": {"pester": "Troll",
                                "removechum": "Trash",
                                "report": "Tattle",
@@ -63,7 +64,10 @@
                                "memonoquirk": "Disable Quirks",
                                "memohidden": "Hidden",
                                "memoinvite": "Invite-Only",
-                               "memomute": "Mute" }
+                               "memomute": "Mute",
+							   "beeponmessage": "Beep on Message",
+							   "flashonmessage": "Flash on Message",
+							   "mutenotifications": "Mute Notifications" }
            },
   "chums": { "style": "font-size: 12px; background: white; border:0px; font-family: 'Arial';selection-background-color:rgb(200,200,200); ",
              "scrollbar": { "style" : "background-color:#c2c2c2;",

@@ -123,7 +123,7 @@
                                      "text": "" },
                     "currentMood": [18, 249]
                   },
-  "defaultwindow": { "style": "background: #22222; font-family:'Courier';font:bold;selection-background-color:#F1F1F1; " 
+  "defaultwindow": { "style": "background: #F1F1F1; font-family:'Courier';font:bold;selection-background-color:#F1F1F1; " 
                    },
   "addchum":  { "style": "background: rgba(255, 255, 0, 0%); border:2px solid #000000; font: bold; color: rgba(0, 0, 0, 0%); font-family:'Courier';",
                 "pressed" : "background: rgb(255, 255, 255, 30%);",
@@ -218,7 +218,7 @@
                },
   "margins": {"top": 0, "bottom": 6, "left": 0, "right": 0 },
   "size": [500, 325],
-  "chumlabel": { "style": "margin-bottom: 21px;background: rgb(256, 256, 256); color: white; border:0px; font-size: 14px;font-family: 'Courier'",
+  "chumlabel": { "style": "margin-bottom: 21px;background: rgb(255, 255, 255); color: white; border:0px; font-size: 14px;font-family: 'Courier'",
                  "align": { "h": "center", "v": "center" },
                  "minheight": 47,
                  "maxheight": 47,
