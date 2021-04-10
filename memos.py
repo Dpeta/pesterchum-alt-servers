@@ -894,7 +894,7 @@ class PesterMemo(PesterConvo):
         if c.lower() == self.channel.lower():
             self.mainwindow.inviteOnlyChan['QString'].disconnect(self.closeInviteOnly)
             if self.parent():
-                print(self.channel)
+                logging.info(self.channel)
                 i = self.parent().tabIndices[self.channel]
                 self.parent().tabClose(i)
             else:

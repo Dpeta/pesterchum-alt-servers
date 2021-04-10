@@ -18,7 +18,7 @@ class LuaQuirks(ScriptQuirks):
         try:
             return lua.require(name)
         except Error as e:
-            print(e)
+            logging.error(e)
             return None
         finally:
             os.chdir(CurrentDir)

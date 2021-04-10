@@ -24,7 +24,7 @@ class DefaultToast(object):
         if t.title == self.title and t.msg == self.msg and t.icon == self.icon:
             self.machine.toasts.pop(0)
             self.machine.displaying = False
-            print("Done")
+            logging.info("Done")
 
 class ToastMachine(object):
     class __Toast__(object):
@@ -143,7 +143,7 @@ class ToastMachine(object):
         if type in self.types:
             if type == "libnotify":
                 if not pynotify or not pynotify.init("ToastMachine"):
-                    print("Problem initilizing pynotify")
+                    logging.info("Problem initilizing pynotify")
                     return
                     #self.type = type = "default"
             elif type == "twmn":
@@ -151,7 +151,7 @@ class ToastMachine(object):
                 try:
                     pytwmn.init()
                 except pytwmn.ERROR as e:
-                    print("Problem initilizing pytwmn: " + str(e))
+                    logging.error("Problem initilizing pytwmn: " + str(e))
                     return
                     #self.type = type = "default"
             self.type = type

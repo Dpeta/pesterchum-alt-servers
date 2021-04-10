@@ -20,6 +20,7 @@
 - Fixed "Report" string not being updated in convo window when changing theme.
 - Fixed pesterChumAction's text not being updated in memo windows when changing theme.
 - Fixed incorrect sRGB profile in paperchum.
+- Fixed Sound slider in settings not working with pygame.
 
 ### Changed
 - Made it so handle and ident are passed to ``_max_msg_len``, so, hopefully the text cutoff will be *slightly* less restrictive.

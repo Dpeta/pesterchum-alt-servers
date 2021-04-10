@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+import logging
 
 RANDNICK = "randomEncounter"
 
@@ -65,5 +66,5 @@ class RandomHandler(QtCore.QObject):
                 msgbox.exec_()
                 return
             name = str(l[1])
-            print(name)
+            logging.info("Random Encounter name is: " + name)
             self.mainwindow.newConversation(name)

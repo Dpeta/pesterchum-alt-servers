@@ -11,6 +11,7 @@ from quirks import ScriptQuirks
 from pyquirks import PythonQuirks
 from luaquirks import LuaQuirks
 import dataobjs
+import logging
 
 # karxi: My own contribution to this - a proper lexer.
 import pnc.lexercon as lexercon
@@ -42,7 +43,7 @@ quirkloader = ScriptQuirks()
 quirkloader.add(PythonQuirks())
 quirkloader.add(LuaQuirks())
 quirkloader.loadAll()
-print(quirkloader.funcre())
+logging.info(quirkloader.funcre())
 _functionre = re.compile(r"%s" % quirkloader.funcre())
 _groupre = re.compile(r"\\([0-9]+)")
 
@@ -398,7 +399,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
     while len(lexed) > 0:
         rounds += 1
         if debug:
-            print("[Starting round {}...]".format(rounds))
+            logging.info("[Starting round {}...]".format(rounds))
         msg = lexed.popleft()
         msglen = 0
         is_text = False
@@ -439,7 +440,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
                     # instead?
                     subround += 1
                     if debug:
-                        print("[Splitting round {}-{}...]".format(
+                        logging.info("[Splitting round {}-{}...]".format(
                                 rounds, subround
                                 ))
                     point = msg.rfind(' ', 0, lenl)
@@ -454,12 +455,12 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
                     # Remove what we just added.
                     msg = msg[point:]
                     if debug:
-                        print("msg = {!r}".format(msg))
+                        logging.info("msg = {!r}".format(msg))
                 else:
                     # Catch the remainder.
                     stack.append(msg)
                     if debug:
-                        print("msg caught; stack = {!r}".format(stack))
+                        logging.info("msg caught; stack = {!r}".format(stack))
                 # Done processing. Pluck out the first portion so we can
                 # continue processing, clean it up a bit, then add the rest to
                 # our waiting list.

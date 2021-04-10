@@ -292,7 +292,7 @@ class ConsoleWindow(QtWidgets.QDialog):
             else:
                 # No errors.
                 if result is not None:
-                    print(repr(result))
+                    logging.info(repr(result))
             finally:
                 # Restore system output.
                 sys.stdout = sysout
