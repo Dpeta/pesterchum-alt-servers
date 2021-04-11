@@ -7,6 +7,8 @@
 - Server prompt + interface for adding & removing servers.
 - Custom text for numerous themes. (Mostly just made things consistent, for example, "REPORT BUG" to "Report Bug" for Trollian.)
 - Added theme support for "Beep on Message", "Flash on Message", "Mute Notifications".
+- "Usage:" for pesterchum.py when running from the command line.
+- Made logging level configurable via command line arguments.
 
 ### Fixed
 - Fixed current mood icon not showing up.

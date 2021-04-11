@@ -8,8 +8,71 @@ except NameError:
 
 if os.path.dirname(sys.argv[0]):
     os.chdir(os.path.dirname(sys.argv[0]))
+
+print("Usage: pesterchum.py [OPTIONS]\n")
+print("Use -h/--help to see the available options.")
+#print("sys.argv:    " + str(sys.argv[1:]) + '\n')
+
+# Help
+if ('--help' in sys.argv[1:]) or ('-h' in sys.argv[1:]):
+    print("Possible arguments:")
+    help_arguments = " -l, --logging\n    Specify level of logging, possible values are:\n" + \
+                     "    CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET.\n" + \
+                     "    The default value is WARNING.\n" + \
+                     "    (See https://docs.python.org/3/library/logging.html)\n\n" + \
+                     " -s, --server\n    Specify server override. (legacy)\n\n" + \
+                     " -p, --port\n    Specify port override. (legacy)\n\n" + \
+                     " --advanced\n    Enable advanced.\n\n" + \
+                     " --no-honk\n    Disable honking.\n"
+    print(help_arguments)
+    sys.exit()
+
 import logging
-logging.basicConfig(level=logging.DEBUG)
+
+if ('--logging' in sys.argv[1:]) or ('-l' in sys.argv[1:]) & (False == ('--logging' in sys.argv[1:]) and ('-l' in sys.argv[1:])):
+    try:
+        # If both are specified, this does not run.
+        if ('-l' in sys.argv[1:]):
+            loglevel = sys.argv[sys.argv.index('-l') + 1]
+        if ('--logging' in sys.argv[1:]):
+            loglevel = sys.argv[sys.argv.index('--logging') + 1]
+
+        loglevel = loglevel.upper()
+        
+        if loglevel == "CRITICAL":
+            loglevel = 50
+            print("Logging Level is CRITICAL")
+        elif loglevel == "ERROR":
+            loglevel = 40
+            print("Logging Level is ERROR")
+        elif loglevel == "WARNING":
+            loglevel = 30
+            print("Logging Level is WARNING")
+        elif loglevel == "INFO":
+            loglevel = 20
+            print("Logging Level is INFO")
+        elif loglevel == "DEBUG":
+            loglevel = 10
+            print("Logging Level is DEBUG")
+        elif loglevel == "NOTSET":
+            loglevel = 0
+            print("Logging Level is NOTSET")
+        else:
+            raise Exception
+        logging.basicConfig(level=loglevel)
+
+        # Remove from argv because the rest of the code can't handle it :/
+        if ('-l' in sys.argv[1:]):
+                sys.argv.pop(sys.argv.index('-l') + 1)
+                sys.argv.pop(sys.argv.index('-l'))
+        if ('--logging' in sys.argv[1:]):
+            sys.argv.pop(sys.argv.index('--logging') + 1)
+            sys.argv.pop(sys.argv.index('--logging'))
+    except:
+        print("Invalid syntax.")
+        logging.basicConfig(level=30) # Warning
+else:
+    logging.basicConfig(level=30) # Warning
 
 from datetime import *
 import random
@@ -1108,6 +1171,7 @@ class PesterWindow(MovingWindow):
             self.portOverride = options["port"]
         if "honk" in options:
               self.honk = options["honk"]
+            
         else: self.honk = True
         self.modes = ""
 
