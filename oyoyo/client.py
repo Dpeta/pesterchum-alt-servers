@@ -25,6 +25,9 @@ import threading
 import os
 import traceback
 import ssl
+import ostools
+
+_datadir = ostools.getDataDir()
 
 from oyoyo.parse import *
 from oyoyo import helpers
@@ -103,7 +106,7 @@ class IRCClient:
                 self.bare_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket = self.context.wrap_socket(self.bare_socket)
         except:
-            #print("TLS except.")
+            logging.exception('')
             self.context = ssl.create_default_context()
             self.context.check_hostname = False
             self.context.verify_mode = ssl.CERT_NONE
