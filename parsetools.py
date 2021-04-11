@@ -43,7 +43,9 @@ quirkloader = ScriptQuirks()
 quirkloader.add(PythonQuirks())
 quirkloader.add(LuaQuirks())
 quirkloader.loadAll()
-logging.info(quirkloader.funcre())
+# Quirks are already listed in quirks.py, so logging is redundant here. 
+#logging.debug(quirkloader.funcre())
+quirkloader.funcre()
 _functionre = re.compile(r"%s" % quirkloader.funcre())
 _groupre = re.compile(r"\\([0-9]+)")
 

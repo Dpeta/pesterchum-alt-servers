@@ -31,7 +31,9 @@ class ScriptQuirks(object):
                     del self.quirks[k]
         #print self.quirks
         if self.quirks:
-            logging.info('Registered quirks:', '(), '.join(self.quirks) + "()")
+            # See https://stackoverflow.com/questions/12843099/python-logging-typeerror-not-all-arguments-converted-during-string-formatting
+            reg_quirks = ('Registered quirks:', '(), '.join(self.quirks) + "()")
+            logging.info(reg_quirks)
         else:
             logging.warning("Couldn't find any script quirks")
 
