@@ -63,7 +63,7 @@ or
 ``python setup.py bdist_msi``
 
 #### Mac:
-``python setup.py bdist``
+``python setup.py build``
 
 ### PYINSTALLER BUILDING
 #### Linux (might also work on other platforms!!): 
