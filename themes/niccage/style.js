@@ -27,7 +27,7 @@
                        "reconnect": "Reconnect",
                        "idle": "Idle",
                        "exit": "Exit",
-					   "console": "Console"},
+                       "console": "Console"},
             "profile": {"_name": "Profile",
                         "switch": "Switch",
                         "color": "Color",
@@ -40,7 +40,7 @@
                       "calsprite": "CalSprite",
                       "chanserv": "ChanServ",
                       "nickserv": "NickServ",
-					  "reportbug": "Report Bug"},
+                      "reportbug": "Report Bug"},
             "rclickchumlist": {"pester": "Pester",
                                "removechum": "Remove Chum",
                                "blockchum": "Block",
@@ -56,16 +56,16 @@
                                "voiceuser": "Give Voice",
                                "quirksoff": "Quirks Off",
                                "invitechum": "Invite Chum",
-							   "notes": "Edit Notes...",
+                               "notes": "Edit Notes...",
                                "quirkkill": "Kill Quirk",
                                "memosetting": "Memo Settings",
                                "memonoquirk": "Disable Quirks",
                                "memohidden": "Hidden",
                                "memoinvite": "Invite-Only",
                                "memomute": "Mute",
-							   "beeponmessage": "Beep on Message",
-							   "flashonmessage": "Flash on Message",
-							   "mutenotifications": "Mute Notifications" 
+                               "beeponmessage": "Beep on Message",
+                               "flashonmessage": "Flash on Message",
+                               "mutenotifications": "Mute Notifications" 
                               }
            },
   "chums": { "style": "font-size: 16px; background-image:url($path/chumbg.png); background-color: #C2C4EB; background-repeat: no-repeat; font-family: 'Arial'; border: 0px; selection-background-color: #222222; color: black;",
@@ -275,7 +275,7 @@
       "tabstyle": 0
   },
   "tabwindow" : {
-	  "style": "background: #6769A8; font-family: 'Arial'"
+      "style": "background: #6769A8; font-family: 'Arial'"
   },
   "text": {
       "beganpester": "began pestering",

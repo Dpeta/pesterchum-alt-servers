@@ -25,9 +25,9 @@
                        "talk": "Pester",
                        "import": "Reinforce",
                        "reconnect": "Resurrect",
-					   "idle": "Rest",
+                       "idle": "Rest",
                        "exit": "Exit",
-					   "console": "Console"},
+                       "console": "Console"},
             "profile": {"_name": "Title",
                         "switch": "Alter",
                         "color": "Hue",
@@ -39,7 +39,7 @@
                       "help": "Help",
                       "calsprite": "Calsprite",
                       "nickserv": "NickServ",
-					  "reportbug": "Report Bug",
+                      "reportbug": "Report Bug",
                       "chanserv": "ChanServ"},
             "rclickchumlist": {"pester": "Parley",
                                "removechum": "Turn On",
@@ -51,7 +51,7 @@
                                "banuser": "Destroy User",
                                "opuser": "Empower",
                                "quirksoff": "Untype",
-							   
+                               
                                "notes": "Edit Notes...",
                                "removegroup": "Remove Group",
                                "renamegroup": "Rename Group",
@@ -64,9 +64,9 @@
                                "memohidden": "Hidden",
                                "memoinvite": "Invite-Only",
                                "memomute": "Mute",
-							   "beeponmessage": "Beep on Message",
-							   "flashonmessage": "Flash on Message",
-							   "mutenotifications": "Mute Notifications" 
+                               "beeponmessage": "Beep on Message",
+                               "flashonmessage": "Flash on Message",
+                               "mutenotifications": "Mute Notifications" 
                               }
            },
   "chums": { "style": "font-size: 16px; background-image:url($path/chumbg.png); background-color: #C2C4EB; background-repeat: no-repeat; font-family: 'Arial'; border: 0px; selection-background-color: #222222; color: black;",
@@ -84,7 +84,7 @@
 
                  "offline": { "icon": "$path/offline.gif", "color": "#4a4a4a"},
 
-			     
+                 
                  "pleasant": { "icon": "$path/pleasant.gif", "color": "white" },
 
                  "distraught": { "icon": "$path/distraught.gif", "color": "white" },
@@ -112,7 +112,7 @@
                  "devious": { "icon": "$path/devious.gif", "color": "#88319A" },
 
                  "sleek": { "icon": "$path/sleek.gif", "color": "#88319A" },
-			     
+                 
                  "detestful": { "icon": "$path/detestful.gif", "color": "#88319A" },
 
                  "mirthful": { "icon": "$path/mirthful.gif", "color": "#88319A" },
@@ -169,82 +169,82 @@
            },
   "defaultmood": 18,
   "moodlabel": { "style": "",
-				 "loc": [20, 430],
-				 "text": ""
-			   },
+                 "loc": [20, 430],
+                 "text": ""
+               },
   "moods": [
       { "style": "background-image:url($path/mood1.png); border:0px;", 
-		"selected": "background-image:url($path/mood1c.png); border:0px;",
-		"loc": [0, 208],
-		"size": [100,160],
-	   	 "text": "",
-		"icon": "",
-		"mood": 0
-	  },
+        "selected": "background-image:url($path/mood1c.png); border:0px;",
+        "loc": [0, 208],
+        "size": [100,160],
+         "text": "",
+        "icon": "",
+        "mood": 0
+      },
       { "style": "background-image:url($path/mood2.png); border:0px;", 
-		"selected": "background-image:url($path/mood2c.png); border:0px;",
-		"loc": [106, 208],
-		"size": [100, 160],
-	   	 "text": "",
-		"icon": "",
-		"mood": 19
-	  },
+        "selected": "background-image:url($path/mood2c.png); border:0px;",
+        "loc": [106, 208],
+        "size": [100, 160],
+         "text": "",
+        "icon": "",
+        "mood": 19
+      },
       { "style": "background-image:url($path/mood3.png); border:0px;", 
-		"selected": "background-image:url($path/mood3c.png); border:0px;",
-		"loc": [212, 208],
-		"size": [100, 160],
-	   	 "text": "",
-		"icon": "",
-		"mood": 6
-	  },
+        "selected": "background-image:url($path/mood3c.png); border:0px;",
+        "loc": [212, 208],
+        "size": [100, 160],
+         "text": "",
+        "icon": "",
+        "mood": 6
+      },
       { "style": "background-image:url($path/mood4.png); border:0px;", 
-		"selected": "background-image:url($path/mood4c.png); border:0px;",
-		"loc": [318, 382],
-		"size": [100, 160],
-	   	 "text": "",
-		"icon": "",
-		"mood": 22
-	  },
+        "selected": "background-image:url($path/mood4c.png); border:0px;",
+        "loc": [318, 382],
+        "size": [100, 160],
+         "text": "",
+        "icon": "",
+        "mood": 22
+      },
       { "style": "background-image:url($path/mood5.png); border:0px;", 
-		"selected": "background-image:url($path/mood5c.png); border:0px;",
-		"loc": [0, 382],
-		"size": [100, 160],
-	   	 "text": "",
-		"icon": "",
-		"mood": 4
-	  },
+        "selected": "background-image:url($path/mood5c.png); border:0px;",
+        "loc": [0, 382],
+        "size": [100, 160],
+         "text": "",
+        "icon": "",
+        "mood": 4
+      },
       { "style": "background-image:url($path/mood6.png); border:0px;", 
-		"selected": "background-image:url($path/mood6c.png); border:0px;",
-		"loc": [106, 382],
-		"size": [100, 160],
-	   	 "text": "",
-		"icon": "",
-		"mood": 20
-	  },
+        "selected": "background-image:url($path/mood6c.png); border:0px;",
+        "loc": [106, 382],
+        "size": [100, 160],
+         "text": "",
+        "icon": "",
+        "mood": 20
+      },
       { "style": "background-image:url($path/mood7.png); border:0px;", 
-		"selected": "background-image:url($path/mood7c.png); border:0px;",
-		"loc": [212, 382],
-		"size": [100, 160],
-	   	 "text": "",
-		"icon": "",
-		"mood": 3
-	  },
+        "selected": "background-image:url($path/mood7c.png); border:0px;",
+        "loc": [212, 382],
+        "size": [100, 160],
+         "text": "",
+        "icon": "",
+        "mood": 3
+      },
       { "style": "background-image:url($path/mood8.png); border:0px;", 
-		"selected": "background-image:url($path/mood8c.png); border:0px;",
-		"loc": [318, 208],
-		"size": [100, 160],
-	   	 "text": "",
-		"icon": "",
-		"mood": 1
-	  },
+        "selected": "background-image:url($path/mood8c.png); border:0px;",
+        "loc": [318, 208],
+        "size": [100, 160],
+         "text": "",
+        "icon": "",
+        "mood": 1
+      },
       { "style": "border:0px;", 
-		"selected": "border:0px;",
-		"loc": [0, 0],
-		"size": [100, 100],
-	   	 "text": "",
-		"icon": "",
-		"mood": 2
-	  }
+        "selected": "border:0px;",
+        "loc": [0, 0],
+        "size": [100, 100],
+         "text": "",
+        "icon": "",
+        "mood": 2
+      }
   ]
  },
  "convo":
@@ -274,19 +274,19 @@
       "tabstyle": 0
   },
   "tabwindow" : {
-	  "style": "background: #EED128; font-family: 'Courier'"
+      "style": "background: #EED128; font-family: 'Courier'"
   },
   "text": {
       "beganpester": "began pestering",
       "ceasepester": "ceased pestering",
       "blocked": "blocked",
       "unblocked": "unblocked",
-	  "blockedmsg": "did not receive message from",
+      "blockedmsg": "did not receive message from",
       "openmemo": "coveted",
       "joinmemo": "answered the memo",
       "closememo": "went away from the memo",
       "kickedmemo": "You have been overthrown",
-	  "idle": "has abdicated"
+      "idle": "has abdicated"
   },
   "systemMsgColor": "#393939"
  },

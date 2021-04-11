@@ -16,7 +16,7 @@
              "loc": [10,0]
            },
   "sounds": { "alertsound": "$path/alarm.wav",
-			  "ceasesound": "$path/cease.wav" },
+              "ceasesound": "$path/cease.wav" },
   "menus": {"client": {"_name": "CLIENT",
                        "options": "OPTIONS",
                        "memos": "MEMOS",
@@ -24,7 +24,7 @@
                        "userlist": "USERLIST",
                        "import": "IMPORT",
                        "reconnect": "RECONNECT",
-					   "idle": "IDLE",
+                       "idle": "IDLE",
                        "exit": "EXIT"},
             "profile": {"_name": "PROFILE",
                         "switch": "SWITCH",
@@ -58,7 +58,7 @@
 
                  "offline": { "icon": "$path/offline.png", "color": "#646464"},
 
-			     
+                 
                  "pleasant": { "icon": "$path/pleasant.png", "color": "white" },
 
                  "distraught": { "icon": "$path/distraught.png", "color": "white" },
@@ -86,7 +86,7 @@
                  "devious": { "icon": "$path/devious.png", "color": "red" },
 
                  "sleek": { "icon": "$path/sleek.png", "color": "red" },
-			     
+                 
                  "detestful": { "icon": "$path/detestful.png", "color": "red" },
 
                  "mirthful": { "icon": "$path/mirthful.png", "color": "red" },
@@ -145,66 +145,66 @@
            },
   "defaultmood": 3,
   "moodlabel": { "style": "",
-				 "loc": [20, 430],
-				 "text": "MOODS"
-			   },
+                 "loc": [20, 430],
+                 "text": "MOODS"
+               },
   "moods": [
       { "style": "text-align:left; border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier'", 
-		"selected": "text-align:left; background-image:url($path/moodcheck1.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
-		"loc": [12, 288],
-		"size": [104, 22],
-	                  "text": "Joyful",
-		"icon": "$path/chummy.png",
-		"mood": 0
-	  },
+        "selected": "text-align:left; background-image:url($path/moodcheck1.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
+        "loc": [12, 288],
+        "size": [104, 22],
+                      "text": "Joyful",
+        "icon": "$path/chummy.png",
+        "mood": 0
+      },
       { "style": "text-align:left; border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier'", 
-		"selected": "text-align:left; background-image:url($path/moodcheck2.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
-		"loc": [12, 308],
-		"size": [104, 22],
-		"text": "Pleasant",
-		"icon": "$path/pleasant.png",
-		"mood": 3
-	  },
+        "selected": "text-align:left; background-image:url($path/moodcheck2.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
+        "loc": [12, 308],
+        "size": [104, 22],
+        "text": "Pleasant",
+        "icon": "$path/pleasant.png",
+        "mood": 3
+      },
       { "style": "text-align:left; border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier'", 
-		"selected": "text-align:left; background-image:url($path/moodcheck3.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
-		"loc": [12, 328],
-		"size": [104, 22],
-		"text": "Troubled",
-		"icon": "$path/distraught.png",
-		"mood": 4
-	  },
+        "selected": "text-align:left; background-image:url($path/moodcheck3.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
+        "loc": [12, 328],
+        "size": [104, 22],
+        "text": "Troubled",
+        "icon": "$path/distraught.png",
+        "mood": 4
+      },
       { "style": "text-align:left; border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier'", 
-		"selected": "text-align:left; background-image:url($path/moodcheck2.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
-		"loc": [117, 288],
-		"size": [104, 22],
-		"text": "Playful",
-		"icon": "$path/pranky.png",
-		"mood": 5
-	  },
+        "selected": "text-align:left; background-image:url($path/moodcheck2.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
+        "loc": [117, 288],
+        "size": [104, 22],
+        "text": "Playful",
+        "icon": "$path/pranky.png",
+        "mood": 5
+      },
       { "style": "text-align:left; border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier'", 
-		"selected": "text-align:left; background-image:url($path/moodcheck2.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
-		"loc": [117, 308],
-		"size": [104, 22],
-		"text": "Smooth",
-		"icon": "$path/smooth.png",
-		"mood": 6
-	  },
+        "selected": "text-align:left; background-image:url($path/moodcheck2.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
+        "loc": [117, 308],
+        "size": [104, 22],
+        "text": "Smooth",
+        "icon": "$path/smooth.png",
+        "mood": 6
+      },
       { "style": "text-align:left; border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier'", 
-		"selected": "text-align:left; background-image:url($path/moodcheck4.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
-		"loc": [117, 328],
-		"size": [104, 22],
-		"text": "Pissed",
-		"icon": "$path/rancorous.png",
-		"mood": 1
-	  },
+        "selected": "text-align:left; background-image:url($path/moodcheck4.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
+        "loc": [117, 328],
+        "size": [104, 22],
+        "text": "Pissed",
+        "icon": "$path/rancorous.png",
+        "mood": 1
+      },
       { "style": "text-align:left; border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier'", 
-		"selected": "text-align:left; background-image:url($path/moodcheck5.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
-		"loc": [12, 348],
-		"size": [209, 22],
-		"text": "ABSCOND",
-		"icon": "",
-		"mood": 2
-	  }
+        "selected": "text-align:left; background-image:url($path/moodcheck5.png); border:2px solid #000000; padding: 5px;color: rgba(0, 0, 0, 0%); font-family:'Courier';",
+        "loc": [12, 348],
+        "size": [209, 22],
+        "text": "ABSCOND",
+        "icon": "",
+        "mood": 2
+      }
   ]
  },
  "convo":
@@ -231,7 +231,7 @@
       "style": "background: white; border:2px solid #000000;margin-top:5px; margin-right:10px; margin-left:10px; font-size: 12px;font-family: 'Courier'"
   },
   "tabwindow" : {
-	  "style": "background-color:#f2f2f2;border:0px"
+      "style": "background-color:#f2f2f2;border:0px"
   },
   "tabs": {
       "style": "background-color: #f2f2f2; font-family: 'Courier';font:bold;font-size:12px;min-height:25px;",
@@ -244,12 +244,12 @@
       "ceasepester": "ceased pestering",
       "blocked": "blocked",
       "unblocked": "unblocked",
-	  "blockedmsg": "did not receive message from",
+      "blockedmsg": "did not receive message from",
       "openmemo": "opened memo on board",
       "joinmemo": "responded to memo",
       "closememo": "ceased responding to memo",
       "kickedmemo": "You have been banned from this memo!",
-	  "idle": "is now an idle chum!"
+      "idle": "is now an idle chum!"
   },
   "systemMsgColor": "#646464"
  },

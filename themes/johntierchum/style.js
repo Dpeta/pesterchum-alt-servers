@@ -15,7 +15,7 @@
   "minimize": { "image": "$path/m.png",
                 "loc": [370, 42]},
   "sounds": { "alertsound": "$path/alarm.wav",
-			  "ceasesound": "$path/cease.wav" },
+              "ceasesound": "$path/cease.wav" },
   "defaultwindow": { "style": "background: #9BC4F2; font-family:'Arial';font:bold;selection-background-color:#66A5EC; " },
   "chums": { "style": "border:2px solid rgba(0,0,0,0%); background-color: rgba(0,0,0,0%);color: black;font: bold;font-size:14px;font-family: 'Arial';selection-background-color:white; ",
              "size": [200, 180],
@@ -28,7 +28,7 @@
 
                  "offline": { "icon": "$path/offline.png", "color": "#646464"},
 
-			     
+                 
                  "pleasant": { "icon": "$path/pleasant.png", "color": "#FFFFFF" },
 
                  "distraught": { "icon": "$path/distraught.png", "color": "#FFFFFF" },
@@ -56,7 +56,7 @@
                  "devious": { "icon": "$path/devious.png", "color": "#E5E5E5" },
 
                  "sleek": { "icon": "$path/sleek.png", "color": "#E5E5E5" },
-			     
+                 
                  "detestful": { "icon": "$path/detestful.png", "color": "#E5E5E5" },
 
                  "mirthful": { "icon": "$path/mirthful.png", "color": "#E5E5E5" },
@@ -72,8 +72,8 @@
                  "protective": { "icon": "$path/protective.png", "color": "#000000" },
 
                  "blocked": { "icon": "$path/blocked.png", "color": "#000000" }
-			 }
-		   },
+             }
+           },
   "mychumhandle": { "label": { "text": "",
                                "loc": [0,0],
                                "style": "color: rgba(0,0,0,0);" },
@@ -104,125 +104,125 @@
            },
   "moodlabel": { "text": "",
                  "style": "font:bold;font-family:'Arial';color:#000000;"
-			   },
+               },
   "defaultmood": 5,
   "moods": [
       { "style": "text-align:left; background:rgba(0,0,0,0);border:2px solid rgba(0,0,0,0);color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;", 
-		"selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
-		"loc": [302, 133],
-		"size": [30, 30],
-	    "text": "",
-		"icon": "$path/chummy.png",
-		"mood": 0
-	  },
+        "selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
+        "loc": [302, 133],
+        "size": [30, 30],
+        "text": "",
+        "icon": "$path/chummy.png",
+        "mood": 0
+      },
       { "style": "text-align:left; background:rgba(0,0,0,0);border:2px solid rgba(0,0,0,0);color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;", 
-		"selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
-		"loc": [460, 432],
-		"size": [30, 30],
-	    "text": "",
-		"icon": "$path/rancorous.png",
-		"mood": 1
-	  },
+        "selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
+        "loc": [460, 432],
+        "size": [30, 30],
+        "text": "",
+        "icon": "$path/rancorous.png",
+        "mood": 1
+      },
       { "style": "text-align:left; background:rgba(0,0,0,0);border:2px solid rgba(0,0,0,0);color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;", 
-		"selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
-		"loc": [368, 162],
-		"size": [30, 30],
-	    "text": "",
-		"icon": "$path/bemused.png",
-		"mood": 22
-	  },
+        "selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
+        "loc": [368, 162],
+        "size": [30, 30],
+        "text": "",
+        "icon": "$path/bemused.png",
+        "mood": 22
+      },
       { "style": "text-align:left; background:rgba(0,0,0,0);border:2px solid rgba(0,0,0,0);color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;", 
-		"selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
-		"loc": [391, 192],
-		"size": [30, 30],
-	    "text": "",
-		"icon": "$path/pleasant.png",
-		"mood": 3
-	  },
+        "selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
+        "loc": [391, 192],
+        "size": [30, 30],
+        "text": "",
+        "icon": "$path/pleasant.png",
+        "mood": 3
+      },
       { "style": "text-align:left; background:rgba(0,0,0,0);border:2px solid rgba(0,0,0,0);color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;", 
-		"selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
-		"loc": [409, 223],
-		"size": [30, 30],
-	    "text": "",
-		"icon": "$path/distraught.png",
-		"mood": 4
-	  },
+        "selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
+        "loc": [409, 223],
+        "size": [30, 30],
+        "text": "",
+        "icon": "$path/distraught.png",
+        "mood": 4
+      },
       { "style": "text-align:left; background:rgba(0,0,0,0);border:2px solid rgba(0,0,0,0);color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;", 
-		"selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
-		"loc": [416, 260],
-		"size": [30, 30],
-	    "text": "",
-		"icon": "$path/pranky.png",
-		"mood": 5
-	  },
+        "selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
+        "loc": [416, 260],
+        "size": [30, 30],
+        "text": "",
+        "icon": "$path/pranky.png",
+        "mood": 5
+      },
       { "style": "text-align:left; background:rgba(0,0,0,0);border:2px solid rgba(0,0,0,0);color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;", 
-		"selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
-		"loc": [412, 289],
-		"size": [30, 30],
-	    "text": "",
-		"icon": "$path/smooth.png",
-		"mood": 6
-	  },
+        "selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
+        "loc": [412, 289],
+        "size": [30, 30],
+        "text": "",
+        "icon": "$path/smooth.png",
+        "mood": 6
+      },
 
       { "style": "text-align:left; background:rgba(0,0,0,0);border:2px solid rgba(0,0,0,0);color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;", 
-		"selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
-		"loc": [335, 145],
-		"size": [30, 30],
-	    "text": "",
-		"icon": "$path/amazed.png",
-		"mood": 20
-	  },
+        "selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
+        "loc": [335, 145],
+        "size": [30, 30],
+        "text": "",
+        "icon": "$path/amazed.png",
+        "mood": 20
+      },
       { "style": "text-align:left; background:rgba(0,0,0,0);border:2px solid rgba(0,0,0,0);color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;", 
-		"selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
-		"loc": [265, 122],
-		"size": [30, 30],
-	    "text": "",
-		"icon": "$path/insolent.png",
-		"mood": 21
-	  },
+        "selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
+        "loc": [265, 122],
+        "size": [30, 30],
+        "text": "",
+        "icon": "$path/insolent.png",
+        "mood": 21
+      },
       { "style": "text-align:left; background:rgba(0,0,0,0);border:2px solid rgba(0,0,0,0);color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;", 
-		"selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
-		"loc": [387, 309],
-		"size": [30, 30],
-	    "text": "",
-		"icon": "$path/protective.png",
-		"mood": 18
-	  },
+        "selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
+        "loc": [387, 309],
+        "size": [30, 30],
+        "text": "",
+        "icon": "$path/protective.png",
+        "mood": 18
+      },
       { "style": "text-align:left; background:rgba(0,0,0,0);border:2px solid rgba(0,0,0,0);color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;", 
-		"selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
-		"loc": [436, 404],
-		"size": [30, 30],
-		"text": "",
-		"icon": "$path/offline.png",
-		"mood": 2
-	  }
+        "selected": "text-align:left; background:rgba(0,0,0,0); border:2px solid rgba(0,0,0,0); color: #66A5EC; font-family:'Arial'; font:bold; padding-left:3px;",
+        "loc": [436, 404],
+        "size": [30, 30],
+        "text": "",
+        "icon": "$path/offline.png",
+        "mood": 2
+      }
   ]
 },
  "convo": {
      "style": "background-color: #4473a8;border:2px solid #626262; font-family: 'Arial';",
      "chumlabel": { "style": "margin-bottom: 21px;background: #66A5EC; color: #000000; border:0px; font-size: 14px;",
-					"text" : "~ Pranking $handle ~" },
-	 "textarea": {
-		 "style": "background: #BDDFFF;  font-size: 14px;font:bold; border:2px solid #5C5C5C;text-align:center; margin-right:10px; margin-left:10px;font-family: 'Arial'"
- 	 },
+                    "text" : "~ Pranking $handle ~" },
+     "textarea": {
+         "style": "background: #BDDFFF;  font-size: 14px;font:bold; border:2px solid #5C5C5C;text-align:center; margin-right:10px; margin-left:10px;font-family: 'Arial'"
+     },
   "input": { "style": "background: #99c2f0; border:2px solid #626262;margin-top:5px; margin-right:10px; margin-left:10px; font-size: 12px;" },
-	 "tabwindow" : {
-		 "style": "background: #6277bc; font-family: 'Arial'"
-	 },
-	 "tabs": {
-		 "style": "border: 2px solid #D4DEFF; background: #6277bc; color: #FFFFFF;",
-		 "selectedstyle": "border: 3px solid #D4DEFF; background: #7C9CD2; color: #76ADFF;",
-		 "newmsgcolor": "#730F0F"
-	 },
-	 "scrollbar": null
+     "tabwindow" : {
+         "style": "background: #6277bc; font-family: 'Arial'"
+     },
+     "tabs": {
+         "style": "border: 2px solid #D4DEFF; background: #6277bc; color: #FFFFFF;",
+         "selectedstyle": "border: 3px solid #D4DEFF; background: #7C9CD2; color: #76ADFF;",
+         "newmsgcolor": "#730F0F"
+     },
+     "scrollbar": null
  },
  "memos":
  { "size": [600,425],
    "style": "background-color: #0F731C;border:2px solid #626262; font-family: 'Arial';",
    "label": { "style": "margin-bottom: 21px;background: #AFBAEE; color: #5C5C5C; border:0px; font-size: 14px;"
-			},
+            },
    "textarea": {
-	   "style": "background: #DFEFFF;  font-size: 14px;font:bold; border:2px solid #5C5C5C;text-align:center; margin-right:10px; margin-left:10px;font-family: 'Arial'"
+       "style": "background: #DFEFFF;  font-size: 14px;font:bold; border:2px solid #5C5C5C;text-align:center; margin-right:10px; margin-left:10px;font-family: 'Arial'"
    },
    "userlist": { "style": "border:2px solid #000079; background: #AFBAEE;font: bold;font-family: 'Courier';selection-background-color:#646464; font-size: 12px;  margin-left:0px; margin-right:10px;"
                },

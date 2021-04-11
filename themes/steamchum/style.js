@@ -11,7 +11,7 @@
              "disabled": "color: grey",
              "loc": [9,10]
            },
-	"menubar": { "style": "font-family: 'arial';  font-size: 14px; color: #000000;" },
+    "menubar": { "style": "font-family: 'arial';  font-size: 14px; color: #000000;" },
    "menus": {"client": {"_name": "            ",
                        "options": "Options",
                        "memos": "Community",
@@ -24,7 +24,7 @@
                        "reconnect": "Reconnect",
                        "idle": "Idle",
                        "exit": "Log Off",
-					   "console": "Console"},
+                       "console": "Console"},
             "profile": {"_name": "           ",
                         "switch": "Switch",
                         "color": "Color",
@@ -37,7 +37,7 @@
                       "calsprite": "CalSprite",
                       "chanserv": "ChanServ",
                       "nickserv": "NickServ",
-					  "reportbug": "Report Bug" },
+                      "reportbug": "Report Bug" },
             "rclickchumlist": {"pester": "Message",
                                "removechum": "Remove",
                                "report": "Report",
@@ -54,16 +54,16 @@
                                "voiceuser": "Give Voice",
                                "quirkkill": "Kill Quirk",
                                "quirksoff": "Quirks Off",
-							   "ooc": "OOC",
+                               "ooc": "OOC",
                                "invitechum": "Invite",
                                "memosetting": "Memo Settings",
                                "memonoquirk": "Disable Quirks",
                                "memohidden": "Hidden",
                                "memoinvite": "Invite Only",
                                "memomute": "Mute Memo",
-							   "beeponmessage": "Beep on Message",
-							   "flashonmessage": "Flash on Message",
-							   "mutenotifications": "Mute Notifications" 
+                               "beeponmessage": "Beep on Message",
+                               "flashonmessage": "Flash on Message",
+                               "mutenotifications": "Mute Notifications" 
                               }
            },
   "close": { "image": "$path/m.png",
@@ -71,14 +71,14 @@
   "minimize": { "image": "$path/m.png",
                 "loc": [262, 9]},
   "chums": { "style": "background: #151515 url($path/chumbg.png) repeat-x top left; background-attachment: fixed;border:0px solid dicks;font-size:14px;font-family: 'arial'; color: #e5e2df",
-				
-				
-				"loc": [12, 110],
-				"size": [278, 339],
-				
-				
+                
+                
+                "loc": [12, 110],
+                "size": [278, 339],
+                
+                
 
-				"moods": {
+                "moods": {
 
                  "chummy": { "icon": "$path/chummy.png", "color": "#4AC925" },
 
@@ -131,9 +131,9 @@
 
                  "blocked": { "icon": "$path/blocked.png", "color": "red" }
                          }
-						 
+                         
            },
-		   
+           
   "trollslum": {
       "style": "background: #363636; border:1px solid #4d4b48; font-family: 'Arial'",
       "size": [195, 200],
@@ -141,8 +141,8 @@
                  "style": "color: #bebdb7; font-family: 'Arial';border:0px;" },
       "chumroll": {"style": "border:1px solid #4d4b48; background-color: #363636;color: bebdb7; font-family: 'Arial';selection-background-color:#314159; " }
   },
-		   
-	"mychumhandle": { 
+           
+    "mychumhandle": { 
             "handle": { "loc": [40,507],
                     "size": [233, 18],
                     "style": "background: transparent; color: #a8a8a8; font-family:'arial'; text-align:left;"
@@ -152,9 +152,9 @@
                                      "text": "C" },
                     "currentMood": [21, 508]
                   },
-	"defaultwindow": { "style": "background: #363636; color: #e5e2df; font-family:arial;selection-background-color:#314159; "
+    "defaultwindow": { "style": "background: #363636; color: #e5e2df; font-family:arial;selection-background-color:#314159; "
                    },
-				  
+                  
   "addchum":  { "style": "background: transparent;",
                 "loc": [19,462],
                 "size": [102, 17]
@@ -217,7 +217,7 @@
                 "icon": "$path/smooth.png",
                 "mood": 6
           },
-		  
+          
       { "style": "text-align:left; background:#363636; color: #d1cfcd; font-family:'arial';  padding-left:3px;",
                 "selected": "text-align:left; background: #314159; color: #d1cfcd; font-family:'arial';  padding-left:3px;",
                 "loc": [110, 581],
@@ -225,17 +225,17 @@
             "text": "Relaxed",
                 "icon": "$path/relaxed.png",
                 "mood": 8
-          },		  
+          },          
 
       { "style": "text-align:left; background:#363636; color: #d1cfcd; font-family:'arial';  padding-left:3px;",
                 "selected": "text-align:left; background: #314159; color: #d1cfcd; font-family:'arial';  padding-left:3px;",
                 "loc": [190, 537],
                 "size": [90, 18],
-				"text": "Insolent",
+                "text": "Insolent",
                 "icon": "$path/insolent.png",
                 "mood": 21
           },
-		  
+          
 
       { "style": "text-align:left; background:#363636; color: #d1cfcd; font-family:'arial';  padding-left:3px;",
                 "selected": "text-align:left; background: #314159; color: #d1cfcd; font-family:'arial';  padding-left:3px;",
@@ -244,8 +244,8 @@
             "text": "Devious",
                 "icon": "$path/devious.png",
                 "mood": 10
-          },		  
-		  
+          },          
+          
       { "style": "text-align:left; background:black;color: #6c757c; font-family:'arial'; padding-left:3px;",
                 "selected": "text-align:left; background: #314159; color: #d1cfcd; font-family:'arial';  padding-left:3px;",
                 "loc": [190, 581],
@@ -283,7 +283,7 @@
       "selectedstyle": "background: #1b1a19 url($path/tabbg.png) repeat-x top left; color: #f7fffd; padding-bottom: 10px",
        "newmsgcolor": "#FF724C",
        "tabstyle": 0
-	   
+       
   },
   "text": {
       "beganpester": "began messaging",
@@ -306,7 +306,7 @@
       "selectedstyle": "",
        "newmsgcolor": "#FF724C",
        "tabstyle": 0
-	   
+       
   },
     "tabwindow" : {
       "style": "background: #383635; font-family: Arial;"

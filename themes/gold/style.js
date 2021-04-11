@@ -30,7 +30,7 @@
                        "reconnect": "Reconnect",
                        "idle": "Idle",
                        "exit": "Exit",
-					   "console": "Console"},
+                       "console": "Console"},
             "profile": {"_name": "Profile",
                         "switch": "Switch",
                         "color": "Color",
@@ -43,7 +43,7 @@
                       "calsprite": "CalSprite",
                       "chanserv": "ChanServ",
                       "nickserv": "NickServ",
-					  "reportbug": "Report Bug"},
+                      "reportbug": "Report Bug"},
             "rclickchumlist": {"pester": "Pester",
                                "removechum": "Remove Chum",
                                "report": "Report",
@@ -66,9 +66,9 @@
                                "memohidden": "Hidden",
                                "memoinvite": "Invite-Only",
                                "memomute": "Mute",
-							   "beeponmessage": "Beep on Message",
-							   "flashonmessage": "Flash on Message",
-							   "mutenotifications": "Mute Notifications" 
+                               "beeponmessage": "Beep on Message",
+                               "flashonmessage": "Flash on Message",
+                               "mutenotifications": "Mute Notifications" 
                               }
            },
   "chums": { "style": "border:0px; background-image:url($path/chumbg.png); background-color: rgb(110,110,110); background-repeat: no-repeat; color: white; font-family: 'Arial';selection-background-color:#646464; font-size:14px; ",

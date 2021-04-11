@@ -9,8 +9,8 @@ except NameError:
 if os.path.dirname(sys.argv[0]):
     os.chdir(os.path.dirname(sys.argv[0]))
 
-print("Usage: pesterchum.py [OPTIONS]\n")
-print("Use -h/--help to see the available options.")
+print("Usage: pesterchum.py [OPTIONS]")
+print("Use -h/--help to see the available options.\n")
 #print("sys.argv:    " + str(sys.argv[1:]) + '\n')
 
 # Help
@@ -87,7 +87,7 @@ try:
     from pnc.attrdict import AttrDict
 except ImportError:
     # Fall back on the old location - just in case
-    logging.warning("Couldn't load attrdict from new loc; falling back")
+    #logging.warning("Couldn't load attrdict from new loc; falling back")
     from pnc.dep.attrdict import AttrDict
 
 try:
@@ -1316,9 +1316,10 @@ class PesterWindow(MovingWindow):
         self.aboutAction.triggered.connect(self.aboutPesterchum)
 
         # Because I can't expect all themes to have this included.
-        if self.theme.has_key("main/menus/help/reportbug"):
+        #if self.theme.has_key("main/menus/help/reportbug"):
+        try:
             self.reportBugAction = QtWidgets.QAction(self.theme["main/menus/help/reportbug"], self)
-        else:
+        except:
             self.reportBugAction = QtWidgets.QAction("REPORT BUG", self)
         
         self.reportBugAction.triggered.connect(self.reportBug)
@@ -1357,8 +1358,7 @@ class PesterWindow(MovingWindow):
 
         self.moodsLabel = QtWidgets.QLabel(self.theme["main/moodlabel/text"], self)
         self.moodsLabel.setObjectName("moodlabel")
-        # Padding so it fits. I, don't know how to fix this properly :/
-        self.mychumhandleLabel = QtWidgets.QLabel(self.theme["main/mychumhandle/label/text"] + "     ", self)
+        self.mychumhandleLabel = QtWidgets.QLabel(self.theme["main/mychumhandle/label/text"], self)
         self.mychumhandleLabel.setObjectName("myhandlelabel")
         self.mychumhandle = QtWidgets.QPushButton(self.profile().handle, self)
         self.mychumhandle.setFlat(True)
@@ -1411,6 +1411,9 @@ class PesterWindow(MovingWindow):
         self.pingtimer.timeout.connect(self.checkPing)
         self.lastping = int(time())
         self.pingtimer.start(1000*90)
+
+        self.mychumhandleLabel.adjustSize() # Required so "CHUMHANDLE:" regardless of style-sheet.
+        self.moodsLabel.adjustSize()        # Required so "MOOD:" regardless of style-sheet.
 
         self.chooseServerAskedToReset = False
         self.chooseServer()
@@ -1892,7 +1895,8 @@ class PesterWindow(MovingWindow):
         else:
             self.mychumcolor.setText("")
 
-        
+        self.mychumhandleLabel.adjustSize() # Required so "CHUMHANDLE:" regardless of style-sheet.
+        self.moodsLabel.adjustSize()        # Required so "MOOD:" regardless of style-sheet.
 
         if _CONSOLE:
             if self.console.window:

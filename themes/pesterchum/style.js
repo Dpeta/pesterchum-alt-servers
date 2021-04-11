@@ -31,7 +31,7 @@
                        "reconnect": "RECONNECT",
                        "idle": "IDLE",
                        "exit": "EXIT",
-					   "console": "CONSOLE"},
+                       "console": "CONSOLE"},
             "profile": {"_name": "PROFILE",
                         "switch": "SWITCH",
                         "color": "COLOR",
@@ -67,9 +67,9 @@
                                "memohidden": "HIDDEN",
                                "memoinvite": "INVITE-ONLY",
                                "memomute": "MUTE",
-							   "beeponmessage": "BEEP ON MESSAGE",
-							   "flashonmessage": "FLASH ON MESSAGE",
-							   "mutenotifications": "MUTE NOTIFICATIONS"
+                               "beeponmessage": "BEEP ON MESSAGE",
+                               "flashonmessage": "FLASH ON MESSAGE",
+                               "mutenotifications": "MUTE NOTIFICATIONS"
                               }
            },
   "chums": { "style": "border:2px solid yellow; background-color: black;color: white;font: bold;font-family: 'Courier';selection-background-color:#646464; ",

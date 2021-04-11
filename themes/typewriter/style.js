@@ -30,7 +30,7 @@
                        "idle": "Idle",
                        "reconnect": "Reconnect",
                        "exit": "Cease",
-					   "console": "Console"},
+                       "console": "Console"},
             "profile": {"_name": "Ink",
                         "switch": "Alias",
                         "color": "Ink Color",
@@ -43,7 +43,7 @@
                       "calsprite": "CalSprite",
                       "chanserv": "ChanServ",
                       "nickserv": "NickServ",
-					  "reportbug": "Report Bug" },
+                      "reportbug": "Report Bug" },
             "rclickchumlist": {"pester": "Converse",
                                "removechum": "Erase User",
                                "report": "Report User",
@@ -66,9 +66,9 @@
                                "memohidden": "Hidden",
                                "memoinvite": "Invite-Only",
                                "memomute": "Mute",
-							   "beeponmessage": "Beep on Message",
-							   "flashonmessage": "Flash on Message",
-							   "mutenotifications": "Mute Notifications" 
+                               "beeponmessage": "Beep on Message",
+                               "flashonmessage": "Flash on Message",
+                               "mutenotifications": "Mute Notifications" 
                               }
            },
   "chums": { "style": "border:0px; background-color: white; font: bold;font-family: 'Courier';selection-background-color: black; ",
