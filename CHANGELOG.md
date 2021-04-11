@@ -1,14 +1,15 @@
 # Changelog
 (This document uses YYYY-MM-DD as per ISO 8601)
 
-## [v2.1.0] - 2021-4-4
+## [v2.1.0] - 2021-4-11
 
 ### Added
 - Server prompt + interface for adding & removing servers.
-- Custom text for numerous themes. (Mostly just made things consistent, for example, "REPORT BUG" to "Report Bug" for Trollian.)
+- Consistently capitalized text for all themes, for example, "REPORT BUG" to "Report Bug" for Trollian.
 - Added theme support for "Beep on Message", "Flash on Message", "Mute Notifications".
 - "Usage:" for pesterchum.py when running from the command line.
 - Made logging level configurable via command line arguments.
+- Added -h/--help.
 
 ### Fixed
 - Fixed current mood icon not showing up.
@@ -16,13 +17,14 @@
 - Fixed "CONSOLE" & "REPORT BUG" menu options not being updated on theme change.
 - Incorrect hex for color in MSChum theme.
 - Fixed \_datadir not being used for certain json files.
-- Fixed "Specified color without alpha value but alpha given: 'rgb 0,0,0,0'" in johntierchum
-- Fixed "RGB parameters out of range" in MSChum
+- Fixed "Specified color without alpha value but alpha given: 'rgb 0,0,0,0'" in johntierchum.
+- Fixed "RGB parameters out of range" in MSChum.
 - Fixed nothing.png not being present in battlefield theme.
 - Fixed "Report" string not being updated in convo window when changing theme.
 - Fixed pesterChumAction's text not being updated in memo windows when changing theme.
 - Fixed incorrect sRGB profile in paperchum.
-- Fixed Sound slider in settings not working with pygame.
+- Fixed sound slider in settings not working with pygame.
+- Fixed MOOD & CHUMHANDLE adjusting to style-sheet.
 
 ### Changed
 - Made it so handle and ident are passed to ``_max_msg_len``, so, hopefully the text cutoff will be *slightly* less restrictive.

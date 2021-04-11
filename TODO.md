@@ -4,7 +4,6 @@
  - Memoserv support.
 
 ## FIX
- - Audio mixer slider in options doesn't always work.
  - Any remaining unicode-related crashes.
  - Exclude unnecessary imports for builds.
  - Mask & target not being passed to ``_max_msg_len``.

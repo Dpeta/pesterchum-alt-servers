@@ -3277,7 +3277,7 @@ class PesterWindow(MovingWindow):
             self.chooseRemoveServerWidged.show()
             self.chooseRemoveServerWidged.setFocus()
         else:
-            logging.info(self.serverBox.currentText() + " chosen")
+            logging.info(self.serverBox.currentText() + " chosen.")
 
             with open(_datadir + "serverlist.json", "r") as server_file:
                 read_file = server_file.read()
