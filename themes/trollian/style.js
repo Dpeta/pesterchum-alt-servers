@@ -142,7 +142,8 @@
                                 "size": [0,0] },
                     "colorswatch": { "loc": [0,0],
                                      "size": [0,0],
-                                     "text": "" }
+                                     "text": "" },
+                    "currentMood": []
                   },
   "defaultwindow": { "style": "background: #c2c2c2; font-family:'Arial';font:bold;selection-background-color:#545454; "
                    },
