@@ -2,6 +2,7 @@
 
 ## ADD
  - Memoserv support.
+ - (Re-add) update checking.
 
 ## FIX
  - Any remaining unicode-related crashes.

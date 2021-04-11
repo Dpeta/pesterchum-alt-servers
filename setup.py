@@ -21,7 +21,6 @@ includefiles = ["quirks",
                 "README.md",
                 "LICENSE",
                 "CHANGELOG.md",
-                "server.json",
                 "PCskins.png",
                 "Pesterchum.png"]
 build_exe_options = {
