@@ -15,3 +15,5 @@ quirks/*
 Pesterchum.dmg
 *.md.backup
 subscript.txt
+package-lock.json
+package.json

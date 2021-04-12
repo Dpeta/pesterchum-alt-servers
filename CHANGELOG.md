@@ -1,6 +1,12 @@
 # Changelog
 (This document uses YYYY-MM-DD as per ISO 8601)
 
+## [v2.1.2]
+
+### Changed
+- Made file capitalization consistent for a few files. (.PNG --> .png), because some file systems are queasy on that. (See https://superuser.com/questions/881804/case-sensitive-file-extensions-in-windows-and-linux) 
+
+
 ## [v2.1.1] - 2021-4-12
 
 ### Fixed
