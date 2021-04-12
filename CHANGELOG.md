@@ -33,7 +33,7 @@
 - Fixed pesterChumAction's text not being updated in memo windows when changing theme.
 - Fixed incorrect sRGB profile in paperchum.
 - Fixed sound slider in settings not working with pygame.
-- Fixed MOOD & CHUMHANDLE adjusting to style-sheet.
+- Fixed MOOD & CHUMHANDLE not adjusting to style-sheet.
 
 ### Changed
 - Made it so handle and ident are passed to ``_max_msg_len``, so, hopefully the text cutoff will be *slightly* less restrictive.
