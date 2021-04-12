@@ -158,7 +158,7 @@
      },
   "input": { "style": "background: white; border:2px solid #ffa4a4;margin-top:5px; margin-right:10px; margin-left:10px; font-size: 12px;" },
      "tabwindow" : {
-         "style": ""
+         "style": "background-color: #e5000f;border:2px solid #780000;"
      },
   "text": {
       "beganpester": "began trolling",

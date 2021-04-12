@@ -595,7 +595,7 @@ class PesterConvo(QtWidgets.QFrame):
         self.mainwindow = mainwindow
         theme = self.mainwindow.theme
         self.resize(*theme["convo/size"])
-        self.setStyleSheet("QFrame#%s { %s }" % (chum.handle, theme["convo/style"]))
+        self.setStyleSheet("QtWidgets.QFrame#%s { %s }" % (chum.handle, theme["convo/style"]))
         self.setWindowIcon(self.icon())
         self.setWindowTitle(self.title())
 
@@ -856,7 +856,7 @@ class PesterConvo(QtWidgets.QFrame):
         self.chumopen = o
     def changeTheme(self, theme):
         self.resize(*theme["convo/size"])
-        self.setStyleSheet("QFrame#%s { %s }" % (self.chum.handle, theme["convo/style"]))
+        self.setStyleSheet("QtWidgets.QFrame#%s { %s }" % (self.chum.handle, theme["convo/style"]))
 
         margins = theme["convo/margins"]
         self.layout.setContentsMargins(margins["left"], margins["top"],

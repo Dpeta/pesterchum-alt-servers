@@ -1,6 +1,15 @@
 # Changelog
 (This document uses YYYY-MM-DD as per ISO 8601)
 
+## [v2.1.1] - 2021-4-12
+
+# Fixed
+- Fixed theme not getting applied correctly to memo.
+- Fixed sRGB profile in steamchum.
+
+## Changed
+- convo/tabwindow on trollian seems to be used for the general background color, so, I changed it to a value. I'm not use if this was intentional.
+
 ## [v2.1.0] - 2021-4-11
 
 ### Added
