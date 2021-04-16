@@ -196,6 +196,7 @@ class PesterIRC(QtCore.QThread):
             self.setConnectionBroken()
     @QtCore.pyqtSlot()
     def updateColor(self):
+        #logging.debug("irc updateColor (outgoing)")
         me = self.mainwindow.profile()
         for h in list(self.mainwindow.convos.keys()):
             try:
@@ -411,8 +412,10 @@ class PesterHandler(DefaultCommandHandler):
                 colors = msg[7:].split(",")
                 try:
                     colors = [int(d) for d in colors]
-                except ValueError:
+                except ValueError as e:
+                    logging.warning(e)
                     colors = [0,0,0]
+                logging.debug("colors: " + str(colors))
                 color = QtGui.QColor(*colors)
                 self.parent.colorUpdated.emit(handle, color)
             else:

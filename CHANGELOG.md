@@ -1,13 +1,28 @@
 # Changelog
 (This document uses YYYY-MM-DD as per ISO 8601)
 
+## [v2.1.2] - 2021-4-16
+
+### Added
+- Added HOSTSERV and BOTSERV to BOTNAMES.
+
+### Fixed
+- Colors in direct messages sometimes not working.
+- Handles sometimes not showing up in chumroll or trollslum.
+
+### Removed
+- Separate handling for canon handles on chumroll because it was buggy and unneeded.
+
+### Changed
+- setup.py build description to just "Pesterchum"
+
 ## [v2.1.1] - 2021-4-12
 
-# Fixed
+### Fixed
 - Fixed theme not getting applied correctly to memo.
 - Fixed sRGB profile in steamchum.
 
-## Changed
+### Changed
 - convo/tabwindow on trollian seems to be used for the general background color, so, I changed it to a value. I'm not use if this was intentional.
 
 ## [v2.1.0] - 2021-4-11
