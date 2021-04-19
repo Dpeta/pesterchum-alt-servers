@@ -162,9 +162,9 @@ class PesterIRC(QtCore.QThread):
     def startConvo(self, handle, initiated):
         h = str(handle)
         try:
+            helpers.msg(self.cli, h, "COLOR >%s" % (self.mainwindow.profile().colorcmd()))
             if initiated:
                 helpers.msg(self.cli, h, "PESTERCHUM:BEGIN")
-            helpers.msg(self.cli, h, "COLOR >%s" % (self.mainwindow.profile().colorcmd()))
         except socket.error:
             self.setConnectionBroken()
     @QtCore.pyqtSlot(QString)
