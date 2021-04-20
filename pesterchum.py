@@ -1482,13 +1482,29 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot()
     def closeToTray(self):
+        # I'm just gonna include a toast here to make sure people don't get confused. :'3
+        t = self.tm.Toast("Notice:", "Pesterchum has been minimized to your tray. \
+        \n(This behavior is configurable in settings.)")
+        t.show()
         self.hide()
         self.closeToTraySignal.emit()
     def closeEvent(self, event):
-        self.closeConversations()
+        # This gets called directly if Pesterchum is closed from the taskbar, annoyingly enough.
         if hasattr(self, 'trollslum') and self.trollslum:
             self.trollslum.close()
-        self.closeSignal.emit()
+        try:
+            setting = self.config.closeAction()
+        except:
+            logging.exception('')
+            setting = 0
+        if setting == 0: # minimize to taskbar
+            self.showMinimized()
+        elif setting == 1: # minimize to tray
+            self.closeToTray()
+        elif setting == 2: # quit
+            self.closeConversations()
+            self.quit() # Shut down IRC & Pesterchum fully.
+            self.closeSignal.emit() # <-- A close signal here on it's own shuts down QT but not the Python and the IRC connection :(
         event.accept()
     def newMessage(self, handle, msg):
         if handle in self.config.getBlocklist():
