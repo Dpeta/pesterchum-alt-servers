@@ -212,15 +212,10 @@ class PesterLogViewer(QtWidgets.QDialog):
             layout_search.addWidget(self.search)
             layout_search.addWidget(self.find)
 
-            self.qdb = QtWidgets.QPushButton("Pesterchum QDB", self)
-            self.qdb.setFixedWidth(260)
-            self.qdb.clicked.connect(self.openQDB)
             self.ok = QtWidgets.QPushButton("CLOSE", self)
             self.ok.setFixedWidth(80)
             self.ok.clicked.connect(self.reject)
             layout_ok = QtWidgets.QHBoxLayout()
-            # Website is offline so there's no point.
-            #layout_ok.addWidget(self.qdb)
             layout_ok.addWidget(self.ok)
             layout_ok.setAlignment(self.ok, QtCore.Qt.AlignRight)
 
@@ -242,10 +237,6 @@ class PesterLogViewer(QtWidgets.QDialog):
     def loadSelectedLog(self):
         if len(self.tree.currentItem().text(0)) > len("September 2011"):
             self.loadLog(self.timeToFile(self.tree.currentItem().text(0)))
-
-    @QtCore.pyqtSlot()
-    def openQDB(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://qdb.pesterchum.net/index.php?p=browse", QtCore.QUrl.TolerantMode))
 
     def loadLog(self, fname):
         fp = codecs.open("%s/%s/%s/%s/%s" % (self.logpath, self.handle, self.chum, self.format, fname), encoding='utf-8', mode='r')
@@ -299,11 +290,6 @@ class PesterLogText(PesterText):
 
     def contextMenuEvent(self, event):
         textMenu = self.createStandardContextMenu()
-        #if self.textSelected:
-        #    self.submitLogAction = QtGui.QAction("Submit to Pesterchum QDB", self)
-        #    self.connect(self.submitLogAction, QtCore.SIGNAL('triggered()'),
-        #                 self, QtCore.SLOT('submitLog()'))
-        #    textMenu.addAction(self.submitLogAction)
         a = textMenu.actions()
         a[0].setText("Copy Plain Text")
         a[0].setShortcut(self.tr("Ctrl+C"))

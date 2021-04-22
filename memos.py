@@ -355,8 +355,6 @@ class MemoText(PesterText):
 
     def changeTheme(self, theme):
         self.initTheme(theme)
-    def submitLogTitle(self):
-        return "[%s]" % (self.parent().title())
 
 class MemoInput(PesterInput):
     stylesheet_path = "memos/input/style"

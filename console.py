@@ -471,13 +471,7 @@ class ConsoleText(QtWidgets.QTextEdit):
             self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
 
     def contextMenuEvent(self, event):
-        # This is almost certainly no longer necessary.
         textMenu = self.createStandardContextMenu()
-        #~if self.textSelected:
-        #~    self.submitLogAction = QtGui.QAction("Submit to Pesterchum QDB", self)
-        #~    self.connect(self.submitLogAction, QtCore.SIGNAL('triggered()'),
-        #~                 self, QtCore.SLOT('submitLog()'))
-        #~    textMenu.addAction(self.submitLogAction)
         textMenu.exec_(event.globalPos())
 
 

@@ -18,15 +18,14 @@
 import logging
 import socket
 import sys
-import re
-import string
+#import re
+#import string
 import time
-import threading
+#import threading
 import os
 import traceback
-import ssl
 import ostools
-
+import ssl
 _datadir = ostools.getDataDir()
 
 from oyoyo.parse import *

@@ -1,7 +1,6 @@
 from string import Template
 import re
 import platform
-import http.client, urllib.request, urllib.parse, urllib.error
 from time import strftime
 from copy import copy
 from datetime import datetime, timedelta
@@ -515,50 +514,7 @@ class PesterText(QtWidgets.QTextEdit):
 
     def contextMenuEvent(self, event):
         textMenu = self.createStandardContextMenu()
-        #if self.textSelected:
-        #    self.submitLogAction = QtGui.QAction("Submit to Pesterchum QDB", self)
-        #    self.connect(self.submitLogAction, QtCore.SIGNAL('triggered()'),
-        #                 self, QtCore.SLOT('submitLog()'))
-        #    textMenu.addAction(self.submitLogAction)
         textMenu.exec_(event.globalPos())
-
-    def submitLogTitle(self):
-        return "[%s -> %s]" % (self.parent().mainwindow.profile().handle,
-                               self.parent().chum.handle)
-
-    @QtCore.pyqtSlot()
-    def submitLog(self):
-        mimedata = self.createMimeDataFromSelection()
-        htmldata = img2smiley(mimedata.data("text/html"))
-        textdoc = QtGui.QTextDocument()
-        textdoc.setHtml(htmldata)
-        logdata = "%s\n%s" % (self.submitLogTitle(), textdoc.toPlainText())
-        self.sending = QtWidgets.QDialog(self)
-        layout = QtWidgets.QVBoxLayout()
-        self.sending.sendinglabel = QtWidgets.QLabel("S3ND1NG...", self.sending)
-        cancelbutton = QtWidgets.QPushButton("OK", self.sending)
-        cancelbutton.clicked.connect(self.sending.close)
-        layout.addWidget(self.sending.sendinglabel)
-        layout.addWidget(cancelbutton)
-        self.sending.setLayout(layout)
-        self.sending.show()
-        params = urllib.parse.urlencode({'quote': logdata, 'do': "add"})
-        headers = {"Content-type": "application/x-www-form-urlencoded",
-                   "Accept": "text/plain"}
-        try:
-            pass
-            hconn = http.client.HTTPConnection('qdb.pesterchum.net', 80,
-                                           timeout=15)
-            hconn.request("POST", "/index.php", params, headers)
-            response = hconn.getresponse()
-            if response.status == 200:
-                self.sending.sendinglabel.setText("SUCC3SS!")
-            else:
-                self.sending.sendinglabel.setText("F41L3D: %s %s" % (response.status, response.reason))
-            hconn.close()
-        except Exception as e:
-            self.sending.sendinglabel.setText("F41L3D: %s" % (e))
-        del self.sending
 
 class PesterInput(QtWidgets.QLineEdit):
     stylesheet_path = "convo/input/style"

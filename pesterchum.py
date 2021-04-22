@@ -1,5 +1,9 @@
-# pesterchum
-import os, shutil, sys, getopt
+# Pesterchum :3c
+
+import sys
+import os
+import shutil
+import getopt
 try:
     QString = unicode
 except NameError:
@@ -8,11 +12,8 @@ except NameError:
 
 if os.path.dirname(sys.argv[0]):
     os.chdir(os.path.dirname(sys.argv[0]))
-
 print("Usage: pesterchum.py [OPTIONS]")
 print("Use -h/--help to see the available options.\n")
-#print("sys.argv:    " + str(sys.argv[1:]) + '\n')
-
 # Help
 if ('--help' in sys.argv[1:]) or ('-h' in sys.argv[1:]):
     print("Possible arguments:")
@@ -26,9 +27,7 @@ if ('--help' in sys.argv[1:]) or ('-h' in sys.argv[1:]):
                      " --no-honk\n    Disable honking.\n"
     print(help_arguments)
     sys.exit()
-
 import logging
-
 if ('--logging' in sys.argv[1:]) or ('-l' in sys.argv[1:]) & (False == ('--logging' in sys.argv[1:]) and ('-l' in sys.argv[1:])):
     try:
         # If both are specified, this does not run.
@@ -78,7 +77,7 @@ from datetime import *
 import random
 import re
 from time import time
-import threading, queue
+import queue#, threading
 try:
     import json
 except:
@@ -89,7 +88,6 @@ except ImportError:
     # Fall back on the old location - just in case
     #logging.warning("Couldn't load attrdict from new loc; falling back")
     from pnc.dep.attrdict import AttrDict
-
 try:
     import console
 except ImportError:
