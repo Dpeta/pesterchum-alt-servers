@@ -27,7 +27,6 @@ build_exe_options = {
     "includes": [""],
 ##    "includes": ["PyQt5.QtCore",
 ##                 "PyQt5.QtGui",
-##                 "PyQt5.QtMultimedia",
 ##                 "PyQt5.QtWidgets",
 ##                 "pygame",
 ##                 "feedparser",

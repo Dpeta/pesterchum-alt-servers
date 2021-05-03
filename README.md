@@ -55,6 +55,11 @@ You can install them with Python's pip or your package manager if you're on linu
 [python-magic]: https://pypi.org/project/python-magic/
 [ostools]: https://pypi.org/project/ostools/
 [requests]: https://pypi.org/project/requests/
+
+### PYINSTALLER BUILDING
+My preferred method of generating binary releases.
+``python pyinstaller.py``
+
 ### CX_FREEZE BUILDING
 
 #### Windows:
@@ -64,10 +69,6 @@ or
 
 #### Mac:
 ``python setup.py build``
-
-### PYINSTALLER BUILDING
-#### Linux (might also work on other platforms!!): 
-``pyinstaller pesterchum.spec``
 
 ## SMILIES
 Just for easy reference. :3 (Taken from docs/README-karxi.mkdn)

@@ -1,0 +1,52 @@
+# -*- mode: python ; coding: utf-8 -*-
+
+block_cipher = None
+
+added_binaries = [
+         ( "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86\\api-ms-win-core-console-l1-1-0.dll", '.' ),
+         #( "api-ms-win-core-file-l1-1-0.dll", '.' ),
+         ]
+
+added_files = [
+         ( "quirks", 'quirks' ),
+         ( "smilies", 'smilies' ),
+         ( "themes", 'themes' ),
+         ( "docs", 'docs' ),
+         ( "README.md", '.' ),
+         ( "LICENSE", '.' ),
+         ( "CHANGELOG.md", '.' ),
+         ( "PCskins.png", '.' ),
+         ( "Pesterchum.png", '.' )
+         ]
+
+a = Analysis(['pesterchum.py'],
+             #binaries=added_binaries,
+             datas=added_files,
+             hiddenimports=[],
+             hookspath=[],
+             runtime_hooks=[],
+             excludes=[],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher,
+             noarchive=False)
+pyz = PYZ(a.pure, a.zipped_data,
+             cipher=block_cipher)
+exe = EXE(pyz,
+          a.scripts,
+          icon='pesterchum.ico',
+          exclude_binaries=True,
+          name='Pesterchum',
+          debug=False,
+          bootloader_ignore_signals=False,
+          strip=False,
+          upx=True,
+          console=False )
+coll = COLLECT(exe,
+               #a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=False,
+               upx=True,
+               upx_exclude=['qwindows.dll', 'Qt5Multimedia.dll', 'Qt5Gui.dll', 'Qt5Core.dll', 'vcruntime140.dll', 'MSVCP140.dll', 'Qt5Multimedia.dll'.lower(), 'Qt5Gui.dll'.lower(), 'Qt5Core.dll'.lower(), 'vcruntime140.dll'.lower(), 'MSVCP140.dll'.lower()], # UPX corrupts DLLs sometimes </3
+               name='Pesterchum')

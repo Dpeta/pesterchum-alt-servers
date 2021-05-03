@@ -103,7 +103,7 @@ else:
 reqmissing = []
 optmissing = []
 try:
-    from PyQt5 import QtCore, QtGui, QtMultimedia, QtWidgets
+    from PyQt5 import QtCore, QtGui, QtWidgets
 except ImportError as e:
     module = str(e)
     if module.startswith("No module named ") or \
@@ -1933,20 +1933,9 @@ class PesterWindow(MovingWindow):
             if (pygame and pygame.mixer):
                 # We have pygame, so we may as well use it.
                 soundclass = pygame.mixer.Sound
-            # QSound.isAvailable no longer exists in pyqt5 :(
-            # This deserves a better solution
-            #elif QtMultimedia.QSound.isAvailable():
-            #    # We don't have pygame; try to use QSound.
-            #    soundclass = QtMultimedia.QSound
-            #else:
-            #    # We don't have any options...just use fillers.
-            #    soundclass = NoneSound
             else:
                 logging.warning("Failed to define pygame mixer, is pygame imported?")
-                try:
-                    soundclass = QtMultimedia.QSound
-                except:
-                    soundclass = NoneSound
+                soundclass = NoneSound
 
         self.sound_type = soundclass
 
@@ -1982,8 +1971,7 @@ class PesterWindow(MovingWindow):
                 if pygame and pygame.mixer and \
                         isinstance(sound, pygame.mixer.Sound):#pygame.mixer.Sound is case sensitive!!
                             sound.set_volume(vol)
-                elif not isinstance(sound, QtMultimedia.QSound):
-                    # We can't set a volume on those....
+                else:
                     sound.setVolume(vol)
             except Exception as err:
                 # Why was this set as "info"? ?w?

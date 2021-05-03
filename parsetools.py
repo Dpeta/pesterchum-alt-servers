@@ -213,10 +213,11 @@ class honker(lexercon.Chunk):
     def __init__(self, string):
         self.string = string
     def convert(self, format):
-        if format == "html":
-            return "<img src='smilies/honk.png' alt'honk' title='honk' />"
-        else:
-            return self.string
+        # No more 'honk' turning into an emote because everyone hated that :')
+        #if format == "html":
+        #    return "<img src='smilies/honk.png' alt'honk' title='honk' />"
+        #else:
+        return self.string
 
 class mecmd(lexercon.Chunk):
     def __init__(self, string, mecmd, suffix):
@@ -998,6 +999,7 @@ smiledict = {
     ":suckers:": "Suckers.gif",
     ":scorpio:": "scorpio.gif",
     ":shades:": "shades.png",
+    ":honk:": "honk.png",
     }
 
 if ostools.isOSXBundle():
