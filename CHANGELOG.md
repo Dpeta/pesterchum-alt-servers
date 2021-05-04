@@ -5,6 +5,7 @@
 
 ### Added
 - pyinstaller.py script to make building with pyinstaller more convenient.
+- Themes by cubicSimulation.
 
 ### Changed
 - Honk emote now only triggers when typing ':honk:' instead of on every 'honk'.
