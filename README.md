@@ -1,5 +1,6 @@
 # PESTERCHUM
-Maintained repository of ghostDunk's Pesterchum. Connects to irc.pesterchum.xyz by defaults since the official server shut down (custom servers can be configured in server.json!!). Pesterchum is an instant messaging client copying the look and feel of clients from Andrew Hussie's webcomic Homestuck.
+Pesterchum is an instant messaging client copying the look and feel of clients from Andrew Hussie's webcomic Homestuck.
+Maintained repository of ghostDunk's Pesterchum. Prompts the user to choose a server at launch (irc.pesterchum.xyz by default).
 
 This repository builds on (and was mirrored from!) from pesterchum-karxi + Hydrothermal's nickserv fix.
 
@@ -57,7 +58,7 @@ You can install them with Python's pip or your package manager if you're on linu
 [requests]: https://pypi.org/project/requests/
 
 ### PYINSTALLER BUILDING
-My preferred method of generating binary releases.
+My preferred method of generating binary releases on Windows and Linux, MacOS doesn't seem to work for me.
 ``python pyinstaller.py``
 
 ### CX_FREEZE BUILDING

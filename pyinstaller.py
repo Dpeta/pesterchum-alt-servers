@@ -28,7 +28,7 @@ is a lot more useable than having to include all command line arguments every ti
         except FileNotFoundError as e:
             print(e)
 
-    print("\nUPX corrupts DLLs when it feels like it, try disabling it if your build doesn't run.")
+    print("\nUPX corrupts DLLs when it feels like it, try disabling it if your build doesn't run.\nIf upx is on your path you don't need to include anything here.")
     if is_64bit == True:
         upx_dir = input("UPX directory [D:\\upx-3.96-win64]: ")
         if upx_dir == '':
@@ -38,16 +38,17 @@ is a lot more useable than having to include all command line arguments every ti
         if upx_dir == '':
             upx_dir = "D:\\upx-3.96-win32" # Default dir for me :)
     print("upx_dir = " + upx_dir)
-    print("\nUniversal CRT needs to be included if you don't want to run into compatibility issues when building on Windows 10. ( https://pyinstaller.readthedocs.io/en/stable/usage.html?highlight=sdk#windows )")
-    if is_64bit == True:
-        crt_path = input("Universal CRT: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64]: ")
-        if crt_path == '':
-            crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64" # Default directory.
-    else:
-        crt_path = input("Extra path: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86]: ")
-        if crt_path == '':
-            crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86" # Default directory.
-    print("crt_path = " + crt_path)
+    if sys.platform == 'win32':
+        print("\nUniversal CRT needs to be included if you don't want to run into compatibility issues when building on Windows 10. ( https://pyinstaller.readthedocs.io/en/stable/usage.html?highlight=sdk#windows )")
+        if is_64bit == True:
+            crt_path = input("Universal CRT: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64]: ")
+            if crt_path == '':
+                crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64" # Default directory.
+        else:
+            crt_path = input("Extra path: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86]: ")
+            if crt_path == '':
+                crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86" # Default directory.
+        print("crt_path = " + crt_path)
 except KeyboardInterrupt as e:
     sys.exit("KeyboardInterrupt")
 
@@ -142,38 +143,14 @@ if sys.platform == 'win32':
         '--name=Pesterchum',
         '--paths=%s' % crt_path,
         #'--noconfirm',               # Overwrite output directory.
-        '--upx-dir=%s' % upx_dir,     # Set Upx directory. (I think it also works from path.)
         '--windowed',                 # Hide console
         #'--onefile',
         '--icon=pesterchum.ico',
         #'--clean', # Clear cache
-        
-        #'--hidden-import=pkg_resources.py2_warn',
-        #'--hidden-import=PyQt5.sip',
-        
-        #'--add-data=quirks;quirks',
-        #'--add-data=smilies;smilies',
-        #'--add-data=themes;themes',
-        #'--add-data=docs;docs',
-        #'--add-data=README.md;.',
-        #'--add-data=LICENSE;.',
-        #'--add-data=CHANGELOG.md;.',
-        #'--add-data=PCskins.png;.',
-        #'--add-data=Pesterchum.png;.',
-        
-        #'--upx-exclude=qwindows.dll',
-        #'--upx-exclude=Qt5Multimedia.dll',
-        #'--upx-exclude=Qt5Gui.dll',
-        #'--upx-exclude=Qt5Core.dll',
-        #'--upx-exclude=vcruntime140.dll',
-        #'--upx-exclude=MSVCP140.dll',
-        #'--upx-exclude=MSVCP140_1.dll',
-        #'--upx-exclude=' + 'Qt5Multimedia.dll'.lower(),
-        #'--upx-exclude=' + 'Qt5Gui.dll'.lower(),
-        #'--upx-exclude=' + 'Qt5Core.dll'.lower(),
-        #'--upx-exclude=' + 'vcruntime140.dll'.lower(),
-        #'--upx-exclude=' + 'MSVCP140.dll'.lower()
     ]
+
+    if os.path.isdir(upx_dir):
+        run_win32.append('--upx-dir=%s' % upx_dir)
 
     for x in upx_exclude:
         run_win32.append('--upx-exclude=%s' % x )
@@ -235,14 +212,19 @@ if sys.platform == 'win32':
     PyInstaller.__main__.run(run_win32)
 #MacOS
 elif sys.platform == 'darwin' :
+    input("NOTE: Building with pyinstaller on MacOS doesn't seem to work for me.")
     run_darwin =[
         'pesterchum.py',
+        '--name=Pesterchum',
         '--windowed',             # Hide console
         #'--noconfirm',           # Overwrite output directory.
         '--icon=trayicon32.icns', # Icon
-        
-        '--upx-dir=%s' % upx_dir  # Set Upx directory. (I think it also works from path.)
+        '--onedir',
+        #'--noupx'
     ]
+
+    if os.path.isdir(upx_dir):
+        run_darwin.append('--upx-dir=%s' % upx_dir)
     
     for x in upx_exclude:
         run_darwin.append('--upx-exclude=%s' % x )
@@ -257,16 +239,19 @@ elif sys.platform == 'darwin' :
     
     PyInstaller.__main__.run(run_darwin)
 #Linux
-elif sys.platform == 'linux' :
+elif sys.platform == 'linux':
     run_linux =[
         'pesterchum.py',
-        '--onedir',             # Hide console
+        '--name=Pesterchum',
+        #'--windowed',             # Hide console
         #'--noconfirm',           # Overwrite output directory.
         '--icon=trayicon32.icns', # Icon
-        
-        '--upx-dir=%s' % upx_dir  # Set Upx directory. (I think it also works from path.)
     ]
+
     
+    if os.path.isdir(upx_dir):
+        run_linux.append('--upx-dir=%s' % upx_dir)
+        
     for x in upx_exclude:
         run_linux.append('--upx-exclude=%s' % x )
         # Lower case variants are required.
@@ -284,6 +269,7 @@ else:
     
     run_generic =[
         'pesterchum.py',
+        '--name=Pesterchum',
         '--upx-dir=%s' % upx_dir  # Set Upx directory. (I think it also works from path.)
     ]
     
