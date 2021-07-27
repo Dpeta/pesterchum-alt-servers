@@ -123,7 +123,7 @@
                                      "text": "" },
                     "currentMood": [18, 249]
                   },
-  "defaultwindow": { "style": "background: #22222; font-family:'Courier';font:bold;selection-background-color:#F1F1F1; " 
+  "defaultwindow": { "style": "background: #222222; font-family:'Courier';font:bold;selection-background-color:#F1F1F1; " 
                    },
   "addchum":  { "style": "background: rgba(255, 255, 0, 0%); border:2px solid #000000; font: bold; color: rgba(0, 0, 0, 0%); font-family:'Courier';",
                 "pressed" : "background: rgb(255, 255, 255, 30%);",
