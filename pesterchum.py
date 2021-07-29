@@ -28,51 +28,7 @@ if ('--help' in sys.argv[1:]) or ('-h' in sys.argv[1:]):
     print(help_arguments)
     sys.exit()
 import logging
-if ('--logging' in sys.argv[1:]) or ('-l' in sys.argv[1:]) & (False == ('--logging' in sys.argv[1:]) and ('-l' in sys.argv[1:])):
-    try:
-        # If both are specified, this does not run.
-        if ('-l' in sys.argv[1:]):
-            loglevel = sys.argv[sys.argv.index('-l') + 1]
-        if ('--logging' in sys.argv[1:]):
-            loglevel = sys.argv[sys.argv.index('--logging') + 1]
-
-        loglevel = loglevel.upper()
-        
-        if loglevel == "CRITICAL":
-            loglevel = 50
-            print("Logging Level is CRITICAL")
-        elif loglevel == "ERROR":
-            loglevel = 40
-            print("Logging Level is ERROR")
-        elif loglevel == "WARNING":
-            loglevel = 30
-            print("Logging Level is WARNING")
-        elif loglevel == "INFO":
-            loglevel = 20
-            print("Logging Level is INFO")
-        elif loglevel == "DEBUG":
-            loglevel = 10
-            print("Logging Level is DEBUG")
-        elif loglevel == "NOTSET":
-            loglevel = 0
-            print("Logging Level is NOTSET")
-        else:
-            raise Exception
-        logging.basicConfig(level=loglevel)
-
-        # Remove from argv because the rest of the code can't handle it :/
-        if ('-l' in sys.argv[1:]):
-                sys.argv.pop(sys.argv.index('-l') + 1)
-                sys.argv.pop(sys.argv.index('-l'))
-        if ('--logging' in sys.argv[1:]):
-            sys.argv.pop(sys.argv.index('--logging') + 1)
-            sys.argv.pop(sys.argv.index('--logging'))
-    except:
-        print("Invalid syntax.")
-        logging.basicConfig(level=30) # Warning
-else:
-    logging.basicConfig(level=30) # Warning
-
+logging.basicConfig(filename="pesterchum.log")
 from datetime import *
 import random
 import re
@@ -156,6 +112,51 @@ _datadir = ostools.getDataDir()
 #   Now using data directory as defined by QDesktopServices on all platforms
 #   (on Linux, same as using xdg). To stay safe with older versions, copy any
 #   data (profiles, logs, etc) from old location to new data directory.
+
+if ('--logging' in sys.argv[1:]) or ('-l' in sys.argv[1:]) & (False == ('--logging' in sys.argv[1:]) and ('-l' in sys.argv[1:])):
+    try:
+        # If both are specified, this does not run.
+        if ('-l' in sys.argv[1:]):
+            loglevel = sys.argv[sys.argv.index('-l') + 1]
+        if ('--logging' in sys.argv[1:]):
+            loglevel = sys.argv[sys.argv.index('--logging') + 1]
+
+        loglevel = loglevel.upper()
+        
+        if loglevel == "CRITICAL":
+            loglevel = 50
+            print("Logging Level is CRITICAL")
+        elif loglevel == "ERROR":
+            loglevel = 40
+            print("Logging Level is ERROR")
+        elif loglevel == "WARNING":
+            loglevel = 30
+            print("Logging Level is WARNING")
+        elif loglevel == "INFO":
+            loglevel = 20
+            print("Logging Level is INFO")
+        elif loglevel == "DEBUG":
+            loglevel = 10
+            print("Logging Level is DEBUG")
+        elif loglevel == "NOTSET":
+            loglevel = 0
+            print("Logging Level is NOTSET")
+        else:
+            raise Exception
+        logging.basicConfig(level=loglevel)
+
+        # Remove from argv because the rest of the code can't handle it :/
+        if ('-l' in sys.argv[1:]):
+                sys.argv.pop(sys.argv.index('-l') + 1)
+                sys.argv.pop(sys.argv.index('-l'))
+        if ('--logging' in sys.argv[1:]):
+            sys.argv.pop(sys.argv.index('--logging') + 1)
+            sys.argv.pop(sys.argv.index('--logging'))
+    except:
+        print("Invalid syntax.")
+        logging.basicConfig(level=30) # Warning
+else:
+    logging.basicConfig(level=30) # Warning
 
 if _datadir:
     if not os.path.exists(_datadir):
@@ -3778,6 +3779,7 @@ Click this message to never see this again.")
         return options
 
     def run(self):
+        #logging.critical("mreowww") <--- debug thingy :3
         sys.exit(self.app.exec_())
 
 def _retrieveGlobals():
