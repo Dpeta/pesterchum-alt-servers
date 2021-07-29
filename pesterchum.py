@@ -1420,6 +1420,16 @@ class PesterWindow(MovingWindow):
 
         self.chooseServerAskedToReset = False
         self.chooseServer()
+
+        # Update RE bot
+        try:
+            if self.userprofile.getRandom():
+                code = "+"
+            else:
+                code = "-"
+            self.sendNotice.emit(code, RANDNICK)
+        except:
+            logging.warning("No randomEncounter set in userconfig?")
     
     @QtCore.pyqtSlot(QString, QString)
     def updateMsg(self, ver, url):
@@ -2996,7 +3006,16 @@ class PesterWindow(MovingWindow):
             if ret == QtWidgets.QMessageBox.Cancel:
                 return
         self.changeProfile()
-    @QtCore.pyqtSlot()
+        # Update RE bot
+        try:
+            if self.userprofile.getRandom():
+                code = "+"
+            else:
+                code = "-"
+            self.sendNotice.emit(code, RANDNICK)
+        except:
+            logging.warning("No randomEncounter set in userconfig?")
+            
     def aboutPesterchum(self):
         if hasattr(self, 'aboutwindow') and self.aboutwindow:
             return

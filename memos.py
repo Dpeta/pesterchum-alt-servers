@@ -12,6 +12,7 @@ from parsetools import convertTags, addTimeInitial, timeProtocol, \
     lexMessage, colorBegin, colorEnd, mecmd, smiledict
 import parsetools
 from logviewer import PesterLogViewer
+import logging
 
 try:
     QString = unicode
