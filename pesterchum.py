@@ -427,11 +427,11 @@ class chumArea(RightClickTree):
         try:
             # create mime data object
             mime = QtCore.QMimeData()
-            mime.setData('application/x-item', '???')
+            mime.setData('application/x-item', QtCore.QByteArray()) # Voodoo programming :"3
             # start drag
             drag = QtGui.QDrag(self)
             drag.setMimeData(mime)
-            drag.start(QtCore.Qt.MoveAction)
+            drag.exec_(QtCore.Qt.MoveAction)
         except:
             logging.exception('')
 

@@ -14,6 +14,7 @@
 - A few memo/convo related syntax errors in a few themes
 - nothing.png being missing in some themes.
 - 64-bit crt for PyInstaller 
+- Manual sort not working
 
 ### Changed
 - Honk emote now only triggers when typing ':honk:' instead of on every 'honk'.
