@@ -28,17 +28,21 @@ Some of the include files are specific to my instalation, so you might have to e
             shutil.rmtree('build')
         except FileNotFoundError as e:
             print(e)
-
-    print("\nUPX corrupts DLLs when it feels like it, try disabling it if your build doesn't run.\nIf upx is on your path you don't need to include anything here.")
-    if is_64bit == True:
-        upx_dir = input("UPX directory [D:\\upx-3.96-win64]: ")
-        if upx_dir == '':
-            upx_dir = "D:\\upx-3.96-win64" # Default dir for me :)
+    print("UPX can decently reduce filesize but builds might get flagged by anti-viruses more often. (+ it sometimes breaks QT's DLLs)")
+    upx_input = input("Enable UPX? [N]: ").lower()
+    if upx_input == 'y':
+        print("If upx is on your path you don't need to include anything here.")
+        if is_64bit == True:
+            upx_dir = input("UPX directory [D:\\upx-3.96-win64]: ")
+            if upx_dir == '':
+                upx_dir = "D:\\upx-3.96-win64" # Default dir for me :)
+        else:
+            upx_dir = input("UPX directory [D:\\upx-3.96-win32]: ")
+            if upx_dir == '':
+                upx_dir = "D:\\upx-3.96-win32" # Default dir for me :)
+        print("upx_dir = " + upx_dir)
     else:
-        upx_dir = input("UPX directory [D:\\upx-3.96-win32]: ")
-        if upx_dir == '':
-            upx_dir = "D:\\upx-3.96-win32" # Default dir for me :)
-    print("upx_dir = " + upx_dir)
+        upx_dir = ''
     if sys.platform == 'win32':
         print("\nUniversal CRT needs to be included if you don't want to run into compatibility issues when building on Windows 10. ( https://pyinstaller.readthedocs.io/en/stable/usage.html?highlight=sdk#windows )")
         if is_64bit == True:
@@ -147,7 +151,7 @@ if sys.platform == 'win32':
         '--windowed',                 # Hide console
         #'--onefile',
         '--icon=pesterchum.ico',
-        #'--clean', # Clear cache
+        '--clean', # Clear cache
     ]
 
     if os.path.isdir(upx_dir):
