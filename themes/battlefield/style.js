@@ -37,6 +37,7 @@
             "help": { "_name": "Cavalry",
                       "about": "Creators",
                       "help": "Help",
+                      "rules": "Rules",
                       "calsprite": "Calsprite",
                       "nickserv": "NickServ",
                       "reportbug": "Report Bug",

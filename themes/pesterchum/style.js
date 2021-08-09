@@ -39,6 +39,7 @@
                         "block": "TROLLSLUM",
                         "quirks": "QUIRKS"},
             "help": { "_name": "HELP",
+                      "rules": "RULES",
                       "about": "ABOUT",
                       "help": "HELP",
                       "calsprite": "CALSPRITE",

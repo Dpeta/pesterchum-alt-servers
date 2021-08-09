@@ -37,6 +37,7 @@
             "help": { "_name": "Help",
                       "about": "About",
                       "help": "Help",
+                      "rules": "Rules",
                       "calsprite": "CalSprite",
                       "chanserv": "ChanServ",
                       "nickserv": "NickServ",
@@ -258,7 +259,7 @@
                },
   "margins": {"top": 35, "bottom": 35, "left": 32, "right": 20 },
   "size": [480, 348],
-  "chumlabel": { "style": " background:  rgba(255, 255, 0, 0%); color: #FFFCBD; border:0px; font-size: 0px;",
+  "chumlabel": { "style": " background:  rgba(255, 255, 0, 0%); color: #FFFCBD; border:0px;",
                  "align": { "h": "center", "v": "center" },
                  "minheight": 0,
                  "maxheight": 0,
@@ -308,7 +309,7 @@
                  "uarrowstyle": "image:url();"
                },
   "label": { "text": "Bulletin Board: $channel",
-             "style": "margin-bottom: 7px; margin-top: 10px; background-color: rgba (0,0,0,0) ; background-image:url($path/nothing.png); color: #FFFCBD; border:0px; font-size: 16px;",
+             "style": "margin-bottom: 7px; margin-top: 10px; background-color: rgba(0,0,0,0) ; background-image:url($path/nothing.png); color: #FFFCBD; border:0px; font-size: 16px;",
              "align": { "h": "center", "v": "center" },
              "minheight": 47,
              "maxheight": 47
@@ -317,7 +318,7 @@
   "textarea": { "style": " background-color: #FFFCBD; background-image:url();  font: bold; font-size: 14px; font-family: 'Arial'; border:2px solid #F7B53D;text-align:center; margin-right:10px; margin-left:10px;" },
   "margins": {"top": 0, "bottom": 6, "left": 0, "right": 0 },
   "userlist": { "width": 150,
-                "style": "border:2px solid #F7B53D; background: #FFFCBD; font-family: 'Arial';selection-background-color:#646464; font-size: 14px;  margin-left:0px; margin-right:10px;"
+                "style": "border:2px solid #F7B53D; background: #FFFCBD; font-family: 'Arial';selection-background-color:#646464; font-size: 14px; margin-right:10px;"
               },
   "time": { "text": { "width": 75,
                       "style": " border: 2px solid #FFD47C; background: #FFFCBD; font-size: 12px; margin-top: 5px; margin-right: 5px; margin-left: 5px; font-family:'Arial';font:bold;"

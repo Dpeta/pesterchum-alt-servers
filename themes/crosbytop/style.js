@@ -39,6 +39,7 @@
             "help": { "_name": "MSPA",
                       "about": "About",
                       "help": "Help",
+                      "rules": "Rules",
                       "calsprite": "CalSprite",
                       "chanserv": "ChanServ",
                       "nickserv": "NickServ",

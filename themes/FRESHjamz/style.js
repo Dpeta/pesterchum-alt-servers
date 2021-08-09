@@ -40,6 +40,7 @@
                         "quirks": "Quirks"},
             "help": { "_name": "Info",
                       "help": "Info",
+                      "rules": "Rules",
                       "calsprite": "Calsprite",
                       "chanserv": "ChanServ",
                       "nickserv": "NickServ",

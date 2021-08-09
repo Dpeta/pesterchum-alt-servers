@@ -34,6 +34,7 @@
             "help": { "_name": "            ",
                       "about": "About",
                       "help": "Help",
+                      "rules": "Rules",
                       "calsprite": "CalSprite",
                       "chanserv": "ChanServ",
                       "nickserv": "NickServ",

@@ -36,6 +36,7 @@
                         "quirks": "Quirks"},
             "help": { "_name": "Help??",
                       "about": "About!",
+                      "rules": "Rules!",
                       "help": "Help!!",
                       "calsprite": "CalSprite",
                       "chanserv": "ChanServ",
@@ -258,7 +259,7 @@
                },
   "margins": {"top": 35, "bottom": 35, "left": 32, "right": 20 },
   "size": [480, 348],
-  "chumlabel": { "style": " background:  rgba(130, 230, 80, 0%); color: #C6FFA9; border:0px; font-size: 0px;",
+  "chumlabel": { "style": " background:  rgba(130, 230, 80, 0%); color: #C6FFA9; border:0px; ",
                  "align": { "h": "center", "v": "center" },
                  "minheight": 0,
                  "maxheight": 0,
@@ -308,7 +309,7 @@
                  "uarrowstyle": "image:url();"
                },
   "label": { "text": "Bulletin Board: $channel",
-             "style": "margin-bottom: 7px; margin-top: 10px; background-color: rgba (0,0,0,0) ; background-image:url($path/nothing.png); color: #C6FFA9; border:0px; font-size: 16px;",
+             "style": "margin-bottom: 7px; margin-top: 10px; background-color: rgba(0,0,0,0) ; background-image:url($path/nothing.png); color: #C6FFA9; border:0px; font-size: 16px;",
              "align": { "h": "center", "v": "center" },
              "minheight": 47,
              "maxheight": 47

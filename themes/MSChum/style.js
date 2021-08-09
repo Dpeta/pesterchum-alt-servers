@@ -231,7 +231,7 @@
       "style": "background: white; border:2px solid #000000;margin-top:5px; margin-right:10px; margin-left:10px; font-size: 12px;font-family: 'Courier'"
   },
   "tabwindow" : {
-      "style": "background-color:#f2f2f2;border:0px"
+      "style": "background-color:#f2f2f2;border:0px;"
   },
   "tabs": {
       "style": "background-color: #f2f2f2; font-family: 'Courier';font:bold;font-size:12px;min-height:25px;",

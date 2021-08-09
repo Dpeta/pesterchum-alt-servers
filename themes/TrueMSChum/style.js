@@ -123,7 +123,7 @@
                                      "text": "" },
                     "currentMood": [18, 249]
                   },
-  "defaultwindow": { "style": "background: #222222; font-family:'Courier';font:bold;selection-background-color:#F1F1F1; " 
+  "defaultwindow": { "style": "background: #F1F1F1; font-family:'Courier';font:bold;selection-background-color:#F1F1F1; "
                    },
   "addchum":  { "style": "background: rgba(255, 255, 0, 0%); border:2px solid #000000; font: bold; color: rgba(0, 0, 0, 0%); font-family:'Courier';",
                 "pressed" : "background: rgb(255, 255, 255, 30%);",
@@ -210,7 +210,7 @@
  "convo":
  {"style": "background-color: #f2f2f2;background-image:url($path/convobg.png);background-repeat: no-repeat; border:2px solid black; font-family: 'Courier'",
   "scrollbar": { "style" : "padding-top:17px; padding-bottom:17px;width: 18px; background: white; border:2px solid #000000;",
-                 "handle": "background-color:#FFFFFF;min-height:20px;",
+                 "handle": "background-color:#000000;min-height:20px;",
                  "downarrow": "height:17px;border:0px solid #000000;", 
                  "darrowstyle": "image:url($path/downarrow.png);",
                  "uparrow": "height:17px;border:0px solid #000000;",
@@ -218,7 +218,7 @@
                },
   "margins": {"top": 0, "bottom": 6, "left": 0, "right": 0 },
   "size": [500, 325],
-  "chumlabel": { "style": "margin-bottom: 21px;background: rgb(256, 256, 256); color: white; border:0px; font-size: 14px;font-family: 'Courier'",
+  "chumlabel": { "style": "margin-bottom: 21px;background: rgb(255, 255, 255); color: white; border:0px; font-size: 14px;font-family: 'Courier'",
                  "align": { "h": "center", "v": "center" },
                  "minheight": 47,
                  "maxheight": 47,
@@ -231,12 +231,12 @@
       "style": "background: white; border:2px solid #000000;margin-top:5px; margin-right:10px; margin-left:10px; font-size: 12px;font-family: 'Courier'"
   },
   "tabwindow" : {
-	  "style": "background-color:#f2f2f2;border:0px"
+	  "style": "background-color:#f2f2f2;border:0px;"
   },
   "tabs": {
       "style": "background-color: #f2f2f2; font-family: 'Courier';font:bold;font-size:12px;min-height:25px;",
       "selectedstyle": "border:0px;background-color:#f2f2f2;border-top:2px solid black; border-left:2px solid black;border-right:2px solid black; border-top-left-radius: 4px; border-top-right-radius: 4px;",
-      "newmsgcolor": "#FFFFFF",
+      "newmsgcolor": "#fdb302",
       "tabstyle": 0
   },
   "text": {
@@ -255,23 +255,23 @@
  },
  "memos":
  {"memoicon": "$path/memo.png",
-  "style": "background-color: #FFFFFF; background-image:url($path/convobg.png); background-repeat: no-repeat; border:2px solid black; font-family: 'Courier'; font: bold; selection-background-color:#919191; ",
+  "style": "background-color: #fdb302; background-image:url($path/convobg.png); background-repeat: no-repeat; border:2px solid black; font-family: 'Courier'; font: bold; selection-background-color:#919191; ",
   "size": [500,325],
   "tabs": {
       "style": "",
       "selectedstyle": "",
-      "newmsgcolor": "#FFFFFF",
+      "newmsgcolor": "#fdb302",
       "tabstyle": 0
   },
   "scrollbar": { "style" : "padding-top:17px; padding-bottom:17px;width: 18px; background:  rgba(255, 255, 0, 0%); border:0px;",
-                 "handle": "background-color:#FFFFFF;min-height:20px;",
+                 "handle": "background-color:#000000;min-height:20px;",
                  "downarrow": "height:17px;border:0px solid #000000;", 
                  "darrowstyle": "image:url($path/downarrow.png);",
                  "uparrow": "height:17px;border:0px solid #000000;",
                  "uarrowstyle": "image:url($path/uparrow.png);"
                },
   "label": { "text": "Bulletin Board: $channel",
-             "style": "margin-bottom: 21px;background: rgb(0, 0, 0); color: white; border:0px; font-size: 14px;",
+             "style": "margin-bottom: 21px;background: rgb(196, 138, 0); color: white; border:0px; font-size: 14px;",
              "align": { "h": "center", "v": "center" },
              "minheight": 47,
              "maxheight": 47

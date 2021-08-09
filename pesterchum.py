@@ -1324,11 +1324,17 @@ class PesterWindow(MovingWindow):
             self.reportBugAction = QtWidgets.QAction(self.theme["main/menus/help/reportbug"], self)
         except:
             self.reportBugAction = QtWidgets.QAction("REPORT BUG", self)
+        try:
+            self.xyzRulesAction = QtWidgets.QAction(self.theme["main/menus/help/rules"], self)
+        except:
+            self.xyzRulesAction = QtWidgets.QAction("RULES", self)
         
         self.reportBugAction.triggered.connect(self.reportBug)
+        self.xyzRulesAction.triggered.connect(self.xyzRules)
         helpmenu = self.menu.addMenu(self.theme["main/menus/help/_name"])
         self.helpmenu = helpmenu
         self.helpmenu.addAction(self.helpAction)
+        self.helpmenu.addAction(self.xyzRulesAction)
         self.helpmenu.addAction(self.botAction)
         self.helpmenu.addAction(self.chanServAction)
         self.helpmenu.addAction(self.nickServAction)
@@ -1851,6 +1857,11 @@ class PesterWindow(MovingWindow):
         except:
             self.reportBugAction.setText("REPORT BUG")
 
+        try:
+            self.xyzRulesAction.setText(self.theme["main/menus/help/rules"])
+        except:
+            self.xyzRulesAction.setText("RULES")
+        
         # moods
         self.moodsLabel.setText(theme["main/moodlabel/text"])
         self.moodsLabel.move(*theme["main/moodlabel/loc"])
@@ -3038,7 +3049,10 @@ class PesterWindow(MovingWindow):
     @QtCore.pyqtSlot()
     def reportBug(self):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/Dpeta/pesterchum-alt-servers/issues", QtCore.QUrl.TolerantMode))
-        return
+
+    @QtCore.pyqtSlot()
+    def xyzRules(self):
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://www.pesterchum.xyz/pesterchum-rules", QtCore.QUrl.TolerantMode))
 
     @QtCore.pyqtSlot(QString, QString)
     def nickCollision(self, handle, tmphandle):

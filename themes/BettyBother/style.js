@@ -38,6 +38,7 @@
             "help": { "_name": "HELP",
                       "about": "ABOUT",
                       "help": "HELP",
+                      "rules": "Rules",
                       "calsprite": "CALSPRITE",
                       "nickserv": "NICKSERV" },
             "rclickchumlist": {"pester": "PESTER",

@@ -9,8 +9,8 @@
              "loc": [315, 26]},
   "minimize": { "image": "$path/m.gif",
                 "loc": [300, 32]},
-  "menubar": { "style": "font-family: 'Century Gothic'; font-size: 14px; color:#9d9d9d" },
-  "menu" : { "style": "font-family: 'Century Gothic'; font-size: 14px; color: #000000; background-color: #fdb302;border:2px solid #ffff00",
+  "menubar": { "style": "font-family: 'Century Gothic'; font-size: 14px; color:#9d9d9d;" },
+  "menu" : { "style": "font-family: 'Century Gothic'; font-size: 14px; color: #000000; background-color: #fdb302;border:2px solid #ffff00;",
              "menuitem": "margin-right:25px;",
              "selected": "background-color: #ffff00",
              "loc": [480,30]
@@ -37,7 +37,7 @@
             "help": { "_name": "Help",
                       "about": "About",
                       "help": "Help",
-                      "help": "Help",
+                      "rules": "Rules",
                       "calsprite": "CalSprite",
                       "chanserv": "ChanServ",
                       "nickserv": "NickServ",
@@ -66,8 +66,7 @@
                                "memomute": "Mute",
                                "beeponmessage": "Beep on Message",
                                "flashonmessage": "Flash on Message",
-                               "mutenotifications": "Mute Notifications" 
-                              }
+                               "mutenotifications": "Mute Notifications" }
            },
   "chums": { "style": "text-align: center; border:0px; background-image:url($path/chumbg.png); background-color: #ffe400; background-repeat: no-repeat; color: white; font-family: 'Century Gothic';selection-background-color:#646464; font-size:18px; ",
              "scrollbar": { "style" : "background-image:url($path/chumbg.png); background-color: #ffe400;",
@@ -263,7 +262,7 @@
                },
   "margins": {"top": 35, "bottom": 35, "left": 32, "right": 20 },
   "size": [480, 348],
-  "chumlabel": { "style": " background:  rgba(255, 255, 0, 0%); color: white; border:0px; font-size: 0px;",
+  "chumlabel": { "style": " background:  rgba(255, 255, 0, 0%); color: white; border:0px; font-size: 14px;",
                  "align": { "h": "center", "v": "center" },
                  "minheight": 0,
                  "maxheight": 0,
@@ -272,7 +271,7 @@
   "textarea": {
       "style": "background-color: white;  background-image: url(); font: bold; font-size: 14px; font-family: 'Century Gothic'; border:2px solid yellow;text-align:center;"
   },
-  "input": { "style": "background: white; border:2px solid yellow;margin-top:10px; font: bold; font-size: 14px; font-family: 'Century Gothic'" },
+  "input": { "style": "background: white; border:2px solid yellow;margin-top:10px; font: bold; font-size: 14px; font-family: 'Century Gothic';" },
   "tabs": {
       "style": "",
       "selectedstyle": "",
@@ -310,7 +309,7 @@
                  "uarrowstyle": "image:url();"
                },
   "label": { "text": "Bulletin Board: $channel",
-             "style": "margin-bottom: 7px; margin-top: 10px; background-color: rgba (0,0,0,0) ; background-image:url($path/nothing.png); color: white; border:0px; font-size: 16px;",
+             "style": "margin-bottom: 7px; margin-top: 10px; background-color: rgba(0,0,0,0); background-image:url($path/nothing.png); color: white; border:0px; font-size: 16px;",
              "align": { "h": "center", "v": "center" },
              "minheight": 47,
              "maxheight": 47

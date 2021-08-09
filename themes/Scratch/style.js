@@ -38,6 +38,7 @@
                         "quirks": "Lingo" },
             "help": { "_name": "Info",
                       "help": "Info",
+                      "rules": "Rules",
                       "calsprite": "Calsprite",
                       "nickserv": "NickServ",
                       "about": "The Deal",
