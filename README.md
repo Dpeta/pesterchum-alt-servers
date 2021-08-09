@@ -59,6 +59,7 @@ You can install them with Python's pip or your package manager if you're on linu
 
 ### PYINSTALLER BUILDING
 My preferred method of generating binary releases on Windows and Linux, MacOS doesn't seem to work for me.
+NOTE: pyinstaller builds seem to get flagged as malware.
 ``python pyinstaller.py``
 
 ### CX_FREEZE BUILDING
