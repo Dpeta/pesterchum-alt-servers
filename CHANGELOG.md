@@ -13,6 +13,7 @@
 - Random encounters occasionally not being disabled when switched off. (RE bot is now updated after connect and on profile switch.)
 - A few memo/convo related syntax errors in a few themes
 - nothing.png being missing in some themes.
+- 64-bit crt for PyInstaller 
 
 ### Changed
 - Honk emote now only triggers when typing ':honk:' instead of on every 'honk'.
