@@ -1,15 +1,18 @@
 # Changelog
-(This document uses YYYY-MM-DD as per ISO 8601)
+(This document uses YYYY-MM-DD)
 
-## [v2.1.3] - 2021-7-16
+## [v2.1.3] - 2021-8-09
 
 ### Added
 - pyinstaller.py script to make building with pyinstaller more convenient.
 - Themes by cubicSimulation.
+- Link to server rules under help.
 
 ### Fixed
 - Crash when opening invite-only memo. (My bad-)
 - Random encounters occasionally not being disabled when switched off. (RE bot is now updated after connect and on profile switch.)
+- A few memo/convo related syntax errors in a few themes
+- nothing.png being missing in some themes.
 
 ### Changed
 - Honk emote now only triggers when typing ':honk:' instead of on every 'honk'.
