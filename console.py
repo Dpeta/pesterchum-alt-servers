@@ -105,7 +105,7 @@ class ConsoleWindow(QtWidgets.QDialog):
         try:
             self.addMessage(traceback.format_exc(), direction=0)
         except Exception as err:
-            logging.error("Failed to display error message (???): %s" % err)
+            PchumLog.error("Failed to display error message (???): %s" % err)
 
     def addMessage(self, msg, direction):
         # Redirect to where these things belong.
@@ -276,7 +276,7 @@ class ConsoleWindow(QtWidgets.QDialog):
                 # Don't overwrite anything!
                 warn = "Console environment item {0!r} already exists in CENV."
                 warn.format(k)
-                logging.warning(warn)
+                PchumLog.warning(warn)
         # Because all we did was change a linked AttrDict, we should be fine
         # here.
         try:
@@ -292,7 +292,7 @@ class ConsoleWindow(QtWidgets.QDialog):
             else:
                 # No errors.
                 if result is not None:
-                    logging.info(repr(result))
+                    PchumLog.info(repr(result))
             finally:
                 # Restore system output.
                 sys.stdout = sysout

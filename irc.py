@@ -1,8 +1,10 @@
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
 from PyQt5 import QtCore, QtGui
 from oyoyo.client import IRCClient
 from oyoyo.cmdhandler import DefaultCommandHandler
 from oyoyo import helpers, services
-import logging
 import random
 import socket
 from time import time
@@ -51,10 +53,10 @@ class PesterIRC(QtCore.QThread):
         while 1:
             res = True
             try:
-                logging.debug("updateIRC()")
+                PchumLog.debug("updateIRC()")
                 res = self.updateIRC()
             except socket.timeout as se:
-                logging.debug("timeout in thread %s" % (self))
+                PchumLog.debug("timeout in thread %s" % (self))
                 self.cli.close()
                 self.stopIRC = se
                 return
@@ -63,18 +65,18 @@ class PesterIRC(QtCore.QThread):
                     self.stopIRC = None
                 else:
                     self.stopIRC = se
-                logging.debug("socket error, exiting thread")
+                PchumLog.debug("socket error, exiting thread")
                 return
             else:
                 if not res:
-                    logging.debug("false Yield: %s, returning" % res)
+                    PchumLog.debug("false Yield: %s, returning" % res)
                     return
 
     def setConnected(self):
         self.registeredIRC = True
         self.connected.emit()
     def setConnectionBroken(self):
-        logging.debug("setconnection broken")
+        PchumLog.debug("setconnection broken")
         self.reconnectIRC()
         #self.brokenConnection = True
     @QtCore.pyqtSlot()
@@ -95,7 +97,7 @@ class PesterIRC(QtCore.QThread):
             return res
     @QtCore.pyqtSlot()
     def reconnectIRC(self):
-        logging.debug("reconnectIRC() from thread %s" % (self))
+        PchumLog.debug("reconnectIRC() from thread %s" % (self))
         self.cli.close()
 
     @QtCore.pyqtSlot(PesterProfile)
@@ -196,7 +198,7 @@ class PesterIRC(QtCore.QThread):
             self.setConnectionBroken()
     @QtCore.pyqtSlot()
     def updateColor(self):
-        #logging.debug("irc updateColor (outgoing)")
+        #PchumLog.debug("irc updateColor (outgoing)")
         me = self.mainwindow.profile()
         for h in list(self.mainwindow.convos.keys()):
             try:
@@ -351,7 +353,7 @@ class PesterHandler(DefaultCommandHandler):
         #nick = nick.decode('utf-8')
         #chan = chan.decode('utf-8')
         handle = nick[0:nick.find("!")]
-        logging.info("---> recv \"NOTICE %s :%s\"" % (handle, msg))
+        PchumLog.info("---> recv \"NOTICE %s :%s\"" % (handle, msg))
         if handle == "ChanServ" and chan == self.parent.mainwindow.profile().handle and msg[0:2] == "[#":
                 self.parent.memoReceived.emit(msg[1:msg.index("]")], handle, msg)
         else:
@@ -371,7 +373,7 @@ class PesterHandler(DefaultCommandHandler):
         # silently ignore the rest of the CTCPs
         if msg[0] == '\x01':
             handle = nick[0:nick.find("!")]
-            logging.warning("---> recv \"CTCP %s :%s\"" % (handle, msg[1:-1]))
+            PchumLog.warning("---> recv \"CTCP %s :%s\"" % (handle, msg[1:-1]))
             if msg[1:-1] == "VERSION":
                 helpers.ctcp_reply(self.parent.cli, handle, "VERSION", "Pesterchum %s" % (_pcVersion))
             elif msg[1:-1].startswith("NOQUIRKS") and chan[0] == "#":
@@ -382,7 +384,7 @@ class PesterHandler(DefaultCommandHandler):
 
         if chan != "#pesterchum":
             # We don't need anywhere near that much spam.
-            logging.info("---> recv \"PRIVMSG %s :%s\"" % (handle, msg))
+            PchumLog.info("---> recv \"PRIVMSG %s :%s\"" % (handle, msg))
 
         if chan == "#pesterchum":
             # follow instructions
@@ -413,9 +415,9 @@ class PesterHandler(DefaultCommandHandler):
                 try:
                     colors = [int(d) for d in colors]
                 except ValueError as e:
-                    logging.warning(e)
+                    PchumLog.warning(e)
                     colors = [0,0,0]
-                logging.debug("colors: " + str(colors))
+                PchumLog.debug("colors: " + str(colors))
                 color = QtGui.QColor(*colors)
                 self.parent.colorUpdated.emit(handle, color)
             else:
@@ -438,7 +440,7 @@ class PesterHandler(DefaultCommandHandler):
         self.parent.nickCollision.emit(nick, newnick)
     def quit(self, nick, reason):
         handle = nick[0:nick.find("!")]
-        logging.info("---> recv \"QUIT %s: %s\"" % (handle, reason))
+        PchumLog.info("---> recv \"QUIT %s: %s\"" % (handle, reason))
         if handle == self.parent.mainwindow.randhandler.randNick:
             self.parent.mainwindow.randhandler.setRunning(False)
         server = self.parent.mainwindow.config.server()
@@ -454,13 +456,13 @@ class PesterHandler(DefaultCommandHandler):
         # ok i shouldnt be overloading that but am lazy
     def part(self, nick, channel, reason="nanchos"):
         handle = nick[0:nick.find("!")]
-        logging.info("---> recv \"PART %s: %s\"" % (handle, channel))
+        PchumLog.info("---> recv \"PART %s: %s\"" % (handle, channel))
         self.parent.userPresentUpdate.emit(handle, channel, "left")
         if channel == "#pesterchum":
             self.parent.moodUpdated.emit(handle, Mood("offline"))
     def join(self, nick, channel):
         handle = nick[0:nick.find("!")]
-        logging.info("---> recv \"JOIN %s: %s\"" % (handle, channel))
+        PchumLog.info("---> recv \"JOIN %s: %s\"" % (handle, channel))
         self.parent.userPresentUpdate.emit(handle, channel, "join")
         if channel == "#pesterchum":
             if handle == self.parent.mainwindow.randhandler.randNick:
@@ -512,7 +514,7 @@ class PesterHandler(DefaultCommandHandler):
                 self.parent.mainwindow.randhandler.setRunning(True)
     def namreply(self, server, nick, op, channel, names):
         namelist = names.split(" ")
-        logging.info("---> recv \"NAMES %s: %d names\"" % (channel, len(namelist)))
+        PchumLog.info("---> recv \"NAMES %s: %d names\"" % (channel, len(namelist)))
         if not hasattr(self, 'channelnames'):
             self.channelnames = {}
         if channel not in self.channelnames:
@@ -521,7 +523,7 @@ class PesterHandler(DefaultCommandHandler):
     #def ison(self, server, nick, nicks):
     #    nicklist = nicks.split(" ")
     #    getglub = "GETMOOD "
-    #    logging.info("---> recv \"ISON :%s\"" % nicks)
+    #    PchumLog.info("---> recv \"ISON :%s\"" % nicks)
     #    for nick_it in nicklist:
     #        self.parent.moodUpdated.emit(nick_it, Mood(0))
     #        if nick_it in self.parent.mainwindow.namesdb["#pesterchum"]:
@@ -550,16 +552,16 @@ class PesterHandler(DefaultCommandHandler):
         self.channel_list = []
         info = list(info)
         self.channel_field = info.index("Channel") # dunno if this is protocol
-        logging.info("---> recv \"CHANNELS: %s " % (self.channel_field))
+        PchumLog.info("---> recv \"CHANNELS: %s " % (self.channel_field))
     def list(self, server, handle, *info):
         channel = info[self.channel_field]
         usercount = info[1]
         if channel not in self.channel_list and channel != "#pesterchum":
             self.channel_list.append((channel, usercount))
-        logging.info("---> recv \"CHANNELS: %s " % (channel))
+        PchumLog.info("---> recv \"CHANNELS: %s " % (channel))
     def listend(self, server, handle, msg):
         pl = PesterList(self.channel_list)
-        logging.info("---> recv \"CHANNELS END\"")
+        PchumLog.info("---> recv \"CHANNELS END\"")
         self.parent.channelListReceived.emit(pl)
         self.channel_list = []
 

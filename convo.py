@@ -1,3 +1,6 @@
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
 from string import Template
 import re
 import platform
@@ -5,7 +8,6 @@ from time import strftime
 from copy import copy
 from datetime import datetime, timedelta
 from PyQt5 import QtCore, QtGui, QtWidgets
-import logging
 
 from mood import Mood
 from dataobjs import PesterProfile, PesterHistory
@@ -709,7 +711,7 @@ class PesterConvo(QtWidgets.QFrame):
         self.optionsMenu.removeAction(self.blockAction)
 
     def updateColor(self, color):
-        logging.debug("convo updateColor: " + str(color))
+        PchumLog.debug("convo updateColor: " + str(color))
         self.chum.color = color
     def addMessage(self, msg, me=True):
         if type(msg) in [str, str]:

@@ -13,22 +13,36 @@ except NameError:
 if os.path.dirname(sys.argv[0]):
     os.chdir(os.path.dirname(sys.argv[0]))
 print("Usage: pesterchum.py [OPTIONS]")
-print("Use -h/--help to see the available options.\n")
+print("Use -h/--help to see the available options.\nLogging is configured in logging.conf")
 # Help
 if ('--help' in sys.argv[1:]) or ('-h' in sys.argv[1:]):
     print("Possible arguments:")
-    help_arguments = " -l, --logging\n    Specify level of logging, possible values are:\n" + \
-                     "    CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET.\n" + \
-                     "    The default value is WARNING.\n" + \
-                     "    (See https://docs.python.org/3/library/logging.html)\n\n" + \
-                     " -s, --server\n    Specify server override. (legacy)\n\n" + \
+    #help_arguments = " -l, --logging\n    Specify level of logging, possible values are:\n" + \
+    #                 "    CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET.\n" + \
+    #                 "    The default value is WARNING.\n" + \
+    #                 "    (See https://docs.python.org/3/library/logging.html)\n\n" + \
+    help_arguments = " -s, --server\n    Specify server override. (legacy)\n\n" + \
                      " -p, --port\n    Specify port override. (legacy)\n\n" + \
                      " --advanced\n    Enable advanced.\n\n" + \
                      " --no-honk\n    Disable honking.\n"
     print(help_arguments)
     sys.exit()
-import logging
-logging.basicConfig(filename="pesterchum.log")
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
+#PchumLog = logging.getLogger(__name__)
+
+#Logfile = logging.FileHandler("pesterchum.log")
+#fileformat = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#Logfile.setFormatter(fileformat)
+#PchumLog.addHandler(Logfile)
+
+#stream = logging.StreamHandler()
+#streamformat = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#stream.setFormatter(streamformat)
+#PchumLog.addHandler(stream)
+
+#logging.basicConfig(filename="pesterchum.log")
 from datetime import *
 import random
 import re
@@ -42,17 +56,17 @@ try:
     from pnc.attrdict import AttrDict
 except ImportError:
     # Fall back on the old location - just in case
-    #logging.warning("Couldn't load attrdict from new loc; falling back")
+    #PchumLog.warning("Couldn't load attrdict from new loc; falling back")
     from pnc.dep.attrdict import AttrDict
 try:
     import console
 except ImportError:
     _CONSOLE = False
-    logging.warning("Console file not shipped; skipping.")
+    PchumLog.warning("Console file not shipped; skipping.")
 except Exception as err:
     _CONSOLE = False
     # Consider erroring?
-    logging.error("Failed to load console!", exc_info=err)
+    PchumLog.error("Failed to load console!", exc_info=err)
 else:
     _CONSOLE = True
 
@@ -65,7 +79,7 @@ except ImportError as e:
     if module.startswith("No module named ") or \
        module.startswith("cannot import name "):
         reqmissing.append(module[module.rfind(" ")+1:])
-    else: logging.critical(e)
+    else: PchumLog.critical(e)
     del module
 
 # Because pygame intro msg :3c
@@ -80,11 +94,11 @@ except ImportError as e:
     pygame = None
     module = str(e)
     if module[:16] == "No module named ": optmissing.append(module[16:])
-    else: logging.critical(e)
+    else: PchumLog.critical(e)
     del module
 if reqmissing:
-    logging.critical("ERROR: The following modules are required for Pesterchum to run and are missing on your system:")
-    for m in reqmissing: logging.critical("* "+m)
+    PchumLog.critical("ERROR: The following modules are required for Pesterchum to run and are missing on your system:")
+    for m in reqmissing: PchumLog.critical("* "+m)
     # False flag for some reason.
     #exit()
 vnum = QtCore.qVersion()
@@ -94,8 +108,8 @@ if vnum.find(".", vnum.find(".")+1) != -1:
 else:
     minor = int(vnum[vnum.find(".")+1:])
 if not ((major > 5) or (major == 5 and minor >= 0)):
-    logging.critical("ERROR: Pesterchum requires at least Qt version >= 5.0")
-    logging.critical("You currently have version " + vnum + ". Please upgrade Qt.")
+    PchumLog.critical("ERROR: Pesterchum requires at least Qt version >= 5.0")
+    PchumLog.critical("You currently have version " + vnum + ". Please upgrade Qt.")
     exit()
 
 from version import _pcVersion
@@ -113,50 +127,53 @@ _datadir = ostools.getDataDir()
 #   (on Linux, same as using xdg). To stay safe with older versions, copy any
 #   data (profiles, logs, etc) from old location to new data directory.
 
-if ('--logging' in sys.argv[1:]) or ('-l' in sys.argv[1:]) & (False == ('--logging' in sys.argv[1:]) and ('-l' in sys.argv[1:])):
-    try:
-        # If both are specified, this does not run.
-        if ('-l' in sys.argv[1:]):
-            loglevel = sys.argv[sys.argv.index('-l') + 1]
-        if ('--logging' in sys.argv[1:]):
-            loglevel = sys.argv[sys.argv.index('--logging') + 1]
-
-        loglevel = loglevel.upper()
-        
-        if loglevel == "CRITICAL":
-            loglevel = 50
-            print("Logging Level is CRITICAL")
-        elif loglevel == "ERROR":
-            loglevel = 40
-            print("Logging Level is ERROR")
-        elif loglevel == "WARNING":
-            loglevel = 30
-            print("Logging Level is WARNING")
-        elif loglevel == "INFO":
-            loglevel = 20
-            print("Logging Level is INFO")
-        elif loglevel == "DEBUG":
-            loglevel = 10
-            print("Logging Level is DEBUG")
-        elif loglevel == "NOTSET":
-            loglevel = 0
-            print("Logging Level is NOTSET")
-        else:
-            raise Exception
-        logging.basicConfig(level=loglevel)
-
-        # Remove from argv because the rest of the code can't handle it :/
-        if ('-l' in sys.argv[1:]):
-                sys.argv.pop(sys.argv.index('-l') + 1)
-                sys.argv.pop(sys.argv.index('-l'))
-        if ('--logging' in sys.argv[1:]):
-            sys.argv.pop(sys.argv.index('--logging') + 1)
-            sys.argv.pop(sys.argv.index('--logging'))
-    except:
-        print("Invalid syntax.")
-        logging.basicConfig(level=30) # Warning
-else:
-    logging.basicConfig(level=30) # Warning
+#loglevel = 30# Warning (Default)
+#if ('--logging' in sys.argv[1:]) or ('-l' in sys.argv[1:]) & (False == ('--logging' in sys.argv[1:]) and ('-l' in sys.argv[1:])):
+#    try:
+#        # If both are specified, this does not run.
+#        if ('-l' in sys.argv[1:]):
+#            loglevel = sys.argv[sys.argv.index('-l') + 1]
+#        if ('--logging' in sys.argv[1:]):
+#            loglevel = sys.argv[sys.argv.index('--logging') + 1]
+#
+#        loglevel = loglevel.upper()
+#        
+#        if loglevel == "CRITICAL":
+#            loglevel = 50
+#            print("Logging Level is CRITICAL")
+#        elif loglevel == "ERROR":
+#            print("Logging Level is ERROR")
+#        elif loglevel == "WARNING":
+#            loglevel = 30
+#            print("Logging Level is WARNING")
+#        elif loglevel == "INFO":
+#            loglevel = 20
+#            print("Logging Level is INFO")
+#        elif loglevel == "DEBUG":
+#            loglevel = 10
+#            print("Logging Level is DEBUG")
+#        elif loglevel == "NOTSET":
+#            loglevel = 0
+#            print("Logging Level is NOTSET")
+#        else:
+#            raise Exception
+#        stream.setLevel(loglevel)
+#        Logfile.setLevel(loglevel)
+#        
+#        # Remove from argv because the rest of the code can't handle it :/
+#        if ('-l' in sys.argv[1:]):
+#                sys.argv.pop(sys.argv.index('-l') + 1)
+#                sys.argv.pop(sys.argv.index('-l'))
+#        if ('--logging' in sys.argv[1:]):
+#            sys.argv.pop(sys.argv.index('--logging') + 1)
+#            sys.argv.pop(sys.argv.index('--logging'))
+#    except:
+#        print("Invalid syntax.")
+#        stream.setLevel(loglevel)
+#        Logfile.setLevel(loglevel)
+#else:
+#    stream.setLevel(loglevel)
+#    Logfile.setLevel(loglevel)
 
 if _datadir:
     if not os.path.exists(_datadir):
@@ -399,7 +416,7 @@ class chumArea(RightClickTree):
 
     @QtCore.pyqtSlot()
     def beginNotify(self):
-        logging.info("BEGIN NOTIFY")
+        PchumLog.info("BEGIN NOTIFY")
         self.notify = True
 
     def getOptionsMenu(self):
@@ -1185,7 +1202,7 @@ class PesterWindow(MovingWindow):
         try:
             themeChecker(self.theme)
         except ThemeException as inst:
-            logging.error("Caught: " + inst.parameter)
+            PchumLog.error("Caught: " + inst.parameter)
             themeWarning = QtWidgets.QMessageBox(self)
             themeWarning.setText("Theme Error: %s" % inst)
             themeWarning.exec_()
@@ -1435,7 +1452,7 @@ class PesterWindow(MovingWindow):
                 code = "-"
             self.sendNotice.emit(code, RANDNICK)
         except:
-            logging.warning("No randomEncounter set in userconfig?")
+            PchumLog.warning("No randomEncounter set in userconfig?")
     
     @QtCore.pyqtSlot(QString, QString)
     def updateMsg(self, ver, url):
@@ -1673,9 +1690,9 @@ class PesterWindow(MovingWindow):
         win = self.console.window
         if win is None:
             # We have no console window; make one.
-            logging.info("Making a console....")
+            PchumLog.info("Making a console....")
             self.console.window = win = console.ConsoleWindow(parent=self)
-            logging.info("Console made.")
+            PchumLog.info("Console made.")
             # 'ConsoleWindow' object has no attribute 'windowClosed'
             win.finished.connect(self.consoleWindowClosed)
             self.console.shortcuts.curwgt.activated.connect(win.designateCurrentWidget)
@@ -1692,7 +1709,7 @@ class PesterWindow(MovingWindow):
                     continue
                 # No error, let's see if we're actually focused.
                 if focused:
-                    logging.debug(
+                    PchumLog.debug(
                             "{0!r} is in focus (parent: {1!r}); hiding".format(
                             wgt, wgt.parent())
                             )
@@ -1713,7 +1730,7 @@ class PesterWindow(MovingWindow):
                 # process/window that 'owns' this one changes our focus, since
                 # the application ultimately already *has* our focus - but I'm
                 # not sure.
-                logging.debug("Console isn't in focus; fixing")
+                PchumLog.debug("Console isn't in focus; fixing")
                 win.raise_()
                 win.show()
                 win.activateWindow()
@@ -1721,7 +1738,7 @@ class PesterWindow(MovingWindow):
                 win.text.input.setFocus()
                 # No need to explicitly set it as open; it already is.
         else:
-            logging.debug("Console not visible; showing")
+            PchumLog.debug("Console not visible; showing")
             # Console isn't visible - show it.
             win.show()
             self.console.is_open = True
@@ -1730,7 +1747,7 @@ class PesterWindow(MovingWindow):
     def consoleWindowClosed(self):
         self.console.is_open = False
         self.console.window = None
-        logging.info("Console closed.")
+        PchumLog.info("Console closed.")
 
     def newMemo(self, channel, timestr, secret=False, invite=False):
         if channel == "#pesterchum":
@@ -1956,7 +1973,7 @@ class PesterWindow(MovingWindow):
                 # We have pygame, so we may as well use it.
                 soundclass = pygame.mixer.Sound
             else:
-                logging.warning("Failed to define pygame mixer, is pygame imported?")
+                PchumLog.warning("Failed to define pygame mixer, is pygame imported?")
                 soundclass = NoneSound
 
         self.sound_type = soundclass
@@ -1972,7 +1989,7 @@ class PesterWindow(MovingWindow):
             self.ceasesound = soundclass(self.theme["main/sounds/ceasesound"])
             self.honksound = soundclass("themes/honk.wav")
         except Exception as err:
-            logging.error("Warning: Error loading sounds! ({0!r})".format(err))
+            PchumLog.error("Warning: Error loading sounds! ({0!r})".format(err))
             self.alarm = NoneSound()
             self.memosound = NoneSound()
             self.namesound = NoneSound()
@@ -1997,7 +2014,7 @@ class PesterWindow(MovingWindow):
                     sound.setVolume(vol)
             except Exception as err:
                 # Why was this set as "info"? ?w?
-                logging.warning("Couldn't set volume: {}".format(err))
+                PchumLog.warning("Couldn't set volume: {}".format(err))
 
     def canSetVolume(self):
         """Returns the state of volume setting capabilities."""
@@ -2153,7 +2170,7 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot(QString, QtGui.QColor)
     def updateColorSlot(self, handle, color):
-        logging.debug("updateColorSlot, "+ str(handle) +", " + str(color))
+        PchumLog.debug("updateColorSlot, "+ str(handle) +", " + str(color))
         h = str(handle)
         self.changeColor(h, color)
 
@@ -2899,7 +2916,7 @@ class PesterWindow(MovingWindow):
                 if newmodes:
                     self.setChannelMode.emit(self.profile().handle, newmodes, "")
         except Exception as e:
-            logging.error(e)
+            PchumLog.error(e)
         finally:
             self.optionmenu = None
 
@@ -3025,7 +3042,7 @@ class PesterWindow(MovingWindow):
                 code = "-"
             self.sendNotice.emit(code, RANDNICK)
         except:
-            logging.warning("No randomEncounter set in userconfig?")
+            PchumLog.warning("No randomEncounter set in userconfig?")
             
     def aboutPesterchum(self):
         if hasattr(self, 'aboutwindow') and self.aboutwindow:
@@ -3107,7 +3124,7 @@ class PesterWindow(MovingWindow):
         self.irc = irc
 
     def updateServerJson(self):
-        logging.info(self.customServerPrompt_qline.text() + " chosen")
+        PchumLog.info(self.customServerPrompt_qline.text() + " chosen")
 
         server_and_port = self.customServerPrompt_qline.text().split(':')
 
@@ -3117,7 +3134,7 @@ class PesterWindow(MovingWindow):
                 "port": int(server_and_port[1]),# to make sure port is a valid integer, and raise an exception if it cannot be converted.
                 "TLS": self.TLS_checkbox.isChecked()
                 }
-            logging.info("server:    "+str(server))
+            PchumLog.info("server:    "+str(server))
         except:
             msgbox = QtWidgets.QMessageBox()
             msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
@@ -3138,7 +3155,7 @@ class PesterWindow(MovingWindow):
                 server_file.write(json.dumps(server_list_obj, indent = 4))
                 server_file.close()
         except:
-                logging.error("failed")
+                PchumLog.error("failed")
 
         # Go back to original screen
         self.chooseServer()
@@ -3150,7 +3167,7 @@ class PesterWindow(MovingWindow):
                                         "TLS": True
                                     }]
         if os.path.isfile(_datadir + "serverlist.json"):
-            logging.error("Failed to load server list from serverlist.json.")
+            PchumLog.error("Failed to load server list from serverlist.json.")
             msgbox = QtWidgets.QMessageBox()
             msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
             msgbox.setWindowIcon(PesterIcon(self.theme["main/icon"]))
@@ -3168,7 +3185,7 @@ class PesterWindow(MovingWindow):
                     server_file.close()
 
         else:
-            logging.warning("Failed to load server list because serverlist.json doesn't exist, " \
+            PchumLog.warning("Failed to load server list because serverlist.json doesn't exist, " \
                 + "this isn't an issue if this is the first time Pesterchum has been started.")
             with open(_datadir + "serverlist.json", "w") as server_file:
                     server_file.write(json.dumps(default_server_list, indent = 4) )
@@ -3203,7 +3220,7 @@ class PesterWindow(MovingWindow):
                     server_file.write(json.dumps(server_list_obj, indent = 4))
                     server_file.close()
             except:
-                    logging.error("failed")
+                    PchumLog.error("failed")
 
 
         self.chooseServer()
@@ -3276,7 +3293,7 @@ class PesterWindow(MovingWindow):
                     self.resetServerlist()
                     return 1
         
-            logging.info("server_list_items:    " + str(server_list_items))
+            PchumLog.info("server_list_items:    " + str(server_list_items))
             
             # Widget 1
             self.chooseRemoveServerWidged = QtWidgets.QDialog()
@@ -3318,7 +3335,7 @@ class PesterWindow(MovingWindow):
             self.chooseRemoveServerWidged.show()
             self.chooseRemoveServerWidged.setFocus()
         else:
-            logging.info(self.serverBox.currentText() + " chosen.")
+            PchumLog.info(self.serverBox.currentText() + " chosen.")
 
             with open(_datadir + "serverlist.json", "r") as server_file:
                 read_file = server_file.read()
@@ -3341,7 +3358,7 @@ class PesterWindow(MovingWindow):
                     server_file.write(json.dumps(json_server_file, indent = 4) )
                     server_file.close()
             except:
-                    logging.error("Failed to set server :(")
+                    PchumLog.error("Failed to set server :(")
 
             # Continue running Pesterchum as usual
             pesterchum.irc.start()
@@ -3366,7 +3383,7 @@ class PesterWindow(MovingWindow):
                 self.resetServerlist()
                 return 1
     
-        logging.info("server_list_items:    " + str(server_list_items))
+        PchumLog.info("server_list_items:    " + str(server_list_items))
         
         # Widget 1
         self.chooseServerWidged = QtWidgets.QDialog()
@@ -3482,8 +3499,8 @@ class MainProgram(QtCore.QObject):
                 windll.shell32.SetCurrentProcessExplicitAppUserModelID(wid)
             except Exception as err:
                 # Log, but otherwise ignore any exceptions.
-                logging.error("Failed to set AppUserModel ID: {0}".format(err))
-                logging.error("Attempted to set as {0!r}.".format(wid))
+                PchumLog.error("Failed to set AppUserModel ID: {0}".format(err))
+                PchumLog.error("Attempted to set as {0!r}.".format(wid))
             # Back to our scheduled program.
 
         self.app = QtWidgets.QApplication(sys.argv)
@@ -3812,7 +3829,7 @@ Click this message to never see this again.")
         return options
 
     def run(self):
-        #logging.critical("mreowww") <--- debug thingy :3
+        #PchumLog.critical("mreowww") <--- debug thingy :3
         sys.exit(self.app.exec_())
 
 def _retrieveGlobals():

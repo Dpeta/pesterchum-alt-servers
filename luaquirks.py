@@ -1,4 +1,7 @@
-import os, sys, re, ostools, logging
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
+import os, sys, re, ostools
 try:
     import lua
 except ImportError:
@@ -18,7 +21,7 @@ class LuaQuirks(ScriptQuirks):
         try:
             return lua.require(name)
         except Error as e:
-            logging.error(e)
+            PchumLog.error(e)
             return None
         finally:
             os.chdir(CurrentDir)
@@ -52,7 +55,7 @@ class LuaQuirks(ScriptQuirks):
                     raise Exception
             except:
                 #print("Quirk malformed: %s" % (name))
-                logging.error("Quirk malformed: %s" % (name))
+                PchumLog.error("Quirk malformed: %s" % (name))
                 
                 # Since this is executed before QApplication is constructed,
                 # This prevented pesterchum from starting entirely when a quirk was malformed :/

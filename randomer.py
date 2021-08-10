@@ -1,5 +1,7 @@
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
 from PyQt5 import QtCore, QtGui, QtWidgets
-import logging
 
 RANDNICK = "randomEncounter"
 
@@ -66,5 +68,5 @@ class RandomHandler(QtCore.QObject):
                 msgbox.exec_()
                 return
             name = str(l[1])
-            logging.info("Random Encounter name is: " + name)
+            PchumLog.info("Random Encounter name is: " + name)
             self.mainwindow.newConversation(name)

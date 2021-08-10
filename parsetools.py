@@ -1,3 +1,6 @@
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
 import re
 import random
 import ostools
@@ -11,7 +14,6 @@ from quirks import ScriptQuirks
 from pyquirks import PythonQuirks
 from luaquirks import LuaQuirks
 import dataobjs
-import logging
 
 # karxi: My own contribution to this - a proper lexer.
 import pnc.lexercon as lexercon
@@ -44,7 +46,7 @@ quirkloader.add(PythonQuirks())
 quirkloader.add(LuaQuirks())
 quirkloader.loadAll()
 # Quirks are already listed in quirks.py, so logging is redundant here. 
-#logging.debug(quirkloader.funcre())
+#PchumLog.debug(quirkloader.funcre())
 quirkloader.funcre()
 _functionre = re.compile(r"%s" % quirkloader.funcre())
 _groupre = re.compile(r"\\([0-9]+)")
@@ -402,7 +404,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
     while len(lexed) > 0:
         rounds += 1
         if debug:
-            logging.info("[Starting round {}...]".format(rounds))
+            PchumLog.info("[Starting round {}...]".format(rounds))
         msg = lexed.popleft()
         msglen = 0
         is_text = False
@@ -443,7 +445,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
                     # instead?
                     subround += 1
                     if debug:
-                        logging.info("[Splitting round {}-{}...]".format(
+                        PchumLog.info("[Splitting round {}-{}...]".format(
                                 rounds, subround
                                 ))
                     point = msg.rfind(' ', 0, lenl)
@@ -458,12 +460,12 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
                     # Remove what we just added.
                     msg = msg[point:]
                     if debug:
-                        logging.info("msg = {!r}".format(msg))
+                        PchumLog.info("msg = {!r}".format(msg))
                 else:
                     # Catch the remainder.
                     stack.append(msg)
                     if debug:
-                        logging.info("msg caught; stack = {!r}".format(stack))
+                        PchumLog.info("msg caught; stack = {!r}".format(stack))
                 # Done processing. Pluck out the first portion so we can
                 # continue processing, clean it up a bit, then add the rest to
                 # our waiting list.

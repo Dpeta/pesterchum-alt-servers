@@ -1,4 +1,7 @@
-import os, sys, re, ostools, logging
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
+import os, sys, re, ostools
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class ScriptQuirks(object):
@@ -20,7 +23,7 @@ class ScriptQuirks(object):
         self.last = self.quirks.copy()
         self.quirks.clear()
         for script in self.scripts:
-            logging.info(script.getExtension())
+            PchumLog.info(script.getExtension())
             script.load()
             #print script.quirks
             for q in script.quirks:
@@ -33,9 +36,9 @@ class ScriptQuirks(object):
         if self.quirks:
             # See https://stackoverflow.com/questions/12843099/python-logging-typeerror-not-all-arguments-converted-during-string-formatting
             reg_quirks = ('Registered quirks:', '(), '.join(self.quirks) + "()")
-            logging.info(reg_quirks)
+            PchumLog.info(reg_quirks)
         else:
-            logging.warning("Couldn't find any script quirks")
+            PchumLog.warning("Couldn't find any script quirks")
 
     def add(self, script):
         self.scripts.append(script)

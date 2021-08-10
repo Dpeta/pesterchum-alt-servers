@@ -1,3 +1,6 @@
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
 from string import Template
 import re
 from copy import copy
@@ -12,7 +15,6 @@ from parsetools import convertTags, addTimeInitial, timeProtocol, \
     lexMessage, colorBegin, colorEnd, mecmd, smiledict
 import parsetools
 from logviewer import PesterLogViewer
-import logging
 
 try:
     QString = unicode
@@ -890,7 +892,7 @@ class PesterMemo(PesterConvo):
         if c.lower() == self.channel.lower():
             self.mainwindow.inviteOnlyChan['QString'].disconnect(self.closeInviteOnly)
             if self.parent():
-                logging.info(self.channel)
+                PchumLog.info(self.channel)
                 i = self.parent().tabIndices[self.channel]
                 self.parent().tabClose(i)
             else:

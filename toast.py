@@ -1,8 +1,10 @@
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
 import inspect
 #import threading
 import time, os
 import ostools
-import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 try:
@@ -24,7 +26,7 @@ class DefaultToast(object):
         if t.title == self.title and t.msg == self.msg and t.icon == self.icon:
             self.machine.toasts.pop(0)
             self.machine.displaying = False
-            logging.info("Done")
+            PchumLog.info("Done")
 
 class ToastMachine(object):
     class __Toast__(object):
@@ -143,7 +145,7 @@ class ToastMachine(object):
         if type in self.types:
             if type == "libnotify":
                 if not pynotify or not pynotify.init("ToastMachine"):
-                    logging.info("Problem initilizing pynotify")
+                    PchumLog.info("Problem initilizing pynotify")
                     return
                     #self.type = type = "default"
             elif type == "twmn":
@@ -151,7 +153,7 @@ class ToastMachine(object):
                 try:
                     pytwmn.init()
                 except pytwmn.ERROR as e:
-                    logging.error("Problem initilizing pytwmn: " + str(e))
+                    PchumLog.error("Problem initilizing pytwmn: " + str(e))
                     return
                     #self.type = type = "default"
             self.type = type
@@ -179,7 +181,7 @@ class ToastMachine(object):
 
 class PesterToast(QtWidgets.QWidget, DefaultToast):
     def __init__(self, machine, title, msg, icon, time=3000, parent=None):
-        logging.info(isinstance(parent, QtWidgets.QWidget))
+        PchumLog.info(isinstance(parent, QtWidgets.QWidget))
         kwds = dict(machine=machine, title=title, msg=msg, icon=icon)
         super().__init__(parent, **kwds)
 

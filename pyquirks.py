@@ -1,7 +1,9 @@
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
 import os, sys, imp, re, ostools
 from quirks import ScriptQuirks
 from PyQt5 import QtCore, QtGui, QtWidgets
-import logging
 
 class PythonQuirks(ScriptQuirks):
     def loadModule(self, name, filename):
@@ -27,7 +29,7 @@ class PythonQuirks(ScriptQuirks):
                         raise Exception
                 except:
                     #print("Quirk malformed: %s" % (obj.command))
-                    logging.error("Quirk malformed: %s" % (obj.command))
+                    PchumLog.error("Quirk malformed: %s" % (obj.command))
 
                     # Since this is executed before QApplication is constructed,
                     # This prevented pesterchum from starting entirely when a quirk was malformed :/

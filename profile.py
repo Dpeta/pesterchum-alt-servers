@@ -1,4 +1,6 @@
-import logging
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
 import os
 from string import Template
 import json
@@ -509,7 +511,7 @@ class userProfile(object):
             for (i,m) in enumerate(mentions):
                 re.compile(m)
         except re.error as e:
-            logging.error("#%s Not a valid regular expression: %s" % (i, e))
+            PchumLog.error("#%s Not a valid regular expression: %s" % (i, e))
         else:
             self.mentions = mentions
             self.userprofile["mentions"] = mentions
