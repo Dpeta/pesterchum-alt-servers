@@ -22,7 +22,8 @@ includefiles = ["quirks",
                 "LICENSE",
                 "CHANGELOG.md",
                 "PCskins.png",
-                "Pesterchum.png"]
+                "Pesterchum.png",
+                "logging.conf"]
 build_exe_options = {
 ##    "includes": ["PyQt5.QtCore",
 ##                 "PyQt5.QtGui",
