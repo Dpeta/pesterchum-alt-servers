@@ -71,7 +71,8 @@
              "loc": [279, 5]},
   "minimize": { "image": "$path/minimize.png",
                 "loc": [262, 5]},
-  "chums": { "style": "background: #c3c3c3 url($path/chumbg.png) repeat-x top left; background-attachment: fixed;border:0px solid dicks;font-size:14px;font-family: 'arial'; color: #000000",
+  "chums": { "style": "background: #c3c3c3 url($path/chumbg.png) repeat-x top left; background-attachment: fixed;border:0px solid dicks;font-size:14px;font-family: 'arial'; color: #000000;",
+             "userlistcolor": "black",
 				
 				
 				"loc": [12, 110],
