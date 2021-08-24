@@ -269,6 +269,7 @@ class PesterIRC(QtCore.QThread):
         c = str(channel)
         m = str(mode)
         cmd = str(command)
+        PchumLog.debug("c=%s\nm=%s\ncmd=%s" % (c,m,cmd))
         if cmd == "":
             cmd = None
         try:
@@ -469,36 +470,87 @@ class PesterHandler(DefaultCommandHandler):
                 self.parent.mainwindow.randhandler.setRunning(True)
             self.parent.moodUpdated.emit(handle, Mood("chummy"))
     def mode(self, op, channel, mode, *handles):
-        #channel = channel.decode('utf-8')
+        PchumLog.debug("op=" + str(op))
+        PchumLog.debug("channel=" + str(channel))
+        PchumLog.debug("mode=" + str(mode))
+        PchumLog.debug("*handles=" + str(handles))
+
         if len(handles) <= 0: handles = [""]
-        #opnick = op.decode('utf-8')[0:op.decode('utf-8').find("!")]
         opnick = op[0:op.find("!")]
-        if op == channel or channel == self.parent.mainwindow.profile().handle:
+        PchumLog.debug("opnick=" + opnick)
+
+        # Channel section
+        # Okay so, as I understand it channel modes will always be applied to a channel even if the commands also sets a mode to a user.
+        # So "MODE #channel +ro handleHandle" will set +r to channel #channel as well as set +o to handleHandle
+        # Therefore the bellow method causes a crash if both user and channel mode are being set in one command.
+
+        #if op == channel or channel == self.parent.mainwindow.profile().handle:
+        #    modes = list(self.parent.mainwindow.modes)
+        #    if modes and modes[0] == "+": modes = modes[1:]
+        #    if mode[0] == "+":
+        #        for m in mode[1:]:
+        #            if m not in modes:
+        #                modes.extend(m)
+        #    elif mode[0] == "-":
+        #        for i in mode[1:]:
+        #            try:
+        #                modes.remove(i)
+        #            except ValueError:
+        #                pass
+        #    modes.sort()
+        #    self.parent.mainwindow.modes = "+" + "".join(modes)
+
+
+        # EXPIRIMENTAL FIX
+        # No clue how stable this is but since it doens't seem to cause a crash it's probably an improvement.
+        # This might be clunky with non-unrealircd IRC servers
+        channel_mode = ""
+        unrealircd_channel_modes = ['c', 'C', 'd', 'f', 'G', 'H', 'i', 'k', 'K', 'L', 'l', 'm', 'M', 'N', 'n', 'O', 'P', 'p', 'Q', 'R', 'r', 's', 'S', 'T', 't', 'V', 'z', 'Z']
+        if any(md in mode for md in unrealircd_channel_modes):
+            PchumLog.debug("Channel mode in string.")
             modes = list(self.parent.mainwindow.modes)
-            if modes and modes[0] == "+": modes = modes[1:]
-            if mode[0] == "+":
-                for m in mode[1:]:
-                    if m not in modes:
-                        modes.extend(m)
-            elif mode[0] == "-":
-                for i in mode[1:]:
-                    try:
-                        modes.remove(i)
-                    except ValueError:
-                        pass
+            for md in unrealircd_channel_modes:
+                if mode.find(md)!= -1: # -1 means not found
+                    PchumLog.debug("md=" + md)
+                    if mode[0] == "+":
+                        modes.extend(md)
+                        channel_mode = "+"  + md
+                    elif mode[0] == "-":
+                        try:
+                            modes.remove(md)
+                            channel_mode = "-" + md
+                        except ValueError:
+                            PchumLog.warning("Can't remove channel mode that isn't set.")
+                            pass
+                    self.parent.userPresentUpdate.emit("", channel, channel_mode+":%s" % (op))
+                    PchumLog.debug("pre-mode=" + str(mode))
+                    mode = mode.replace(md, "")
+                    PchumLog.debug("post-mode=" + str(mode))
             modes.sort()
             self.parent.mainwindow.modes = "+" + "".join(modes)
+            
         modes = []
         cur = "+"
         for l in mode:
             if l in ["+","-"]: cur = l
             else:
                 modes.append("%s%s" % (cur, l))
+        PchumLog.debug("handles=" + str(handles))
+        PchumLog.debug("enumerate(modes) = " + str(list(enumerate(modes))))
         for (i,m) in enumerate(modes):
-            try:
-                self.parent.userPresentUpdate.emit(handles[i], channel, m+":%s" % (op))
-            except IndexError:
-                self.parent.userPresentUpdate.emit("", channel, m+":%s" % (op))
+
+            # Server-set usermodes don't need to be passed.
+            if (handles == "") & ( ('x' in m) | ('z' in m) | ('o' in m) )!=True:
+                try:
+                    self.parent.userPresentUpdate.emit(handles[i], channel, m+":%s" % (op))
+                except:
+                    PchumLog.exception('')
+                    
+                #self.parent.userPresentUpdate.emit(handles[i], channel, m+":%s" % (op))
+            # Passing an empty handle here might cause a crash.
+            #except IndexError:
+                #self.parent.userPresentUpdate.emit("", channel, m+":%s" % (op))
+                
     def nick(self, oldnick, newnick):
         oldhandle = oldnick[0:oldnick.find("!")]
         if oldhandle == self.mainwindow.profile().handle:

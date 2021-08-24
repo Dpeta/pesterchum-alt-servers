@@ -15,6 +15,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
+
 import logging
 import socket
 import sys
@@ -215,6 +219,8 @@ class IRCClient:
 
                     data = buffer.split(bytes("\n", "UTF-8"))
                     buffer = data.pop()
+
+                    PchumLog.debug("data = " + str(data))
 
                     for el in data:
                         prefix, command, args = parse_raw_irc_command(el)

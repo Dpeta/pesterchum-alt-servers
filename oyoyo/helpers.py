@@ -17,6 +17,9 @@
 
 """ contains helper functions for common irc commands """
 
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
 import random
 
 def msg(cli, user, msg):
@@ -42,6 +45,8 @@ def kick(cli, handle, channel, reason=""):
     cli.send("KICK %s %s %s" % (channel, handle, reason))
 
 def mode(cli, channel, mode, options=None):
+    PchumLog.debug("mode = " + str(mode))
+    PchumLog.debug("options = " + str(options))
     cmd = "MODE %s %s" % (channel, mode)
     if options:
         cmd += " %s" % (options)

@@ -1,6 +1,17 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.1.3.1] - 2021-8-24
+
+### Added
+ - Memo messages for the following channel modes: zMQNRODGPCrR (see https://www.unrealircd.org/docs/Channel_Modes for info)
+    - (Memo messages for registration is pretty much the only useful one out of these.)
+ - More comprehensive logging for DEBUG (Might be a bit obtuse so I'll probably make it more consistent later).
+
+### Fixed
+ - Rewrote channel mode function to fix crash when user and channel modes were set in a single command, this also fixes:
+    - Crash when being the only person in a non-persistent memo you own while having autoop enabled (with nickServ). 
+
 ## [v2.1.3] - 2021-8-09
 
 ### Added
@@ -18,6 +29,7 @@
 
 ### Changed
 - Honk emote now only triggers when typing ':honk:' instead of on every 'honk'.
+- Logging is now configured in logging.conf and logs are also writen to pesterchum.log by default.
 
 ## [v2.1.2] - 2021-4-16
 

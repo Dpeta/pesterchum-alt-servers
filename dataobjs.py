@@ -1,3 +1,6 @@
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
 from PyQt5 import QtCore, QtGui
 from datetime import *
 import re
@@ -167,7 +170,15 @@ class PesterProfile(object):
         caps = [l for l in handle if l.isupper()]
         if not caps:
             caps = [""]
-        initials = (handle[0]+caps[0]).upper()
+        PchumLog.debug("handle = " + str(handle))
+        PchumLog.debug("caps = " + str(caps))
+        # Fallback for invalid string
+        try:
+            initials = (handle[0]+caps[0]).upper()
+        except:
+            PchumLog.exception('')
+            initials = "XX"
+        PchumLog.debug("initials = " + str(initials))
         if hasattr(self, 'time') and time:
             if self.time > time:
                 return "F"+initials
@@ -176,7 +187,7 @@ class PesterProfile(object):
             else:
                 return "C"+initials
         else:
-            return (handle[0]+caps[0]).upper()
+            return initials
     def colorhtml(self):
         if self.color:
             return self.color.name()
@@ -227,7 +238,9 @@ class PesterProfile(object):
     def memoopenmsg(self, syscolor, td, timeGrammar, verb, channel):
         (temporal, pcf, when) = (timeGrammar.temporal, timeGrammar.pcf, timeGrammar.when)
         timetext = timeDifference(td)
+        PchumLog.debug("pre pcf+self.initials()")
         initials = pcf+self.initials()
+        PchumLog.debug("post pcf+self.initials()")
         return "<c=%s><c=%s>%s</c> %s %s %s.</c>" % \
             (syscolor.name(), self.colorhtml(), initials, timetext, verb, channel[1:].upper().replace("_", " "))
     def memobanmsg(self, opchum, opgrammar, syscolor, initials, reason):

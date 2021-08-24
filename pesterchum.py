@@ -2258,6 +2258,7 @@ class PesterWindow(MovingWindow):
     def userPresentUpdate(self, handle, channel, update):
         c = str(channel)
         n = str(handle)
+        PchumLog.debug("c=%s\nn=%s\nupdate=%s\n" % (c, n, update))
         if update == "nick":
             l = n.split(":")
             oldnick = l[0]
@@ -2297,6 +2298,7 @@ class PesterWindow(MovingWindow):
             except KeyError:
                 self.namesdb[c] = [n]
 
+        PchumLog.debug("handle=%s\nchannel=%s\nupdate=%s\n" % (handle, channel, update))
         self.userPresentSignal.emit(handle, channel, update)
 
     @QtCore.pyqtSlot()

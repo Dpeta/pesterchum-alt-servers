@@ -14,6 +14,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import logging, logging.config
+logging.config.fileConfig('logging.conf')
+PchumLog = logging.getLogger('pchumLogger')
 
 import inspect
 import logging
@@ -105,11 +108,12 @@ class CommandHandler(object):
 
         # Because more than 5 arguments can be passed by channelmodeis
         try:
-            if str(command) == 'channelmodeis':
+            #if str(command) == 'channelmodeis':
                 # This might be stupid :)
-                f(*args[0:4])
-            else:
-                f(*args)
+                # Update: This was very stupid
+            #f(*args[0:4])
+            #else:
+            f(*args)
         except Exception as e:
             #logging.error('command raised '+ command + str())
             logging.error('command args: ' + str([*args]))
@@ -188,7 +192,7 @@ class BotCommandHandler(DefaultCommandHandler):
         and calls self.processBotCommand(cmd, sender) if its is.
         """
     
-        logging.debug("tryBotCommand('%s' '%s' '%s')" % (prefix, dest, msg))
+        PchumLog.debug("tryBotCommand('%s' '%s' '%s')" % (prefix, dest, msg))
 
         if dest == self.client.nick:
             dest = parse_nick(prefix)[0]
