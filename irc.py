@@ -540,7 +540,7 @@ class PesterHandler(DefaultCommandHandler):
         for (i,m) in enumerate(modes):
 
             # Server-set usermodes don't need to be passed.
-            if (handles == "") & ( ('x' in m) | ('z' in m) | ('o' in m) | ('x' in m) )!=True:
+            if (handles == ['']) & ( ('x' in m) | ('z' in m) | ('o' in m) | ('x' in m) )!=True:
                 try:
                     self.parent.userPresentUpdate.emit(handles[i], channel, m+":%s" % (op))
                 except:
