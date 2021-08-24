@@ -22,14 +22,15 @@
 ### Fixed
 - Crash when opening invite-only memo. (My bad-)
 - Random encounters occasionally not being disabled when switched off. (RE bot is now updated after connect and on profile switch.)
-- A few memo/convo related syntax errors in a few themes
+- A few memo/convo related syntax errors in a few themes.
 - nothing.png being missing in some themes.
-- 64-bit crt for PyInstaller 
-- Manual sort not working
+- 64-bit crt for PyInstaller.
+- Manual chumroll sorting not working.
 
 ### Changed
 - Honk emote now only triggers when typing ':honk:' instead of on every 'honk'.
 - Logging is now configured in logging.conf and logs are also writen to pesterchum.log by default.
+- Warnings/Errors are now logged to pesterchum.log as well as console.
 
 ## [v2.1.2] - 2021-4-16
 
