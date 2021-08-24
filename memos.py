@@ -791,109 +791,91 @@ class PesterMemo(PesterConvo):
 
             #New
             if modes.find("C") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "No-CTCP", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("D") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Join Delayed", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("f") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Flood Protected", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("G") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Censored", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("H") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Remembering Chat History", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("k") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Key-only", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("K") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "No-Knock", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("L") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Redirecting", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("K") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "No-Knock", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("l") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Limiting maximum amount of users", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("M") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Non-Auth muted", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("N") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Handle-locked", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("O") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "An Oper-Only channel", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("P") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Permanent", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("Q") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "No-kick", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("R") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Registered users only", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("r") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Registered", True)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("z") >= 0:
-                self.chanMod.setChecked(True)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Secure-only", True)
                     self.textArea.append(convertTags(msg))
@@ -931,109 +913,91 @@ class PesterMemo(PesterConvo):
 
             #New
             if modes.find("C") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "No-CTCP", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("D") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Join Delayed", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("f") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Flood Protected", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("G") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Censored", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("H") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Remembering Chat History", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("k") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Key-only", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("K") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "No-Knock", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("L") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Redirecting", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("K") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "No-Knock", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("l") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Limiting maximum amount of users", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("M") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Non-Auth muted", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("N") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Handle-locked", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("O") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "An Oper-Only channel", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("P") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Permanent", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("Q") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "No-kick", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("R") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Registered users only", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("r") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Registered", False)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             if modes.find("z") >= 0:
-                self.chanMod.setChecked(False)
                 if op:
                     msg = chum.memomodemsg(opchum, opgrammar, systemColor, "Secure-only", False)
                     self.textArea.append(convertTags(msg))

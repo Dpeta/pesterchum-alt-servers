@@ -21,11 +21,11 @@ except NameError:
     # Python 3
     QString = str
 
-if ostools.isOSXBundle():
-    logging.basicConfig(level=logging.WARNING)
-else:
-    # karxi; We do NOT need this set to INFO; it's very, very spammy.
-    logging.basicConfig(level=logging.WARNING)
+#if ostools.isOSXBundle():
+#    logging.basicConfig(level=logging.WARNING)
+#else:
+#    # karxi; We do NOT need this set to INFO; it's very, very spammy.
+#    logging.basicConfig(level=logging.WARNING)
 
 class PesterIRC(QtCore.QThread):
     def __init__(self, config, window):
@@ -502,7 +502,7 @@ class PesterHandler(DefaultCommandHandler):
 
 
         # EXPIRIMENTAL FIX
-        # No clue how stable this is but since it doens't seem to cause a crash it's probably an improvement.
+        # No clue how stable this is but since it doesn't seem to cause a crash it's probably an improvement.
         # This might be clunky with non-unrealircd IRC servers
         channel_mode = ""
         unrealircd_channel_modes = ['c', 'C', 'd', 'f', 'G', 'H', 'i', 'k', 'K', 'L', 'l', 'm', 'M', 'N', 'n', 'O', 'P', 'p', 'Q', 'R', 'r', 's', 'S', 'T', 't', 'V', 'z', 'Z']
@@ -540,7 +540,7 @@ class PesterHandler(DefaultCommandHandler):
         for (i,m) in enumerate(modes):
 
             # Server-set usermodes don't need to be passed.
-            if (handles == "") & ( ('x' in m) | ('z' in m) | ('o' in m) )!=True:
+            if (handles == "") & ( ('x' in m) | ('z' in m) | ('o' in m) | ('x' in m) )!=True:
                 try:
                     self.parent.userPresentUpdate.emit(handles[i], channel, m+":%s" % (op))
                 except:
