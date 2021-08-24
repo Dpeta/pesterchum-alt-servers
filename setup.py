@@ -61,7 +61,7 @@ build_exe_options = {
         'PyQt5.QtDesigner',
         'PyQt5.QAxContainer',],
     "include_files": includefiles,
-    "include_msvcr": True
+    "include_msvcr": False# cx_freeze copies 64-bit binaries always?
 }
 
 bdist_mac_options = {
