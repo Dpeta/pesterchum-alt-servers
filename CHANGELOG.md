@@ -1,6 +1,12 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.1.3.1] - 2021-9-18
+
+### Fixed
+ - Crash for certain invalid values of PESTERCHUM:TIME>
+
+
 ## [v2.1.3.1] - 2021-8-24
 
 ### Added

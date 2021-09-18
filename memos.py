@@ -1021,14 +1021,18 @@ class PesterMemo(PesterConvo):
             s = (timed.seconds // 60)*60
             timed = timedelta(timed.days, s)
         except ValueError:
-            if cmd == "i":
-                timed = timedelta(0)
-            else:
-                if cmd[len(cmd)-1] == 'c':
-                    close = timeProtocol(cmd)
-                    timed = None
+            try:
+                if cmd == "i":
+                    timed = timedelta(0)
                 else:
-                    timed = timeProtocol(cmd)
+                    if cmd[len(cmd)-1] == 'c':
+                        close = timeProtocol(cmd)
+                        timed = None
+                    else:
+                        timed = timeProtocol(cmd)
+            except:
+                PchumLog.warning("Invalid PESTERCHUM:TIME> " + str(cmd))
+                timed = timedelta(0)
 
         if handle in self.times:
             if close is not None:
