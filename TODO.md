@@ -11,4 +11,3 @@
  - Right click menu's color doesn't get updated on theme change in memos.
  - Closed windows sometimes stay open.
  - help() causes console to crash...? 
- - Manual chumdroid sorting not working.
