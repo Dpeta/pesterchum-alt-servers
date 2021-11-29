@@ -932,7 +932,7 @@ class chumArea(RightClickTree):
                 gname = str(gname)
                 if re.search("[^A-Za-z0-9_\s]", gname) is not None:
                     msgbox = QtWidgets.QMessageBox()
-                    msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
+                    msgbox.setStyleSheet("QMessageBox{" + self.mainwindow.theme["main/defaultwindow/style"] + "}")
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
                     msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
                     ret = msgbox.exec_()
