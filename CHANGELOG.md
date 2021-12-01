@@ -1,11 +1,13 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
-## [v2.1.3.1] - 2021-9-18
+## [v2.1.3.2] - 2021-12-1
 
 ### Fixed
  - Crash for certain invalid values of PESTERCHUM:TIME>
-
+ - Fixed invalid group name causing a crash
+ - "Fixed" toast related mac crash?
+ - Re-enabled include_msvcr for setup.py (Should hopefully actually work now)
 
 ## [v2.1.3.1] - 2021-8-24
 

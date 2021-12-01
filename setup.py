@@ -14,6 +14,14 @@ base = None
 if sys.platform == "win32":
     base = "Win32GUI"
 
+    path = sys.path
+    if is_64bit() == True:
+        path.append(r"C:\Program Files (x86)\Windows Kits\10\Redist\10.0.22000.0\ucrt\DLLs\x64")
+    elif is_64bit() == False:
+        path.append(r"C:\Program Files (x86)\Windows Kits\10\Redist\10.0.22000.0\ucrt\DLLs\x86")
+        
+    print("Path = " + str(path))
+    
 includefiles = ["quirks",
                 "smilies",
                 "themes",
@@ -61,7 +69,9 @@ build_exe_options = {
         'PyQt5.QtDesigner',
         'PyQt5.QAxContainer',],
     "include_files": includefiles,
-    "include_msvcr": False# cx_freeze copies 64-bit binaries always?
+    "include_msvcr": True,  # cx_freeze copies 64-bit binaries always?
+    "path": path            # Improved in 6.6, path to be safe
+                            # VCRUNTIME140.dll <3
 }
 
 bdist_mac_options = {
