@@ -14,7 +14,7 @@ except NameError:
 if os.path.dirname(sys.argv[0]):
     os.chdir(os.path.dirname(sys.argv[0]))
 print("Usage: pesterchum.py [OPTIONS]")
-print("Use -h/--help to see the available options.\nLogging is configured in logging.conf")
+print("Use -h/--help to see the available options.\nLogging is configured in logging.ini")
 # Help
 if ('--help' in sys.argv[1:]) or ('-h' in sys.argv[1:]):
     print("Possible arguments:")
@@ -22,7 +22,7 @@ if ('--help' in sys.argv[1:]) or ('-h' in sys.argv[1:]):
                      "    CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET.\n" + \
                      "    The default value is WARNING.\n" + \
                      "    (See https://docs.python.org/3/library/logging.html)\n\n" + \
-    help_arguments = " -s, --server\n    Specify server override. (legacy)\n\n" + \
+                     " -s, --server\n    Specify server override. (legacy)\n\n" + \
                      " -p, --port\n    Specify port override. (legacy)\n\n" + \
                      " --advanced\n    Enable advanced.\n\n" + \
                      " --no-honk\n    Disable honking.\n"
@@ -162,6 +162,7 @@ if ('--logging' in sys.argv[1:]) or ('-l' in sys.argv[1:]) & (False == ('--loggi
         config['logger_root']['level'] = loglevel
         config['logger_pchumLogger']['level'] = loglevel
         config['handler_consoleHandler']['level'] = loglevel
+        config['handler_FileHandler']['level'] = loglevel
         
         # Remove from argv because the rest of the code can't handle it :/
         if ('-l' in sys.argv[1:]):
