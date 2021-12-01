@@ -1,6 +1,11 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.1.3.3] - 2021-12-1
+
+### Fixed
+ - Attempt at fixing up logging.
+
 ## [v2.1.3.2] - 2021-12-1
 
 ### Fixed
