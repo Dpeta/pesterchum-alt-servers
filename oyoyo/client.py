@@ -16,7 +16,9 @@
 # THE SOFTWARE.
 
 import logging, logging.config
-logging.config.fileConfig('logging.conf')
+import ostools
+_datadir = ostools.getDataDir()
+logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 import logging

@@ -2,7 +2,7 @@
 keys=root,pchumLogger
 
 [handlers]
-keys=consoleHandler,FileHandler
+keys=consoleHandler
 
 [formatters]
 keys=simpleFormatter
@@ -13,7 +13,7 @@ handlers=consoleHandler
 
 [logger_pchumLogger]
 level=WARNING
-handlers=consoleHandler,FileHandler
+handlers=consoleHandler
 qualname=pchumLogger
 propagate=0
 
@@ -22,12 +22,6 @@ class=StreamHandler
 level=WARNING
 formatter=simpleFormatter
 args=(sys.stdout,)
-
-[handler_FileHandler]
-class=FileHandler
-level=WARNING
-formatter=simpleFormatter
-args=('pesterchum.log', 'a')
 
 [formatter_simpleFormatter]
 format=%(asctime)s - %(levelname)s - %(module)s - %(threadName)s - %(message)s

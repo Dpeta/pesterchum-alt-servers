@@ -31,7 +31,7 @@ includefiles = ["quirks",
                 "CHANGELOG.md",
                 "PCskins.png",
                 "Pesterchum.png",
-                "logging.conf"]
+                "logging.ini.example"]
 build_exe_options = {
 ##    "includes": ["PyQt5.QtCore",
 ##                 "PyQt5.QtGui",

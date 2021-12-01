@@ -4,6 +4,7 @@ import sys
 import os
 import shutil
 import getopt
+import configparser
 try:
     QString = unicode
 except NameError:
@@ -17,32 +18,18 @@ print("Use -h/--help to see the available options.\nLogging is configured in log
 # Help
 if ('--help' in sys.argv[1:]) or ('-h' in sys.argv[1:]):
     print("Possible arguments:")
-    #help_arguments = " -l, --logging\n    Specify level of logging, possible values are:\n" + \
-    #                 "    CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET.\n" + \
-    #                 "    The default value is WARNING.\n" + \
-    #                 "    (See https://docs.python.org/3/library/logging.html)\n\n" + \
+    help_arguments = " -l, --logging\n    Specify level of logging, possible values are:\n" + \
+                     "    CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET.\n" + \
+                     "    The default value is WARNING.\n" + \
+                     "    (See https://docs.python.org/3/library/logging.html)\n\n" + \
     help_arguments = " -s, --server\n    Specify server override. (legacy)\n\n" + \
                      " -p, --port\n    Specify port override. (legacy)\n\n" + \
                      " --advanced\n    Enable advanced.\n\n" + \
                      " --no-honk\n    Disable honking.\n"
     print(help_arguments)
     sys.exit()
-import logging, logging.config
-logging.config.fileConfig('logging.conf')
-PchumLog = logging.getLogger('pchumLogger')
-#PchumLog = logging.getLogger(__name__)
 
-#Logfile = logging.FileHandler("pesterchum.log")
-#fileformat = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-#Logfile.setFormatter(fileformat)
-#PchumLog.addHandler(Logfile)
-
-#stream = logging.StreamHandler()
-#streamformat = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-#stream.setFormatter(streamformat)
-#PchumLog.addHandler(stream)
-
-#logging.basicConfig(filename="pesterchum.log")
+import logging
 from datetime import *
 import random
 import re
@@ -58,17 +45,6 @@ except ImportError:
     # Fall back on the old location - just in case
     #PchumLog.warning("Couldn't load attrdict from new loc; falling back")
     from pnc.dep.attrdict import AttrDict
-try:
-    import console
-except ImportError:
-    _CONSOLE = False
-    PchumLog.warning("Console file not shipped; skipping.")
-except Exception as err:
-    _CONSOLE = False
-    # Consider erroring?
-    PchumLog.error("Failed to load console!", exc_info=err)
-else:
-    _CONSOLE = True
 
 reqmissing = []
 optmissing = []
@@ -79,7 +55,7 @@ except ImportError as e:
     if module.startswith("No module named ") or \
        module.startswith("cannot import name "):
         reqmissing.append(module[module.rfind(" ")+1:])
-    else: PchumLog.critical(e)
+    else: logging.critical(e)
     del module
 
 # Because pygame intro msg :3c
@@ -94,11 +70,11 @@ except ImportError as e:
     pygame = None
     module = str(e)
     if module[:16] == "No module named ": optmissing.append(module[16:])
-    else: PchumLog.critical(e)
+    else: logging.critical(e)
     del module
 if reqmissing:
-    PchumLog.critical("ERROR: The following modules are required for Pesterchum to run and are missing on your system:")
-    for m in reqmissing: PchumLog.critical("* "+m)
+    logging.critical("ERROR: The following modules are required for Pesterchum to run and are missing on your system:")
+    for m in reqmissing: logging.critical("* "+m)
     # False flag for some reason.
     #exit()
 vnum = QtCore.qVersion()
@@ -108,8 +84,8 @@ if vnum.find(".", vnum.find(".")+1) != -1:
 else:
     minor = int(vnum[vnum.find(".")+1:])
 if not ((major > 5) or (major == 5 and minor >= 0)):
-    PchumLog.critical("ERROR: Pesterchum requires at least Qt version >= 5.0")
-    PchumLog.critical("You currently have version " + vnum + ". Please upgrade Qt.")
+    logging.critical("ERROR: Pesterchum requires at least Qt version >= 5.0")
+    logging.critical("You currently have version " + vnum + ". Please upgrade Qt.")
     exit()
 
 from version import _pcVersion
@@ -127,53 +103,96 @@ _datadir = ostools.getDataDir()
 #   (on Linux, same as using xdg). To stay safe with older versions, copy any
 #   data (profiles, logs, etc) from old location to new data directory.
 
-#loglevel = 30# Warning (Default)
-#if ('--logging' in sys.argv[1:]) or ('-l' in sys.argv[1:]) & (False == ('--logging' in sys.argv[1:]) and ('-l' in sys.argv[1:])):
-#    try:
-#        # If both are specified, this does not run.
-#        if ('-l' in sys.argv[1:]):
-#            loglevel = sys.argv[sys.argv.index('-l') + 1]
-#        if ('--logging' in sys.argv[1:]):
-#            loglevel = sys.argv[sys.argv.index('--logging') + 1]
-#
-#        loglevel = loglevel.upper()
-#        
-#        if loglevel == "CRITICAL":
-#            loglevel = 50
-#            print("Logging Level is CRITICAL")
-#        elif loglevel == "ERROR":
-#            print("Logging Level is ERROR")
-#        elif loglevel == "WARNING":
-#            loglevel = 30
-#            print("Logging Level is WARNING")
-#        elif loglevel == "INFO":
-#            loglevel = 20
-#            print("Logging Level is INFO")
-#        elif loglevel == "DEBUG":
-#            loglevel = 10
-#            print("Logging Level is DEBUG")
-#        elif loglevel == "NOTSET":
-#            loglevel = 0
-#            print("Logging Level is NOTSET")
-#        else:
-#            raise Exception
-#        stream.setLevel(loglevel)
-#        Logfile.setLevel(loglevel)
-#        
-#        # Remove from argv because the rest of the code can't handle it :/
-#        if ('-l' in sys.argv[1:]):
-#                sys.argv.pop(sys.argv.index('-l') + 1)
-#                sys.argv.pop(sys.argv.index('-l'))
-#        if ('--logging' in sys.argv[1:]):
-#            sys.argv.pop(sys.argv.index('--logging') + 1)
-#            sys.argv.pop(sys.argv.index('--logging'))
-#    except:
-#        print("Invalid syntax.")
-#        stream.setLevel(loglevel)
-#        Logfile.setLevel(loglevel)
-#else:
-#    stream.setLevel(loglevel)
-#    Logfile.setLevel(loglevel)
+config = configparser.ConfigParser()
+# Create logging.conf
+if os.path.exists(_datadir + "logging.ini") == False:
+    config.read('logging.ini.example')
+
+    # Enable file logging
+    config['handlers']['keys'] = 'consoleHandler,FileHandler'
+    config['logger_pchumLogger']['handlers'] = 'consoleHandler,FileHandler'
+
+    #(r'C:\Users\X\AppData\Local\pesterchum\pesterchum.log', 'a')
+    config['handler_FileHandler'] = {'class': 'FileHandler',
+                                'level': 'WARNING',
+                                'formatter': 'simpleFormatter',
+                                'args': (_datadir + 'pesterchum.log', 'a')}
+
+    print(config.sections())
+else:
+    config.read(_datadir + 'logging.ini')
+    
+loglevel = "30"# Warning (Default)
+if ('--logging' in sys.argv[1:]) or ('-l' in sys.argv[1:]) & (False == ('--logging' in sys.argv[1:]) and ('-l' in sys.argv[1:])):
+    try:
+        # If both are specified, this does not run.
+        if ('-l' in sys.argv[1:]):
+            loglevel = sys.argv[sys.argv.index('-l') + 1]
+        if ('--logging' in sys.argv[1:]):
+            loglevel = sys.argv[sys.argv.index('--logging') + 1]
+
+        loglevel = loglevel.upper().strip()
+
+        config.read(_datadir + 'logging.ini')
+        
+        print("loglevel = " + loglevel)
+
+        if loglevel == "50" or loglevel == "CRITICAL":
+            loglevel = "CRITICAL"
+            print("Logging Level is CRITICAL")
+        elif loglevel == "40" or loglevel == "ERROR":
+            loglevel = "ERROR"
+            print("Logging Level is ERROR")
+        elif loglevel == "30" or loglevel == "WARNING":
+            loglevel = "WARNING"
+            print("Logging Level is WARNING")
+        elif loglevel == "20" or loglevel == "INFO":
+            loglevel = "INFO"
+            print("Logging Level is INFO")
+        elif loglevel == "10" or loglevel == "DEBUG":
+            loglevel = "DEBUG"
+            print("Logging Level is DEBUG")
+        elif loglevel == "0" or loglevel == "NOTSET":
+            loglevel = "NOTSET"
+            print("Logging Level is NOTSET")
+        else:
+            loglevel = "WARNING"
+            print("Logging Level is WARNING")
+
+        config['logger_root']['level'] = loglevel
+        config['logger_pchumLogger']['level'] = loglevel
+        config['handler_consoleHandler']['level'] = loglevel
+        
+        # Remove from argv because the rest of the code can't handle it :/
+        if ('-l' in sys.argv[1:]):
+                sys.argv.pop(sys.argv.index('-l') + 1)
+                sys.argv.pop(sys.argv.index('-l'))
+        if ('--logging' in sys.argv[1:]):
+            sys.argv.pop(sys.argv.index('--logging') + 1)
+            sys.argv.pop(sys.argv.index('--logging'))
+    except:
+        logging.exception("Invalid syntax?")
+
+# Update logging.conf
+with open(_datadir + "logging.ini", 'w') as configfile:
+        config.write(configfile)
+
+# Load logging.conf
+import logging.config
+logging.config.fileConfig(_datadir + "logging.ini")
+PchumLog = logging.getLogger('pchumLogger')
+
+try:
+    import console
+except ImportError:
+    _CONSOLE = False
+    logging.warning("Console file not shipped; skipping.")
+except Exception as err:
+    _CONSOLE = False
+    # Consider erroring?
+    logging.error("Failed to load console!", exc_info=err)
+else:
+    _CONSOLE = True
 
 if _datadir:
     if not os.path.exists(_datadir):

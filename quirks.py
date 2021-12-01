@@ -1,5 +1,7 @@
 import logging, logging.config
-logging.config.fileConfig('logging.conf')
+import ostools
+_datadir = ostools.getDataDir()
+logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 import os, sys, re, ostools
 from PyQt5 import QtCore, QtGui, QtWidgets
