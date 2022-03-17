@@ -629,7 +629,7 @@ class PesterHandler(DefaultCommandHandler):
     def inviteonlychan(self, server, handle, channel, msg):
         self.parent.chanInviteOnly.emit(channel)
     # This can cause a crash without mode_params, channelmodeis can have six arguments.
-    def channelmodeis(self, server, handle, channel, modes, mode_params):
+    def channelmodeis(self, server, handle, channel, modes, mode_params=""):
         self.parent.modesUpdated.emit(channel, modes)
     def cannotsendtochan(self, server, handle, channel, msg):
         self.parent.cannotSendToChan.emit(channel, msg)
