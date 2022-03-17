@@ -543,11 +543,8 @@ class PesterHandler(DefaultCommandHandler):
 
             # Server-set usermodes don't need to be passed.
             if (handles == ['']) & ( ('x' in m) | ('z' in m) | ('o' in m) | ('x' in m) )!=True:
-                try:
-                    self.parent.userPresentUpdate.emit(handles[i], channel, m+":%s" % (op))
-                except:
-                    PchumLog.exception('')
-                    
+                self.parent.userPresentUpdate.emit(handles[i], channel, m+":%s" % (op))
+                
                 #self.parent.userPresentUpdate.emit(handles[i], channel, m+":%s" % (op))
             # Passing an empty handle here might cause a crash.
             #except IndexError:
