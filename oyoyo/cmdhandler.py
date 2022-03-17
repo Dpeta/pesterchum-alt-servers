@@ -103,8 +103,11 @@ class CommandHandler(object):
             return
 
         PchumLog.debug('f %s' % f)
-        
-        f(*args)
+
+        try:
+            f(*args)
+        except TypeError as e:
+            logging.exception("Failed to pass command, did the server pass an unsupported paramater?\n%s" % e)
 
     @protected
     def __unhandled__(self, cmd, *args):
