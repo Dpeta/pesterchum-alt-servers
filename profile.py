@@ -4,11 +4,14 @@ _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 import os
+import sys
 from string import Template
 import json
 import re
 import codecs
 import platform
+import datetime
+import shutil
 from datetime import *
 from time import strftime, time
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -101,8 +104,22 @@ class userConfig(object):
         self.NEWCONVO = 8
         self.INITIALS  = 16
         self.filename = _datadir+"pesterchum.js"
-        with open(self.filename) as fp:
-            self.config = json.load(fp)
+        try:
+            with open(self.filename) as fp:
+                self.config = json.load(fp)
+        except json.decoder.JSONDecodeError as e:
+            PchumLog.critical("ohno :(")
+            PchumLog.critical("failed to load pesterchum.js")
+            PchumLog.critical(e)
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setWindowTitle(":(")
+            msgbox.setTextFormat(QtCore.Qt.RichText) # Clickable html links
+            msgbox.setInformativeText("<h3>Failed to load pesterchum.js, this might require manual intervention.<br><br>\
+Consider overriding: <a href='%s'>%s</a> <br>\
+with a backup from: <a href='%s'>%s</a></h3>" % (_datadir, self.filename, os.path.join(_datadir, "backup"), os.path.join(_datadir, "backup")))
+            ret = msgbox.exec_()
+            sys.exit()
+
         # Trying to fix:
         #     IOError: [Errno 2]
         #     No such file or directory:
@@ -128,6 +145,69 @@ class userConfig(object):
             with open("%s/groups.js" % (self.logpath), 'w') as fp:
                 json.dump(self.groups, fp)
 
+        self.backup()
+
+    def backup(self):
+        # Backup pesterchum.js file.
+        # Useful because it seems to randomly get blanked for people.
+        
+        try:
+            backup_path = os.path.join(_datadir, "backup")
+            if os.path.exists(backup_path) == False:
+                os.makedirs(backup_path)
+            
+            current_backup = datetime.now().day % 5
+            shutil.copyfile(self.filename, os.path.join(backup_path, "pesterchum.js.backup." + str(current_backup)))
+            
+        except OSError as e:
+            PchumLog.warning("Failed to make backup, no permission?")
+            PchumLog.warning(e)
+        except shutil.Error as e:
+            PchumLog.warning("Failed to make backup, shutil error?")
+            PchumLog.warning(e)
+            
+                # Yeah,,, we really don't need this nvm </3
+                #import zipfile, lzma
+                #with open(self.filename) as f:
+                #    with zipfile.ZipFile(os.path.join(backup_path, "pesterchum.js.backup.zip"), 'a') as bzip:
+                #        bzip.writestr(today_backups_str_nopath, f.read(), zipfile.ZIP_LZMA)
+    
+    #def backup(self):
+        # Backup, because pesterchum.js seems to randomly get blanked for people.
+        #try:
+            #backup_path = os.path.join(_datadir, "backup")
+            #if os.path.exists(backup_path) == False:
+                #os.makedirs(backup_path)
+
+            #today_backups_str_nopath = "pesterchum.js" + strftime(".%d", gmtime()) + ".backup"
+            #today_backups_str = os.path.join(backup_path, today_backups_str_nopath)
+            #if os.path.isfile(today_backups_str):
+                #PchumLog.debug("pesterchum.js backup exists.")
+            #else:
+                #PchumLog.debug("pesterchum.js backup does not exist, making backup.")
+                #shutil.copyfile(self.filename, today_backups_str)
+                # Yeah,,, we really don't need this nvm </3
+                #import zipfile, lzma
+                #with open(self.filename) as f:
+                #    with zipfile.ZipFile(os.path.join(backup_path, "pesterchum.js.backup.zip"), 'a') as bzip:
+                #        bzip.writestr(today_backups_str_nopath, f.read(), zipfile.ZIP_LZMA)
+
+        #except OSError as e:
+        #    PchumLog.warning("Failed to make backup, no permission?")
+        #    PchumLog.warning(e)
+        #except shutil.Error as e:
+        #    PchumLog.warning("Failed to make backup, shutil error?")
+        #    PchumLog.warning(e)
+        #except ImportError as e:
+        #    PchumLog.warning("Failed to import module/library: " + e)
+        #    PchumLog.warning(e)
+        #except lzma.LZMAError as e:
+        #    PchumLog.warning("Failed to make backup, LZMAError?")
+        #    PchumLog.warning(e)
+        #except zipfile.BadZipFile as e:
+        #    PchumLog.warning("Failed to make backup, BadZipFile?")
+        #    PchumLog.warning(e)
+                
     def chums(self):
         if 'chums' not in self.config:
             self.set("chums", [])

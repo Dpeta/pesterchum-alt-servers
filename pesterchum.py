@@ -3188,7 +3188,7 @@ class PesterWindow(MovingWindow):
             msgbox = QtWidgets.QMessageBox()
             msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
             msgbox.setWindowIcon(PesterIcon(self.theme["main/icon"]))
-            msgbox.setInformativeText("Failed to load server list, do you wish to revert to defaults?\n" \
+            msgbox.setInformativeText("Failed to load server list, do you want to revert to defaults?\n" \
                                       + "If you choose no, Pesterchum will most likely crash unless you manually fix serverlist.json\n" \
                                       + "Please tell me if this error occurs :'3")
             msgbox.addButton(QtWidgets.QPushButton("Yes"), QtWidgets.QMessageBox.YesRole)
