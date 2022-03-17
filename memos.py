@@ -1254,20 +1254,24 @@ class PesterMemo(PesterConvo):
 
                 # Add ban(kick) reason
                 # l = split update
+                kick_msg = ("press 0k to rec0nnect or cancel to absc0nd")
                 if len(l) >= 3:
-                    if l[1] != l[2]: # If there's no reason then reason is set to handle
-                        # Process spare ':' characters (this might not be safe?)
-                        aggrievocation = l[1] + ": " + l[2]
-                        if len(l) > 3:
-                            aggrievocation += ':'
-                            for x in range(3, len(l)):
-                                aggrievocation += l[x] + ':'
-                        aggrievocation = aggrievocation.strip(':')
-                        msgbox.setInformativeText("%s\n\npress 0k to rec0nnect or cancel to absc0nd" % aggrievocation)
-                    else:
-                        msgbox.setInformativeText("press 0k to rec0nnect or cancel to absc0nd")
-                else:
-                    msgbox.setInformativeText("press 0k to rec0nnect or cancel to absc0nd")
+                    try:
+                        if l[1] != l[2]: # If there's no reason then reason is set to handle
+                            # Process spare ':' characters (this might not be safe?)
+                            aggrievocation = l[1] + ": " + l[2]
+                            if len(l) > 3:
+                                aggrievocation += ':'
+                                for x in range(3, len(l)):
+                                    aggrievocation += l[x]
+                                    # Not for last slice
+                                    if x != (len(l)-1):
+                                        aggrievocation += ':'
+                            kick_msg = ("%s\n\npress 0k to rec0nnect or cancel to absc0nd" % aggrievocation)
+                    except IndexError as e:
+                        # This shouldn't happen
+                        PchumLog.warning("kickmsg IndexError: %s" % e)
+                msgbox.setInformativeText(kick_msg)
                 msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
                 # Find the OK button and make it default
                 for b in msgbox.buttons():
