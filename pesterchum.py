@@ -185,15 +185,10 @@ PchumLog = logging.getLogger('pchumLogger')
 
 try:
     import console
+    _CONSOLE = True
 except ImportError:
     _CONSOLE = False
     logging.warning("Console file not shipped; skipping.")
-except Exception as err:
-    _CONSOLE = False
-    # Consider erroring?
-    logging.error("Failed to load console!", exc_info=err)
-else:
-    _CONSOLE = True
 
 if _datadir:
     if not os.path.exists(_datadir):

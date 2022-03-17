@@ -15,17 +15,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import logging
+import logging, logging.config
+import ostools
+_datadir = ostools.getDataDir()
+logging.config.fileConfig(_datadir + "logging.ini")
+PchumLog = logging.getLogger('pchumLogger')
+
 import sys
 
 from oyoyo.ircevents import *
-
-# Python < 3 compatibility
-if sys.version_info < (3,):
-    class bytes(object):
-        def __new__(self, b='', encoding='utf8'):
-            return str(b)
-
 
 def parse_raw_irc_command(element):
     """
@@ -46,14 +44,12 @@ def parse_raw_irc_command(element):
 
     <crlf>     ::= CR LF
     """
+    
     try:
         element = element.decode("utf-8")
-    except:
-        try:
-            element = element.decode("latin-1")
-        except:
-            # This shouldn't happen, but if it does:
-            element = ""
+    except UnicodeDecodeError as e:
+        PchumLog.debug("utf-8 error %s" % e)
+        element = element.decode("latin-1", 'replace')
     
     parts = element.strip().split(" ")
     if parts[0].startswith(':'):
@@ -69,7 +65,7 @@ def parse_raw_irc_command(element):
         try:
             command = numeric_events[command]
         except KeyError:
-            logging.info('unknown numeric event %s' % command)
+            PchumLog.info('unknown numeric event %s' % command)
     command = command.lower()
 
     if args[0].startswith(':'):

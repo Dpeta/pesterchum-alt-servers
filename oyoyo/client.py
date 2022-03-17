@@ -24,26 +24,17 @@ PchumLog = logging.getLogger('pchumLogger')
 import logging
 import socket
 import sys
-#import re
-#import string
 import time
-#import threading
 import os
 import traceback
 import ostools
 import ssl
+import json
 _datadir = ostools.getDataDir()
 
 from oyoyo.parse import *
 from oyoyo import helpers
 from oyoyo.cmdhandler import CommandError
-
-# Python < 3 compatibility
-if sys.version_info < (3,):
-    class bytes(object):
-        def __new__(self, b='', encoding='utf8'):
-            return str(b)
-
 
 class IRCClientError(Exception):
     pass
@@ -92,26 +83,17 @@ class IRCClient:
         """
 
         # This should be moved to profiles
-        import json
         
-        try:
-            with open(_datadir + "server.json", "r") as server_file:
-                read_file = server_file.read()
-                server_file.close()
-                server_obj = json.loads(read_file)
-            TLS = server_obj['TLS']
-            #print("TLS-status is: " + str(TLS))
-            if TLS == False:
-                #print("false")
-                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            else:
-                self.context = ssl.create_default_context()
-                self.context.check_hostname = False
-                self.context.verify_mode = ssl.CERT_NONE
-                self.bare_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                self.socket = self.context.wrap_socket(self.bare_socket)
-        except:
-            logging.exception('')
+        with open(_datadir + "server.json", "r") as server_file:
+            read_file = server_file.read()
+            server_file.close()
+            server_obj = json.loads(read_file)
+        TLS = server_obj['TLS']
+        #print("TLS-status is: " + str(TLS))
+        if TLS == False:
+            #print("false")
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        else:
             self.context = ssl.create_default_context()
             self.context.check_hostname = False
             self.context.verify_mode = ssl.CERT_NONE
@@ -160,10 +142,11 @@ class IRCClient:
                                      % repr([(type(arg), arg) for arg in args]))
 
         msg = bytes(" ", "UTF-8").join(bargs)
-        logging.info('---> send "%s"' % msg)
+        PchumLog.info('---> send "%s"' % msg)
         try:
-            self.socket.send(msg + bytes("\r\n", "UTF-8"))
+            self.socket.sendall(msg + bytes("\r\n", "UTF-8"))
         except socket.error as se:
+            PchumLog.debug("socket.error %s" % se)
             try:  # a little dance of compatibility to get the errno
                 errno = se.errno
             except AttributeError:
@@ -177,7 +160,7 @@ class IRCClient:
         """ initiates the connection to the server set in self.host:self.port 
         """
 
-        logging.info('connecting to %s:%s' % (self.host, self.port))
+        PchumLog.info('connecting to %s:%s' % (self.host, self.port))
         self.socket.connect(("%s" % self.host, self.port))
         if not self.blocking:
             self.socket.setblocking(0)
@@ -196,15 +179,16 @@ class IRCClient:
             while not self._end:
                 try:
                     buffer += self.socket.recv(1024)
+                    #raise socket.timeout
                 except socket.timeout as e:
                     if self._end:
                         break
-                    logging.debug("timeout in client.py")
+                    PchumLog.debug("timeout in client.py")
                     raise e
                 except socket.error as e:
                     if self._end:
                         break
-                    logging.debug("error %s" % e)
+                    PchumLog.debug("error %s" % e)
                     try:  # a little dance of compatibility to get the errno
                         errno = e.errno
                     except AttributeError:
@@ -228,48 +212,43 @@ class IRCClient:
                         prefix, command, args = parse_raw_irc_command(el)
                         try:
                             self.command_handler.run(command, prefix, *args)
-                        except CommandError:
-                            # error will have already been loggingged by the handler
-                            pass 
+                        except CommandError as e:
+                            PchumLog.debug("CommandError %s" % e)
 
                 yield True
         except socket.timeout as se:
-            logging.debug("passing timeout")
+            PchumLog.debug("passing timeout")
             raise se
         except socket.error as se:
-            logging.debug("problem: %s" % (se))
+            PchumLog.debug("problem: %s" % (se))
             if self.socket:
-                logging.info('error: closing socket')
+                PchumLog.info('error: closing socket')
                 self.socket.close()
             raise se
         except Exception as e:
-            logging.debug("other exception: %s" % e)
+            PchumLog.debug("other exception: %s" % e)
             raise e
         else:
-            logging.debug("ending while, end is %s" % self._end)
+            PchumLog.debug("ending while, end is %s" % self._end)
             if self.socket: 
-                logging.info('finished: closing socket')
+                PchumLog.info('finished: closing socket')
                 self.socket.close()
             yield False
     def close(self):
         # with extreme prejudice
         if self.socket:
-            logging.info('shutdown socket')
+            PchumLog.info('shutdown socket')
             #print("shutdown socket")
             self._end = True
             self.socket.shutdown(socket.SHUT_WR)
             self.socket.close()
             
     def simple_send(self, message):
-        self.socket.send(bytes(message, "UTF-8"))
+        self.socket.sendall(bytes(message, "UTF-8"))
 
     def quit(self, msg):
-        # I am going mad :)
-        # Why does this only work 33% of the time </3
-
-        # Somehow, kinda fixed :')
-        logging.info("QUIT")
-        self.socket.send(bytes(msg + "\n", "UTF-8"))
+        PchumLog.info("QUIT")
+        self.socket.sendall(bytes(msg + "\n", "UTF-8"))
         
 class IRCApp:
     """ This class manages several IRCClient instances without the use of threads.
@@ -296,7 +275,7 @@ class IRCApp:
 
         warning: if you add a client that has blocking set to true,
         timers will no longer function properly """
-        logging.info('added client %s (ar=%s)' % (client, autoreconnect))
+        PchumLog.info('added client %s (ar=%s)' % (client, autoreconnect))
         self._clients[client] = self._ClientDesc(autoreconnect=autoreconnect)
 
     def addTimer(self, seconds, cb):
@@ -305,7 +284,7 @@ class IRCApp:
         ( the only advantage to these timers is they dont use threads )
         """
         assert callable(cb)
-        logging.info('added timer to call %s in %ss' % (cb, seconds))
+        PchumLog.info('added timer to call %s in %ss' % (cb, seconds))
         self._timers.append((time.time() + seconds, cb))
 
     def run(self):
@@ -322,8 +301,8 @@ class IRCApp:
                 try:
                     next(clientdesc.con)
                 except Exception as e:
-                    logging.error('client error %s' % e)
-                    logging.error(traceback.format_exc())
+                    PchumLog.error('client error %s' % e)
+                    PchumLog.error(traceback.format_exc())
                     if clientdesc.autoreconnect:
                         clientdesc.con = None 
                         if isinstance(clientdesc.autoreconnect, (int, float)):
@@ -335,7 +314,7 @@ class IRCApp:
                     found_one_alive = True
                 
             if not found_one_alive:
-                logging.info('nothing left alive... quiting')
+                PchumLog.info('nothing left alive... quiting')
                 self.stop() 
 
             now = time.time()
@@ -343,7 +322,7 @@ class IRCApp:
             self._timers = []
             for target_time, cb in timers:
                 if now > target_time:
-                    logging.info('calling timer cb %s' % cb)
+                    PchumLog.info('calling timer cb %s' % cb)
                     cb()
                 else:   
                     self._timers.append((target_time, cb))

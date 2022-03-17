@@ -28,13 +28,6 @@ import traceback
 from oyoyo import helpers
 from oyoyo.parse import parse_nick
 
-# Python < 3 compatibility
-if sys.version_info < (3,):
-    class bytes(object):
-        def __new__(self, b='', encoding='utf8'):
-            return str(b)
-
-
 def protected(func):
     """ decorator to protect functions from being called """
     func.protected = True
@@ -62,6 +55,7 @@ class CommandHandler(object):
 
     @protected
     def get(self, in_command_parts):
+        PchumLog.debug("in_command_parts: %s" % in_command_parts)
         """ finds a command 
         commands may be dotted. each command part is checked that it does
         not start with and underscore and does not have an attribute 
@@ -97,7 +91,10 @@ class CommandHandler(object):
     @protected
     def run(self, command, *args):
         """ finds and runs a command """
-        logging.debug("processCommand %s(%s)" % (command, args))
+        arguments_str = ''
+        for x in args:
+            arguments_str += str(x) + ' '
+        PchumLog.debug("processCommand %s(%s)" % (command, arguments_str.strip()))
 
         try:
             f = self.get(command)
@@ -105,30 +102,30 @@ class CommandHandler(object):
             self.__unhandled__(command, *args)
             return
 
-        logging.debug('f %s' % f)
+        PchumLog.debug('f %s' % f)
         #logging.info(*args)
 
         # Because more than 5 arguments can be passed by channelmodeis
-        try:
+        #try:
             #if str(command) == 'channelmodeis':
                 # This might be stupid :)
                 # Update: This was very stupid
             #f(*args[0:4])
             #else:
-            f(*args)
-        except Exception as e:
-            #logging.error('command raised '+ command + str())
-            logging.error('command args: ' + str([*args]))
-            logging.error('command raised %s' % e)
-            logging.error(traceback.format_exc())
-            raise CommandError(command)
+        f(*args)
+        #except Exception as e:
+        #    #logging.error('command raised '+ command + str())
+        #    PchumLog.error('command args: ' + str([*args]))
+        #    PchumLog.error('command raised %s' % e)
+        #    PchumLog.error(traceback.format_exc())
+        #    raise CommandError(command)
 
     @protected
     def __unhandled__(self, cmd, *args):
         """The default handler for commands. Override this method to
         apply custom behavior (example, printing) unhandled commands.
         """
-        logging.debug('unhandled command %s(%s)' % (cmd, args))
+        PchumLog.debug('unhandled command %s(%s)' % (cmd, args))
 
 
 class DefaultCommandHandler(CommandHandler):
@@ -155,7 +152,7 @@ class DefaultBotCommandHandler(CommandHandler):
 
     def help(self, sender, dest, arg=None):
         """list all available commands or get help on a specific command"""
-        logging.info('help sender=%s dest=%s arg=%s' % (sender, dest, arg))
+        PchumLog.info('help sender=%s dest=%s arg=%s' % (sender, dest, arg))
         if not arg:
             commands = self.getVisibleCommands()
             commands.sort()
