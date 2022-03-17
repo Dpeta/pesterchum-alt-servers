@@ -103,22 +103,8 @@ class CommandHandler(object):
             return
 
         PchumLog.debug('f %s' % f)
-        #logging.info(*args)
-
-        # Because more than 5 arguments can be passed by channelmodeis
-        #try:
-            #if str(command) == 'channelmodeis':
-                # This might be stupid :)
-                # Update: This was very stupid
-            #f(*args[0:4])
-            #else:
+        
         f(*args)
-        #except Exception as e:
-        #    #logging.error('command raised '+ command + str())
-        #    PchumLog.error('command args: ' + str([*args]))
-        #    PchumLog.error('command raised %s' % e)
-        #    PchumLog.error(traceback.format_exc())
-        #    raise CommandError(command)
 
     @protected
     def __unhandled__(self, cmd, *args):
