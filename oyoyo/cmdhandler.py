@@ -107,7 +107,7 @@ class CommandHandler(object):
         try:
             f(*args)
         except TypeError as e:
-            logging.exception("Failed to pass command, did the server pass an unsupported paramater?\n%s" % e)
+            logging.exception("Failed to pass command, did the server pass an unsupported paramater?\n%s" % str(e))
 
     @protected
     def __unhandled__(self, cmd, *args):

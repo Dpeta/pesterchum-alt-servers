@@ -1146,7 +1146,7 @@ class PesterWindow(MovingWindow):
     sendMessage = QtCore.pyqtSignal('QString', 'QString')
 
     def __init__(self, options, parent=None, app=None):
-        super(PesterWindow, self).__init__(parent,
+        super(PesterWindow, self).__init__(None,
                               (QtCore.Qt.CustomizeWindowHint |
                                QtCore.Qt.FramelessWindowHint))
 
@@ -1165,6 +1165,7 @@ class PesterWindow(MovingWindow):
 
         self.autoJoinDone = False
         self.app = app
+        self.parent = parent
         self.convos = CaseInsensitiveDict()
         self.memos = CaseInsensitiveDict()
         self.tabconvo = None
@@ -3159,12 +3160,13 @@ class PesterWindow(MovingWindow):
     @QtCore.pyqtSlot()
     def quit(self):
         try:
-            pesterchum.irc.quit_dc()    # Actually send QUIT to server
-        except:
+            self.irc.quit_dc()    # Actually send QUIT to server
+        except Exception as e:
             # Not connected.
-            pass
-        pesterchum.trayicon.hide()  #
-        pesterchum.app.quit()       #
+            PchumLog.warning("QUIT failed: " + str(e))
+            
+        self.parent.trayicon.hide()  #
+        self.app.quit()       #
 
     def passIRC(self, irc):
         self.irc = irc
@@ -3407,9 +3409,10 @@ class PesterWindow(MovingWindow):
                     PchumLog.error("Failed to set server :(")
 
             # Continue running Pesterchum as usual
-            pesterchum.irc.start()
-            pesterchum.reconnectok = False
-            pesterchum.showLoading(pesterchum.widget)
+            # Sorry-
+            self.irc.start()
+            self.parent.reconnectok = False
+            self.parent.showLoading(self.parent.widget)
             self.show() # Not required?
             self.setFocus()
 
@@ -3582,7 +3585,7 @@ class MainProgram(QtCore.QObject):
             #    print("Warning: No sound! (No pygame/QSound)")
 
         doSoundInit()
-        self.widget = PesterWindow(options, app=self.app)
+        self.widget = PesterWindow(options, parent=self, app=self.app)
         #self.widget.show() <== Already called in showLoading()
 
         self.trayicon = PesterTray(PesterIcon(self.widget.theme["main/icon"]), self.widget, self.app)
@@ -3882,6 +3885,10 @@ def _retrieveGlobals():
     # NOTE: Yes, this is a terrible kludge so that the console can work
     # properly. I'm open to alternatives.
     return globals()
+
+#def main():
+#    pesterchum = MainProgram()
+#    pesterchum.run()
 
 if __name__ == "__main__":
     # We're being run as a script - not being imported.

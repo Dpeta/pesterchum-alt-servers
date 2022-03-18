@@ -48,7 +48,7 @@ def parse_raw_irc_command(element):
     try:
         element = element.decode("utf-8")
     except UnicodeDecodeError as e:
-        PchumLog.debug("utf-8 error %s" % e)
+        PchumLog.debug("utf-8 error %s" % str(e))
         element = element.decode("latin-1", 'replace')
     
     parts = element.strip().split(" ")

@@ -154,16 +154,16 @@ class IRCClient:
             while retry < 5:
                 try:
                     ready_to_read, ready_to_write, in_error = select.select([], [self.socket], [])
-                    PchumLog.debug("ready_to_write (len %s): " % len(ready_to_write) + str(ready_to_write))
+                    PchumLog.debug("ready_to_write (len %s): " % str(len(ready_to_write)) + str(ready_to_write))
                     #ready_to_write[0].sendall(msg + bytes("\r\n", "UTF-8"))
                     for x in ready_to_write:
                         x.sendall(msg + bytes("\r\n", "UTF-8"))
                     break
                 except socket.error as e:
                     retry += 1
-                    PchumLog.warning("socket.error (retry %s) %s" % (retry, e))
+                    PchumLog.warning("socket.error (retry %s) %s" % (str(retry), str(e)))
         except socket.error as se:
-            PchumLog.warning("socket.error %s" % se)
+            PchumLog.warning("socket.error %s" % str(se))
             try:  # a little dance of compatibility to get the errno
                 errno = se.errno
             except AttributeError:
@@ -206,7 +206,7 @@ class IRCClient:
                     #print(buffer)
                     #raise socket.timeout
                 except socket.timeout as e:
-                    PchumLog.warning("timeout in client.py, " + e)
+                    PchumLog.warning("timeout in client.py, " + str(e))
                     if self._end:
                         break
                     raise e
@@ -241,20 +241,20 @@ class IRCClient:
                         try:
                             self.command_handler.run(command, prefix, *args)
                         except CommandError as e:
-                            PchumLog.debug("CommandError %s" % e)
+                            PchumLog.debug("CommandError %s" % str(e))
 
                 yield True
         except socket.timeout as se:
             PchumLog.debug("passing timeout")
             raise se
         except socket.error as se:
-            PchumLog.debug("problem: %s" % (se))
+            PchumLog.debug("problem: %s" % (str(se)))
             if self.socket:
                 PchumLog.info('error: closing socket')
                 self.socket.close()
             raise se
         except Exception as e:
-            PchumLog.debug("other exception: %s" % e)
+            PchumLog.debug("other exception: %s" % str(e))
             raise e
         else:
             PchumLog.debug("ending while, end is %s" % self._end)
@@ -269,13 +269,13 @@ class IRCClient:
             #print("shutdown socket")
             self._end = True
             try:
-                self.socket.shutdown(SHUT_RDWR)
+                self.socket.shutdown(socket.SHUT_RDWR)
             except OSError as e:
-                PchumLog.warning("Error while shutting down socket, already broken? %s" % e)                
+                PchumLog.warning("Error while shutting down socket, already broken? %s" % str(e))                
             try:
                 self.socket.close()
             except OSError as e:
-                PchumLog.warning("Error while closing socket, already broken? %s" % e)   
+                PchumLog.warning("Error while closing socket, already broken? %s" % str(e))   
 
     def quit(self, msg):
         PchumLog.info("QUIT")
@@ -332,7 +332,7 @@ class IRCApp:
                 try:
                     next(clientdesc.con)
                 except Exception as e:
-                    PchumLog.error('client error %s' % e)
+                    PchumLog.error('client error %s' % str(e))
                     PchumLog.error(traceback.format_exc())
                     if clientdesc.autoreconnect:
                         clientdesc.con = None 
