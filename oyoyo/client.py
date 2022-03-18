@@ -30,6 +30,7 @@ import traceback
 import ostools
 import ssl
 import json
+import select
 _datadir = ostools.getDataDir()
 
 from oyoyo.parse import *
@@ -93,19 +94,22 @@ class IRCClient:
         if TLS == False:
             #print("false")
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            #self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         else:
             self.context = ssl.create_default_context()
             self.context.check_hostname = False
             self.context.verify_mode = ssl.CERT_NONE
             self.bare_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket = self.context.wrap_socket(self.bare_socket)
+            #self.socket.setsockopt(socket.IPPROTO_TCP, socket.SO_KEEPALIVE, 1)
+        self.blocking = True
+        self.socket.setblocking(self.blocking)
         
         self.nick = None
         self.real_name = None
         self.host = None
         self.port = None
         self.connect_cb = None
-        self.blocking = False
         self.timeout = None
 
         self.__dict__.update(kwargs)
@@ -138,15 +142,28 @@ class IRCClient:
             elif type(arg).__name__ == 'unicode':
                 bargs.append(arg.encode(encoding))
             else:
+                PchumLog.warning('Refusing to send one of the args from provided: %s'% repr([(type(arg), arg) for arg in args]))
                 raise IRCClientError('Refusing to send one of the args from provided: %s'
                                      % repr([(type(arg), arg) for arg in args]))
 
         msg = bytes(" ", "UTF-8").join(bargs)
         PchumLog.info('---> send "%s"' % msg)
         try:
-            self.socket.sendall(msg + bytes("\r\n", "UTF-8"))
+            # Extra block to give a failed write another try, causes a reconnect otherwise
+            retry = 0
+            while retry < 5:
+                try:
+                    ready_to_read, ready_to_write, in_error = select.select([], [self.socket], [])
+                    PchumLog.debug("ready_to_write (len %s): " % len(ready_to_write) + str(ready_to_write))
+                    #ready_to_write[0].sendall(msg + bytes("\r\n", "UTF-8"))
+                    for x in ready_to_write:
+                        x.sendall(msg + bytes("\r\n", "UTF-8"))
+                    break
+                except socket.error as e:
+                    retry += 1
+                    PchumLog.warning("socket.error (retry %s) %s" % (retry, e))
         except socket.error as se:
-            PchumLog.debug("socket.error %s" % se)
+            PchumLog.warning("socket.error %s" % se)
             try:  # a little dance of compatibility to get the errno
                 errno = se.errno
             except AttributeError:
@@ -178,17 +195,25 @@ class IRCClient:
             buffer = bytes()
             while not self._end:
                 try:
-                    buffer += self.socket.recv(1024)
+                    ready_to_read, ready_to_write, in_error = select.select([self.socket], [], []) # Don't wanna cause an unnecessary timeout
+                                                                                                        # Though this could probably be 90
+                    PchumLog.debug("ready_to_read (len %s): " % len(ready_to_read) + str(ready_to_read))
+                    for x in ready_to_read:
+                        buffer += x.recv(1024)
+                    #print("pre-recv")
+                    #buffer += self.socket.recv(1024)
+                    #print("post-recv")
+                    #print(buffer)
                     #raise socket.timeout
                 except socket.timeout as e:
+                    PchumLog.warning("timeout in client.py, " + e)
                     if self._end:
                         break
-                    PchumLog.debug("timeout in client.py")
                     raise e
                 except socket.error as e:
+                    PchumLog.warning("conn socket.error %s in %s" % (e, self))
                     if self._end:
                         break
-                    PchumLog.debug("error %s" % e)
                     try:  # a little dance of compatibility to get the errno
                         errno = e.errno
                     except AttributeError:
@@ -200,7 +225,9 @@ class IRCClient:
                 else:
                     if self._end:
                         break
+                    PchumLog.debug("pre buffer check, len(buffer) = " + str(len(buffer)))
                     if len(buffer) == 0 and self.blocking:
+                        PchumLog.debug("len(buffer) = 0")
                         raise socket.error("Connection closed")
 
                     data = buffer.split(bytes("\n", "UTF-8"))
@@ -209,6 +236,7 @@ class IRCClient:
                     PchumLog.debug("data = " + str(data))
 
                     for el in data:
+                        PchumLog.debug("el=%s, data=%s" % (el,data))
                         prefix, command, args = parse_raw_irc_command(el)
                         try:
                             self.command_handler.run(command, prefix, *args)
@@ -240,11 +268,14 @@ class IRCClient:
             PchumLog.info('shutdown socket')
             #print("shutdown socket")
             self._end = True
-            self.socket.shutdown(socket.SHUT_WR)
-            self.socket.close()
-            
-    def simple_send(self, message):
-        self.socket.sendall(bytes(message, "UTF-8"))
+            try:
+                self.socket.shutdown(SHUT_RDWR)
+            except OSError as e:
+                PchumLog.warning("Error while shutting down socket, already broken? %s" % e)                
+            try:
+                self.socket.close()
+            except OSError as e:
+                PchumLog.warning("Error while closing socket, already broken? %s" % e)   
 
     def quit(self, msg):
         PchumLog.info("QUIT")
