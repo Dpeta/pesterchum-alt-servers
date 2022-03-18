@@ -2997,8 +2997,25 @@ class PesterWindow(MovingWindow):
             if handle == self.profile().handle:
                 self.chooseprofile = None
                 return
-            self.userprofile = userProfile(handle)
-            self.changeTheme(self.userprofile.getTheme())
+            try:
+                self.userprofile = userProfile(handle)
+                self.changeTheme(self.userprofile.getTheme())
+            except (json.JSONDecodeError, FileNotFoundError) as e:
+                msgBox = QtWidgets.QMessageBox()
+                msgBox.setIcon(QtWidgets.QMessageBox.Warning)
+                msgBox.setWindowTitle(":(")
+                msgBox.setTextFormat(QtCore.Qt.RichText) # Clickable html links
+                self.filename = _datadir+"pesterchum.js"
+                msgBox.setText("<html><h3>Failed to load: " + ("<a href='%s'>%s/%s.js</a>" % (self.profiledir, self.profiledir, user)) + \
+                               "<br><br> Try to check for syntax errors if the file exists." + \
+                               "<br><br>If you got this message at launch you may want to change your default profile." + \
+                               "<br><br>" + str(e) + "<\h3><\html>")
+                               #"\" if pesterchum acts oddly you might want to try backing up and then deleting \"" + \
+                               #_datadir+"pesterchum.js" + \
+                               #"\"")
+                PchumLog.critical(e)
+                msgBox.exec_()
+                return
         else:
             handle = str(self.chooseprofile.chumHandle.text())
             if handle == self.profile().handle:

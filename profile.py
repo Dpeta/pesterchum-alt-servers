@@ -64,12 +64,17 @@ class PesterLog(object):
                     os.makedirs("%s/%s/%s/%s" % (self.logpath, self.handle, handle, format))
                 try:
                     fp = codecs.open("%s/%s/%s/%s/%s.%s.txt" % (self.logpath, self.handle, handle, format, handle, time), encoding='utf-8', mode='a')
-                except IOError:
-                    errmsg = QtWidgets.QMessageBox(self)
+                except (IOError, OSError) as e:
+                    # Catching this exception does not stop pchum from dying if we run out of file handles </3
+                    PchumLog.critical(e)
+                    errmsg = QtWidgets.QMessageBox()
+                    errmsg.setIcon(QtWidgets.QMessageBox.Warning)
                     errmsg.setText("Warning: Pesterchum could not open the log file for %s!" % (handle))
                     errmsg.setInformativeText("Your log for %s will not be saved because something went wrong. We suggest restarting Pesterchum. Sorry :(" % (handle))
-                    errmsg.show()
-                    continue
+                    errmsg.setWindowTitle(":(")
+                    errmsg.exec_()
+                    PchumLog.debug("post-error msg")
+                    
                 self.convos[handle][format] = fp
         for (format, t) in modes.items():
             f = self.convos[handle][format]
@@ -113,6 +118,7 @@ class userConfig(object):
             PchumLog.critical("failed to load pesterchum.js")
             PchumLog.critical(e)
             msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
             msgbox.setWindowTitle(":(")
             msgbox.setTextFormat(QtCore.Qt.RichText) # Clickable html links
             msgbox.setInformativeText("<html><h3>Failed to load pesterchum.js, this might require manual intervention.<br><br>\
@@ -461,7 +467,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>" % (_datadir, self.filename,
                 PchumLog.warning(x + " removed from profile list.")
                 
                 msgBox = QtWidgets.QMessageBox()
-                msgBox.setIcon(QtWidgets.QMessageBox.Information)
+                msgBox.setIcon(QtWidgets.QMessageBox.Warning)
                 msgBox.setWindowTitle(":(")
                 msgBox.setTextFormat(QtCore.Qt.RichText) # Clickable html links
                 self.filename = _datadir+"pesterchum.js"
@@ -508,14 +514,14 @@ class userProfile(object):
             try:
                 with open("%s/%s.js" % (self.profiledir, user)) as fp:
                     self.userprofile = json.load(fp)
-            except json.JSONDecodeError as e:
+            except (json.JSONDecodeError, FileNotFoundError) as e:
                 msgBox = QtWidgets.QMessageBox()
-                msgBox.setIcon(QtWidgets.QMessageBox.Information)
+                msgBox.setIcon(QtWidgets.QMessageBox.Warning)
                 msgBox.setWindowTitle(":(")
                 msgBox.setTextFormat(QtCore.Qt.RichText) # Clickable html links
                 self.filename = _datadir+"pesterchum.js"
-                msgBox.setText("<html><h3>Failed to open: " + ("<a href='%s'>%s/%s.js</a>" % (self.profiledir, self.profiledir, user)) + \
-                               "<br><br> Try to check for syntax errors." + \
+                msgBox.setText("<html><h3>Failed to load: " + ("<a href='%s'>%s/%s.js</a>" % (self.profiledir, self.profiledir, user)) + \
+                               "<br><br> Try to check for syntax errors if the file exists." + \
                                "<br><br>If you got this message at launch you may want to change your default profile." + \
                                "<br><br>" + str(e) + "<\h3><\html>")
                                #"\" if pesterchum acts oddly you might want to try backing up and then deleting \"" + \
