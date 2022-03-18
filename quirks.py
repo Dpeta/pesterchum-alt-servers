@@ -72,11 +72,11 @@ class ScriptQuirks(object):
                 if module is None:
                     continue
             except Exception as e:
-                print("Error loading %s: %s (in quirks.py)" % (os.path.basename(name), e))
-                msgbox = QtWidgets.QMessageBox()
-                msgbox.setWindowTitle("Error!")
-                msgbox.setText("Error loading %s: %s (in quirks.py)" % (os.path.basename(filename), e))
-                msgbox.exec_()
+                PchumLog.warning("Error loading %s: %s (in quirks.py)" % (os.path.basename(name), e))
+                #msgbox = QtWidgets.QMessageBox()
+                #msgbox.setWindowTitle("Error!")
+                #msgbox.setText("Error loading %s: %s (in quirks.py)" % (os.path.basename(filename), e))
+                #msgbox.exec_()
             else:
                 if self.modHas(module, 'setup'):
                     module.setup()
