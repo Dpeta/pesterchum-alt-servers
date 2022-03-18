@@ -12,6 +12,7 @@ import codecs
 import platform
 import datetime
 import shutil
+import zipfile
 from datetime import *
 from time import strftime, time
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -114,9 +115,9 @@ class userConfig(object):
             msgbox = QtWidgets.QMessageBox()
             msgbox.setWindowTitle(":(")
             msgbox.setTextFormat(QtCore.Qt.RichText) # Clickable html links
-            msgbox.setInformativeText("<h3>Failed to load pesterchum.js, this might require manual intervention.<br><br>\
+            msgbox.setInformativeText("<html><h3>Failed to load pesterchum.js, this might require manual intervention.<br><br>\
 Consider overriding: <a href='%s'>%s</a> <br>\
-with a backup from: <a href='%s'>%s</a></h3>" % (_datadir, self.filename, os.path.join(_datadir, "backup"), os.path.join(_datadir, "backup")))
+with a backup from: <a href='%s'>%s</a></h3></html>" % (_datadir, self.filename, os.path.join(_datadir, "backup"), os.path.join(_datadir, "backup")))
             ret = msgbox.exec_()
             sys.exit()
 
@@ -148,65 +149,37 @@ with a backup from: <a href='%s'>%s</a></h3>" % (_datadir, self.filename, os.pat
         self.backup()
 
     def backup(self):
-        # Backup pesterchum.js file.
-        # Useful because it seems to randomly get blanked for people.
+        # Backups
         
         try:
+            # Backup pesterchum.js file.
+            # Useful because it seems to randomly get blanked for people.
             backup_path = os.path.join(_datadir, "backup")
             if os.path.exists(backup_path) == False:
                 os.makedirs(backup_path)
-            
             current_backup = datetime.now().day % 5
-            shutil.copyfile(self.filename, os.path.join(backup_path, "pesterchum.js.backup." + str(current_backup)))
-            
+            shutil.copyfile(self.filename, os.path.join(backup_path, "pesterchum.backup-" + str(current_backup) + ".js"))
+
+            # Backup profiles.
+            # Useful because people don't know how to add underscores to handles.
+            profile_path = os.path.join(_datadir, "profiles")
+            profile_list = os.listdir(profile_path)
+            with zipfile.ZipFile(os.path.join(backup_path, "profiles.backup-" + str(current_backup)) + ".zip", 'w') as pzip:
+                for x in profile_list:
+                    if x.endswith(".js") == True:
+                        with open(self.filename) as f:
+                                pzip.writestr(x, f.read())
+
+            PchumLog.info("Updated backups-%s." % current_backup)
         except OSError as e:
             PchumLog.warning("Failed to make backup, no permission?")
             PchumLog.warning(e)
         except shutil.Error as e:
             PchumLog.warning("Failed to make backup, shutil error?")
             PchumLog.warning(e)
-            
-                # Yeah,,, we really don't need this nvm </3
-                #import zipfile, lzma
-                #with open(self.filename) as f:
-                #    with zipfile.ZipFile(os.path.join(backup_path, "pesterchum.js.backup.zip"), 'a') as bzip:
-                #        bzip.writestr(today_backups_str_nopath, f.read(), zipfile.ZIP_LZMA)
-    
-    #def backup(self):
-        # Backup, because pesterchum.js seems to randomly get blanked for people.
-        #try:
-            #backup_path = os.path.join(_datadir, "backup")
-            #if os.path.exists(backup_path) == False:
-                #os.makedirs(backup_path)
-
-            #today_backups_str_nopath = "pesterchum.js" + strftime(".%d", gmtime()) + ".backup"
-            #today_backups_str = os.path.join(backup_path, today_backups_str_nopath)
-            #if os.path.isfile(today_backups_str):
-                #PchumLog.debug("pesterchum.js backup exists.")
-            #else:
-                #PchumLog.debug("pesterchum.js backup does not exist, making backup.")
-                #shutil.copyfile(self.filename, today_backups_str)
-                # Yeah,,, we really don't need this nvm </3
-                #import zipfile, lzma
-                #with open(self.filename) as f:
-                #    with zipfile.ZipFile(os.path.join(backup_path, "pesterchum.js.backup.zip"), 'a') as bzip:
-                #        bzip.writestr(today_backups_str_nopath, f.read(), zipfile.ZIP_LZMA)
-
-        #except OSError as e:
-        #    PchumLog.warning("Failed to make backup, no permission?")
-        #    PchumLog.warning(e)
-        #except shutil.Error as e:
-        #    PchumLog.warning("Failed to make backup, shutil error?")
-        #    PchumLog.warning(e)
-        #except ImportError as e:
-        #    PchumLog.warning("Failed to import module/library: " + e)
-        #    PchumLog.warning(e)
-        #except lzma.LZMAError as e:
-        #    PchumLog.warning("Failed to make backup, LZMAError?")
-        #    PchumLog.warning(e)
-        #except zipfile.BadZipFile as e:
-        #    PchumLog.warning("Failed to make backup, BadZipFile?")
-        #    PchumLog.warning(e)
+        except zipfile.BadZipFile as e:
+            PchumLog.warning("Failed to make backup, BadZipFile?")
+            PchumLog.warning(e)
                 
     def chums(self):
         if 'chums' not in self.config:
@@ -472,6 +445,36 @@ with a backup from: <a href='%s'>%s</a></h3>" % (_datadir, self.filename, os.pat
                 if filename[l-3:l] == ".js":
                     profs.append(filename[0:l-3])
         profs.sort()
+        PchumLog.info("Profiles: %s" % str(profs))
+        
+        # Validity check
+        PchumLog.info("Starting profile check. . .")
+        for x in profs:
+            c_profile = os.path.join(profileloc, x+".js")
+            try:
+                js_profile = json.load(open(c_profile))
+                PchumLog.info(x + ": Pass.")
+            except json.JSONDecodeError as e:
+                PchumLog.warning(x + ": Fail.")
+                PchumLog.warning(e)
+                profs.remove(x)
+                PchumLog.warning(x + " removed from profile list.")
+                
+                msgBox = QtWidgets.QMessageBox()
+                msgBox.setIcon(QtWidgets.QMessageBox.Information)
+                msgBox.setWindowTitle(":(")
+                msgBox.setTextFormat(QtCore.Qt.RichText) # Clickable html links
+                self.filename = _datadir+"pesterchum.js"
+                msgBox.setText("<html><h3>Failed to load " + x + ", removed from list." + \
+                               "<br><br>Consider taking a look at: <a href=" + profileloc + ">"+ os.path.join(profileloc, x + ".js") + "</a>" + \
+                               "<br><br>" + str(e) + "<\h3><\html>")
+                               #"\" if pesterchum acts oddly you might want to try backing up and then deleting \"" + \
+                               #_datadir+"pesterchum.js" + \
+                               #"\"")
+                PchumLog.critical(e)
+                msgBox.exec_()
+                
+        
         return [userProfile(p) for p in profs]
 
 class userProfile(object):
@@ -505,22 +508,23 @@ class userProfile(object):
             try:
                 with open("%s/%s.js" % (self.profiledir, user)) as fp:
                     self.userprofile = json.load(fp)
-            except:
-                
+            except json.JSONDecodeError as e:
                 msgBox = QtWidgets.QMessageBox()
                 msgBox.setIcon(QtWidgets.QMessageBox.Information)
                 msgBox.setWindowTitle(":(")
+                msgBox.setTextFormat(QtCore.Qt.RichText) # Clickable html links
                 self.filename = _datadir+"pesterchum.js"
-                msgBox.setText("Failed to open \"" + \
-                               ("%s/%s.js" % (self.profiledir, user)) + \
-                               "\n You should switch to a different profile and set it as the default.")
+                msgBox.setText("<html><h3>Failed to open: " + ("<a href='%s'>%s/%s.js</a>" % (self.profiledir, self.profiledir, user)) + \
+                               "<br><br> Try to check for syntax errors." + \
+                               "<br><br>If you got this message at launch you may want to change your default profile." + \
+                               "<br><br>" + str(e) + "<\h3><\html>")
                                #"\" if pesterchum acts oddly you might want to try backing up and then deleting \"" + \
                                #_datadir+"pesterchum.js" + \
                                #"\"")
+                PchumLog.critical(e)
                 msgBox.exec_()
+                raise ValueError(e)
 
-                
-                
             try:
                 self.theme = pesterTheme(self.userprofile["theme"])
             except ValueError:

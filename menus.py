@@ -777,6 +777,7 @@ class PesterChooseProfile(QtWidgets.QDialog):
             self.profileBox = QtWidgets.QComboBox(self)
             self.profileBox.addItem("Choose a profile...")
             for p in avail_profiles:
+                #PchumLog.debug("Adding profile: %s" % p.chat.handle)
                 self.profileBox.addItem(p.chat.handle)
         else:
             self.profileBox = None

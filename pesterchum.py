@@ -1186,7 +1186,19 @@ class PesterWindow(MovingWindow):
             else:
                 self.userprofile = userProfile(PesterProfile("pesterClient%d" % (random.randint(100,999)), QtGui.QColor("black"), Mood(0)))
                 self.theme = self.userprofile.getTheme()
-        except:
+        except Exception as e:
+            msgBox = QtWidgets.QMessageBox()
+            msgBox.setIcon(QtWidgets.QMessageBox.Information)
+            msgBox.setWindowTitle(":(")
+            msgBox.setTextFormat(QtCore.Qt.RichText) # Clickable html links
+            self.filename = _datadir+"pesterchum.js"
+            msgBox.setText("<html><h3>A profile error occured, trying to switch to default pesterClient profile." + \
+                               "<br><br>" + str(e) + "<\h3><\html>")
+                               #"\" if pesterchum acts oddly you might want to try backing up and then deleting \"" + \
+                               #_datadir+"pesterchum.js" + \
+                               #"\"")
+            PchumLog.critical(e)
+            msgBox.exec_()
             self.userprofile = userProfile(PesterProfile("pesterClient%d" % (random.randint(100,999)), QtGui.QColor("black"), Mood(0)))
             self.theme = self.userprofile.getTheme()
             
