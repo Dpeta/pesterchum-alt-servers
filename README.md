@@ -46,7 +46,6 @@ You can install them with Python's pip or your package manager if you're on linu
  - [PyQt5] (And, depending on your package manager & platform, python3-pyqt5.qtmultimedia)
  - [feedparser]
  - [python-magic]
- - [ostools]
  - [requests]
 
 [Python 3]: https://www.python.org/downloads/
@@ -54,7 +53,6 @@ You can install them with Python's pip or your package manager if you're on linu
 [pygame]: https://pypi.org/project/pygame/
 [feedparser]: https://pypi.org/project/feedparser/
 [python-magic]: https://pypi.org/project/python-magic/
-[ostools]: https://pypi.org/project/ostools/
 [requests]: https://pypi.org/project/requests/
 
 ### PYINSTALLER BUILDING
