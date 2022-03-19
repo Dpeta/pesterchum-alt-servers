@@ -1,32 +1,29 @@
-import logging, logging.config
-import ostools
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
-PchumLog = logging.getLogger('pchumLogger')
+import logging
+import logging.config
 import re
 import random
-import ostools
 import collections
 from copy import copy
 from datetime import timedelta
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+import dataobjs
+import ostools
+# karxi: My own contribution to this - a proper lexer.
+import pnc.lexercon as lexercon
 from generic import mysteryTime
 from quirks import ScriptQuirks
 from pyquirks import PythonQuirks
-from luaquirks import LuaQuirks
-import dataobjs
+#from luaquirks import LuaQuirks
 
-# karxi: My own contribution to this - a proper lexer.
-import pnc.lexercon as lexercon
+_datadir = ostools.getDataDir()
+logging.config.fileConfig(_datadir + "logging.ini")
+PchumLog = logging.getLogger('pchumLogger')
 
 # I'll clean up the things that are no longer needed once the transition is
 # actually finished.
-try:
-    QString = unicode
-except NameError:
-    # Python 3
-    QString = str
+QString = str
 
 _ctag_begin = re.compile(r'(?i)<c=(.*?)>')
 _gtag_begin = re.compile(r'(?i)<g[a-f]>')
@@ -45,7 +42,7 @@ _honk = re.compile(r"(?i)\bhonk\b")
 
 quirkloader = ScriptQuirks()
 quirkloader.add(PythonQuirks())
-quirkloader.add(LuaQuirks())
+#quirkloader.add(LuaQuirks())
 quirkloader.loadAll()
 # Quirks are already listed in quirks.py, so logging is redundant here. 
 #PchumLog.debug(quirkloader.funcre())

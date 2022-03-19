@@ -9,12 +9,7 @@ from os import remove
 
 import dataobjs, generic, memos, parsetools, ostools
 from version import _pcVersion
-
-try:
-    from pnc.attrdict import AttrDict
-except ImportError:
-    # Fall back on the old location, just in case
-    from pnc.dep.attrdict import AttrDict
+from pnc.dep.attrdict import AttrDict
 #~from styling import styler
 
 _datadir = ostools.getDataDir()

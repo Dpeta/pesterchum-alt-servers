@@ -1,10 +1,16 @@
-import logging, logging.config
+import os
+import sys
+import re
+import logging
+import logging.config
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 import ostools
+
 _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
-import os, sys, re, ostools
-from PyQt5 import QtCore, QtGui, QtWidgets
 
 class ScriptQuirks(object):
     def __init__(self):

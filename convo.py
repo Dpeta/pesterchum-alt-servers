@@ -1,4 +1,5 @@
-import logging, logging.config
+import logging
+import logging.config
 import ostools
 _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")
@@ -19,11 +20,7 @@ from parsetools import convertTags, lexMessage, mecmd, colorBegin, colorEnd, \
 import parsetools
 
 import pnc.lexercon as lexercon
-try:
-    from pnc.attrdict import AttrDict
-except ImportError:
-    # Fall back on the old location - just in case
-    from pnc.dep.attrdict import AttrDict
+from pnc.dep.attrdict import AttrDict
 
 class PesterTabWindow(QtWidgets.QFrame):
     def __init__(self, mainwindow, parent=None, convo="convo"):

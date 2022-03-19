@@ -1,28 +1,28 @@
-import logging, logging.config
-import ostools
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
-PchumLog = logging.getLogger('pchumLogger')
-from string import Template
+import logging
+import logging.config
 import re
+from string import Template
 from copy import copy
-from PyQt5 import QtCore, QtGui, QtWidgets
 from datetime import time, timedelta, datetime
 
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+import ostools
+import parsetools
 from mood import Mood
 from dataobjs import PesterProfile, PesterHistory
 from generic import PesterIcon, RightClickList, mysteryTime
 from convo import PesterConvo, PesterInput, PesterText, PesterTabWindow
 from parsetools import convertTags, addTimeInitial, timeProtocol, \
     lexMessage, colorBegin, colorEnd, mecmd, smiledict
-import parsetools
 from logviewer import PesterLogViewer
 
-try:
-    QString = unicode
-except NameError:
-    # Python 3
-    QString = str
+_datadir = ostools.getDataDir()
+logging.config.fileConfig(_datadir + "logging.ini")
+PchumLog = logging.getLogger('pchumLogger')
+
+# Python 3
+QString = str
 
 def delta2txt(d, format="pc"):
     if type(d) is mysteryTime:

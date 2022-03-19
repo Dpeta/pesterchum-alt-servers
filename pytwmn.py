@@ -1,4 +1,5 @@
-import os, socket
+import os
+import socket
 
 class TwmnError(Exception):
     UNWN_ERR = -1

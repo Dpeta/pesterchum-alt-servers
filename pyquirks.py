@@ -1,11 +1,18 @@
-import logging, logging.config
+import os
+import sys
+import imp
+import re
+import logging
+import logging.config
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 import ostools
+from quirks import ScriptQuirks
+
 _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
-import os, sys, imp, re, ostools
-from quirks import ScriptQuirks
-from PyQt5 import QtCore, QtGui, QtWidgets
 
 class PythonQuirks(ScriptQuirks):
     def loadModule(self, name, filename):

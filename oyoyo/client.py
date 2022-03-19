@@ -15,7 +15,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import logging, logging.config
+import logging
+import logging.config
 import ostools
 _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")
@@ -27,11 +28,9 @@ import sys
 import time
 import os
 import traceback
-import ostools
 import ssl
 import json
 import select
-_datadir = ostools.getDataDir()
 
 from oyoyo.parse import *
 from oyoyo import helpers
@@ -159,7 +158,7 @@ class IRCClient:
                     for x in ready_to_write:
                         x.sendall(msg + bytes("\r\n", "UTF-8"))
                     break
-                except socket.error as e:
+                except (socket.error, ValueError) as e:# "file descriptor cannot be a negative integer"
                     retry += 1
                     PchumLog.warning("socket.error (retry %s) %s" % (str(retry), str(e)))
         except socket.error as se:
@@ -210,7 +209,7 @@ class IRCClient:
                     if self._end:
                         break
                     raise e
-                except socket.error as e:
+                except (socket.error, ValueError) as e:
                     PchumLog.warning("conn socket.error %s in %s" % (e, self))
                     if self._end:
                         break

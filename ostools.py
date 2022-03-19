@@ -1,5 +1,7 @@
-import os, sys
+import os
+import sys
 import platform
+
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtCore import QStandardPaths
 

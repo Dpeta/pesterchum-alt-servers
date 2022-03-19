@@ -1,11 +1,7 @@
-import logging, logging.config
-import ostools
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
-PchumLog = logging.getLogger('pchumLogger')
+import logging
+import logging.config
 import os
 import sys
-from string import Template
 import json
 import re
 import codecs
@@ -13,8 +9,10 @@ import platform
 import datetime
 import shutil
 import zipfile
+from string import Template
 from datetime import *
 from time import strftime, time
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import ostools
@@ -23,6 +21,9 @@ from dataobjs import PesterProfile, pesterQuirk, pesterQuirks
 from parsetools import convertTags, addTimeInitial, themeChecker, ThemeException
 
 _datadir = ostools.getDataDir()
+logging.config.fileConfig(_datadir + "logging.ini")
+PchumLog = logging.getLogger('pchumLogger')
+
 
 class PesterLog(object):
     def __init__(self, handle, parent=None):

@@ -1,17 +1,15 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-import re, ostools
-
+import re
 from os import remove
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+import ostools
 from generic import RightClickList, RightClickTree, MultiTextDialog, NoneSound
 from dataobjs import pesterQuirk, PesterProfile
 from memos import TimeSlider, TimeInput
 from version import _pcVersion
 
-try:
-    QString = unicode
-except NameError:
-    # Python 3
-    QString = str
+QString = str
 
 _datadir = ostools.getDataDir()
 

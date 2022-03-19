@@ -1,27 +1,27 @@
-import logging, logging.config
-import ostools
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
-PchumLog = logging.getLogger('pchumLogger')
-from PyQt5 import QtCore, QtGui
-from oyoyo.client import IRCClient
-from oyoyo.cmdhandler import DefaultCommandHandler
-from oyoyo import helpers, services
-import random
+import logging
+import logging.config
 import socket
+import random
 from time import time
 
+from PyQt5 import QtCore, QtGui
+
+import ostools
 from mood import Mood
 from dataobjs import PesterProfile
 from generic import PesterList
 from version import _pcVersion
 
-import ostools
-try:
-    QString = unicode
-except NameError:
-    # Python 3
-    QString = str
+from oyoyo.client import IRCClient
+from oyoyo.cmdhandler import DefaultCommandHandler
+from oyoyo import helpers, services
+
+_datadir = ostools.getDataDir()
+logging.config.fileConfig(_datadir + "logging.ini")
+PchumLog = logging.getLogger('pchumLogger')
+
+# Python 3
+QString = str
 
 #if ostools.isOSXBundle():
 #    logging.basicConfig(level=logging.WARNING)

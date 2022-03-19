@@ -1,9 +1,13 @@
-import logging, logging.config
+import logging
+import logging.config
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 import ostools
+
 _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
-from PyQt5 import QtCore, QtGui, QtWidgets
 
 RANDNICK = "randomEncounter"
 

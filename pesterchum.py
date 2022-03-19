@@ -1,15 +1,12 @@
-# Pesterchum :3c
-
+#!/usr/bin/env python3
 import sys
 import os
 import shutil
 import getopt
 import configparser
-try:
-    QString = unicode
-except NameError:
-    # Python 3
-    QString = str
+
+# Python 3
+QString = str
 
 if os.path.dirname(sys.argv[0]):
     os.chdir(os.path.dirname(sys.argv[0]))
@@ -39,12 +36,7 @@ try:
     import json
 except:
     pass
-try:
-    from pnc.attrdict import AttrDict
-except ImportError:
-    # Fall back on the old location - just in case
-    #PchumLog.warning("Couldn't load attrdict from new loc; falling back")
-    from pnc.dep.attrdict import AttrDict
+from pnc.dep.attrdict import AttrDict
 
 reqmissing = []
 optmissing = []

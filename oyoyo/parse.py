@@ -15,7 +15,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import logging, logging.config
+import logging
+import logging.config
 import ostools
 _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")

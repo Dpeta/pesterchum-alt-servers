@@ -1,18 +1,24 @@
-import logging, logging.config
+import os
+import time
+import inspect
+import logging
+import logging.config
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 import ostools
+
 _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
-import inspect
-#import threading
-import time, os
-import ostools
-from PyQt5 import QtCore, QtGui, QtWidgets
 
-try:
-    import pynotify
-except:
-    pynotify = None
+#try:
+#    import pynotify
+#except:
+#    pynotify = None
+
+# Pynotify is broken.
+pynotify = None
 
 class DefaultToast(object):
     def __init__(self, machine, title, msg, icon):

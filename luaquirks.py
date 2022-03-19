@@ -1,15 +1,36 @@
-import logging, logging.config
+"""
+Okay so, this definitely doesn't work in its current state-
+Probably broke when transitioning to Python 3? Might've been broken for longer-
+Hard for me to work on this since I know absolutely nothing about lua, plus I'm not sure what 'lua' library this was originally supposed to work with.
+ + I asked and there doesn't seem to be a single person who actually used this 💀
+
+import logging
+import logging.config
+import os
+import sys
+import re
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 import ostools
+from quirks import ScriptQuirks
+
 _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
-import os, sys, re, ostools
+
 try:
-    import lua
-except ImportError:
+    try:
+        import lua
+    except ImportError:
+        import lupa
+        from lupa import LuaRuntime
+        
+    lua = LuaRuntime(unpack_returned_tuples=True)
+    PchumLog.info("Lua \"successfully\" imported.")
+except ImportError as e:
+    PchumLog.warning("No lua library. " + str(e))
     lua = None
-from quirks import ScriptQuirks
-from PyQt5 import QtCore, QtGui, QtWidgets
 
 class LuaQuirks(ScriptQuirks):
     def loadModule(self, name, filename):
@@ -20,10 +41,13 @@ class LuaQuirks(ScriptQuirks):
 
         CurrentDir = os.getcwd()
         os.chdir('quirks')
+
+        lua.globals().package.path = filename.replace(name+".lua", "?.lua")
+
         try:
             return lua.require(name)
-        except Error as e:
-            PchumLog.error(e)
+        except Exception as e:
+            PchumLog.warning(e)
             return None
         finally:
             os.chdir(CurrentDir)
@@ -32,7 +56,7 @@ class LuaQuirks(ScriptQuirks):
         return '.lua'
 
     def modHas(self, module, attr):
-        return module[attr] is not None
+        return attr in module
 
     def register(self, module):
         class Wrapper(object):
@@ -45,7 +69,8 @@ class LuaQuirks(ScriptQuirks):
                 os.chdir('quirks')
                 try:
                     return self.module.commands[self.name](lua.globals().tostring(text))
-                except:
+                except Exception as e:
+                    PchumLog.warning(e)
                     return None
                 finally:
                     os.chdir(CurrentDir)
@@ -70,4 +95,4 @@ class LuaQuirks(ScriptQuirks):
                     msgbox.exec_()
             else:
                 self.quirks[name] = CommandWrapper
-
+"""

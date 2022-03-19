@@ -17,7 +17,8 @@
 
 """ contains helper functions for common irc commands """
 
-import logging, logging.config
+import logging
+import logging.config
 import ostools
 _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")
