@@ -1,0 +1,13 @@
+#!/bin/sh
+# Run pesterchum either locally or when installed as library/module.
+# If installed as library/module can be excecuted from anywhere.
+#echo $@
+
+if [ -f "pesterchum.py" ]; 
+then
+python3 pesterchum.py $@
+
+else
+python3 -m pesterchum_alt $@
+
+fi
