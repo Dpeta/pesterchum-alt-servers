@@ -265,7 +265,7 @@ class MemoText(PesterText):
             self.mainwindow = self.parent().mainwindow
         else:
             self.mainwindow = self.parent()
-        if type(parent.parent()) is PesterTabWindow:
+        if type(parent.parent) is PesterTabWindow:
             self.tabobject = parent.parent()
             self.hasTabs = True
         else:
