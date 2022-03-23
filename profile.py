@@ -77,13 +77,23 @@ class PesterLog(object):
                     PchumLog.debug("post-error msg")
                     
                 self.convos[handle][format] = fp
+                
         for (format, t) in modes.items():
             f = self.convos[handle][format]
-            if platform.system() == "Windows":
-                f.write(t+"\r\n")
-            else:
-                f.write(t+"\r\n")
+            f.write(t+"\r\n")
+        
+        # flush + fsync force a write, might not be required though.
+        for (format, t) in modes.items():
             f.flush()
+            os.fsync(f.fileno())
+
+        # This way the file descriptors are closed and reopened for every message,
+        # which is sub-optimal and definitely a performance drain but,
+        # otherwise we still run into the ulimit on platforms like MacOS fairly easily.
+        if ostools.isOSX() == True:
+            for (format, t) in modes.items():
+                self.finish(handle)
+            
     def finish(self, handle):
         if handle not in self.convos:
             return
