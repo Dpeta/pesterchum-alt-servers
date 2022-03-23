@@ -1,9 +1,9 @@
 import os
 import sys
-import imp
 import re
 import logging
 import logging.config
+import importlib.util
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -16,8 +16,14 @@ PchumLog = logging.getLogger('pchumLogger')
 
 class PythonQuirks(ScriptQuirks):
     def loadModule(self, name, filename):
-        return imp.load_source(name, filename)
-
+        # imp is depreciated since Python 3.4
+        #return imp.load_source(name, filename)
+        
+        spec = importlib.util.spec_from_file_location(name, filename)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    
     def getExtension(self):
         return '.py'
 
