@@ -323,6 +323,7 @@ class PesterMovie(QtGui.QMovie):
                     text.document().addResource(QtGui.QTextDocument.ImageResource,
                                        text.urls[movie], movie.currentPixmap())
                     text.setLineWrapColumnOrWidth(text.lineWrapColumnOrWidth())
+    
 
 class PesterText(QtWidgets.QTextEdit):
     def __init__(self, theme, parent=None):
@@ -344,17 +345,25 @@ class PesterText(QtWidgets.QTextEdit):
         self.urls = {}
         for k in smiledict:
             self.addAnimation(QtCore.QUrl("smilies/%s" % (smiledict[k])), "smilies/%s" % (smiledict[k]))
-        self.mainwindow.animationSetting[bool].connect(self.animateChanged)
+        #self.mainwindow.animationSetting[bool].connect(self.animateChanged)
     def addAnimation(self, url, fileName):
+        # We don't need to treat images formats like .png as animation,
+        # this always opens a file handler otherwise, "movie.frameCount() > 1" isn't sufficient.
+        # Might be useful to use QImageReader's supportsAnimation function for this?
+        # As long as we're only using gifs there's no advantage to that though.
+        if not fileName.endswith(".gif"):
+            return
+        
         movie = PesterMovie(self)
         movie.setFileName(fileName)
-        movie.setCacheMode(QtGui.QMovie.CacheAll)
-        if movie.frameCount() > 1:
-            self.urls[movie] = url
-            movie.frameChanged[int].connect(movie.animate)
-            #movie.start()
+        self.urls[movie] = url
+        movie.frameChanged[int].connect(movie.animate)
+        
+    """
     @QtCore.pyqtSlot(bool)
     def animateChanged(self, animate):
+        PchumLog.warning("aaa")
+        
         if animate:
             for m in self.urls:
                 html = str(self.toHtml())
@@ -367,6 +376,7 @@ class PesterText(QtWidgets.QTextEdit):
                 if html.find(self.urls[m].toString()) != -1:
                     if m.frameCount() > 1:
                         m.stop()
+        """
 
     @QtCore.pyqtSlot(bool)
     def textReady(self, ready):
@@ -807,6 +817,7 @@ class PesterConvo(QtWidgets.QFrame):
     def closeEvent(self, event):
         self.mainwindow.waitingMessages.messageAnswered(self.title())
         for movie in self.textArea.urls:
+            movie.setFileName("") # Required, sometimes, for some reason. . .
             movie.stop()
             del movie
         self.windowClosed.emit(self.title())

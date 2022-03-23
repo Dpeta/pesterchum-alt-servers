@@ -278,7 +278,7 @@ class MemoText(PesterText):
         self.urls = {}
         for k in smiledict:
             self.addAnimation(QtCore.QUrl("smilies/%s" % (smiledict[k])), "smilies/%s" % (smiledict[k]))
-        self.mainwindow.animationSetting[bool].connect(self.animateChanged)
+        #self.mainwindow.animationSetting[bool].connect(self.animateChanged)
 
     def initTheme(self, theme):
         if "memos/scrollbar" in theme:
