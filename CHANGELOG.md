@@ -1,7 +1,7 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
-## v[2.2]
+## [v2.2] - 2022-03-24
 
 ### Added
  - Ban/kick reasons to message box popup.
@@ -10,15 +10,15 @@
 ### Fixed
  - Crash when opening logviewer from memo or convo.
  - Smiley-related file descriptor/handle leak, this would crash when you had too many tabs open.
-    - MacOS has a comparatively low ulimit, so this limit could be reached very easily. (~>10 tabs)
- - Added fall-back for if the server passes an unsupported amount of parameters for a command, should no longer cause a crash.
- - Added fall-backs for invalid profiles & json loading problems, should cause a crash less often and display a descriptive message.
+    - macOS has a comparatively low ulimit, so this limit could be reached very easily. (~>10 tabs)
+ - Added fallback for if the server passes an unsupported amount of parameters for a command, should no longer cause a crash.
+ - Added fallbacks for invalid profiles & json loading problems, should cause a crash less often and display a descriptive message.
     - Invalid profiles are now pruned from list when switching profiles. (would cause a crash previously)
- - RPL_CHANNELMODEIS function missing the mode_params parameters. (Pesterchum doesn't actually do anything with it, but previously it'd cause a crash when the server tried to pass it.)
+ - RPL_CHANNELMODEIS function missing the mode_params parameter. (Pesterchum doesn't actually do anything with it, but previously it'd cause a crash when the server tried to pass it.)
  
 ### Changed
- - Animated emotes should work on MacOS now if they didn't before.
- - File descriptors for logs are now closed after write to prevent reaching the ulimit, this is probably bad for performance.
+ - Animated emotes should work on macOS now if they didn't before.
+ - On macOS, file descriptors for logs are now closed after write to prevent reaching the ulimit, this is probably bad for performance.
  - Some imports are reorganized.
  - Now using select module for sockets, should hopefully make random connection errors/broken pipes a bit less common.
  - Failed socket write operations are now tried 5 times before connection is reset.
