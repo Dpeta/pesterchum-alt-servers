@@ -269,7 +269,6 @@ if sys.platform == 'win32':
     PyInstaller.__main__.run(run_win32)
 #MacOS
 elif sys.platform == 'darwin' :
-    input("NOTE: Building with pyinstaller on MacOS doesn't seem to work for me.")
     run_darwin =[
         'pesterchum.py',
         '--name=Pesterchum',
