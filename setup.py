@@ -10,6 +10,7 @@ if sys.version_info < (3, 0, 0):
 def is_64bit() -> bool:
     return sys.maxsize > 2**32
 
+path = ""
 base = None
 if sys.platform == "win32":
     base = "Win32GUI"
