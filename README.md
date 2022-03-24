@@ -35,7 +35,7 @@ Guides for python quirks and themes are also in the [docs] folder. If you want t
         - Newer releases probably won't run on Windows XP since Python stopped supporting it, if you're the singular Windows XP user left consider running from source. :'3
 
 
-    - For Linux, run ``pesterchum``.
+    - For Linux, run ``Pesterchum``.
         - Linux releases are not backwards compatible with glibc versions older than the one it was build against. The glibc version the release was build against will be included in the filename, like: *PesterchumAlt.-2.2-linux64-**glibc2.27**.tar.gz*. This really shouldn't be an issue unless your distro is absolutely ancient, if it is, run from source.
     - For macOS, run ``Pesterchum.app``, this may show up as just "Pesterchum". Alternatively, run the binary directly from ``Pesterchum\Pesterchum.app\Contents\MacOS\Pesterchum``.
 
