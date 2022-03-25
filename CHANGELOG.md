@@ -1,6 +1,11 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.2.1] - 2022-03-26
+
+### Fixed
+ - Crash when datadir is missing :"3
+
 ## [v2.2] - 2022-03-24
 
 ### Added

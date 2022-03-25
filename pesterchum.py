@@ -88,6 +88,8 @@ import ostools
 #  plowing on. :o)
 # ~Lex
 _datadir = ostools.getDataDir()
+if not os.path.isdir(_datadir):
+    os.makedirs(_datadir)
 # See, what I've done here is that _datadir is '' if we're not on OSX, so the
 #  concatination is the same as if it wasn't there.
 # UPDATE 2011-11-28 <Kiooeht>:
