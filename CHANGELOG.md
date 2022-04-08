@@ -1,6 +1,11 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.2.2] - 2022-03-26
+
+### Fixed
+ - Timeline overflow conditions, time is now replaced with platform max/min on OverflowError.
+
 ## [v2.2.1] - 2022-03-26
 
 ### Fixed

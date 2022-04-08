@@ -68,9 +68,9 @@ def txt2delta(txt):
         timed = timedelta(0)
     except OverflowError:
         if sign < 0:
-            return timedelta(min)
+            return timedelta.min
         else:
-            return timedelta(max)
+            return timedelta.max
     return sign*timed
 
 def pcfGrammar(td):
@@ -1022,7 +1022,13 @@ class PesterMemo(PesterConvo):
             timed = time - datetime.now()
             s = (timed.seconds // 60)*60
             timed = timedelta(timed.days, s)
-        except ValueError:
+        except OverflowError:
+            if secs < 0:
+                timed = timedelta.min
+            else:
+                timed = timedelta.max
+        except (OSError, ValueError) as e:
+            print(e)
             try:
                 if cmd == "i":
                     timed = timedelta(0)
