@@ -1,23 +1,27 @@
 # vim: set autoindent ts=4 sts=4 sw=4 textwidth=79 expandtab:
 # -*- coding=UTF-8; tab-width: 4 -*-
-
+#import os
+#from os import remove
+import sys
+import traceback
+import time
+import datetime
+import logging
+import logging.config
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-import re, os, traceback, sys
-import time, datetime
-from os import remove
 
-import dataobjs, generic, memos, parsetools, ostools
-from version import _pcVersion
+import dataobjs
+#import generic
+#import memos
+#import parsetools
+import ostools
+#from version import _pcVersion
 from pnc.dep.attrdict import AttrDict
-#~from styling import styler
 
 _datadir = ostools.getDataDir()
-
-import logging
-logging.basicConfig(level=logging.WARNING)
-
-
+logging.config.fileConfig(_datadir + "logging.ini")
+PchumLog = logging.getLogger('pchumLogger')
 
 
 class ConsoleWindow(QtWidgets.QDialog):
@@ -370,7 +374,7 @@ class ConsoleText(QtWidgets.QTextEdit):
         parent = self.window()
         mwindow = parent.mainwindow
 
-        systemColor = QtGui.QColor(mwindow.theme["convo/systemMsgColor"])
+        #systemColor = QtGui.QColor(mwindow.theme["convo/systemMsgColor"])
 
         if mwindow.config.showTimeStamps():
             if mwindow.config.time12Format():

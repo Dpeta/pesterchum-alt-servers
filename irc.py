@@ -207,7 +207,7 @@ class PesterIRC(QtCore.QThread):
     @QtCore.pyqtSlot()
     def updateColor(self):
         #PchumLog.debug("irc updateColor (outgoing)")
-        me = self.mainwindow.profile()
+        #me = self.mainwindow.profile()
         for h in list(self.mainwindow.convos.keys()):
             try:
                 helpers.msg(self.cli, h, "COLOR >%s" % (self.mainwindow.profile().colorcmd()))
@@ -449,7 +449,7 @@ class PesterHandler(DefaultCommandHandler):
 
     def welcome(self, server, nick, msg):
         self.parent.setConnected()
-        mychumhandle = self.mainwindow.profile().handle
+        #mychumhandle = self.mainwindow.profile().handle
         mymood = self.mainwindow.profile().mood.value()
         if not self.mainwindow.config.lowBandwidth():
             from time import sleep

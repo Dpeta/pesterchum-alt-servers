@@ -4,13 +4,12 @@ import ostools
 _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
-from PyQt5 import QtCore, QtGui
-from datetime import *
+from PyQt5 import QtGui
+from datetime import datetime
 import re
 import random
 
 from mood import Mood
-from generic import PesterIcon
 from parsetools import timeDifference, convertTags, lexMessage, parseRegexpFunctions
 from mispeller import mispeller
 
@@ -113,7 +112,7 @@ class pesterQuirks(object):
             self.quirklist.append(q)
     def apply(self, lexed, first=False, last=False):
         prefix = [q for q in self.quirklist if q.type=='prefix']
-        suffix = [q for q in self.quirklist if q.type=='suffix']
+        #suffix = [q for q in self.quirklist if q.type=='suffix'] # <-- Seems unused
 
         newlist = []
         for (i, o) in enumerate(lexed):
@@ -256,24 +255,43 @@ class PesterProfile(object):
                 return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>." % \
                     (opchum.colorhtml(), opinit, self.colorhtml(), ", ".join(initials), str(reason))
         else:
-            initials = timeGrammar.pcf+self.initials()+timeGrammar.number
-            if opchum.handle == reason:
-                return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo." % \
-                    (opchum.colorhtml(), opinit, self.colorhtml(), initials)
-            else:
-                return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>." % \
-                    (opchum.colorhtml(), opinit, self.colorhtml(), initials, str(reason))
+            # Is timeGrammar defined? Not sure if this works as intented, added try except block to be safe.
+            try:
+                initials = timeGrammar.pcf+self.initials()+timeGrammar.number
+                if opchum.handle == reason:
+                    return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo." % \
+                        (opchum.colorhtml(), opinit, self.colorhtml(), initials)
+                else:
+                    return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>." % \
+                        (opchum.colorhtml(), opinit, self.colorhtml(), initials, str(reason))
+            except:
+                PchumLog.exception('')
+                initials = self.initials()
+                if opchum.handle == reason:
+                    return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo." % \
+                        (opchum.colorhtml(), opinit, self.colorhtml(), initials)
+                else:
+                    return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>." % \
+                        (opchum.colorhtml(), opinit, self.colorhtml(), initials, str(reason))
+    """
+    # Currently unused, might be neat to use in the future?
+
     def memopermabanmsg(self, opchum, opgrammar, syscolor, timeGrammar):
-        initials = timeGrammar.pcf+self.initials()+timeGrammar.number
-        opinit = opgrammar.pcf+opchum.initials()+opgrammar.number
+        initials = (timeGrammar.pcf
+                    + self.initials()
+                    + timeGrammar.number)
+        opinit = (opgrammar.pcf
+                  + opchum.initials()
+                  + opgrammar.number)
         return "<c=%s>%s</c> permabanned <c=%s>%s</c> from the memo." % \
             (opchum.colorhtml(), opinit, self.colorhtml(), initials)
+    """
     def memojoinmsg(self, syscolor, td, timeGrammar, verb):
-        (temporal, pcf, when) = (timeGrammar.temporal, timeGrammar.pcf, timeGrammar.when)
+        #(temporal, pcf, when) = (timeGrammar.temporal, timeGrammar.pcf, timeGrammar.when)
         timetext = timeDifference(td)
-        initials = pcf+self.initials()+timeGrammar.number
+        initials = timeGrammar.pcf+self.initials()+timeGrammar.number
         return "<c=%s><c=%s>%s %s [%s]</c> %s %s.</c>" % \
-            (syscolor.name(), self.colorhtml(), temporal, self.handle,
+            (syscolor.name(), self.colorhtml(), timeGrammar.temporal, self.handle,
              initials, timetext, verb)
     def memoopmsg(self, opchum, opgrammar, syscolor):
         opinit = opgrammar.pcf+opchum.initials()+opgrammar.number

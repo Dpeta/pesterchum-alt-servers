@@ -27,11 +27,10 @@ if ('--help' in sys.argv[1:]) or ('-h' in sys.argv[1:]):
     sys.exit()
 
 import logging
-from datetime import *
+from datetime import timedelta
 import random
 import re
 from time import time
-import queue#, threading
 try:
     import json
 except:
@@ -80,8 +79,8 @@ if not ((major > 5) or (major == 5 and minor >= 0)):
     logging.critical("You currently have version " + vnum + ". Please upgrade Qt.")
     exit()
 
-from version import _pcVersion
-
+from profile import userConfig, userProfile, pesterTheme, PesterLog, \
+     PesterProfileDB
 import ostools
 # Placed here before importing the rest of pesterchum, since bits of it need
 #  OSX's data directory and it doesn't hurt to have everything set up before
@@ -208,10 +207,10 @@ from menus import PesterChooseQuirks, PesterChooseTheme, \
     LoadingScreen, AboutPesterchum, UpdatePesterchum, AddChumDialog
 from mood import Mood, PesterMoodAction, PesterMoodHandler, PesterMoodButton
 from dataobjs import PesterProfile, pesterQuirk, pesterQuirks
-from generic import PesterIcon, RightClickList, RightClickTree, \
-    MultiTextDialog, PesterList, CaseInsensitiveDict, MovingWindow, \
+from generic import PesterIcon, RightClickTree, \
+    PesterList, CaseInsensitiveDict, MovingWindow, \
     NoneSound, WMButton
-from convo import PesterTabWindow, PesterText, PesterInput, PesterConvo
+from convo import PesterTabWindow, PesterConvo
 from parsetools import convertTags, addTimeInitial, themeChecker, ThemeException
 from memos import PesterMemo, MemoTabWindow, TimeTracker
 from irc import PesterIRC
@@ -225,7 +224,6 @@ import nickservmsgs
 
 from toast import PesterToastMachine, PesterToast
 import pytwmn
-from profile import *
 
 #canon_handles = ["apocalypseArisen", "arsenicCatnip", "arachnidsGrip", "adiosToreador", \
 #                 "caligulasAquarium", "cuttlefishCuller", "carcinoGeneticist", "centaursTesticle", \
@@ -439,7 +437,8 @@ class chumArea(RightClickTree):
         elif text in self.groups:
             return self.groupMenu
         else:
-            currenthandle = self.currentItem().chum.handle
+            #currenthandle = self.currentItem().chum.handle
+            
             #if currenthandle in canon_handles:
             #    return self.canonMenu
             #else:
@@ -944,7 +943,7 @@ class chumArea(RightClickTree):
                     msgbox.setStyleSheet("QMessageBox{" + self.mainwindow.theme["main/defaultwindow/style"] + "}")
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
                     msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                    ret = msgbox.exec_()
+                    msgbox.exec_()
                     self.addgroupdialog = None
                     return
                 currentGroup = self.currentItem()
@@ -1488,6 +1487,9 @@ class PesterWindow(MovingWindow):
             self.updatemenu.raise_()
             self.updatemenu.activateWindow()
 
+    """
+    Depreciated
+    
     @QtCore.pyqtSlot()
     def updatePC(self):
         version.updateDownload(str(self.updatemenu.url))
@@ -1495,6 +1497,7 @@ class PesterWindow(MovingWindow):
     @QtCore.pyqtSlot()
     def noUpdatePC(self):
         self.updatemenu = None
+    """
 
     @QtCore.pyqtSlot()
     def checkPing(self):
@@ -2216,7 +2219,7 @@ class PesterWindow(MovingWindow):
             msgbox.setText("This chumhandle has been registered; you may not use it.")
             msgbox.setInformativeText("Your handle is now being changed to %s." % (changedto))
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            ret = msgbox.exec_()
+            msgbox.exec_()
         elif h == self.randhandler.randNick:
             self.randhandler.incoming(msg)
         elif h in self.convos:
@@ -2252,9 +2255,10 @@ class PesterWindow(MovingWindow):
     @QtCore.pyqtSlot(QString, QString)
     def cannotSendToChan(self, channel, msg):
         self.deliverMemo(channel, "ChanServ", msg)
-    @QtCore.pyqtSlot(QString, QString)
-    def modesUpdated(self, channel, modes):
-        self.modesUpdated.emit(channel, modes)
+    # Unused and redefined.
+    #@QtCore.pyqtSlot(QString, QString)
+    #def modesUpdated(self, channel, modes):
+    #    self.modesUpdated.emit(channel, modes)
     @QtCore.pyqtSlot(QString, QString, QString)
     def timeCommand(self, chan, handle, command):
         (c, h, cmd) = (str(chan), str(handle), str(command))
@@ -2280,7 +2284,7 @@ class PesterWindow(MovingWindow):
     def userPresentUpdate(self, handle, channel, update):
         c = str(channel)
         n = str(handle)
-        PchumLog.debug("c=%s\nn=%s\nupdate=%s\n" % (c, n, update))
+        #PchumLog.debug("c=%s\nn=%s\nupdate=%s\n" % (c, n, update))
         if update == "nick":
             l = n.split(":")
             oldnick = l[0]
@@ -2320,7 +2324,7 @@ class PesterWindow(MovingWindow):
             except KeyError:
                 self.namesdb[c] = [n]
 
-        PchumLog.debug("handle=%s\nchannel=%s\nupdate=%s\n" % (handle, channel, update))
+        #PchumLog.debug("handle=%s\nchannel=%s\nupdate=%s\n" % (handle, channel, update))
         self.userPresentSignal.emit(handle, channel, update)
 
     @QtCore.pyqtSlot()
@@ -2500,7 +2504,7 @@ class PesterWindow(MovingWindow):
                     replace = replace_mo.group(1)
                     try:
                         re.compile(regexp_state)
-                    except re.error as e:
+                    except re.error:
                         continue
                     newquirk = pesterQuirk({"type": "regexp",
                                             "from": regexp_state,
@@ -2665,7 +2669,7 @@ class PesterWindow(MovingWindow):
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
                     msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
                     msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")#Style :) (memos/style or convo/style works :3 )
-                    ret = msgbox.exec_()
+                    msgbox.exec_()
                     self.addgroupdialog = None
                     return
                 self.addGroup(gname)
@@ -2998,13 +3002,21 @@ class PesterWindow(MovingWindow):
                 msgBox.setWindowTitle(":(")
                 msgBox.setTextFormat(QtCore.Qt.RichText) # Clickable html links
                 self.filename = _datadir+"pesterchum.js"
-                msgBox.setText("<html><h3>Failed to load: " + ("<a href='%s'>%s/%s.js</a>" % (self.profiledir, self.profiledir, user)) + \
-                               "<br><br> Try to check for syntax errors if the file exists." + \
-                               "<br><br>If you got this message at launch you may want to change your default profile." + \
-                               "<br><br>" + str(e) + "<\h3><\html>")
-                               #"\" if pesterchum acts oddly you might want to try backing up and then deleting \"" + \
-                               #_datadir+"pesterchum.js" + \
-                               #"\"")
+                try:
+                    msgBox.setText("<html><h3>Failed to load: " + ("<a href='%s'>%s/%s.js</a>" % (self.profiledir, self.profiledir, user)) + \
+                                   "<br><br> Try to check for syntax errors if the file exists." + \
+                                   "<br><br>If you got this message at launch you may want to change your default profile." + \
+                                   "<br><br>" + str(e) + "<\h3><\html>")
+                                   #"\" if pesterchum acts oddly you might want to try backing up and then deleting \"" + \
+                                   #_datadir+"pesterchum.js" + \
+                                   #"\"")
+                except:
+                    # More generic error for if not all variables are available.
+                    msgBox.setText("Unspecified profile error." + \
+                                   "<br><br> Try to check for syntax errors if the file exists." + \
+                                   "<br><br>If you got this message at launch you may want to change your default profile." + \
+                                   "<br><br>" + str(e) + "<\h3><\html>")
+                    
                 PchumLog.critical(e)
                 msgBox.exec_()
                 return
@@ -3180,7 +3192,7 @@ class PesterWindow(MovingWindow):
             msgbox.setWindowIcon(PesterIcon(self.theme["main/icon"]))
             msgbox.setInformativeText("Incorrect format :(")
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            ret = msgbox.exec_()
+            msgbox.exec_()
             self.chooseServer()
             return 1
 
@@ -3215,7 +3227,7 @@ class PesterWindow(MovingWindow):
                                       + "Please tell me if this error occurs :'3")
             msgbox.addButton(QtWidgets.QPushButton("Yes"), QtWidgets.QMessageBox.YesRole)
             msgbox.addButton(QtWidgets.QPushButton("No"), QtWidgets.QMessageBox.NoRole)
-            ret = msgbox.exec_()
+            msgbox.exec_()
             reply = msgbox.buttonRole(msgbox.clickedButton())
 
             if (reply==QtWidgets.QMessageBox.YesRole):

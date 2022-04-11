@@ -1,11 +1,8 @@
-import os
-import sys
-import re
 import logging
 import logging.config
 import importlib.util
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 
 import ostools
 from quirks import ScriptQuirks

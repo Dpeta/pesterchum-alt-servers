@@ -534,7 +534,13 @@ class RelayChat(Lexer):
                     # Go down the stack until we have a line color TO end
                     while cstack:
                         # Add a </c> since we'll need one anyway
-                        closecolor()
+
+                        # Is closecolor accessible here?
+                        try:
+                            closecolor()
+                        except Exception as e:
+                            print(e)
+                            
                         ##if isinstance(color, LineColor):
                         if isinstance(cstack.pop(), LineColor):
                             # We found what we wanted, and the color
@@ -552,7 +558,11 @@ class RelayChat(Lexer):
                             # It's not a line color, so remove it
                             del cstack[-1]
                             # Add a </c>
-                            closecolor()
+                            # Is closecolor accessible here?
+                            try:
+                                closecolor()
+                            except Exception as e:
+                                print(e)
                         else:
                             # It's a line color, so stop searching.
                             # Using break here prevents the 'else'

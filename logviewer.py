@@ -1,4 +1,4 @@
-import os, sys
+import os
 import codecs
 import re
 import ostools

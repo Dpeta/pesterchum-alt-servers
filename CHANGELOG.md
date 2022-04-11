@@ -1,10 +1,17 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
-## [v2.2.2] - 2022-03-26
+## [v2.2.2] - 2022-04-11
+
+### Changed
+ - Removed unused imports.
+ - Removed unused variables.
+ - Made some 'from X import *' imports explicit.
 
 ### Fixed
  - Timeline overflow conditions, time is now replaced with platform max/min on OverflowError.
+ - Some accidental redefinitions. (modesUpdated function got overwriten by modesUpdated QtCore.pyqtSignal, 'time' module got overwriten by 'time' variable, etc.)
+ - A few broken conditions that didn't usually occur.
 
 ## [v2.2.1] - 2022-03-26
 

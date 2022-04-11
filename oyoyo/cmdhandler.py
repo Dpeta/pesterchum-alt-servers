@@ -23,8 +23,6 @@ PchumLog = logging.getLogger('pchumLogger')
 
 import inspect
 import logging
-import sys
-import traceback
 
 from oyoyo import helpers
 from oyoyo.parse import parse_nick

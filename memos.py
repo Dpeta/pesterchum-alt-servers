@@ -2,19 +2,17 @@ import logging
 import logging.config
 import re
 from string import Template
-from copy import copy
-from datetime import time, timedelta, datetime
+from datetime import timedelta, datetime
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import ostools
 import parsetools
-from mood import Mood
 from dataobjs import PesterProfile, PesterHistory
 from generic import PesterIcon, RightClickList, mysteryTime
 from convo import PesterConvo, PesterInput, PesterText, PesterTabWindow
-from parsetools import convertTags, addTimeInitial, timeProtocol, \
-    lexMessage, colorBegin, colorEnd, mecmd, smiledict
+from parsetools import convertTags, timeProtocol, \
+    lexMessage, colorBegin, mecmd, smiledict
 from logviewer import PesterLogViewer
 
 _datadir = ostools.getDataDir()
@@ -334,7 +332,12 @@ class MemoText(PesterText):
                 # new chum! time current
                 newtime = timedelta(0)
                 time = TimeTracker(newtime)
-                parent.times[handle] = time
+
+                # 'handle' undefined?
+                try:
+                    parent.times[handle] = time
+                except:
+                    parent.times[chum.handle] = time
         else:
             time = parent.time
 
@@ -1028,7 +1031,7 @@ class PesterMemo(PesterConvo):
             else:
                 timed = timedelta.max
         except (OSError, ValueError) as e:
-            print(e)
+            PchumLog.warning(str(e))
             try:
                 if cmd == "i":
                     timed = timedelta(0)
@@ -1070,8 +1073,8 @@ class PesterMemo(PesterConvo):
     def namesUpdated(self, channel):
         c = str(channel)
         if c.lower() != self.channel.lower(): return
-        # get namesdb
-        namesdb = self.mainwindow.namesdb
+        # get namesdb (unused)
+        #namesdb = self.mainwindow.namesdb
         # reload names
         self.userlist.clear()
         for n in self.mainwindow.namesdb[self.channel]:
@@ -1098,7 +1101,7 @@ class PesterMemo(PesterConvo):
             msgbox.setText("%s: Invites only!" % (c))
             msgbox.setInformativeText("This channel is invite-only. You must get an invitation from someone on the inside before entering.")
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            ret = msgbox.exec_()
+            msgbox.exec_()
 
     def quirkDisable(self, op, msg):
         chums = self.userlist.findItems(op, QtCore.Qt.MatchFlags(0))
@@ -1124,12 +1127,12 @@ class PesterMemo(PesterConvo):
         chum = PesterProfile(h)
         if h == self.mainwindow.profile().handle:
             chum = self.mainwindow.profile()
-            ttracker = self.time
-            curtime = self.time.getTime()
-        elif h in self.times:
-            ttracker = self.times[h]
-        else:
-            ttracker = TimeTracker(timedelta(0))
+            #ttracker = self.time
+            #curtime = self.time.getTime()
+        #elif h in self.times:
+        #    ttracker = self.times[h]
+        #else:
+        #    ttracker = TimeTracker(timedelta(0))
         opchum = PesterProfile(op)
         PchumLog.debug("op = " + op)
         PchumLog.debug("opchum = " + opchum.handle)
@@ -1167,7 +1170,7 @@ class PesterMemo(PesterConvo):
         h = str(handle)
         c = str(channel)
         update = str(update)
-        PchumLog.debug("h=%s\nc=%s\nupdate=%s" % (h,c,update))
+        #PchumLog.debug("h=%s\nc=%s\nupdate=%s" % (h,c,update))
         if update[0:4] == "kick": # yeah, i'm lazy.
             l = update.split(":")
             update = l[0]
@@ -1514,10 +1517,11 @@ class PesterMemo(PesterConvo):
 
     @QtCore.pyqtSlot()
     def sendtime(self):
-        me = self.mainwindow.profile()
-        systemColor = QtGui.QColor(self.mainwindow.theme["memos/systemMsgColor"])
+        #me = self.mainwindow.profile()
+        #systemColor = QtGui.QColor(self.mainwindow.theme["memos/systemMsgColor"])
         time = txt2delta(self.timeinput.text())
-        present = self.time.addTime(time)
+        #present = self.time.addTime(time)
+        self.time.addTime(time)
 
         serverText = "PESTERCHUM:TIME>"+delta2txt(time, "server")
         self.messageSent.emit(serverText, self.title())

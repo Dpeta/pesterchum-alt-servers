@@ -1,10 +1,6 @@
 import os
-import sys
-import re
 import logging
 import logging.config
-
-from PyQt5 import QtCore, QtGui, QtWidgets
 
 import ostools
 

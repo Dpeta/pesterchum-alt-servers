@@ -1,7 +1,7 @@
 import logging
 import logging.config
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 import ostools
 
@@ -67,7 +67,6 @@ class RandomHandler(QtCore.QObject):
                 pass
         elif code == "!":
             if l[1] == "x":
-                from PyQt5 import QtGui, QtWidgets
                 msgbox = QtWidgets.QMessageBox()
                 msgbox.setText("Unable to fetch you a random encounter!")
                 msgbox.setInformativeText("Try again later :(")

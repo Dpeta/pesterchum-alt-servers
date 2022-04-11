@@ -1,12 +1,11 @@
 import logging
 import logging.config
 import re
-import random
 import collections
 from copy import copy
 from datetime import timedelta
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets
 
 import dataobjs
 import ostools
@@ -293,7 +292,7 @@ def convertTags(lexed, format="html"):
     if type(lexed) in [str, str]:
         lexed = lexMessage(lexed)
     escaped = ""
-    firststr = True
+    #firststr = True
     for (i, o) in enumerate(lexed):
         if type(o) in [str, str]:
             if format == "html":
@@ -380,7 +379,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
     curlen = 0
     # Maximum number of characters *to* use.
     if not maxlen:
-        maxlen = __max_msg_len(None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.real_name)
+        maxlen = _max_msg_len(None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.real_name)
     elif maxlen < 0:
         # Subtract the (negative) length, giving us less leeway in this
         # function.
@@ -394,7 +393,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
         tags that will be needed."""
         return maxlen - curlen - (len(open_ctags) * 4)
 
-    safekeeping = lexed[:]
+    #safekeeping = lexed[:]
     lexed = collections.deque(lexed)
     rounds = 0
     # NOTE: This entire mess is due for a rewrite. I'll start splitting it into

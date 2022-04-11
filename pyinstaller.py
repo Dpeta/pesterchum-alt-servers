@@ -1,7 +1,8 @@
-import PyInstaller.__main__
+import os
 import sys
 import shutil
-import os
+
+import PyInstaller.__main__
 
 if sys.version_info < (3, 0, 0):
     sys.exit("Python versions lower than 3 are not supported.")
@@ -58,7 +59,7 @@ Some of the include files are specific to my instalation, so you might have to e
             if crt_path == '':
                 crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86" # Default directory.
         print("crt_path = " + crt_path)
-except KeyboardInterrupt as e:
+except KeyboardInterrupt:
     sys.exit("KeyboardInterrupt")
 
 exclude_modules = ['collections.sys',

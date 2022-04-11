@@ -24,15 +24,13 @@ PchumLog = logging.getLogger('pchumLogger')
 
 import logging
 import socket
-import sys
 import time
-import os
 import traceback
 import ssl
 import json
 import select
 
-from oyoyo.parse import *
+from oyoyo.parse import parse_raw_irc_command
 from oyoyo import helpers
 from oyoyo.cmdhandler import CommandError
 

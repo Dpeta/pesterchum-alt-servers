@@ -1,6 +1,3 @@
-import sys
-from .helpers import msg
-
 # NickServ basic functions
 _nickservfuncs = (
     'register',

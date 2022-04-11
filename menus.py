@@ -4,10 +4,13 @@ from os import remove
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import ostools
-from generic import RightClickList, RightClickTree, MultiTextDialog, NoneSound
-from dataobjs import pesterQuirk, PesterProfile
+import parsetools
+from generic import RightClickList, RightClickTree, MultiTextDialog
+from dataobjs import pesterQuirk, PesterProfile, PesterHistory
 from memos import TimeSlider, TimeInput
 from version import _pcVersion
+from convo import PesterInput, PesterText
+from parsetools import lexMessage
 
 QString = str
 
@@ -183,7 +186,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
                     msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                    ret = msgbox.exec_()
+                    msgbox.exec_()
                     self.addgroupdialog = None
                     return
                 found = self.findItems(gname, QtCore.Qt.MatchExactly)
@@ -191,7 +194,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS QUIRK GROUP ALREADY EXISTS")
                     msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                    ret = msgbox.exec_()
+                    msgbox.exec_()
                     return
                 child_1 = QtWidgets.QTreeWidgetItem([gname])
                 self.addTopLevelItem(child_1)
@@ -222,11 +225,6 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
             for j in range(self.topLevelItem(index).childCount()):
                 self.topLevelItem(index).child(j).setCheckState(0, state)
 
-from copy import copy
-from convo import PesterInput, PesterText
-from parsetools import convertTags, lexMessage, mecmd, colorBegin, colorEnd, img2smiley, smiledict
-import parsetools
-from dataobjs import pesterQuirks, PesterHistory
 class QuirkTesterWindow(QtWidgets.QDialog):
     def __init__(self, parent):
         QtWidgets.QDialog.__init__(self, parent)
@@ -650,7 +648,7 @@ class PesterChooseQuirks(QtWidgets.QDialog):
     def editSelected(self):
         q = self.quirkList.currentQuirk()
         if not q: return
-        quirk = q.quirk
+        #quirk = q.quirk
         self.addQuirkDialog(q)
 
     @QtCore.pyqtSlot()

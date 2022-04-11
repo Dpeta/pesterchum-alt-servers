@@ -1,6 +1,7 @@
-# Windows-only cx_freeze setup file
-from cx_Freeze import *
+# Windows-only cx_freeze setup file, macOS may work but I've not tested it.
 import sys
+
+from cx_Freeze import setup, Executable
 
 from version import buildVersion
 

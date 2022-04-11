@@ -1,24 +1,22 @@
-import logging
-import logging.config
 import os
 import sys
 import json
 import re
 import codecs
-import platform
-import datetime
 import shutil
 import zipfile
+import logging
+import logging.config
 from string import Template
-from datetime import *
-from time import strftime, time
+from datetime import datetime
+from time import strftime
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import ostools
 from mood import Mood
-from dataobjs import PesterProfile, pesterQuirk, pesterQuirks
-from parsetools import convertTags, addTimeInitial, themeChecker, ThemeException
+from dataobjs import PesterProfile, pesterQuirks
+from parsetools import convertTags
 
 _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")
@@ -35,36 +33,36 @@ class PesterLog(object):
 
     def log(self, handle, msg):
         if self.parent.config.time12Format():
-            time = strftime("[%I:%M")
+            log_time = strftime("[%I:%M")
         else:
-            time = strftime("[%H:%M")
+            log_time = strftime("[%H:%M")
         if self.parent.config.showSeconds():
-            time += strftime(":%S] ")
+            log_time += strftime(":%S] ")
         else:
-            time += "] "
+            log_time += "] "
         if handle[0] == '#':
             if not self.parent.config.logMemos() & self.parent.config.LOG: return
             if not self.parent.config.logMemos() & self.parent.config.STAMP:
-                time = ""
+                log_time = ""
         else:
             if not self.parent.config.logPesters() & self.parent.config.LOG: return
             if not self.parent.config.logPesters() & self.parent.config.STAMP:
-                time = ""
+                log_time = ""
         if self.parent.isBot(handle): return
         #watch out for illegal characters
         handle = re.sub(r'[<>:"/\\|?*]', "_", handle)
-        bbcodemsg = time + convertTags(msg, "bbcode")
-        html = time + convertTags(msg, "html")+"<br />"
-        msg = time +convertTags(msg, "text")
+        bbcodemsg = log_time + convertTags(msg, "bbcode")
+        html = log_time + convertTags(msg, "html")+"<br />"
+        msg = log_time +convertTags(msg, "text")
         modes = {"bbcode": bbcodemsg, "html": html, "text": msg}
         if handle not in self.convos:
-            time = datetime.now().strftime("%Y-%m-%d.%H.%M")
+            log_time = datetime.now().strftime("%Y-%m-%d.%H.%M")
             self.convos[handle] = {}
             for (format, t) in modes.items():
                 if not os.path.exists("%s/%s/%s/%s" % (self.logpath, self.handle, handle, format)):
                     os.makedirs("%s/%s/%s/%s" % (self.logpath, self.handle, handle, format))
                 try:
-                    fp = codecs.open("%s/%s/%s/%s/%s.%s.txt" % (self.logpath, self.handle, handle, format, handle, time), encoding='utf-8', mode='a')
+                    fp = codecs.open("%s/%s/%s/%s/%s.%s.txt" % (self.logpath, self.handle, handle, format, handle, log_time), encoding='utf-8', mode='a')
                 except (IOError, OSError) as e:
                     # Catching this exception does not stop pchum from dying if we run out of file handles </3
                     PchumLog.critical(e)
@@ -135,7 +133,7 @@ class userConfig(object):
             msgbox.setInformativeText("<html><h3>Failed to load pesterchum.js, this might require manual intervention.<br><br>\
 Consider overriding: <a href='%s'>%s</a> <br>\
 with a backup from: <a href='%s'>%s</a></h3></html>" % (_datadir, self.filename, os.path.join(_datadir, "backup"), os.path.join(_datadir, "backup")))
-            ret = msgbox.exec_()
+            msgbox.exec_()
             sys.exit()
 
         # Trying to fix:
@@ -469,7 +467,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>" % (_datadir, self.filename,
         for x in profs:
             c_profile = os.path.join(profileloc, x+".js")
             try:
-                js_profile = json.load(open(c_profile))
+                json.load(open(c_profile))
                 PchumLog.info(x + ": Pass.")
             except json.JSONDecodeError as e:
                 PchumLog.warning(x + ": Fail.")

@@ -5,21 +5,15 @@ _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 from string import Template
-import re
-import platform
 from time import strftime
-from copy import copy
 from datetime import datetime, timedelta
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from mood import Mood
-from dataobjs import PesterProfile, PesterHistory
-from generic import PesterIcon
+from dataobjs import PesterHistory
 from parsetools import convertTags, lexMessage, mecmd, colorBegin, colorEnd, \
-    img2smiley, smiledict
+    smiledict#, img2smiley
 import parsetools
 
-import pnc.lexercon as lexercon
 from pnc.dep.attrdict import AttrDict
 
 class PesterTabWindow(QtWidgets.QFrame):
@@ -95,12 +89,16 @@ class PesterTabWindow(QtWidgets.QFrame):
             self.convos[handle].raiseChat()
         else:
             self.tabs.setCurrentIndex(tabi)
+    """
+    There are two instances of "convoHasFocus" for some reason?
+    This one seems to just get redefined.
 
     def convoHasFocus(self, convo):
         if ((self.hasFocus() or self.tabs.hasFocus()) and
             self.tabs.tabText(self.tabs.currentIndex()) == convo.title()):
             return True
-
+    """
+    
     def isBot(self, *args, **kwargs):
         return self.mainwindow.isBot(*args, **kwargs)
 
@@ -492,7 +490,7 @@ class PesterText(QtWidgets.QTextEdit):
                 QtCore.Qt.Key_Up, QtCore.Qt.Key_Down)
         parent = self.parent()
         key = event.key()
-        keymods = event.modifiers()
+        #keymods = event.modifiers()
         if hasattr(parent, 'textInput') and key not in pass_to_super:
             # TODO: Shift focus here on bare (no modifiers) alphanumerics.
             parent.textInput.keyPressEvent(event)
@@ -745,11 +743,11 @@ class PesterConvo(QtWidgets.QFrame):
         memoblink &= self.mainwindow.config.MBLINK
         pesterblink &= self.mainwindow.config.PBLINK
         mutednots = self.notifications_muted
-        mtsrc = self
+        #mtsrc = self
         if parent:
             try:
                 mutednots = parent.notifications_muted
-                mtsrc = parent
+                #mtsrc = parent
             except:
                 pass
         if not (self.hasFocus() or self.textArea.hasFocus() or
