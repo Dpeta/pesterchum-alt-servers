@@ -79,8 +79,6 @@ if not ((major > 5) or (major == 5 and minor >= 0)):
     logging.critical("You currently have version " + vnum + ". Please upgrade Qt.")
     exit()
 
-from profile import userConfig, userProfile, pesterTheme, PesterLog, \
-     PesterProfileDB
 import ostools
 # Placed here before importing the rest of pesterchum, since bits of it need
 #  OSX's data directory and it doesn't hurt to have everything set up before
@@ -167,11 +165,11 @@ if ('--logging' in sys.argv[1:]) or ('-l' in sys.argv[1:]) & (False == ('--loggi
     except:
         logging.exception("Invalid syntax?")
 
-# Update logging.conf
+# Update logging.ini
 with open(_datadir + "logging.ini", 'w') as configfile:
         config.write(configfile)
 
-# Load logging.conf
+# Load logging.ini
 import logging.config
 logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
@@ -202,6 +200,8 @@ if not os.path.exists(_datadir+"pesterchum.js"):
 if not os.path.exists(_datadir+"logs"):
     os.mkdir(_datadir+"logs")
 
+from profile import userConfig, userProfile, pesterTheme, PesterLog, \
+     PesterProfileDB
 from menus import PesterChooseQuirks, PesterChooseTheme, \
     PesterChooseProfile, PesterOptions, PesterUserlist, PesterMemoList, \
     LoadingScreen, AboutPesterchum, UpdatePesterchum, AddChumDialog
