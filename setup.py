@@ -36,7 +36,8 @@ includefiles = ["quirks",
                 "logging.ini.example"]
 build_exe_options = {
 ##    "includes": [],
-    "excludes": ['collections.sys',
+    "excludes": ['tkinter',
+        'collections.sys',
         'collections._sre',
         'collections._json',
         'collections._locale',
