@@ -531,7 +531,14 @@ class PesterInput(QtWidgets.QLineEdit):
         super(PesterInput, self).__init__(parent)
         self.changeTheme(theme)
     def changeTheme(self, theme):
-        self.setStyleSheet(theme[self.stylesheet_path])
+        # Explicitly set color if not already set.
+        # (Some platforms seem to default to white instead of black.)
+        
+        StyleSheet = theme[self.stylesheet_path]        
+        if "color:" not in theme[self.stylesheet_path].replace(' ', ''):
+            StyleSheet = "color: black; " + StyleSheet
+        self.setStyleSheet(StyleSheet)
+        
     def focusInEvent(self, event):
         self.parent().clearNewMessage()
         self.parent().textArea.textCursor().clearSelection()

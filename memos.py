@@ -386,6 +386,7 @@ class PesterMemo(PesterConvo):
 
         self.textArea = MemoText(self.mainwindow.theme, self)
         self.textInput = MemoInput(self.mainwindow.theme, self)
+        print(self.textInput)
         self.textInput.setFocus()
 
         self.miniUserlist = QtWidgets.QPushButton(">\n>", self)
