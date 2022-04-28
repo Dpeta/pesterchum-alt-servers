@@ -5,7 +5,10 @@
 
 ### Changed
  - Excluded some more modules in build files, hopefully shouldn't cause any issues.
- - Added empty 'package' option to 'setup' in setup.py, setuptools v61.0.0 doesn't seem to like our project layout.
+ - Added empty 'package' option to 'setup' in setup.py, setuptools v61.0.0 doesn't seem to like our project layout anymore.
+
+### Fixed
+ - Unreadable input on MacOS and certain linux distros for themes which didn't explicitly set input color (incl. pesterchum), input color is now black by default instead of being platform-dependent.
 
 ## [v2.2.2] - 2022-04-11
 
