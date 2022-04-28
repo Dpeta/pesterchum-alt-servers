@@ -2,6 +2,7 @@
 import sys
 
 from cx_Freeze import setup, Executable
+import pygame
 
 from version import buildVersion
 
@@ -35,7 +36,9 @@ includefiles = ["quirks",
                 "Pesterchum.png",
                 "logging.ini.example"]
 build_exe_options = {
-##    "includes": [],
+    "includes": ['PyQt5.QtCore',
+        'PyQt5.QtGui',
+        'PyQt5.QtWidgets'],
     "excludes": ['tkinter',
         'collections.sys',
         'collections._sre',
@@ -53,12 +56,20 @@ build_exe_options = {
         'PyQt5.QtSvg',
         'PyQt5.QtTest',
         'PyQt5.QtWebKit',
-#        'PyQt5.QtXml',
-#        'PyQt5.QtXmlPatterns',
+        'PyQt5.QtXml',
+        'PyQt5.QtXmlPatterns',
         'PyQt5.phonon',
         'PyQt5.QtAssistant',
         'PyQt5.QtDesigner',
-        'PyQt5.QAxContainer',],
+        'PyQt5.QAxContainer',
+        'asyncio', # for now . . .
+        'email', # ?? :?
+        'xml',
+        'pygame.docs' # Hopefully we can just not have pygame at all at some point =3
+                      # (when QtMultimedia stops relying on local codecs </3)
+        'pygame.examples',
+        'pygame.tests',
+        'pydoc_data'],
     "include_files": includefiles,
     "include_msvcr": True,  # cx_freeze copies 64-bit binaries always?
     "path": path            # Improved in 6.6, path to be safe
@@ -121,6 +132,7 @@ setup(
             options = {"build_exe": build_exe_options,
                        "bdist_msi": bdist_msi_options,
                        "bdist_mac": bdist_mac_options},
+            packages="",
             executables = [Executable("pesterchum.py",
                                       base=base,
                                       icon=icon

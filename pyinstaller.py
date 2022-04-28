@@ -62,7 +62,8 @@ Some of the include files are specific to my instalation, so you might have to e
 except KeyboardInterrupt:
     sys.exit("KeyboardInterrupt")
 
-exclude_modules = ['collections.sys',
+exclude_modules = ['tkinter',
+        'collections.sys',
         'collections._sre',
         'collections._json',
         'collections._locale',
@@ -78,12 +79,20 @@ exclude_modules = ['collections.sys',
         'PyQt5.QtSvg',
         'PyQt5.QtTest',
         'PyQt5.QtWebKit',
-#        'PyQt5.QtXml',
-#        'PyQt5.QtXmlPatterns',
+        'PyQt5.QtXml',
+        'PyQt5.QtXmlPatterns',
         'PyQt5.phonon',
         'PyQt5.QtAssistant',
         'PyQt5.QtDesigner',
-        'PyQt5.QAxContainer',]
+        'PyQt5.QAxContainer',
+        'asyncio', # for now . . .
+        'email', # ?? :?
+        'xml',
+        'pygame.docs' # Hopefully we can just not have pygame at all at some point =3
+                      # (when QtMultimedia stops relying on local codecs </3)
+        'pygame.examples',
+        'pygame.tests',
+        'pydoc_data'],
 
 add_data = ['quirks;quirks',
         'smilies;smilies',

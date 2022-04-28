@@ -1,6 +1,12 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.2.3] - 2022-04-11
+
+### Changed
+ - Excluded some more modules in build files, hopefully shouldn't cause any issues.
+ - Added empty 'package' option to 'setup' in setup.py, setuptools v61.0.0 doesn't seem to like our project layout.
+
 ## [v2.2.2] - 2022-04-11
 
 ### Changed
