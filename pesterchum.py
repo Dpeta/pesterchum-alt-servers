@@ -15,18 +15,19 @@ print("Use -h/--help to see the available options.\nLogging is configured in log
 # Help
 if ('--help' in sys.argv[1:]) or ('-h' in sys.argv[1:]):
     print("Possible arguments:")
-    help_arguments = " -l, --logging\n    Specify level of logging, possible values are:\n" + \
-                     "    CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET.\n" + \
-                     "    The default value is WARNING.\n" + \
-                     "    (See https://docs.python.org/3/library/logging.html)\n\n" + \
-                     " -s, --server\n    Specify server override. (legacy)\n\n" + \
-                     " -p, --port\n    Specify port override. (legacy)\n\n" + \
-                     " --advanced\n    Enable advanced.\n\n" + \
-                     " --no-honk\n    Disable honking.\n"
+    help_arguments = (" -l, --logging\n    Specify level of logging, possible values are:\n"
+                     + "    CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET.\n" 
+                     + "    The default value is WARNING.\n" 
+                     + "    (See https://docs.python.org/3/library/logging.html)\n\n" 
+                     + " -s, --server\n    Specify server override. (legacy)\n\n"
+                     + " -p, --port\n    Specify port override. (legacy)\n\n"
+                     + " --advanced\n    Enable advanced.\n\n"
+                     + " --no-honk\n    Disable honking.\n")
     print(help_arguments)
     sys.exit()
 
 import logging
+import logging.config
 from datetime import timedelta
 import random
 import re
@@ -95,14 +96,41 @@ if not os.path.isdir(_datadir):
 #   data (profiles, logs, etc) from old location to new data directory.
 
 config = configparser.ConfigParser()
-# Create logging.conf
-if os.path.exists(_datadir + "logging.ini") == False:
-    config.read('logging.ini.example')
+# Create logging.ini
+#if os.path.exists(_datadir + "logging.ini") == False:
+try:
+    config.read(_datadir + 'logging.ini')
 
+    # Test load
+    logging.config.fileConfig(_datadir + "logging.ini")
+    PchumLog = logging.getLogger('pchumLogger')
+except:
+    #config.read('logging.ini.example')
+    config = configparser.ConfigParser()
+
+    # Default setup
+    config['loggers'] = {'keys': 'root,pchumLogger'}
+    config['handlers'] = {'keys': 'consoleHandler,FileHandler'}
+    config['formatters'] = {'keys': 'simpleFormatter'}
+    config['logger_root'] = {'level': 'WARNING',
+                             'handlers': 'consoleHandler'}
+    config['handler_consoleHandler'] = {'class': 'StreamHandler',
+                                        'level': 'WARNING',
+                                        'formatter': 'simpleFormatter',
+                                        'args': '(sys.stdout,)'}
+    config['handler_FileHandler'] = {'class': 'FileHandler',
+                                        'level': 'WARNING',
+                                        'formatter': 'simpleFormatter'}
+    config['logger_pchumLogger'] = {'level': 'WARNING',
+                                        'handlers': 'consoleHandler,FileHandler',
+                                        'qualname': 'pchumLogger',
+                                        'propagate': '0'}
+    config['formatter_simpleFormatter'] = {'format': '%(levelname)s - %(module)s - %(message)s',
+                                        'datefmt': ''}
+    
     # Enable file logging
     config['handlers']['keys'] = 'consoleHandler,FileHandler'
     config['logger_pchumLogger']['handlers'] = 'consoleHandler,FileHandler'
-
     #(r'C:\Users\X\AppData\Local\pesterchum\pesterchum.log', 'a')
     config['handler_FileHandler'] = {'class': 'FileHandler',
                                 'level': 'WARNING',
@@ -110,8 +138,7 @@ if os.path.exists(_datadir + "logging.ini") == False:
                                 'args': (_datadir + 'pesterchum.log', 'a')}
 
     print(config.sections())
-else:
-    config.read(_datadir + 'logging.ini')
+    
     
 loglevel = "30"# Warning (Default)
 if ('--logging' in sys.argv[1:]) or ('-l' in sys.argv[1:]) & (False == ('--logging' in sys.argv[1:]) and ('-l' in sys.argv[1:])):
@@ -170,7 +197,6 @@ with open(_datadir + "logging.ini", 'w') as configfile:
         config.write(configfile)
 
 # Load logging.ini
-import logging.config
 logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
@@ -1165,7 +1191,7 @@ class PesterWindow(MovingWindow):
         self.tabmemo = None
         self.shortcuts = AttrDict()
 
-        self.setAutoFillBackground(True)
+        self.setAutoFillBackground(False)
         self.setObjectName("main")
         self.config = userConfig(self)
         # Trying to fix:
@@ -1534,7 +1560,8 @@ class PesterWindow(MovingWindow):
             pass
         else:
             palette = QtGui.QPalette()
-            palette.setBrush(QtGui.QPalette.Window, QtGui.QBrush(self.backgroundImage))
+            brush = QtGui.QBrush(self.backgroundImage)
+            palette.setBrush(QtGui.QPalette.Window, brush)
             self.setPalette(palette)
 
     @QtCore.pyqtSlot()
@@ -1843,10 +1870,23 @@ class PesterWindow(MovingWindow):
         self.setWindowIcon(PesterIcon(theme["main/icon"]))
         self.setWindowTitle(theme["main/windowtitle"])
         self.setStyleSheet("QtWidgets.QFrame#main { %s }" % (theme["main/style"]))
-        self.backgroundImage = QtGui.QPixmap(theme["main/background-image"])
-        self.backgroundMask = self.backgroundImage.mask()
+        
+        # QPixmap::mask and setMask are legacy and should probably be replaced;
+        # https://doc.qt.io/qt-5/qpixmap.html#pixmap-information
+        # It's slow and this way we don't use antialiasing, leaving us with very ugly borders.
+        # + It breaks transparency on Wayland: https://bugreports-test.qt.io/browse/QTBUG-69906
+        self.backgroundImage = QtGui.QImage(theme["main/background-image"])
+        self.backgroundPixmap = QtGui.QPixmap.fromImage(self.backgroundImage)
+        self.backgroundMask = self.backgroundPixmap.mask()
         self.setMask(self.backgroundMask)
-        self.menu.setStyleSheet("QMenuBar { background: transparent; %s } QMenuBar::item { background: transparent; %s } " % (theme["main/menubar/style"], theme["main/menu/menuitem"]) + "QMenu { background: transparent; %s } QMenu::item::selected { %s } QMenu::item::disabled { %s }" % (theme["main/menu/style"], theme["main/menu/selected"], theme["main/menu/disabled"]))
+        
+        self.menu.setStyleSheet("QMenuBar { background: transparent; %s } QMenuBar::item { background: transparent; %s } "
+                                % (theme["main/menubar/style"],
+                                   theme["main/menu/menuitem"])
+                                + "QMenu { background: transparent; %s } QMenu::item::selected { %s } QMenu::item::disabled { %s }"
+                                % (theme["main/menu/style"],
+                                   theme["main/menu/selected"],
+                                   theme["main/menu/disabled"]))
         newcloseicon = PesterIcon(theme["main/close/image"])
         self.closeButton.setIcon(newcloseicon)
         self.closeButton.setIconSize(newcloseicon.realsize())
@@ -3165,11 +3205,15 @@ class PesterWindow(MovingWindow):
         try:
             self.irc.quit_dc()    # Actually send QUIT to server
         except Exception as e:
-            # Not connected.
+            # Not connected?
             PchumLog.warning("QUIT failed: " + str(e))
-            
-        self.parent.trayicon.hide()  #
-        self.app.quit()       #
+        try:
+            self.parent.trayicon.hide()  #
+            self.app.quit()
+        except AttributeError as e:
+            # Called from outside main Window?
+            PchumLog.warning("Unelegant quit: " + str(e))
+            sys.exit()
 
     def passIRC(self, irc):
         self.irc = irc

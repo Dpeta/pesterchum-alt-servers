@@ -1,15 +1,19 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
-## [v2.2.3] - 2022-04-11
+## [v2.2.3] - 2022-05-04
 
 ### Changed
  - Excluded some more modules in build files, hopefully shouldn't cause any issues.
  - Added empty 'package' option to 'setup' in setup.py, setuptools v61.0.0 doesn't seem to like our project layout anymore.
+ - Qt's startSystemMove() is used to move Pesterchum's main window now. (system-specific move operation)
+    - This fixes click-and-drag on Wayland, which doesn't support setting window position via setPosition().
+    - Assuming this works on all systems we need to support, we can probably depreciate the MovingWindow class.
 
 ### Fixed
  - Unreadable input on MacOS and certain linux distros for themes which didn't explicitly set input color (incl. pesterchum), input color is now black by default instead of being platform-dependent.
-
+ - Logging related crash.
+ 
 ## [v2.2.2] - 2022-04-11
 
 ### Changed

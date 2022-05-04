@@ -102,8 +102,7 @@ add_data = ['quirks;quirks',
         'LICENSE;.',
         'CHANGELOG.md;.',
         'PCskins.png;.',
-        'Pesterchum.png;.',
-        'logging.ini.example;.']
+        'Pesterchum.png;.']
 
 upx_exclude = ["qwindows.dll",
     "Qt5Core.dll",

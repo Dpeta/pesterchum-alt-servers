@@ -105,6 +105,9 @@ class MultiTextDialog(QtWidgets.QDialog):
             return None
 
 class MovingWindow(QtWidgets.QFrame):
+    # Qt supports starting a system-specific move operation since 5.15, so we shouldn't need to manually set position like this anymore.
+    # https://doc.qt.io/qt-5/qwindow.html#startSystemMove
+    # This is also the only method that works on Wayland, which doesn't support setting position.
     def __init__(self, *x, **y):
         super(MovingWindow, self).__init__(*x, **y)
         self.moving = None
@@ -118,8 +121,17 @@ class MovingWindow(QtWidgets.QFrame):
                 self.moveupdate = 0
                 self.update()
     def mousePressEvent(self, event):
-        if event.button() == 1:
-            self.moving = event.globalPos() - self.pos()
+        # Assuming everything is supported, we only need this function to call "self.windowHandle().startSystemMove()".
+        # If not supported, startSystemMove() returns False and the legacy code runs anyway.
+        try:
+            if self.windowHandle().startSystemMove() != True:
+                if event.button() == 1:
+                    self.moving = event.globalPos() - self.pos()
+        except AttributeError as e:
+            print("PyQt5 <= 5.14?")
+            print(str(e))
+            if event.button() == 1:
+                    self.moving = event.globalPos() - self.pos()
     def mouseReleaseEvent(self, event):
         if event.button() == 1:
             self.update()
