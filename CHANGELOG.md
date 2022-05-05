@@ -4,7 +4,6 @@
 ## [v2.2.3] - 2022-05-04
 
 ### Changed
- - Excluded some more modules in build files.
  - Added empty 'package' option to 'setup' in setup.py, setuptools v61.0.0 doesn't seem to like our project layout anymore.
  - Qt's startSystemMove() is used to move Pesterchum's main window now. (system-specific move operation)
     - This fixes click-and-drag on Wayland, which doesn't support setting window position via setPosition().

@@ -60,9 +60,6 @@ build_exe_options = {
         'PyQt5.QtAssistant',
         'PyQt5.QtDesigner',
         'PyQt5.QAxContainer',
-        'asyncio', # for now . . .
-        'email', # ?? :?
-        'xml',
         'pygame.docs' # Hopefully we can just not have pygame at all at some point =3
                       # (when QtMultimedia stops relying on local codecs </3)
         'pygame.examples',
