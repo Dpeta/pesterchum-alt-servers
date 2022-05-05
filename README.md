@@ -50,7 +50,7 @@ Pesterchum is a Python script. This means that as long as you have Python instal
 
 ### REQUIREMENTS
  - [Python 3]
- - [PyQt5]
+ - [PyQt5>=5.15]
  - [pygame] (Only required for audio, Pesterchum will probably still run without it.)
  
 ### WALKTHROUGH
