@@ -62,8 +62,7 @@ Some of the include files are specific to my instalation, so you might have to e
 except KeyboardInterrupt:
     sys.exit("KeyboardInterrupt")
 
-exclude_modules = ['tkinter',
-        'collections.sys',
+exclude_modules = ['collections.sys',
         'collections._sre',
         'collections._json',
         'collections._locale',
@@ -92,7 +91,7 @@ exclude_modules = ['tkinter',
                       # (when QtMultimedia stops relying on local codecs </3)
         'pygame.examples',
         'pygame.tests',
-        'pydoc_data'],
+        'pydoc_data']
 
 add_data = ['quirks;quirks',
         'smilies;smilies',
@@ -168,20 +167,19 @@ if sys.platform == 'win32':
         '--clean', # Clear cache
     ]
 
+    if (sys.version_info.major == 3) & (sys.version_info.minor == 8):
+        exclude_modules.append('tkinter')
     if upx_enabled == True:
         if os.path.isdir(upx_dir):
             run_win32.append('--upx-dir=%s' % upx_dir)
     else:
         run_win32.append('--noupx')
-
     for x in upx_exclude:
         run_win32.append('--upx-exclude=%s' % x )
         # Lower case variants are required.
         run_win32.append('--upx-exclude=%s' % x.lower() )
-
     for x in exclude_modules:
         run_win32.append('--exclude-module=%s' % x )
-    
     for x in add_data:
         run_win32.append('--add-data=%s' % x )
 
@@ -275,7 +273,10 @@ if sys.platform == 'win32':
             run_win32.append('--add-binary=%s\\api-ms-win-crt-utility-l1-1-0.dll;.' % crt_path)
             run_win32.append('--add-binary=%s\\ucrtbase.dll;.' % crt_path)
 
+    print(run_win32)
+
     PyInstaller.__main__.run(run_win32)
+    
 #MacOS
 elif sys.platform == 'darwin' :
     run_darwin =[
@@ -285,24 +286,28 @@ elif sys.platform == 'darwin' :
         #'--noconfirm',           # Overwrite output directory.
         '--icon=trayicon32.icns', # Icon
         '--onedir',
+        '--clean', # Clear cache
         #'--noupx'
     ]
 
+    if upx_enabled == True:
+        if os.path.isdir(upx_dir):
+            run_darwin.append('--upx-dir=%s' % upx_dir)
+    else:
+        run_darwin.append('--noupx')
     if os.path.isdir(upx_dir):
         run_darwin.append('--upx-dir=%s' % upx_dir)
-    
     for x in upx_exclude:
         run_darwin.append('--upx-exclude=%s' % x )
         # Lower case variants are required.
         run_darwin.append('--upx-exclude=%s' % x.lower() )
-
     for x in exclude_modules:
         run_darwin.append('--exclude-module=%s' % x )
-    
     for x in add_data:
         run_darwin.append('--add-data=%s' % x.replace(';',':') )
-    
+        
     PyInstaller.__main__.run(run_darwin)
+    
 #Linux
 elif sys.platform == 'linux':
     run_linux =[
@@ -311,42 +316,51 @@ elif sys.platform == 'linux':
         #'--windowed',             # Hide console
         #'--noconfirm',           # Overwrite output directory.
         '--icon=trayicon32.icns', # Icon
+        '--clean', # Clear cache
     ]
 
-    
+    if upx_enabled == True:
+        if os.path.isdir(upx_dir):
+            run_linux.append('--upx-dir=%s' % upx_dir)
+    else:
+        run_linux.append('--noupx')
     if os.path.isdir(upx_dir):
         run_linux.append('--upx-dir=%s' % upx_dir)
-        
     for x in upx_exclude:
         run_linux.append('--upx-exclude=%s' % x )
         # Lower case variants are required.
         run_linux.append('--upx-exclude=%s' % x.lower() )
-
     for x in exclude_modules:
         run_linux.append('--exclude-module=%s' % x )
-    
     for x in add_data:
         run_linux.append('--add-data=%s' % x.replace(';',':') )
-    
+
+    print(run_linux)
     PyInstaller.__main__.run(run_linux)
+    
 else:
     print("Unknown platform.")
     
     run_generic =[
         'pesterchum.py',
-        '--name=Pesterchum',
-        '--upx-dir=%s' % upx_dir  # Set Upx directory. (I think it also works from path.)
+        '--name=Pesterchum'
+        '--clean', # Clear cache
     ]
-    
+
+    if upx_enabled == True:
+        if os.path.isdir(upx_dir):
+            run_generic.append('--upx-dir=%s' % upx_dir)
+    else:
+        run_generic.append('--noupx')
     for x in upx_exclude:
         run_generic.append('--upx-exclude=%s' % x )
         # Lower case variants are required.
         run_generic.append('--upx-exclude=%s' % x.lower() )
-
     for x in exclude_modules:
         run_generic.append('--exclude-module=%s' % x )
-    
     for x in add_data:
         run_generic.append('--add-data=%s' % x.replace(';',':') )
+
+    print(run_generic)
     
     PyInstaller.__main__.run(run_generic)

@@ -38,8 +38,7 @@ build_exe_options = {
     "includes": ['PyQt5.QtCore',
         'PyQt5.QtGui',
         'PyQt5.QtWidgets'],
-    "excludes": ['tkinter',
-        'collections.sys',
+    "excludes": ['collections.sys',
         'collections._sre',
         'collections._json',
         'collections._locale',
@@ -74,6 +73,10 @@ build_exe_options = {
     "path": path            # Improved in 6.6, path to be safe
                             # VCRUNTIME140.dll <3
 }
+
+if (sys.platform == 'win32') & (sys.version_info.major == 3) & (sys.version_info.minor == 8):
+    build_exe_options["excludes"].append('tkinter')
+
 
 bdist_mac_options = {
     'iconfile': 'trayicon32.icns',
