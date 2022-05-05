@@ -70,7 +70,7 @@ Pesterchum is a Python script. This means that as long as you have Python instal
 
 [Python 3]: https://www.python.org/downloads/
 [pip]: https://pypi.org/project/pip/
-[PyQt5]: https://pypi.org/project/PyQt5/
+[PyQt5>=5.15]: https://pypi.org/project/PyQt5/
 [pygame]: https://pypi.org/project/pygame/
  
 ## FREEZE / BUILD
