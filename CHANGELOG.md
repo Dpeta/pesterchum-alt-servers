@@ -1,13 +1,14 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
-## [v2.2.3] - 2022-05-04
+## [v2.2.3] - 2022-05-06
 
 ### Changed
  - Added empty 'package' option to 'setup' in setup.py, setuptools v61.0.0 doesn't seem to like our project layout anymore.
  - Qt's startSystemMove() is used to move Pesterchum's main window now. (system-specific move operation)
     - This fixes click-and-drag on Wayland, which doesn't support setting window position via setPosition().
     - Still falls back on legacy code if startSystemMove is not supported.
+ - Rewrote pyinstaller.py
 
 ### Fixed
  - Unreadable input on MacOS and certain linux distros for themes which didn't explicitly set input color (incl. pesterchum), input color is now black by default instead of being platform-dependent.
