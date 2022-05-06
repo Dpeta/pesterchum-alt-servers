@@ -322,7 +322,7 @@ elif sys.platform == 'darwin' :
     for x in add_data:
         run_darwin.append('--add-data=%s' % x.replace(';',':') )
     if windowed == 'y':
-        run_win32.append('--windowed')
+        run_darwin.append('--windowed')
     PyInstaller.__main__.run(run_darwin)
     
 #Linux
