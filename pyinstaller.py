@@ -24,6 +24,11 @@ data_files = {'README.md': 'README.md.txt',
         'CHANGELOG.md': 'CHANGELOG.md.txt',
         'PCskins.png': '.',
         'Pesterchum.png': '.'}
+data_files_linux = {'README.md': 'README.md',
+        'LICENSE': 'LICENSE.txt',
+        'CHANGELOG.md': 'CHANGELOG.md',
+        'PCskins.png': '.',
+        'Pesterchum.png': '.'}
 # Some of these might not be required anymore,
 # newer versions of PyInstaller claim to exclude certain problematic DDLs automatically.
 upx_exclude = ["qwindows.dll",
@@ -370,9 +375,9 @@ elif sys.platform == 'linux':
                                            '*.xcf*',
                                            'ebg2.png',
                                            'ebg1.png'))
-        for x in data_files:
+        for x in data_files_linux:
             print(x)
-            shutil.copy(x, os.path.join('dist', data_files[x]))
+            shutil.copy(x, os.path.join('dist', data_files_linux[x]))
         
         files = os.listdir('dist')
         try:
