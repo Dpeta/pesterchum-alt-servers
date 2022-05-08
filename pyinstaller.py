@@ -283,7 +283,10 @@ if sys.platform == 'win32':
             shutil.copy(x, os.path.join('dist', data_files[x]))
         
         files = os.listdir('dist')
-        os.mkdir(os.path.join('dist', 'Pesterchum'))
+        try:
+            os.mkdir(os.path.join('dist', 'Pesterchum'))
+        except FileExistsError:
+            pass
         for x in files:
             shutil.move(os.path.join('dist',x), os.path.join('dist', 'Pesterchum'))
             
@@ -353,7 +356,7 @@ elif sys.platform == 'linux':
         for x in add_data:
             run_linux.append('--add-data=%s' % x.replace(';',':') )
     if windowed == 'y':
-        run_win32.append('--windowed')
+        run_linux.append('--windowed')
         
     print(run_linux)
     PyInstaller.__main__.run(run_linux)
@@ -372,9 +375,15 @@ elif sys.platform == 'linux':
             shutil.copy(x, os.path.join('dist', data_files[x]))
         
         files = os.listdir('dist')
-        os.mkdir(os.path.join('dist', 'Pesterchum'))
+        try:
+            os.mkdir(os.path.join('dist', 'Pesterchum'))
+        except FileExistsError:
+            pass
         for x in files:
-            shutil.move(os.path.join('dist',x), os.path.join('dist', 'Pesterchum'))
+            try:
+                shutil.move(os.path.join('dist',x), os.path.join('dist', 'Pesterchum'))
+            except FileExistsError:
+                pass
     #shutil.copy(os.path.join('build', 'Pesterchum', 'xref-Pesterchum.html'), 
     #            os.path.join('dist', 'Pesterchum', 'xref-Pesterchum.html'))
     #shutil.copy(os.path.join('build', 'Pesterchum', 'Analysis-00.toc'), 
