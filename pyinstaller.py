@@ -376,14 +376,15 @@ elif sys.platform == 'linux':
         
         files = os.listdir('dist')
         try:
-            os.mkdir(os.path.join('dist', 'Pesterchum'))
-        except FileExistsError:
-            pass
+            os.mkdir(os.path.join('dist', '.cache'))
+        except FileExistsError as e:
+            print(e)
         for x in files:
             try:
-                shutil.move(os.path.join('dist',x), os.path.join('dist', 'Pesterchum'))
-            except FileExistsError:
-                pass
+                shutil.move(os.path.join('dist',x), os.path.join('dist', '.cache', x))
+            except FileExistsError as e:
+                print(e)
+        shutil.move(os.path.join('dist', '.cache'), os.path.join('dist', 'Pesterchum'))
     #shutil.copy(os.path.join('build', 'Pesterchum', 'xref-Pesterchum.html'), 
     #            os.path.join('dist', 'Pesterchum', 'xref-Pesterchum.html'))
     #shutil.copy(os.path.join('build', 'Pesterchum', 'Analysis-00.toc'), 
