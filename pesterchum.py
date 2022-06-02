@@ -3529,6 +3529,7 @@ class PesterWindow(MovingWindow):
     newConvoStarted = QtCore.pyqtSignal('QString', bool, name="newConvoStarted")
     sendMessage = QtCore.pyqtSignal('QString', 'QString')
     sendNotice = QtCore.pyqtSignal('QString', 'QString')
+    sendCTCP = QtCore.pyqtSignal('QString', 'QString')
     convoClosed = QtCore.pyqtSignal('QString')
     profileChanged = QtCore.pyqtSignal()
     animationSetting = QtCore.pyqtSignal(bool)
@@ -3694,6 +3695,8 @@ Click this message to never see this again.")
                    'sendMessage(QString, QString)'),
                   ('sendNotice(QString, QString)',
                    'sendNotice(QString, QString)'),
+                  ('sendCTCP(QString, QString)',
+                   'sendCTCP(QString, QString)'),
                   ('newConvoStarted(QString, bool)',
                    'startConvo(QString, bool)'),
                   ('convoClosed(QString)',
@@ -3767,6 +3770,7 @@ Click this message to never see this again.")
         # IRC --> Main window
          return ((widget.sendMessage, irc.sendMessage),
                 (widget.sendNotice, irc.sendNotice),
+                (widget.sendCTCP, irc.sendCTCP),
                 (widget.newConvoStarted, irc.startConvo),
                 (widget.convoClosed, irc.endConvo),
                 (widget.profileChanged, irc.updateProfile),

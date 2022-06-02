@@ -164,6 +164,16 @@ class PesterIRC(QtCore.QThread):
         except socket.error as e:
             PchumLog.warning(e)
             self.setConnectionBroken()
+    @QtCore.pyqtSlot(QString, QString,)
+    def sendCTCP(self, handle, text):
+        #cmd = text.split(' ')[0]
+        #msg = text.replace(cmd + ' ', '')
+        #msg = msg.replace(cmd, '')
+        try:
+            helpers.ctcp(self.cli, handle, text)
+        except socket.error as e:
+            PchumLog.warning(e)
+            self.setConnectionBroken()
     @QtCore.pyqtSlot(QString, bool)
     def startConvo(self, handle, initiated):
         h = str(handle)
@@ -369,12 +379,6 @@ class PesterIRC(QtCore.QThread):
 
 class PesterHandler(DefaultCommandHandler):
     def notice(self, nick, chan, msg):
-        #try:
-        #    msg = msg.decode('utf-8')
-        #except UnicodeDecodeError:
-        #    msg = msg.decode('iso-8859-1', 'ignore')
-        #nick = nick.decode('utf-8')
-        #chan = chan.decode('utf-8')
         handle = nick[0:nick.find("!")]
         PchumLog.info("---> recv \"NOTICE %s :%s\"" % (handle, msg))
         if handle == "ChanServ" and chan == self.parent.mainwindow.profile().handle and msg[0:2] == "[#":
@@ -382,28 +386,46 @@ class PesterHandler(DefaultCommandHandler):
         else:
             self.parent.noticeReceived.emit(handle, msg)
     def privmsg(self, nick, chan, msg):
-        #try:
-        #    msg = msg.decode('utf-8')
-        #except UnicodeDecodeError:
-        #    msg = msg.decode('iso-8859-1', 'ignore')
-        # display msg, do other stuff
+        handle = nick[0:nick.find("!")]
         if len(msg) == 0:
             return
-        # silently ignore CTCP
-        # Notice IRC /me (The CTCP kind)
+
+        # CTCP
+        # ACTION, IRC /me (The CTCP kind)
         if msg[0:8] == '\x01ACTION ':
             msg = '/me' + msg[7:-1]
-        # silently ignore the rest of the CTCPs
-        if msg[0] == '\x01':
-            handle = nick[0:nick.find("!")]
-            PchumLog.warning("---> recv \"CTCP %s :%s\"" % (handle, msg[1:-1]))
-            if msg[1:-1] == "VERSION":
+        # CTCPs that don't need to be shown
+        elif msg[0] == '\x01':
+            PchumLog.info("---> recv \"CTCP %s :%s\"" % (handle, msg[1:-1]))
+            # VERSION, return version
+            if msg[1:-1].startswith("VERSION"):
                 helpers.ctcp_reply(self.parent.cli, handle, "VERSION", "Pesterchum %s" % (_pcVersion))
+            # CLIENTINFO, return supported CTCP commands. 
+            elif msg[1:-1].startswith("CLIENTINFO"):
+                helpers.ctcp_reply(self.parent.cli, handle, "CLIENTINFO",
+                                   "ACTION VERSION CLIENTINFO PING SOURCE NOQUIRKS GETMOOD")
+            # PING, return pong
+            elif msg[1:-1].startswith("PING"):
+                if len(msg[1:-1].split("PING ")) > 1:
+                    helpers.ctcp_reply(self.parent.cli, handle, "PING", msg[1:-1].split("PING ")[1])
+                else:
+                    helpers.ctcp_reply(self.parent.cli, handle, "PING")
+            # SOURCE, return source
+            elif msg[1:-1].startswith("SOURCE"):
+                helpers.ctcp_reply(self.parent.cli, handle, "SOURCE", "https://github.com/Dpeta/pesterchum-alt-servers")
+            # ???
             elif msg[1:-1].startswith("NOQUIRKS") and chan[0] == "#":
                 op = nick[0:nick.find("!")]
                 self.parent.quirkDisable.emit(chan, msg[10:-1], op)
+            # GETMOOD via CTCP
+            elif msg[1:-1].startswith("GETMOOD"):
+                # GETMOOD via CTCP
+                # Maybe we can do moods like this in the future...
+                mymood = self.mainwindow.profile().mood.value()
+                helpers.ctcp_reply(self.parent.cli, handle, "MOOD >%d" % (mymood))
+                # Backwards compatibility
+                helpers.msg(self.client, "#pesterchum", "MOOD >%d" % (mymood))
             return
-        handle = nick[0:nick.find("!")]
 
         if chan != "#pesterchum":
             # We don't need anywhere near that much spam.

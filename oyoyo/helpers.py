@@ -56,7 +56,12 @@ def mode(cli, channel, mode, options=None):
     cli.send(cmd)
 
 def ctcp(cli, handle, cmd, msg=""):
-    cli.send("PRIVMSG", handle, "\x01%s %s\x01" % (cmd, msg))
+     # Space breaks protocol if msg is absent
+    if msg=="":
+        cli.send("PRIVMSG", handle, "\x01%s\x01" % (cmd))
+    else:
+        cli.send("PRIVMSG", handle, "\x01%s %s\x01" % (cmd, msg))
+
 
 def ctcp_reply(cli, handle, cmd, msg=""):
     notice(cli, str(handle), "\x01%s %s\x01" % (cmd.upper(), msg))
