@@ -180,6 +180,16 @@ numeric_events = {
     "502": "usersdontmatch",
 }
 
+# IRC metadata draft specification
+# https://gist.github.com/k4bek4be/92c2937cefd49990fbebd001faf2b237
+metadata_numeric_events = {
+    "761": "keyvalue",
+    "762": "metadataend",
+    "766": "nomatchingkey",
+    "770": "metadatasubok",
+    }
+numeric_events.update(metadata_numeric_events)
+
 generated_events = [
     # Generated events
     "dcc_connect",
@@ -205,6 +215,7 @@ protocol_events = [
     "quit",
     "invite",
     "pong",
+    "metadata" # Metadata specification
 ]
 
 all_events = generated_events + protocol_events + list(numeric_events.values())

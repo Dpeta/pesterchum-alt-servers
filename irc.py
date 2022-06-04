@@ -209,6 +209,13 @@ class PesterIRC(QtCore.QThread):
     @QtCore.pyqtSlot()
     def updateMood(self):
         me = self.mainwindow.profile()
+        # Moods via metadata
+        try:
+            helpers.metadata(self.cli, '*', "set", "mood", str(me.mood.value()))
+        except socket.error as e:
+            PchumLog.warning(e)
+            self.setConnectionBroken()
+        # Backwards compatibility
         try:
             helpers.msg(self.cli, "#pesterchum", "MOOD >%d" % (me.mood.value()))
         except socket.error as e:
@@ -385,6 +392,13 @@ class PesterHandler(DefaultCommandHandler):
                 self.parent.memoReceived.emit(msg[1:msg.index("]")], handle, msg)
         else:
             self.parent.noticeReceived.emit(handle, msg)
+    def metadata(self, target, nick, key, visibility, value):
+        # The format of the METADATA server notication is:
+        # METADATA <Target> <Key> <Visibility> <Value>
+        if key == "mood":
+            mood = Mood(int(value))
+            self.parent.moodUpdated.emit(nick, mood)
+        
     def privmsg(self, nick, chan, msg):
         handle = nick[0:nick.find("!")]
         if len(msg) == 0:
@@ -477,12 +491,38 @@ class PesterHandler(DefaultCommandHandler):
             from time import sleep
             sleep(0.5) # To prevent TLS from dying </3
             helpers.join(self.client, "#pesterchum")
+            # Moods via metadata
+            helpers.metadata(self.client, '*', 'sub', 'mood')
+            helpers.metadata(self.client, '*', "set", "mood", str(mymood))
+            # Backwards compatible moods
             helpers.msg(self.client, "#pesterchum", "MOOD >%d" % (mymood))
+
+    def keyvalue(self, target, handle_us, handle_owner, key, visibility, *value):
+        # The format of the METADATA server notication is:
+        # METADATA <Target> <Key> <Visibility> <Value>
+        if key == "mood":
+            mood = Mood(int(value[0]))
+            self.parent.moodUpdated.emit(handle_owner, mood)
             
+    def metadatasubok(self, *params):
+        PchumLog.info("metadatasubok: " + str(params))
+
+    def nomatchingkey(self, target, our_handle, failed_handle, key, *error):
+        # Try to get moods the old way if metadata fails.
+        PchumLog.info("nomatchingkey: " + failed_handle)
+        chumglub = "GETMOOD "
+        try:
+            helpers.msg(self.client, "#pesterchum", chumglub + failed_handle)
+        except socket.error as e:
+            PchumLog.warning(e)
+            self.parent.setConnectionBroken()
+        
+        
     def nicknameinuse(self, server, cmd, nick, msg):
         newnick = "pesterClient%d" % (random.randint(100,999))
         helpers.nick(self.client, newnick)
         self.parent.nickCollision.emit(nick, newnick)
+        
     def quit(self, nick, reason):
         handle = nick[0:nick.find("!")]
         PchumLog.info("---> recv \"QUIT %s: %s\"" % (handle, reason))
@@ -513,6 +553,7 @@ class PesterHandler(DefaultCommandHandler):
             if handle == self.parent.mainwindow.randhandler.randNick:
                 self.parent.mainwindow.randhandler.setRunning(True)
             self.parent.moodUpdated.emit(handle, Mood("chummy"))
+            
     def mode(self, op, channel, mode, *handles):
         PchumLog.debug("op=" + str(op))
         PchumLog.debug("channel=" + str(channel))
@@ -683,20 +724,12 @@ class PesterHandler(DefaultCommandHandler):
         self.client.send('PONG', server)
 
     def getMood(self, *chums):
-        chumglub = "GETMOOD "
+        # Try to get mood via metadata get.
+        # If it fails the old code is excecuted.
         for c in chums:
             chandle = c.handle
-            if len(chumglub+chandle) >= 350:
-                try:
-                    helpers.msg(self.client, "#pesterchum", chumglub)
-                except socket.error as e:
-                    PchumLog.warning(e)
-                    self.parent.setConnectionBroken()
-                chumglub = "GETMOOD "
-            chumglub += chandle
-        if chumglub != "GETMOOD ":
             try:
-                helpers.msg(self.client, "#pesterchum", chumglub)
+                helpers.metadata(self.client, chandle, "get", "mood")
             except socket.error as e:
                 PchumLog.warning(e)
                 self.parent.setConnectionBroken()

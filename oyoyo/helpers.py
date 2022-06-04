@@ -66,6 +66,11 @@ def ctcp(cli, handle, cmd, msg=""):
 def ctcp_reply(cli, handle, cmd, msg=""):
     notice(cli, str(handle), "\x01%s %s\x01" % (cmd.upper(), msg))
 
+def metadata(cli, target, subcommand, *params):
+    # IRC metadata draft specification
+    # https://gist.github.com/k4bek4be/92c2937cefd49990fbebd001faf2b237
+    cli.send("METADATA", target, subcommand, *params)
+
 def msgrandom(cli, choices, dest, user=None):
     o = "%s: " % user if user else ""
     o += random.choice(choices)
