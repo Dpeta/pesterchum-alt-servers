@@ -516,7 +516,15 @@ class PesterHandler(DefaultCommandHandler):
         except socket.error as e:
             PchumLog.warning(e)
             self.parent.setConnectionBroken()
-        
+
+    def featurelist(self, target, handle, *params):
+        # RPL_ISUPPORT
+        features = params[:-1]
+        PchumLog.info("Server featurelist: " + str(features))
+    #    for x in features:
+    #        if x.upper().startswith("METADATA"):
+    #            print("True")
+    #            self.metadata_supported = True
         
     def nicknameinuse(self, server, cmd, nick, msg):
         newnick = "pesterClient%d" % (random.randint(100,999))
