@@ -2,7 +2,7 @@ import logging
 import logging.config
 import socket
 import random
-from time import time
+import time
 
 from PyQt5 import QtCore, QtGui
 
@@ -35,6 +35,7 @@ class PesterIRC(QtCore.QThread):
         self.mainwindow = window
         self.config = config
         self.registeredIRC = False
+        self.metadata_supported = False
         self.stopIRC = None
         self.NickServ = services.NickServ()
         self.ChanServ = services.ChanServ()
@@ -331,7 +332,7 @@ class PesterIRC(QtCore.QThread):
     @QtCore.pyqtSlot()
     def pingServer(self):
         try:
-            self.cli.send("PING %s" % int(time()))
+            self.cli.send("PING %s" % int(time.time()))
         except socket.error as e:
             PchumLog.warning(e)
             self.setConnectionBroken()
@@ -488,8 +489,6 @@ class PesterHandler(DefaultCommandHandler):
         #mychumhandle = self.mainwindow.profile().handle
         mymood = self.mainwindow.profile().mood.value()
         if not self.mainwindow.config.lowBandwidth():
-            from time import sleep
-            sleep(0.5) # To prevent TLS from dying </3
             helpers.join(self.client, "#pesterchum")
             # Moods via metadata
             helpers.metadata(self.client, '*', 'sub', 'mood')
@@ -521,10 +520,10 @@ class PesterHandler(DefaultCommandHandler):
         # RPL_ISUPPORT
         features = params[:-1]
         PchumLog.info("Server featurelist: " + str(features))
-    #    for x in features:
-    #        if x.upper().startswith("METADATA"):
-    #            print("True")
-    #            self.metadata_supported = True
+        for x in features:
+            if x.upper().startswith("METADATA"):
+                PchumLog.info("Server supports metadata.")
+                self.parent.metadata_supported = True
         
     def nicknameinuse(self, server, cmd, nick, msg):
         newnick = "pesterClient%d" % (random.randint(100,999))
@@ -728,19 +727,47 @@ class PesterHandler(DefaultCommandHandler):
         self.parent.tooManyPeeps.emit()
 
     def ping(self, prefix, server):
-        self.parent.mainwindow.lastping = int(time())
+        self.parent.mainwindow.lastping = int(time.time())
         self.client.send('PONG', server)
 
     def getMood(self, *chums):
         # Try to get mood via metadata get.
         # If it fails the old code is excecuted.
-        for c in chums:
-            chandle = c.handle
-            try:
-                helpers.metadata(self.client, chandle, "get", "mood")
-            except socket.error as e:
-                PchumLog.warning(e)
-                self.parent.setConnectionBroken()
+
+        # Wait for server to send welcome to verify RPL_ISUPPORT has been send.
+        while self.parent.registeredIRC == False:
+            time.sleep(0.1)
+            
+        # Get via metadata or via legacy method
+        if self.parent.metadata_supported == True:
+            # Metadata
+            for c in chums:
+                chandle = c.handle
+                try:
+                    helpers.metadata(self.client, chandle, "get", "mood")
+                except socket.error as e:
+                    PchumLog.warning(e)
+                    self.parent.setConnectionBroken()
+        else:
+            # Legacy
+            chumglub = "GETMOOD "
+            for c in chums:
+                chandle = c.handle
+                if len(chumglub+chandle) >= 350:
+                    try:
+                        helpers.msg(self.client, "#pesterchum", chumglub)
+                    except socket.error as e:
+                        PchumLog.warning(e)
+                        self.parent.setConnectionBroken()
+                    chumglub = "GETMOOD "
+                chumglub += chandle
+            if chumglub != "GETMOOD ":
+                try:
+                    helpers.msg(self.client, "#pesterchum", chumglub)
+                except socket.error as e:
+                    PchumLog.warning(e)
+                    self.parent.setConnectionBroken()
+            
 
     #def isOn(self, *chums):
     #    isonNicks = ""
