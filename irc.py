@@ -735,8 +735,13 @@ class PesterHandler(DefaultCommandHandler):
         # If it fails the old code is excecuted.
 
         # Wait for server to send welcome to verify RPL_ISUPPORT has been send.
-        while self.parent.registeredIRC == False:
+        # Apparently 005 is send after 001 so nvm we gotta wait longer :"3
+        timeout = 0
+        while ((self.parent.registeredIRC == False)
+               or ((timeout < 15)
+                   and (self.parent.metadata_supported == False))):
             time.sleep(0.1)
+            timeout += 1
             
         # Get via metadata or via legacy method
         if self.parent.metadata_supported == True:
@@ -750,6 +755,7 @@ class PesterHandler(DefaultCommandHandler):
                     self.parent.setConnectionBroken()
         else:
             # Legacy
+            PchumLog.warning("Server doesn't seem to support metadata, using legacy GETMOOD.")
             chumglub = "GETMOOD "
             for c in chums:
                 chandle = c.handle
