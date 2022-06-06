@@ -24,9 +24,9 @@ PchumLog = logging.getLogger('pchumLogger')
 QString = str
 
 # Copied from pesterchum.py
-CUSTOMBOTS = ["CALSPRITE", "RANDOMENCOUNTER"]
-BOTNAMES = ["NICKSERV", "CHANSERV", "MEMOSERV", "OPERSERV", "HELPSERV", "HOSTSERV", "BOTSERV"]
-BOTNAMES.extend(CUSTOMBOTS)
+#CUSTOMBOTS = ["CALSPRITE", "RANDOMENCOUNTER"]
+#BOTNAMES = ["NICKSERV", "CHANSERV", "MEMOSERV", "OPERSERV", "HELPSERV", "HOSTSERV", "BOTSERV"]
+#BOTNAMES.extend(CUSTOMBOTS)
 
 #if ostools.isOSXBundle():
 #    logging.basicConfig(level=logging.WARNING)
@@ -793,12 +793,13 @@ class PesterHandler(DefaultCommandHandler):
         # If it fails the old code is excecuted.
 
         # If services/bot, assume mood 18.
-        for c in chums:
-            if c.handle.upper() in BOTNAMES:
-                print("True")
-                print(c.handle)
-                PchumLog.info("%s is a bot, setting mood to 18." % (c.handle))
-                self.parent.moodUpdated.emit(c.handle, Mood(18))
+        # * This doesn't actually seem to work.
+        #for c in chums:
+        #    if c.handle.upper() in BOTNAMES:
+        #        print("True")
+        #        print(c.handle)
+        #        PchumLog.info("%s is a bot, setting mood to 18." % (c.handle))
+        #        self.parent.moodUpdated.emit(c.handle, Mood(18))
         # Wait for server to send welcome to verify RPL_ISUPPORT has been send.
         # Apparently 005 is send after 001 so nvm we gotta wait longer :"3
         timeout = 0
