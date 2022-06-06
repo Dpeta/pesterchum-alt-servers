@@ -1,6 +1,21 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.3] - 2022-06-06
+
+### Added
+ - Support for "CLIENTINFO", "PING" and "SOURCE" CTCP messages.
+ - Support for a "GETMOOD" CTCP message which causes the client to return its mood. Currently this isn't used for anything.
+ - Limited support for IRC metadata as defined by the [temporary draft specification](https://gist.github.com/k4bek4be/92c2937cefd49990fbebd001faf2b237).
+    - Client now sets its own 'mood' metadata key to its mood. (``METADATA * set mood [mood_num]``)
+    - Moods are now received via ``METADATA * SUB mood`` and retrieved via ``METADATA [handle] GET mood`` by default, unlike the current GETMOOD PRIVMSG system, this doesn't have the potential to leak your chumroll, trollslum, and people you message to IRC onlookers. 
+       - If the server returns ERR_KEYNOTSET, ERR_KEYNOPERMISSION, or ERR_NOMATCHINGKEY, the requestee is probably running an older client, in which case a normal GETMOOD PRIVMSG  is send.
+       - If the server hasn't confirmed support for METADATA via ISUPPORT, the GETMOOD message is used after a small timeout.
+ - Limited support for [message tags](https://ircv3.net/irc/#message-tags). The client requests the capability by default and strips unused tags.
+    - The only supported message tag currently is the '+pesterchum' client tag, which requires a server module for UnrealIRCd to forward it: https://github.com/Dpeta/pesterchum-tag. The tag has its own capability which is always requested from the server. If the server supports the module an alternative to the usual ``PESTERCHUM:BEGIN``, ``PESTERCHUM:CEASE``, ``PESTERCHUM:BLOCK``, ``PESTERCHUM:TIME``, and ``COLOR >`` PRIVMSG can be send to the client in the form of a [TAGMSG](https://ircv3.net/specs/extensions/message-tags#the-tagmsg-tag-only-message).
+       - If enough clients support this, it might be feasible to use this as the default method. Unlike the usual PRIVMSG, the tag is only send to clients who have negotiated the message-tags and pesterchum-tag capability with the server and thus support it, so it won't show up as garbage for IRC users.
+    
+
 ## [v2.2.3] - 2022-05-06
 
 ### Changed
