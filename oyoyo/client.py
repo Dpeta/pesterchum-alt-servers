@@ -234,9 +234,13 @@ class IRCClient:
 
                     for el in data:
                         PchumLog.debug("el=%s, data=%s" % (el,data))
-                        prefix, command, args = parse_raw_irc_command(el)
+                        tags, prefix, command, args = parse_raw_irc_command(el)
                         try:
-                            self.command_handler.run(command, prefix, *args)
+                            # Only need tags with tagmsg
+                            if command.upper() == "TAGMSG":
+                                self.command_handler.run(command, prefix, tags, *args)
+                            else:
+                                self.command_handler.run(command, prefix, *args)
                         except CommandError as e:
                             PchumLog.debug("CommandError %s" % str(e))
 

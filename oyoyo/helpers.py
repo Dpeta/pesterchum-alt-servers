@@ -71,6 +71,11 @@ def metadata(cli, target, subcommand, *params):
     # https://gist.github.com/k4bek4be/92c2937cefd49990fbebd001faf2b237
     cli.send("METADATA", target, subcommand, *params)
 
+def cap(cli, subcommand, *params):
+    # Capability Negotiation
+    # https://ircv3.net/specs/extensions/capability-negotiation.html
+    cli.send("CAP", subcommand, *params)
+
 def msgrandom(cli, choices, dest, user=None):
     o = "%s: " % user if user else ""
     o += random.choice(choices)

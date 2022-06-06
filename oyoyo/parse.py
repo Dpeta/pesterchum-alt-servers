@@ -26,6 +26,7 @@ logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 def parse_raw_irc_command(element):
+    print(element)
     """
     This function parses a raw irc command and returns a tuple
     of (prefix, command, args).
@@ -44,6 +45,21 @@ def parse_raw_irc_command(element):
 
     <crlf>     ::= CR LF
     """
+    """
+    When message-tags are enabled, the message pseudo-BNF,
+    as defined in RFC 1459, section 2.3.1 is extended as follows:
+
+    <message>       ::= ['@' <tags> <SPACE>] [':' <prefix> <SPACE> ] <command> [params] <crlf>
+    <tags>          ::= <tag> [';' <tag>]*
+    <tag>           ::= <key> ['=' <escaped_value>]
+    <key>           ::= [ <client_prefix> ] [ <vendor> '/' ] <key_name>
+    <client_prefix> ::= '+'
+    <key_name>      ::= <non-empty sequence of ascii letters, digits, hyphens ('-')>
+    <escaped_value> ::= <sequence of zero or more utf8 characters except NUL, CR, LF, semicolon (`;`) and SPACE>
+    <vendor>        ::= <host>
+
+
+    """
     
     try:
         element = element.decode("utf-8")
@@ -53,10 +69,18 @@ def parse_raw_irc_command(element):
     
     parts = element.strip().split(" ")
     if parts[0].startswith(':'):
+        tags = None
         prefix = parts[0][1:]
         command = parts[1]
         args = parts[2:]
+    elif parts[0].startswith('@'):
+        # Message tag
+        tags = parts[0]
+        prefix = parts[1][1:]
+        command = parts[2]
+        args = parts[3:]
     else:
+        tags = None
         prefix = None
         command = parts[0]
         args = parts[1:]
@@ -76,7 +100,7 @@ def parse_raw_irc_command(element):
                 args = args[:idx] + [" ".join(args[idx:])[1:]]
                 break
 
-    return (prefix, command, args)
+    return (tags, prefix, command, args)
 
 
 def parse_nick(name):

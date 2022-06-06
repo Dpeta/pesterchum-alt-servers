@@ -215,7 +215,8 @@ protocol_events = [
     "quit",
     "invite",
     "pong",
-    "metadata" # Metadata specification
+    "metadata", # Metadata specification
+    "tagmsg", # IRCv3 message tags extension
 ]
 
 all_events = generated_events + protocol_events + list(numeric_events.values())

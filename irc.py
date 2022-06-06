@@ -23,6 +23,11 @@ PchumLog = logging.getLogger('pchumLogger')
 # Python 3
 QString = str
 
+# Copied from pesterchum.py
+CUSTOMBOTS = ["CALSPRITE", "RANDOMENCOUNTER"]
+BOTNAMES = ["NICKSERV", "CHANSERV", "MEMOSERV", "OPERSERV", "HELPSERV", "HOSTSERV", "BOTSERV"]
+BOTNAMES.extend(CUSTOMBOTS)
+
 #if ostools.isOSXBundle():
 #    logging.basicConfig(level=logging.WARNING)
 #else:
@@ -399,6 +404,33 @@ class PesterHandler(DefaultCommandHandler):
         if key == "mood":
             mood = Mood(int(value))
             self.parent.moodUpdated.emit(nick, mood)
+
+    def tagmsg(self, prefix, tags, *args):
+        PchumLog.info('TAGMSG: %s %s %s' % (prefix, tags, str(args)))
+        message_tags = tags[1:].split(';')
+        for m in message_tags:
+            if m.startswith("+pesterchum"):
+                # Pesterchum tag
+                try:
+                    key, value = m.split('=')
+                except ValueError:
+                    return
+                PchumLog.info('Pesterchum tag: %s=%s' % (key, value))
+                # Uses PESTERCHUM: syntax?
+                if ((value.upper().startswith("BEGIN") == False)
+                    & (value.upper().startswith("BLOCK") == False)
+                    & (value.upper().startswith("CEASE") == False)
+                    & (value.upper().startswith("TIME") == False)):
+                    # Invalid syntax
+                    PchumLog.warning("TAGMSG with invalid syntax.")
+                    return
+                
+                # Process like it's a PESTERCHUM: message
+                # Easiest option since we gotta be backwards compatible anyway :"3
+                msg = "PESTERCHUM:" + value
+                self.privmsg(prefix, args[0], msg)
+                
+            
         
     def privmsg(self, nick, chan, msg):
         handle = nick[0:nick.find("!")]
@@ -495,6 +527,8 @@ class PesterHandler(DefaultCommandHandler):
             helpers.metadata(self.client, '*', "set", "mood", str(mymood))
             # Backwards compatible moods
             helpers.msg(self.client, "#pesterchum", "MOOD >%d" % (mymood))
+
+            helpers.cap(self.client, "REQ", "message-tags")
 
     def keyvalue(self, target, handle_us, handle_owner, key, visibility, *value):
         # The format of the METADATA server notication is:
@@ -734,6 +768,13 @@ class PesterHandler(DefaultCommandHandler):
         # Try to get mood via metadata get.
         # If it fails the old code is excecuted.
 
+        # If services/bot, assume mood 18.
+        for c in chums:
+            if c.handle.upper() in BOTNAMES:
+                print("True")
+                print(c.handle)
+                PchumLog.info("%s is a bot, setting mood to 18." % (c.handle))
+                self.parent.moodUpdated.emit(c.handle, Mood(18))
         # Wait for server to send welcome to verify RPL_ISUPPORT has been send.
         # Apparently 005 is send after 001 so nvm we gotta wait longer :"3
         timeout = 0
