@@ -186,6 +186,8 @@ metadata_numeric_events = {
     "761": "keyvalue",
     "762": "metadataend",
     "766": "nomatchingkey",
+    "768": "keynotset",
+    "769": "keynopermission",
     "770": "metadatasubok",
     }
 numeric_events.update(metadata_numeric_events)

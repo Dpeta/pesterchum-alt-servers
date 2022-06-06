@@ -554,6 +554,26 @@ class PesterHandler(DefaultCommandHandler):
             PchumLog.warning(e)
             self.parent.setConnectionBroken()
 
+    def keynotset(self, target, our_handle, failed_handle, key, *error):
+        # Try to get moods the old way if metadata fails.
+        PchumLog.info("nomatchingkey: " + failed_handle)
+        chumglub = "GETMOOD "
+        try:
+            helpers.msg(self.client, "#pesterchum", chumglub + failed_handle)
+        except socket.error as e:
+            PchumLog.warning(e)
+            self.parent.setConnectionBroken()
+
+    def keynopermission(self, target, our_handle, failed_handle, key, *error):
+        # Try to get moods the old way if metadata fails.
+        PchumLog.info("nomatchingkey: " + failed_handle)
+        chumglub = "GETMOOD "
+        try:
+            helpers.msg(self.client, "#pesterchum", chumglub + failed_handle)
+        except socket.error as e:
+            PchumLog.warning(e)
+            self.parent.setConnectionBroken()
+
     def featurelist(self, target, handle, *params):
         # RPL_ISUPPORT
         features = params[:-1]
