@@ -416,21 +416,24 @@ class PesterHandler(DefaultCommandHandler):
                 except ValueError:
                     return
                 PchumLog.info('Pesterchum tag: %s=%s' % (key, value))
-                # Uses PESTERCHUM: syntax?
-                if ((value.upper().startswith("BEGIN") == False)
-                    & (value.upper().startswith("BLOCK") == False)
-                    & (value.upper().startswith("CEASE") == False)
-                    & (value.upper().startswith("TIME") == False)):
+                # PESTERCHUM: syntax check
+                if ((value == "BEGIN")
+                    or (value == "BLOCK")
+                    or (value == "CEASE")):
+                    # Process like it's a PESTERCHUM: PRIVMSG
+                    msg = "PESTERCHUM:" + value
+                    self.privmsg(prefix, args[0], msg)
+                elif value.startswith("COLOR>"):
+                    # Process like it's a COLOR >0,0,0 PRIVMSG
+                    msg = value.replace('>', " >")
+                    self.privmsg(prefix, args[0], msg)
+                elif value.startswith("TIME>"):
+                    # Process like it's a PESTERCHUM:TIME> PRIVMSG
+                    msg = "PESTERCHUM:" + value
+                    self.privmsg(prefix, args[0], msg)
+                else:
                     # Invalid syntax
                     PchumLog.warning("TAGMSG with invalid syntax.")
-                    return
-                
-                # Process like it's a PESTERCHUM: message
-                # Easiest option since we gotta be backwards compatible anyway :"3
-                msg = "PESTERCHUM:" + value
-                self.privmsg(prefix, args[0], msg)
-                
-            
         
     def privmsg(self, nick, chan, msg):
         handle = nick[0:nick.find("!")]
@@ -527,8 +530,9 @@ class PesterHandler(DefaultCommandHandler):
             helpers.metadata(self.client, '*', "set", "mood", str(mymood))
             # Backwards compatible moods
             helpers.msg(self.client, "#pesterchum", "MOOD >%d" % (mymood))
-
+            # Negotiate Pesterchum message tags
             helpers.cap(self.client, "REQ", "message-tags")
+            helpers.cap(self.client, "REQ", "pesterchum-tag")
 
     def keyvalue(self, target, handle_us, handle_owner, key, visibility, *value):
         # The format of the METADATA server notication is:
