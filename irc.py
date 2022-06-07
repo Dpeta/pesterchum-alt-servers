@@ -419,7 +419,12 @@ class PesterHandler(DefaultCommandHandler):
                 # PESTERCHUM: syntax check
                 if ((value == "BEGIN")
                     or (value == "BLOCK")
-                    or (value == "CEASE")):
+                    or (value == "CEASE")
+                    or (value == "BLOCK")
+                    or (value == "BLOCKED")
+                    or (value == "UNBLOCK")
+                    or (value == "IDLE")
+                    or (value == "ME")):
                     # Process like it's a PESTERCHUM: PRIVMSG
                     msg = "PESTERCHUM:" + value
                     self.privmsg(prefix, args[0], msg)
