@@ -79,12 +79,11 @@ class PesterLog(object):
         for (format, t) in modes.items():
             f = self.convos[handle][format]
             f.write(t+"\r\n")
-        
-        # flush + fsync force a write, might not be required though.
-        for (format, t) in modes.items():
+            # flush + fsync force a write,
+            # makes sure logs are saved in the case of a crash.
             f.flush()
             os.fsync(f.fileno())
-
+        
         # This way the file descriptors are closed and reopened for every message,
         # which is sub-optimal and definitely a performance drain but,
         # otherwise we still run into the ulimit on platforms like MacOS fairly easily.
