@@ -1032,7 +1032,6 @@ class PesterMemo(PesterConvo):
             else:
                 timed = timedelta.max
         except (OSError, ValueError) as e:
-            PchumLog.warning(str(e))
             try:
                 if cmd == "i":
                     timed = timedelta(0)
