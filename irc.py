@@ -3,6 +3,7 @@ import logging.config
 import socket
 import random
 import time
+import json
 
 from PyQt5 import QtCore, QtGui
 
@@ -45,9 +46,19 @@ class PesterIRC(QtCore.QThread):
         self.NickServ = services.NickServ()
         self.ChanServ = services.ChanServ()
     def IRCConnect(self):
+        with open(_datadir + "server.json", "r") as server_file:
+            read_file = server_file.read()
+            server_file.close()
+            server_obj = json.loads(read_file)
         server = self.config.server()
         port = self.config.port()
-        self.cli = IRCClient(PesterHandler, host=server, port=int(port), nick=self.mainwindow.profile().handle, real_name='pcc31', blocking=True, timeout=120)
+        self.cli = IRCClient(PesterHandler,
+                             host=server,
+                             port=int(port),
+                             nick=self.mainwindow.profile().handle,
+                             real_name='pcc31',
+                             timeout=120,
+                             ssl=server_obj['TLS'])
         self.cli.command_handler.parent = self
         self.cli.command_handler.mainwindow = self.mainwindow
         self.cli.connect()
@@ -55,10 +66,10 @@ class PesterIRC(QtCore.QThread):
     def run(self):
         try:
             self.IRCConnect()
-        except socket.error as se:
+        except OSError as se:
             self.stopIRC = se
             return
-        while 1:
+        while True:
             res = True
             try:
                 PchumLog.debug("updateIRC()")
@@ -66,13 +77,10 @@ class PesterIRC(QtCore.QThread):
             except socket.timeout as se:
                 PchumLog.debug("timeout in thread %s" % (self))
                 self.cli.close()
-                self.stopIRC = se
+                self.stopIRC = "%s, %s" % (type(se), se)
                 return
-            except socket.error as se:
-                if self.registeredIRC:
-                    self.stopIRC = None
-                else:
-                    self.stopIRC = se
+            except (OSError, IndexError) as se:
+                self.stopIRC = "%s, %s" % (type(se), se)
                 PchumLog.debug("socket error, exiting thread")
                 return
             else:
@@ -97,6 +105,8 @@ class PesterIRC(QtCore.QThread):
             else:
                 raise se
         except socket.error as se:
+            raise se
+        except (OSError, IndexError) as se:
             raise se
         except StopIteration:
             self.conn = self.cli.conn()
@@ -366,10 +376,6 @@ class PesterIRC(QtCore.QThread):
     def quit_dc(self):
         helpers.quit(self.cli, _pcVersion + " <3")
 
-    #def getMask(self):
-        # This needs to be updated when our hostname is changed.
-        # Nevermind this entire thing, actually.
-
     moodUpdated = QtCore.pyqtSignal('QString', Mood)
     colorUpdated = QtCore.pyqtSignal('QString', QtGui.QColor)
     messageReceived = QtCore.pyqtSignal('QString', 'QString')
@@ -439,6 +445,14 @@ class PesterHandler(DefaultCommandHandler):
                 else:
                     # Invalid syntax
                     PchumLog.warning("TAGMSG with invalid syntax.")
+    def error(self, *params):
+        # Server is ending connection.
+        reason = ''
+        for x in params:
+            if (x != None) and (x != ''):
+                reason += x + ' '
+        self.parent.stopIRC = reason.strip()
+        self.parent.reconnectIRC()
         
     def privmsg(self, nick, chan, msg):
         handle = nick[0:nick.find("!")]
@@ -538,6 +552,15 @@ class PesterHandler(DefaultCommandHandler):
             # Negotiate Pesterchum message tags
             helpers.cap(self.client, "REQ", "message-tags")
             helpers.cap(self.client, "REQ", "pesterchum-tag")
+
+    def erroneusnickname(self, *args):
+        # Server is not allowing us to connect.
+        reason = "Handle is not allowed on this server.\n"
+        for x in args:
+            if (x != None) and (x != ''):
+                reason += x + ' '
+        self.parent.stopIRC = reason.strip()
+        self.parent.reconnectIRC()
 
     def keyvalue(self, target, handle_us, handle_owner, key, visibility, *value):
         # The format of the METADATA server notication is:
