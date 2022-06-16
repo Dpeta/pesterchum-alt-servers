@@ -46,19 +46,16 @@ class PesterIRC(QtCore.QThread):
         self.NickServ = services.NickServ()
         self.ChanServ = services.ChanServ()
     def IRCConnect(self):
-        with open(_datadir + "server.json", "r") as server_file:
-            read_file = server_file.read()
-            server_file.close()
-            server_obj = json.loads(read_file)
         server = self.config.server()
         port = self.config.port()
+        ssl = self.config.ssl()
         self.cli = IRCClient(PesterHandler,
                              host=server,
-                             port=int(port),
+                             port=port,
                              nick=self.mainwindow.profile().handle,
                              real_name='pcc31',
                              timeout=120,
-                             ssl=server_obj['TLS'])
+                             ssl=ssl)
         self.cli.command_handler.parent = self
         self.cli.command_handler.mainwindow = self.mainwindow
         self.cli.connect()
@@ -79,7 +76,7 @@ class PesterIRC(QtCore.QThread):
                 self.cli.close()
                 self.stopIRC = "%s, %s" % (type(se), se)
                 return
-            except (OSError, IndexError) as se:
+            except (OSError, IndexError, ValueError) as se:
                 self.stopIRC = "%s, %s" % (type(se), se)
                 PchumLog.debug("socket error, exiting thread")
                 return
@@ -543,6 +540,7 @@ class PesterHandler(DefaultCommandHandler):
         #mychumhandle = self.mainwindow.profile().handle
         mymood = self.mainwindow.profile().mood.value()
         if not self.mainwindow.config.lowBandwidth():
+            time.sleep(0.413 + 0.097) # <--- somehow, this actually helps.
             helpers.join(self.client, "#pesterchum")
             # Moods via metadata
             helpers.metadata(self.client, '*', 'sub', 'mood')

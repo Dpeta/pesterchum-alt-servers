@@ -369,9 +369,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>" % (_datadir, self.filename,
                 read_file = server_file.read()
                 server_file.close()
                 server_obj = json.loads(read_file)
-            server = str(server_obj['server'])
-            #print("Server is: " + server)
-            return server
+            return server_obj['server']
         except:
             try:
                 with open(_datadir + "server.json", "w") as server_file:
@@ -383,7 +381,6 @@ with a backup from: <a href='%s'>%s</a></h3></html>" % (_datadir, self.filename,
                     server_file.write(json.dumps(json_server_file, indent = 4) )
                     server_file.close()
                 server = "irc.pesterchum.xyz"
-                #print("Failed to read server, defaulting to irc.pesterchum.xyz")
             except:
                 return self.config.get('server', "irc.pesterchum.xyz")
     def port(self):
@@ -394,24 +391,22 @@ with a backup from: <a href='%s'>%s</a></h3></html>" % (_datadir, self.filename,
                 read_file = server_file.read()
                 server_file.close()
                 server_obj = json.loads(read_file)
-            port = str(server_obj['port'])
-            #print("Port is: " + port)
+            port = server_obj['port']
             return port
         except:
             return self.config.get('port', '6697')
-##    def TLS(self):
-##        if hasattr(self.parent, 'tlsOverride'):
-##            return self.parent.tlsOverride
-##        try:
-##            with open(_datadir + "server.json", "r") as server_file:
-##                read_file = server_file.read()
-##                server_file.close()
-##                server_obj = json.loads(read_file)
-##            TLS = str(server_obj['TLS'])
-##            print("TLS-status is: " + TLS)
-##            return TLS
-##        except:
-##            return self.config.get('TLS', True)
+
+    def ssl(self):
+        #if hasattr(self.parent, 'tlsOverride'):
+        #    return self.parent.tlsOverride
+        try:
+            with open(_datadir + "server.json", "r") as server_file:
+                read_file = server_file.read()
+                server_file.close()
+                server_obj = json.loads(read_file)
+            return server_obj['TLS']
+        except:
+            return self.config.get('TLS', True)
     def soundOn(self):
         if 'soundon' not in self.config:
             self.set('soundon', True)

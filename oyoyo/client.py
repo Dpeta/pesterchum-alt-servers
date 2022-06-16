@@ -152,8 +152,11 @@ class IRCClient:
                     # socket.timeout is deprecated in 3.10
                     PchumLog.warning("TimeoutError in on send, " + str(e))
                     raise socket.timeout
-                except (OSError, IndexError) as e:
+                except (OSError,
+                        IndexError,
+                        ValueError) as e:
                     # Unknown error, might as well retry?
+                    # index/value can happen if the socket breaks.
                     PchumLog.warning("Unkown error on send, " + str(e))
                     if tries >= 9:
                         raise e
@@ -162,7 +165,7 @@ class IRCClient:
                 time.sleep(0.1)
                 
             PchumLog.debug("ready_to_write (len %s): " % str(len(ready_to_write)) + str(ready_to_write))
-        except OSError as se:
+        except Exception as se:
             PchumLog.warning("socket.error %s" % str(se))                  
             if not self.blocking and se.errno == 11:
                 pass
@@ -176,8 +179,14 @@ class IRCClient:
         
         if self.ssl == True:
             context = ssl.create_default_context()
+            # Checking relies on the system
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+            
             bare_sock = socket.create_connection(("%s" % self.host, self.port))
-            self.socket = context.wrap_socket(bare_sock, server_hostname=self.host, do_handshake_on_connect=False)
+            self.socket = context.wrap_socket(bare_sock,
+                                              server_hostname=self.host,
+                                              do_handshake_on_connect=False)
             while True:
                 try:
                     self.socket.do_handshake()
