@@ -1002,15 +1002,7 @@ smiledict = {
     ":honk:": "honk.png",
     }
 
-if ostools.isOSXBundle():
-    for emote in smiledict:
-        graphic = smiledict[emote]
-        if graphic.find(".gif"):
-            graphic = graphic.replace(".gif", ".png")
-            smiledict[emote] = graphic
-
-
-
+smilelist = list(smiledict.keys())
 
 reverse_smiley = dict((v,k) for k, v in smiledict.items())
 _smilere = re.compile("|".join(list(smiledict.keys())))

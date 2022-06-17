@@ -10,14 +10,22 @@ import re
 import random
 
 from mood import Mood
-from parsetools import timeDifference, convertTags, lexMessage, parseRegexpFunctions
+from parsetools import (timeDifference,
+                        convertTags,
+                        lexMessage,
+                        parseRegexpFunctions,
+                        smiledict,
+                        smilelist)
 from mispeller import mispeller
 
+_urlre = re.compile(r"(?i)(?:^|(?<=\s))(?:(?:https?|ftp)://|magnet:)[^\s]+")
+_url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
 _groupre = re.compile(r"\\([0-9]+)")
 _upperre = re.compile(r"upper\(([\w<>\\]+)\)")
 _lowerre = re.compile(r"lower\(([\w<>\\]+)\)")
 _scramblere = re.compile(r"scramble\(([\w<>\\]+)\)")
 _reversere = re.compile(r"reverse\(([\w<>\\]+)\)")
+_ctagre = re.compile("(</?c=?.*?>)", re.I)
 
 class pesterQuirk(object):
     def __init__(self, quirk):
@@ -32,6 +40,26 @@ class pesterQuirk(object):
             self.quirk["group"] = "Miscellaneous"
         self.group = self.quirk["group"]
     def apply(self, string, first=False, last=False):
+        # This function applies the quirks :3
+
+        # Try to get a list of links and smilies in the message.
+        try:
+            # Check for links, store list of links.
+            links = list()
+            match = re.findall(_urlre, string)
+            match2 = re.findall(_url2re, string)
+            for x in match2:
+                links.append(x)
+            for x in match:
+                links.append(x)
+            # Check for smilies, store list of smilies.
+            smilies = list()
+            for x in smilelist:
+                if x in string:
+                    smilies.append(x)
+        except Exception as e:
+                PchumLog.warning("Quirk issue: " + str(e))
+        
         if not self.on:
             return string
         elif self.type == "prefix":
@@ -39,7 +67,19 @@ class pesterQuirk(object):
         elif self.type == "suffix":
             return string + self.quirk["value"]
         elif self.type == "replace":
-            return string.replace(self.quirk["from"], self.quirk["to"])
+            try:
+                # Replace like normal
+                output = string.replace(self.quirk["from"], self.quirk["to"])
+                # Try to revert links based on list.
+                for link in links:
+                    output = output.replace(link.replace(self.quirk["from"], self.quirk["to"]), link)
+                # Try to revert smilies based on list.
+                for smiley in smilies:
+                    output = output.replace(smiley.replace(self.quirk["from"], self.quirk["to"]), smiley)
+                return output
+            except Exception as e:
+                PchumLog.warning("Replace issue: " + str(e))
+                return string.replace(self.quirk["from"], self.quirk["to"])
         elif self.type == "regexp":
             fr = self.quirk["from"]
             if not first and len(fr) > 0 and fr[0] == "^":
@@ -66,22 +106,66 @@ class pesterQuirk(object):
             percentage = self.quirk["percentage"]/100.0
             words = string.split(" ")
             newl = []
-            ctag = re.compile("(</?c=?.*?>)", re.I)
+            p = random.random()
+
+            # Main /word loop
             for w in words:
-                p = random.random()
-                if not ctag.search(w) and p < percentage:
-                    newl.append(mispeller(w))
-                elif p < percentage:
-                    split = ctag.split(w)
-                    tmp = []
-                    for s in split:
-                        if s and not ctag.search(s):
-                            tmp.append(mispeller(s))
-                        else:
-                            tmp.append(s)
-                    newl.append("".join(tmp))
-                else:
+                # Check if word contains smiley
+                smiling = False
+                for smiley in smilies:
+                    if smiley in w:
+                        # Smiley is in word
+                        smiling = True
+                
+                if re.match(_url2re, w):
+                    # Word is an url, don't break.
                     newl.append(w)
+                elif re.match(_urlre, w):
+                    # Word is an url, don't break.
+                    newl.append(w)
+                elif smiling:
+                    # Word contains a smiley
+                    # Split by ':' and only skip the smiley,
+                    # this part is very messy and optional really.
+                    stripped_smiles = list()
+                    for smiley in smilies:
+                        stripped_smiles.append(smiley.strip(':'))
+                    denominated = w.split(':')
+                    output = ''
+                    for part in range(0, len(denominated)):
+                        if denominated[part] in stripped_smiles:
+                            output +=  denominated[part]
+                        else:
+                            if not _ctagre.search(denominated[part]) and p < percentage:
+                                output += mispeller(denominated[part])
+                            elif p < percentage:
+                                split = _ctagre.split(denominated[part])
+                                tmp = []
+                                for s in split:
+                                    if s and not _ctagre.search(s):
+                                        tmp.append(mispeller(s))
+                                    else:
+                                        tmp.append(s)
+                                output += tmp
+                            else:
+                                output += denominated[part]
+                        if part != len(denominated)-1:
+                            output += ':'
+                    newl.append(output)
+                else:
+                    if not _ctagre.search(w) and p < percentage:
+                        newl.append(mispeller(w))
+                    elif p < percentage:
+                        split = _ctagre.split(w)
+                        tmp = []
+                        for s in split:
+                            if s and not _ctagre.search(s):
+                                tmp.append(mispeller(s))
+                            else:
+                                tmp.append(s)
+                        newl.append("".join(tmp))
+                    else:
+                        newl.append(w)
             return " ".join(newl)
 
     def __str__(self):
