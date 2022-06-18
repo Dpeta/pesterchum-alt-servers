@@ -11,6 +11,7 @@ irctest.log
 pesterchum.js
 quirks/*
 !quirks/defaults.py
+!quirks/gradient.py
 *.pkl
 Pesterchum.dmg
 *.md.backup
