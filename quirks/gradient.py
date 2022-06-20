@@ -41,7 +41,7 @@ def rainbow(text):
             [gradient[color],
              round(color * ratio)])
 
-    # Iterate through match object representing all hyperlinks in text,
+    # Iterate through match object representing all links/smilies in text,
     # if a color tag is going to be placed within it,
     # move its position to after the link.
     for match in re.finditer(_urlre, text):
@@ -54,14 +54,11 @@ def rainbow(text):
             if ((cp[1] >= match.start())
                 and (cp[1] <= match.end())):
                 cp[1] = match.end() + 1
-    # Roughly the same thing but for smilies,
-    # there's no template so they need to be checked individually.
-    for smiley in smilelist:
-        for match in re.finditer(smiley, text):
-            for cp in color_and_position:
-                if ((cp[1] >= match.start())
-                    and (cp[1] <= match.end())):
-                    cp[1] = match.end() + 1
+    for match in re.finditer(_smilere, text):
+        for cp in color_and_position:
+            if ((cp[1] >= match.start())
+                and (cp[1] <= match.end())):
+                cp[1] = match.end() + 1
     
     # Iterate through characters in text and write them to the output,
     # if a color tag should be placed, add it before the character.
@@ -83,68 +80,74 @@ rainbow.command = "rainbow"
 
 # These can't always be imported from their original functions,
 # since those functions won't always be accessible from builds.
+
+# List of smilies.
+smiledict = {
+    ":rancorous:": "pc_rancorous.png",
+    ":apple:": "apple.png",
+    ":bathearst:": "bathearst.png",
+    ":cathearst:": "cathearst.png",
+    ":woeful:": "pc_bemused.png",
+    ":sorrow:": "blacktear.png",
+    ":pleasant:": "pc_pleasant.png",
+    ":blueghost:": "blueslimer.gif",
+    ":slimer:": "slimer.gif",
+    ":candycorn:": "candycorn.png",
+    ":cheer:": "cheer.gif",
+    ":duhjohn:": "confusedjohn.gif",
+    ":datrump:": "datrump.png",
+    ":facepalm:": "facepalm.png",
+    ":bonk:": "headbonk.gif",
+    ":mspa:": "mspa_face.png",
+    ":gun:": "mspa_reader.gif",
+    ":cal:": "lilcal.png",
+    ":amazedfirman:": "pc_amazedfirman.png",
+    ":amazed:": "pc_amazed.png",
+    ":chummy:": "pc_chummy.png",
+    ":cool:": "pccool.png",
+    ":smooth:": "pccool.png",
+    ":distraughtfirman": "pc_distraughtfirman.png",
+    ":distraught:": "pc_distraught.png",
+    ":insolent:": "pc_insolent.png",
+    ":bemused:": "pc_bemused.png",
+    ":3:": "pckitty.png",
+    ":mystified:": "pc_mystified.png",
+    ":pranky:": "pc_pranky.png",
+    ":tense:": "pc_tense.png",
+    ":record:": "record.gif",
+    ":squiddle:": "squiddle.gif",
+    ":tab:": "tab.gif",
+    ":beetip:": "theprofessor.png",
+    ":flipout:": "weasel.gif",
+    ":befuddled:": "what.png",
+    ":pumpkin:": "whatpumpkin.png",
+    ":trollcool:": "trollcool.png",
+    ":jadecry:": "jadespritehead.gif",
+    ":ecstatic:": "ecstatic.png",
+    ":relaxed:": "relaxed.png",
+    ":discontent:": "discontent.png",
+    ":devious:": "devious.png",
+    ":sleek:": "sleek.png",
+    ":detestful:": "detestful.png",
+    ":mirthful:": "mirthful.png",
+    ":manipulative:": "manipulative.png",
+    ":vigorous:": "vigorous.png",
+    ":perky:": "perky.png",
+    ":acceptant:": "acceptant.png",
+    ":olliesouty:": "olliesouty.gif",
+    ":billiards:": "poolballS.gif",
+    ":billiardslarge:": "poolballL.gif",
+    ":whatdidyoudo:": "whatdidyoudo.gif",
+    ":brocool:": "pcstrider.png",
+    ":trollbro:": "trollbro.png",
+    ":playagame:": "saw.gif",
+    ":trollc00l:": "trollc00l.gif",
+    ":suckers:": "Suckers.gif",
+    ":scorpio:": "scorpio.gif",
+    ":shades:": "shades.png",
+    ":honk:": "honk.png",
+    }
+# Regular expression templates for detecting links/smilies.
+_smilere = re.compile("|".join(list(smiledict.keys())))
 _urlre = re.compile(r"(?i)(?:^|(?<=\s))(?:(?:https?|ftp)://|magnet:)[^\s]+")
 _url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
-smilelist = [':rancorous:',
-             ':apple:',
-             ':bathearst:',
-             ':cathearst:',
-             ':woeful:',
-             ':sorrow:',
-             ':pleasant:',
-             ':blueghost:',
-             ':slimer:',
-             ':candycorn:',
-             ':cheer:',
-             ':duhjohn:',
-             ':datrump:',
-             ':facepalm:',
-             ':bonk:',
-             ':mspa:',
-             ':gun:',
-             ':cal:',
-             ':amazedfirman:',
-             ':amazed:',
-             ':chummy:',
-             ':cool:',
-             ':smooth:',
-             ':distraughtfirman',
-             ':distraught:',
-             ':insolent:',
-             ':bemused:',
-             ':3:',
-             ':mystified:',
-             ':pranky:',
-             ':tense:',
-             ':record:',
-             ':squiddle:',
-             ':tab:',
-             ':beetip:',
-             ':flipout:',
-             ':befuddled:',
-             ':pumpkin:',
-             ':trollcool:',
-             ':jadecry:',
-             ':ecstatic:',
-             ':relaxed:',
-             ':discontent:',
-             ':devious:',
-             ':sleek:',
-             ':detestful:',
-             ':mirthful:',
-             ':manipulative:',
-             ':vigorous:',
-             ':perky:',
-             ':acceptant:',
-             ':olliesouty:',
-             ':billiards:',
-             ':billiardslarge:',
-             ':whatdidyoudo:',
-             ':brocool:',
-             ':trollbro:',
-             ':playagame:',
-             ':trollc00l:',
-             ':suckers:',
-             ':scorpio:',
-             ':shades:',
-             ':honk:']
