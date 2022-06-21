@@ -29,7 +29,7 @@ _gtag_begin = re.compile(r'(?i)<g[a-f]>')
 _ctag_end = re.compile(r'(?i)</c>')
 _ctag_rgb = re.compile(r'\d+,\d+,\d+')
 _urlre = re.compile(r"(?i)(?:^|(?<=\s))(?:(?:https?|ftp)://|magnet:)[^\s]+")
-_url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
+#_url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
 _memore = re.compile(r"(\s|^)(#[A-Za-z0-9_]+)")
 _handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
 _imgre = re.compile(r"""(?i)<img src=['"](\S+)['"]\s*/>""")
@@ -160,6 +160,8 @@ class hyperlink(lexercon.Chunk):
             return self.string
 
 class hyperlink_lazy(hyperlink):
+    """Depreciated since it doesn't seem to turn the full url into a link,
+    probably not required anyway, best to require a protocol prefix."""
     def __init__(self, string):
         self.string = "http://" + string
 
@@ -251,7 +253,7 @@ def lexMessage(string):
                # When I change out parsers, I might add it back in.
                ##(formatBegin, _format_begin), (formatEnd, _format_end),
                (imagelink, _imgre),
-               (hyperlink, _urlre), (hyperlink_lazy, _url2re),
+               (hyperlink, _urlre),
                (memolex, _memore),
                (chumhandlelex, _handlere),
                (smiley, _smilere),
@@ -1001,8 +1003,6 @@ smiledict = {
     ":shades:": "shades.png",
     ":honk:": "honk.png",
     }
-
-smilelist = list(smiledict.keys())
 
 reverse_smiley = dict((v,k) for k, v in smiledict.items())
 _smilere = re.compile("|".join(list(smiledict.keys())))

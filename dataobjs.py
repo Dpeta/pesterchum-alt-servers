@@ -14,18 +14,20 @@ from parsetools import (timeDifference,
                         convertTags,
                         lexMessage,
                         parseRegexpFunctions,
-                        smiledict,
-                        smilelist)
+                        smiledict)
 from mispeller import mispeller
 
 _urlre = re.compile(r"(?i)(?:^|(?<=\s))(?:(?:https?|ftp)://|magnet:)[^\s]+")
-_url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
+#_url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
 _groupre = re.compile(r"\\([0-9]+)")
 _upperre = re.compile(r"upper\(([\w<>\\]+)\)")
 _lowerre = re.compile(r"lower\(([\w<>\\]+)\)")
 _scramblere = re.compile(r"scramble\(([\w<>\\]+)\)")
 _reversere = re.compile(r"reverse\(([\w<>\\]+)\)")
 _ctagre = re.compile("(</?c=?.*?>)", re.I)
+_smilere = re.compile("|".join(list(smiledict.keys())))
+_memore = re.compile(r"(\s|^)(#[A-Za-z0-9_]+)")
+_handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
 
 class pesterQuirk(object):
     def __init__(self, quirk):
@@ -39,24 +41,33 @@ class pesterQuirk(object):
         if "group" not in self.quirk:
             self.quirk["group"] = "Miscellaneous"
         self.group = self.quirk["group"]
-    def apply(self, string, first=False, last=False):
+        try:
+            self.checkstate = self.quirk["checkstate"]
+        except KeyError:
+            pass
+    def apply(self, string, first=False, last=False, checkstate=0):
         # This function applies the quirks :3
+        print("checkstate: " + str(checkstate))
 
-        # Try to get a list of links and smilies in the message.
+        # Try to get a list of breakable links, smilies,
+        # @handle, #memo, in the message.
         try:
             # Check for links, store list of links.
             links = list()
-            match = re.findall(_urlre, string)
-            match2 = re.findall(_url2re, string)
-            for x in match2:
-                links.append(x)
-            for x in match:
-                links.append(x)
+            for match in re.findall(_urlre, string):
+                links.append(match)
             # Check for smilies, store list of smilies.
             smilies = list()
-            for x in smilelist:
-                if x in string:
-                    smilies.append(x)
+            for match in re.findall(_smilere, string):
+                smilies.append(match)
+            # Check for @handles, store list of @handles.
+            handles = list()
+            for match in re.findall(_handlere, string):
+                smilies.append(match)
+            # Check for #memos, store list of #memos.
+            memos = list()
+            for match in re.findall(_memore, string):
+                smilies.append(match)
         except Exception as e:
                 PchumLog.warning("Quirk issue: " + str(e))
         
@@ -76,6 +87,12 @@ class pesterQuirk(object):
                 # Try to revert smilies based on list.
                 for smiley in smilies:
                     output = output.replace(smiley.replace(self.quirk["from"], self.quirk["to"]), smiley)
+                # Try to revert @handles based on list.
+                for handle in handles:
+                    output = output.replace(handle.replace(self.quirk["from"], self.quirk["to"]), handle)
+                # Try to revert #memos based on list.
+                for memo in memos:
+                    output = output.replace(memo.replace(self.quirk["from"], self.quirk["to"]), memo)
                 return output
             except Exception as e:
                 PchumLog.warning("Replace issue: " + str(e))
@@ -88,11 +105,21 @@ class pesterQuirk(object):
                 return string
             to = self.quirk["to"]
             pt = parseRegexpFunctions(to)
-            return re.sub(fr, pt.expand, string)
+            output = re.sub(fr, pt.expand, string)
+            # Reverse sub for links/smilies if enabled.
+            if checkstate == 2:
+                for smiley in smilies:
+                    output = output.replace(re.sub(fr, pt.expand, smiley), smiley)
+                for link in links:
+                    output = output.replace(re.sub(fr, pt.expand, link), link)
+                for handle in handles:
+                    output = output.replace(re.sub(fr, pt.expand, handle), handle)
+                for memo in memos:
+                    output = output.replace(re.sub(fr, pt.expand, memo), memo)
+            return output
         elif self.type == "random":
             if len(self.quirk["randomlist"]) == 0:
                 return string
-            fr = self.quirk["from"]
             if not first and len(fr) > 0 and fr[0] == "^":
                 return string
             if not last and len(fr) > 0 and fr[len(fr)-1] == "$":
@@ -101,7 +128,7 @@ class pesterQuirk(object):
                 choice = random.choice(self.quirk["randomlist"])
                 pt = parseRegexpFunctions(choice)
                 return pt.expand(mo)
-            return re.sub(self.quirk["from"], randomrep, string)
+            return self.quirk["from"]
         elif self.type == "spelling":
             percentage = self.quirk["percentage"]/100.0
             words = string.split(" ")
@@ -110,20 +137,16 @@ class pesterQuirk(object):
 
             # Main /word loop
             for w in words:
-                # Check if word contains smiley
-                smiling = False
-                for smiley in smilies:
-                    if smiley in w:
-                        # Smiley is in word
-                        smiling = True
-                
-                if re.match(_url2re, w):
+                if re.match(_urlre, w):
                     # Word is an url, don't break.
                     newl.append(w)
-                elif re.match(_urlre, w):
-                    # Word is an url, don't break.
+                elif re.match(_memore, w):
+                    # Word is an @memo, don't break.
                     newl.append(w)
-                elif smiling:
+                elif re.match(_handlere, w):
+                    # Word is an @handle, don't break.
+                    newl.append(w)
+                elif re.match(_smilere, w):
                     # Word contains a smiley
                     # Split by ':' and only skip the smiley,
                     # this part is very messy and optional really.
@@ -196,8 +219,8 @@ class pesterQuirks(object):
             self.quirklist.append(q)
     def apply(self, lexed, first=False, last=False):
         prefix = [q for q in self.quirklist if q.type=='prefix']
-        #suffix = [q for q in self.quirklist if q.type=='suffix'] # <-- Seems unused
-
+        suffix = [q for q in self.quirklist if q.type=='suffix']
+        
         newlist = []
         for (i, o) in enumerate(lexed):
             if type(o) not in [str, str]:
@@ -211,9 +234,16 @@ class pesterQuirks(object):
             lastStr = (i == len(lexed)-1)
             string = o
             for q in self.quirklist:
+                try:
+                    checkstate = int(q.checkstate)
+                except Exception:
+                    checkstate = 0
                 if q.type != 'prefix' and q.type != 'suffix':
                     if q.type == 'regexp' or q.type == 'random':
-                        string = q.apply(string, first=(i==0), last=lastStr)
+                        string = q.apply(string,
+                                         first=(i==0),
+                                         last=lastStr,
+                                         checkstate=checkstate)
                     else:
                         string = q.apply(string)
                 elif q.type == 'prefix' and i == 0:

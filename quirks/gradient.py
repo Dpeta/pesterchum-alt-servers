@@ -2,7 +2,8 @@ import re
 
 def rainbow(text):
     """Example implementation of a gradient function,
-    distributes colors over text, accounting for links and smilies.
+    distributes colors over text, accounting for links,
+    #memos, @handles, smilies.
 
     Add it as:
         Regexp Replace
@@ -49,12 +50,17 @@ def rainbow(text):
             if ((cp[1] >= match.start())  # cp[1] is pos
                 and (cp[1] <= match.end())):
                 cp[1] = match.end() + 1  # Move to 1 character after link.
-    for match in re.finditer(_url2re, text):
+    for match in re.finditer(_smilere, text):
         for cp in color_and_position:
             if ((cp[1] >= match.start())
                 and (cp[1] <= match.end())):
                 cp[1] = match.end() + 1
-    for match in re.finditer(_smilere, text):
+    for match in re.finditer(_memore, text):
+        for cp in color_and_position:
+            if ((cp[1] >= match.start())
+                and (cp[1] <= match.end())):
+                cp[1] = match.end() + 1
+    for match in re.finditer(_handlere, text):
         for cp in color_and_position:
             if ((cp[1] >= match.start())
                 and (cp[1] <= match.end())):
@@ -150,4 +156,6 @@ smiledict = {
 # Regular expression templates for detecting links/smilies.
 _smilere = re.compile("|".join(list(smiledict.keys())))
 _urlre = re.compile(r"(?i)(?:^|(?<=\s))(?:(?:https?|ftp)://|magnet:)[^\s]+")
-_url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
+#_url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
+_memore = re.compile(r"(\s|^)(#[A-Za-z0-9_]+)")
+_handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
