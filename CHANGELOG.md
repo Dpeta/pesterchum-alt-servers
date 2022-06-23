@@ -1,6 +1,23 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.3.1] - 2022-06-23
+
+### Added
+ - Option to exclude smilies, links, @handles and #memos, from quirks.
+ - An example of a gradient function/quirk, "rainbow", that doesn't break smilies/links/@handles/#memos. (see gradient.py in the quirks folder) 
+ - Disconnect reasons are now shown if the server closes the connection via ERROR message or erroneusnickname reply.
+    - This includes ban reasons if a user is banned by a server, or kick reason if the handle contains a disallowed phrase or character.
+ - More allowed PESTERCHUM: values to the pesterchum message tag.
+ 
+### Fixed
+ - Obtuse warning for 'i' time.
+ - Incorrect handling for certain connection exceptions.
+ - Bbcode and html logs not being written until the memo tab was closed, would sometimes cause the log not to write at all if Pesterchum crashed.
+ 
+### Changed
+ - Socket stuff... 💀
+
 ## [v2.3] - 2022-06-06
 
 ### Added
