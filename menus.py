@@ -13,7 +13,6 @@ from convo import PesterInput, PesterText
 from parsetools import lexMessage
 
 QString = str
-
 _datadir = ostools.getDataDir()
 
 class PesterQuirkItem(QtWidgets.QTreeWidgetItem):
@@ -390,6 +389,12 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         layout_3.addWidget(QtWidgets.QLabel("With:"))
         layout_3.addWidget(QtWidgets.QLineEdit())
         layout_replace.addLayout(layout_3)
+        layout_3 = QtWidgets.QHBoxLayout()
+        excludeCheckbox = QtWidgets.QCheckBox("Exclude links and smilies")
+        excludeCheckbox.setToolTip("Splits input to exclude smilies, weblinks, @handles, and #memos."
+                                   + "\nThe replace is applied on every substring individually.")
+        layout_3.addWidget(excludeCheckbox)
+        layout_replace.addLayout(layout_3)
 
         # Regexp Replace
         widget = QtWidgets.QWidget()
@@ -407,9 +412,10 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         layout_3.addWidget(QtWidgets.QLineEdit())
         layout_regexp.addLayout(layout_3)
         layout_3 = QtWidgets.QHBoxLayout()
-        excludeCheckbox = QtWidgets.QCheckBox("Fix links and smilies")
-        excludeCheckbox.setToolTip("Tries to revert changes to links, smilies, @handles, and #memos."
-                                   + "\nMay behave weirdly with more complex patterns and functions.")
+        excludeCheckbox = QtWidgets.QCheckBox("Exclude links and smilies")
+        excludeCheckbox.setToolTip("Splits input to exclude smilies, weblinks, @handles, and #memos."
+                                   + "\nSince the replace is applied on every substring individually,"
+                                   + "\ncertain patterns or functions like gradients may not work correctly.")
         layout_3.addWidget(excludeCheckbox)
         layout_regexp.addLayout(layout_3)
         layout_all.addLayout(layout_f)
@@ -449,13 +455,13 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         layout_6.addWidget(self.replaceinput)
         layout_6.addLayout(layout_7)
         layout_random.addLayout(layout_6)
-        
-        #layout_9 = QtWidgets.QHBoxLayout()
-        #excludeCheckbox = QtWidgets.QCheckBox("Fix links and smilies")
-        #excludeCheckbox.setToolTip("Tries to revert changes to links, smilies, @handles, and #memos."
-        #                           + "\nMay behave weirdly with more complex patterns and functions.")
-        #layout_9.addWidget(excludeCheckbox)
-        #layout_random.addLayout(layout_9)
+        layout_9 = QtWidgets.QHBoxLayout()
+        excludeCheckbox = QtWidgets.QCheckBox("Exclude links and smilies")
+        excludeCheckbox.setToolTip("Splits input to exclude smilies, weblinks, @handles, and #memos."
+                                   + "\nSince the replace is applied on every substring individually,"
+                                   + "\ncertain patterns or functions like gradients may not work correctly.")
+        layout_9.addWidget(excludeCheckbox)
+        layout_random.addLayout(layout_9)
 
         # Misspeller
         widget = QtWidgets.QWidget()
@@ -483,6 +489,13 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         layout_0.addWidget(self.pages)
         layout_0.addLayout(layout_2)
 
+        layout_3 = QtWidgets.QHBoxLayout()
+        excludeCheckbox = QtWidgets.QCheckBox("Exclude links and smilies")
+        excludeCheckbox.setToolTip("Splits input to exclude smilies, weblinks, @handles, and #memos."
+                                   + "\nThe replace is applied on every substring individually.")
+        layout_3.addWidget(excludeCheckbox)
+        layout_mispeller.addLayout(layout_3)
+
         if quirk:
             types = ["prefix","suffix","replace","regexp","random","spelling"]
             for (i,r) in enumerate(self.radios):
@@ -496,23 +509,31 @@ class PesterQuirkTypes(QtWidgets.QDialog):
             elif q["type"] == "replace":
                 page.itemAt(1).layout().itemAt(1).widget().setText(q["from"])
                 page.itemAt(2).layout().itemAt(1).widget().setText(q["to"])
+                try:
+                    page.itemAt(3).layout().itemAt(0).widget().setCheckState(int(q["checkstate"]))
+                except (KeyError, ValueError) as e:
+                    print("KeyError: %s" % str(e))
             elif q["type"] == "regexp":
                 page.itemAt(2).layout().itemAt(1).layout().itemAt(1).widget().setText(q["from"])
                 page.itemAt(2).layout().itemAt(2).layout().itemAt(1).widget().setText(q["to"])
                 try:
                     page.itemAt(2).layout().itemAt(3).layout().itemAt(0).widget().setCheckState(int(q["checkstate"]))
-                except KeyError as e:
+                except (KeyError, ValueError) as e:
                     print("KeyError: %s" % str(e))
             elif q["type"] == "random":
                 self.regexp.setText(q["from"])
                 for v in q["randomlist"]:
                     item = QtWidgets.QListWidgetItem(v, self.replacelist)
-                #try:
-                #    page.itemAt(2).layout().itemAt(2).layout().itemAt(0).widget().setCheckState(int(q["checkstate"]))
-                #except KeyError as e:
-                #    print("KeyError: %s" % str(e))
+                try:
+                    page.itemAt(2).layout().itemAt(2).layout().itemAt(0).widget().setCheckState(int(q["checkstate"]))
+                except (KeyError, ValueError) as e:
+                    print("KeyError: %s" % str(e))
             elif q["type"] == "spelling":
                 self.slider.setValue(q["percentage"])
+                try:
+                    page.itemAt(3).layout().itemAt(0).widget().setCheckState(int(q["checkstate"]))
+                except (KeyError, ValueError) as e:
+                    print("KeyError: %s" % str(e))
 
         self.setLayout(layout_0)
 
@@ -693,19 +714,20 @@ class PesterChooseQuirks(QtWidgets.QDialog):
         elif vdict["type"] == "replace":
             vdict["from"] = str(page.itemAt(1).layout().itemAt(1).widget().text())
             vdict["to"] = str(page.itemAt(2).layout().itemAt(1).widget().text())
+            vdict["checkstate"] = str(page.itemAt(3).layout().itemAt(0).widget().checkState())
         elif vdict["type"] == "regexp":
             vdict["from"] = str(page.itemAt(2).layout().itemAt(1).layout().itemAt(1).widget().text())
             vdict["to"] = str(page.itemAt(2).layout().itemAt(2).layout().itemAt(1).widget().text())
             vdict["checkstate"] = str(page.itemAt(2).layout().itemAt(3).layout().itemAt(0).widget().checkState())
         elif vdict["type"] == "random":
             vdict["from"] = str(self.quirkadd.regexp.text())
-            #vdict["checkstate"] = str(page.itemAt(2).layout().itemAt(2).layout().itemAt(0).widget().checkState())
+            vdict["checkstate"] = str(page.itemAt(2).layout().itemAt(2).layout().itemAt(0).widget().checkState())
             randomlist = [str(self.quirkadd.replacelist.item(i).text())
                           for i in range(0,self.quirkadd.replacelist.count())]
             vdict["randomlist"] = randomlist
         elif vdict["type"] == "spelling":
             vdict["percentage"] = self.quirkadd.slider.value()
-
+            vdict["checkstate"] = str(page.itemAt(3).layout().itemAt(0).widget().checkState())
         if vdict["type"] in ("regexp", "random"):
             try:
                 re.compile(vdict["from"])

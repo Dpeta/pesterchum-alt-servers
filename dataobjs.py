@@ -45,32 +45,8 @@ class pesterQuirk(object):
             self.checkstate = self.quirk["checkstate"]
         except KeyError:
             pass
-    def apply(self, string, first=False, last=False, checkstate=0):
-        # This function applies the quirks :3
-        print("checkstate: " + str(checkstate))
-
-        # Try to get a list of breakable links, smilies,
-        # @handle, #memo, in the message.
-        try:
-            # Check for links, store list of links.
-            links = list()
-            for match in re.findall(_urlre, string):
-                links.append(match)
-            # Check for smilies, store list of smilies.
-            smilies = list()
-            for match in re.findall(_smilere, string):
-                smilies.append(match)
-            # Check for @handles, store list of @handles.
-            handles = list()
-            for match in re.findall(_handlere, string):
-                smilies.append(match)
-            # Check for #memos, store list of #memos.
-            memos = list()
-            for match in re.findall(_memore, string):
-                smilies.append(match)
-        except Exception as e:
-                PchumLog.warning("Quirk issue: " + str(e))
         
+    def apply(self, string, first=False, last=False):
         if not self.on:
             return string
         elif self.type == "prefix":
@@ -78,25 +54,7 @@ class pesterQuirk(object):
         elif self.type == "suffix":
             return string + self.quirk["value"]
         elif self.type == "replace":
-            try:
-                # Replace like normal
-                output = string.replace(self.quirk["from"], self.quirk["to"])
-                # Try to revert links based on list.
-                for link in links:
-                    output = output.replace(link.replace(self.quirk["from"], self.quirk["to"]), link)
-                # Try to revert smilies based on list.
-                for smiley in smilies:
-                    output = output.replace(smiley.replace(self.quirk["from"], self.quirk["to"]), smiley)
-                # Try to revert @handles based on list.
-                for handle in handles:
-                    output = output.replace(handle.replace(self.quirk["from"], self.quirk["to"]), handle)
-                # Try to revert #memos based on list.
-                for memo in memos:
-                    output = output.replace(memo.replace(self.quirk["from"], self.quirk["to"]), memo)
-                return output
-            except Exception as e:
-                PchumLog.warning("Replace issue: " + str(e))
-                return string.replace(self.quirk["from"], self.quirk["to"])
+            return string.replace(self.quirk["from"], self.quirk["to"])
         elif self.type == "regexp":
             fr = self.quirk["from"]
             if not first and len(fr) > 0 and fr[0] == "^":
@@ -105,21 +63,11 @@ class pesterQuirk(object):
                 return string
             to = self.quirk["to"]
             pt = parseRegexpFunctions(to)
-            output = re.sub(fr, pt.expand, string)
-            # Reverse sub for links/smilies if enabled.
-            if checkstate == 2:
-                for smiley in smilies:
-                    output = output.replace(re.sub(fr, pt.expand, smiley), smiley)
-                for link in links:
-                    output = output.replace(re.sub(fr, pt.expand, link), link)
-                for handle in handles:
-                    output = output.replace(re.sub(fr, pt.expand, handle), handle)
-                for memo in memos:
-                    output = output.replace(re.sub(fr, pt.expand, memo), memo)
-            return output
+            return re.sub(fr, pt.expand, string)
         elif self.type == "random":
             if len(self.quirk["randomlist"]) == 0:
                 return string
+            fr = self.quirk["from"]
             if not first and len(fr) > 0 and fr[0] == "^":
                 return string
             if not last and len(fr) > 0 and fr[len(fr)-1] == "$":
@@ -128,69 +76,29 @@ class pesterQuirk(object):
                 choice = random.choice(self.quirk["randomlist"])
                 pt = parseRegexpFunctions(choice)
                 return pt.expand(mo)
-            return self.quirk["from"]
+            return re.sub(self.quirk["from"], randomrep, string)
         elif self.type == "spelling":
             percentage = self.quirk["percentage"]/100.0
             words = string.split(" ")
             newl = []
-            p = random.random()
-
-            # Main /word loop
+            ctag = re.compile("(</?c=?.*?>)", re.I)
             for w in words:
-                if re.match(_urlre, w):
-                    # Word is an url, don't break.
-                    newl.append(w)
-                elif re.match(_memore, w):
-                    # Word is an @memo, don't break.
-                    newl.append(w)
-                elif re.match(_handlere, w):
-                    # Word is an @handle, don't break.
-                    newl.append(w)
-                elif re.match(_smilere, w):
-                    # Word contains a smiley
-                    # Split by ':' and only skip the smiley,
-                    # this part is very messy and optional really.
-                    stripped_smiles = list()
-                    for smiley in smilies:
-                        stripped_smiles.append(smiley.strip(':'))
-                    denominated = w.split(':')
-                    output = ''
-                    for part in range(0, len(denominated)):
-                        if denominated[part] in stripped_smiles:
-                            output +=  denominated[part]
+                p = random.random()
+                if not ctag.search(w) and p < percentage:
+                    newl.append(mispeller(w))
+                elif p < percentage:
+                    split = ctag.split(w)
+                    tmp = []
+                    for s in split:
+                        if s and not ctag.search(s):
+                            tmp.append(mispeller(s))
                         else:
-                            if not _ctagre.search(denominated[part]) and p < percentage:
-                                output += mispeller(denominated[part])
-                            elif p < percentage:
-                                split = _ctagre.split(denominated[part])
-                                tmp = []
-                                for s in split:
-                                    if s and not _ctagre.search(s):
-                                        tmp.append(mispeller(s))
-                                    else:
-                                        tmp.append(s)
-                                output += tmp
-                            else:
-                                output += denominated[part]
-                        if part != len(denominated)-1:
-                            output += ':'
-                    newl.append(output)
+                            tmp.append(s)
+                    newl.append("".join(tmp))
                 else:
-                    if not _ctagre.search(w) and p < percentage:
-                        newl.append(mispeller(w))
-                    elif p < percentage:
-                        split = _ctagre.split(w)
-                        tmp = []
-                        for s in split:
-                            if s and not _ctagre.search(s):
-                                tmp.append(mispeller(s))
-                            else:
-                                tmp.append(s)
-                        newl.append("".join(tmp))
-                    else:
-                        newl.append(w)
+                    newl.append(w)
             return " ".join(newl)
-
+        
     def __str__(self):
         if self.type == "prefix":
             return "BEGIN WITH: %s" % (self.quirk["value"])
@@ -238,20 +146,76 @@ class pesterQuirks(object):
                     checkstate = int(q.checkstate)
                 except Exception:
                     checkstate = 0
-                if q.type != 'prefix' and q.type != 'suffix':
-                    if q.type == 'regexp' or q.type == 'random':
-                        string = q.apply(string,
-                                         first=(i==0),
-                                         last=lastStr,
-                                         checkstate=checkstate)
-                    else:
+                # Check for substring that should be excluded.
+                excludes = list()
+                # Check for links, store in list.
+                for match in re.finditer(_urlre, string):
+                    excludes.append(match)
+                # Check for smilies, store in list.
+                for match in re.finditer(_smilere, string):
+                    excludes.append(match)
+                # Check for @handles, store in list.
+                for match in re.finditer(_handlere, string):
+                    excludes.append(match)
+                # Check for #memos, store in list.
+                for match in re.finditer(_memore, string):
+                    excludes.append(match)
+                    
+                # Checkstate == 0 means the exclude option is unchecked.
+                if (checkstate == 0) or (len(excludes) == 0):
+                    # No split, apply like normal.
+                    if q.type != 'prefix' and q.type != 'suffix':
+                        if q.type == 'regexp' or q.type == 'random':
+                            string = q.apply(string,
+                                             first=(i==0),
+                                             last=lastStr)
+                        else:
+                            string = q.apply(string)
+                    elif q.type == 'prefix' and i == 0:
                         string = q.apply(string)
-                elif q.type == 'prefix' and i == 0:
-                    string = q.apply(string)
-                elif q.type == 'suffix' and lastStr:
-                    string = q.apply(string)
-            newlist.append(string)
+                    elif q.type == 'suffix' and lastStr:
+                        string = q.apply(string)
+                # Exclude option is checked, split string and only quirk
+                # the parts without links/smilies/@handle/#memo
+                elif (checkstate == 2) and (len(excludes) >= 1):
+                    # Seperate parts to be quirked.
+                    sendparts = list()
+                    # Add string until start of exclude at index 0.
+                    until = excludes[0].start()
+                    sendparts.append(string[:until])  
+                    # Add strings between excludes.
+                    for part in range(1, len(excludes)):
+                        after = excludes[part-1].end()
+                        until = excludes[part].start()
+                        sendparts.append(string[after:until])
+                    # Add string after exclude at last index.
+                    after = excludes[-1].end()
+                    sendparts.append(string[after:])
 
+                    # Quirk to-be-quirked parts.
+                    recvparts = list()
+                    for part in sendparts:
+                        # No split, apply like normal.
+                        if q.type == 'regexp' or q.type == 'random':
+                            recvparts.append(q.apply(part,
+                                                     first=(i==0),
+                                                     last=lastStr))
+                        elif q.type == 'prefix' and i == 0:
+                            recvparts.append(q.apply(part))
+                        elif q.type == 'suffix' and lastStr:
+                            recvparts.append(q.apply(part))
+                        else:
+                            recvparts.append(q.apply(part))
+                    # Reconstruct and update string.
+                    string = ''
+                    #print("sendparts: " + str(sendparts))
+                    #print("recvparts: " + str(recvparts))
+                    for part in range(0, len(excludes)):
+                        string += recvparts[part]
+                        string += excludes[part].group()
+                    string += recvparts[-1]
+                    
+            newlist.append(string)
         final = []
         for n in newlist:
             if type(n) in [str, str]:
