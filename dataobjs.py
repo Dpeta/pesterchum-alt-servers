@@ -167,7 +167,11 @@ class pesterQuirks(object):
                     if len(excludes) >= 1:
                         # SORT !!!
                         excludes.sort(key=lambda exclude: exclude.start())
-                        
+                        # Recursion check.
+                        # Strings like http://:3: require this.
+                        for n in range(0, len(excludes)-1):
+                            if excludes[n].end() > excludes[n+1].start():
+                                excludes.pop(n)
                         # Seperate parts to be quirked.
                         sendparts = list()
                         # Add string until start of exclude at index 0.
