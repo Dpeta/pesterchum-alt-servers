@@ -146,23 +146,79 @@ class pesterQuirks(object):
                     checkstate = int(q.checkstate)
                 except Exception:
                     checkstate = 0
-                # Check for substring that should be excluded.
-                excludes = list()
-                # Check for links, store in list.
-                for match in re.finditer(_urlre, string):
-                    excludes.append(match)
-                # Check for smilies, store in list.
-                for match in re.finditer(_smilere, string):
-                    excludes.append(match)
-                # Check for @handles, store in list.
-                for match in re.finditer(_handlere, string):
-                    excludes.append(match)
-                # Check for #memos, store in list.
-                for match in re.finditer(_memore, string):
-                    excludes.append(match)
-                    
-                # Checkstate == 0 means the exclude option is unchecked.
-                if (checkstate == 0) or (len(excludes) == 0):
+
+                # Exclude option is checked
+                if checkstate == 2:
+                    # Check for substring that should be excluded.
+                    excludes = list()
+                    # Check for links, store in list.
+                    for match in re.finditer(_urlre, string):
+                        excludes.append(match)
+                    # Check for smilies, store in list.
+                    for match in re.finditer(_smilere, string):
+                        excludes.append(match)
+                    # Check for @handles, store in list.
+                    for match in re.finditer(_handlere, string):
+                        excludes.append(match)
+                    # Check for #memos, store in list.
+                    for match in re.finditer(_memore, string):
+                        excludes.append(match)
+
+                    if len(excludes) >= 1:
+                        # SORT !!!
+                        excludes.sort(key=lambda exclude: exclude.start())
+                        
+                        # Seperate parts to be quirked.
+                        sendparts = list()
+                        # Add string until start of exclude at index 0.
+                        until = excludes[0].start()
+                        sendparts.append(string[:until])  
+                        # Add strings between excludes.
+                        for part in range(1, len(excludes)):
+                            after = excludes[part-1].end()
+                            until = excludes[part].start()
+                            sendparts.append(string[after:until])
+                        # Add string after exclude at last index.
+                        after = excludes[-1].end()
+                        sendparts.append(string[after:])
+
+                        # Quirk to-be-quirked parts.
+                        recvparts = list()
+                        for part in sendparts:
+                            # No split, apply like normal.
+                            if q.type == 'regexp' or q.type == 'random':
+                                recvparts.append(q.apply(part,
+                                                         first=(i==0),
+                                                         last=lastStr))
+                            elif q.type == 'prefix' and i == 0:
+                                recvparts.append(q.apply(part))
+                            elif q.type == 'suffix' and lastStr:
+                                recvparts.append(q.apply(part))
+                            else:
+                                recvparts.append(q.apply(part))
+                        # Reconstruct and update string.
+                        string = ''
+                        print("excludes: " + str(excludes))
+                        print("sendparts: " + str(sendparts))
+                        print("recvparts: " + str(recvparts))
+                        for part in range(0, len(excludes)):
+                            string += recvparts[part]
+                            string += excludes[part].group()
+                        string += recvparts[-1]
+                    else:
+                        # No split, apply like normal.
+                        if q.type != 'prefix' and q.type != 'suffix':
+                            if q.type == 'regexp' or q.type == 'random':
+                                string = q.apply(string,
+                                                 first=(i==0),
+                                                 last=lastStr)
+                            else:
+                                string = q.apply(string)
+                        elif q.type == 'prefix' and i == 0:
+                            string = q.apply(string)
+                        elif q.type == 'suffix' and lastStr:
+                            string = q.apply(string)
+                else:
                     # No split, apply like normal.
                     if q.type != 'prefix' and q.type != 'suffix':
                         if q.type == 'regexp' or q.type == 'random':
@@ -175,45 +231,9 @@ class pesterQuirks(object):
                         string = q.apply(string)
                     elif q.type == 'suffix' and lastStr:
                         string = q.apply(string)
-                # Exclude option is checked, split string and only quirk
-                # the parts without links/smilies/@handle/#memo
-                elif (checkstate == 2) and (len(excludes) >= 1):
-                    # Seperate parts to be quirked.
-                    sendparts = list()
-                    # Add string until start of exclude at index 0.
-                    until = excludes[0].start()
-                    sendparts.append(string[:until])  
-                    # Add strings between excludes.
-                    for part in range(1, len(excludes)):
-                        after = excludes[part-1].end()
-                        until = excludes[part].start()
-                        sendparts.append(string[after:until])
-                    # Add string after exclude at last index.
-                    after = excludes[-1].end()
-                    sendparts.append(string[after:])
-
-                    # Quirk to-be-quirked parts.
-                    recvparts = list()
-                    for part in sendparts:
-                        # No split, apply like normal.
-                        if q.type == 'regexp' or q.type == 'random':
-                            recvparts.append(q.apply(part,
-                                                     first=(i==0),
-                                                     last=lastStr))
-                        elif q.type == 'prefix' and i == 0:
-                            recvparts.append(q.apply(part))
-                        elif q.type == 'suffix' and lastStr:
-                            recvparts.append(q.apply(part))
-                        else:
-                            recvparts.append(q.apply(part))
-                    # Reconstruct and update string.
-                    string = ''
-                    #print("sendparts: " + str(sendparts))
-                    #print("recvparts: " + str(recvparts))
-                    for part in range(0, len(excludes)):
-                        string += recvparts[part]
-                        string += excludes[part].group()
-                    string += recvparts[-1]
+                    
+                
+                
                     
             newlist.append(string)
         final = []
