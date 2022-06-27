@@ -5,7 +5,7 @@ import random
 import time
 import json
 
-from PyQt5 import QtCore, QtGui
+from PyQt6 import QtCore, QtGui
 
 import ostools
 from mood import Mood

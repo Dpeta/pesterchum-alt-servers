@@ -7,8 +7,8 @@ This repository builds on (and was mirrored from!) pesterchum-karxi + Hydrotherm
 
 Check out [CHANGELOG.md] file to see what's changed!
 
-[CHANGELOG.md]: https://github.com/Dpeta/pesterchum-alt-servers/blob/py3_pyqt5/CHANGELOG.md
-[TODO.md]: https://github.com/Dpeta/pesterchum-alt-servers/blob/py3_pyqt5/TODO.md
+[CHANGELOG.md]: https://github.com/Dpeta/pesterchum-alt-servers/blob/main/CHANGELOG.md
+[TODO.md]: https://github.com/Dpeta/pesterchum-alt-servers/blob/main/TODO.md
 
 ## GUIDES
 
@@ -20,9 +20,9 @@ I'd highly recommend you take a look at the following files if you're new to Pes
 Guides for python quirks and themes are also in the [docs] folder. If you want to set up a gradient quirk you should take a look at [these guides][gradient-guide].
 
 [gradient-guide]: https://paste.0xfc.de/?e60df5a155e93583#AmcgN9cRnCcBycmVMvw6KJ1YLKPXGbaSzZLbgAhoNCQD
-[trollquirks.mkdn]: https://github.com/Dpeta/pesterchum-alt-servers/blob/py3_pyqt5/docs/trollquirks.mkdn
-[README-pesterchum.mkdn]: https://github.com/Dpeta/pesterchum-alt-servers/blob/py3_pyqt5/docs/README-pesterchum.mkdn
-[docs]: https://github.com/Dpeta/pesterchum-alt-servers/tree/py3_pyqt5/docs/
+[trollquirks.mkdn]: https://github.com/Dpeta/pesterchum-alt-servers/blob/main/docs/trollquirks.mkdn
+[README-pesterchum.mkdn]: https://github.com/Dpeta/pesterchum-alt-servers/blob/main/docs/README-pesterchum.mkdn
+[docs]: https://github.com/Dpeta/pesterchum-alt-servers/tree/main/docs/
 
 ## INSTALLATION
 1. Download the appropriate release for your platform and architecture from [releases][releases].
@@ -50,7 +50,7 @@ Pesterchum is a Python script. This means that as long as you have Python instal
 
 ### REQUIREMENTS
  - [Python 3]
- - [PyQt5>=5.15]
+ - [PyQt6]
  - [pygame] (Only required for audio, Pesterchum will probably still run without it.)
  
 ### WALKTHROUGH
@@ -60,17 +60,17 @@ Pesterchum is a Python script. This means that as long as you have Python instal
     - Some platforms, mostly Linux and macOS, might require you to run ``python3`` instead of ``python``. Some old installations still have Python 2 available under ``python``.
     - On Linux it's better to install Python & pip via your package manager.
     - On macOS it's also possible to install (a more recent version of) Python via [Brew](https://brew.sh/).
-2. Install Pesterchum's dependencies with pip, run: ``python -m pip install PyQt5 pygame``
+2. Install Pesterchum's dependencies with pip, run: ``python -m pip install PyQt6 pygame``
     - If this fails, try running ``python -m pip install -U pip setuptools wheel`` to update pip, setuptools & wheel and then trying again.
-3. Download [this repository's source](https://github.com/Dpeta/pesterchum-alt-servers/archive/refs/heads/py3_pyqt5.zip), or choose the "Source Code" option on any release, and extract the archive to a folder of your choice.
+3. Download [this repository's source](https://github.com/Dpeta/pesterchum-alt-servers/archive/refs/heads/main.zip), or choose the "Source Code" option on any release, and extract the archive to a folder of your choice.
 4. Navigate your terminal to the folder you chose with ``cd /folder/you/chose``.
-    - For example, if you extracted it to your documents on Windows, run ``cd C:\Users\user\Documents\pesterchum-alt-servers-py3_pyqt5``.
-        - Windows's cd command requires the /d flag to navigate to a different drive. (``cd D:\pesterchum-alt-servers-py3_pyqt5``)
+    - For example, if you extracted it to your documents on Windows, run ``cd C:\Users\user\Documents\pesterchum-alt-servers-main``.
+        - Windows's cd command requires the /d flag to navigate to a different drive. (``cd D:\pesterchum-alt-servers-main``)
 5. Run Pesterchum by running either ``pesterchum.py`` or ``python pesterchum.py``.
 
 [Python 3]: https://www.python.org/downloads/
 [pip]: https://pypi.org/project/pip/
-[PyQt5>=5.15]: https://pypi.org/project/PyQt5/
+[PyQt6]: https://pypi.org/project/PyQt6/
 [pygame]: https://pypi.org/project/pygame/
  
 ## FREEZE / BUILD

@@ -3,7 +3,7 @@ import codecs
 import re
 import ostools
 from time import strftime, strptime
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 from generic import RightClickList, RightClickTree
 from parsetools import convertTags
 from convo import PesterText
@@ -17,7 +17,7 @@ class PesterLogSearchInput(QtWidgets.QLineEdit):
     def keyPressEvent(self, event):
         QtWidgets.QLineEdit.keyPressEvent(self, event)
         if hasattr(self.parent(), 'textArea'):
-            if event.key() == QtCore.Qt.Key_Return:
+            if event.key() == QtCore.Qt.Key.Key_Return:
                 self.parent().logSearch(self.text())
                 if self.parent().textArea.find(self.text()):
                     self.parent().textArea.ensureCursorVisible()
@@ -29,8 +29,8 @@ class PesterLogHighlighter(QtGui.QSyntaxHighlighter):
         QtGui.QSyntaxHighlighter.__init__(self, parent)
         self.searchTerm = ""
         self.hilightstyle = QtGui.QTextCharFormat()
-        self.hilightstyle.setBackground(QtGui.QBrush(QtCore.Qt.green))
-        self.hilightstyle.setForeground(QtGui.QBrush(QtCore.Qt.black))
+        self.hilightstyle.setBackground(QtGui.QBrush(QtCore.Qt.GlobalColor.green))
+        self.hilightstyle.setForeground(QtGui.QBrush(QtCore.Qt.GlobalColor.black))
     def highlightBlock(self, text):
         for i in range(0, len(text)-(len(self.searchTerm)-1)):
             if str(text[i:i+len(self.searchTerm)]).lower() == str(self.searchTerm).lower():
@@ -97,7 +97,7 @@ class PesterLogUserSelect(QtWidgets.QDialog):
         return self.chumsBox.currentItem()
 
     def logSearch(self, search):
-        found = self.chumsBox.findItems(search, QtCore.Qt.MatchStartsWith)
+        found = self.chumsBox.findItems(search, QtCore.Qt.MatchFlag.MatchStartsWith)
         if len(found) > 0 and len(found) < self.chumsBox.count():
             self.chumsBox.setCurrentItem(found[0])
 
@@ -121,7 +121,7 @@ class PesterLogUserSelect(QtWidgets.QDialog):
 
     @QtCore.pyqtSlot()
     def openDir(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file:///" + os.path.join(_datadir, "logs"), QtCore.QUrl.TolerantMode))
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file:///" + os.path.join(_datadir, "logs"), QtCore.QUrl.ParsingMode.TolerantMode))
 
 class PesterLogViewer(QtWidgets.QDialog):
     def __init__(self, chum, config, theme, parent):
@@ -217,7 +217,7 @@ class PesterLogViewer(QtWidgets.QDialog):
             self.ok.clicked.connect(self.reject)
             layout_ok = QtWidgets.QHBoxLayout()
             layout_ok.addWidget(self.ok)
-            layout_ok.setAlignment(self.ok, QtCore.Qt.AlignRight)
+            layout_ok.setAlignment(self.ok, QtCore.Qt.AlignmentFlag.AlignRight)
 
             layout_logs = QtWidgets.QHBoxLayout()
             layout_logs.addWidget(self.tree)
@@ -246,7 +246,7 @@ class PesterLogViewer(QtWidgets.QDialog):
             cline = re.sub("\[color=(#.{6})]", r"<c=\1>", cline)
             self.textArea.append(convertTags(cline))
         textCur = self.textArea.textCursor()
-        textCur.movePosition(1)
+        #textCur.movePosition(1)
         self.textArea.setTextCursor(textCur)
         self.instructions.setText("Pesterlog with " +self.chum+ " on " + self.fileToTime(str(fname)))
 
@@ -278,19 +278,19 @@ class PesterLogText(PesterText):
                 handle = str(url[1:])
                 self.parent().parent.newConversation(handle)
             else:
-                QtGui.QDesktopServices.openUrl(QtCore.QUrl(url, QtCore.QUrl.TolerantMode))
+                QtGui.QDesktopServices.openUrl(QtCore.QUrl(url, QtCore.QUrl.ParsingMode.TolerantMode))
         QtWidgets.QTextEdit.mousePressEvent(self, event)
     def mouseMoveEvent(self, event):
         QtWidgets.QTextEdit.mouseMoveEvent(self, event)
         if self.anchorAt(event.pos()):
-            if self.viewport().cursor().shape != QtCore.Qt.PointingHandCursor:
-                self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+            if self.viewport().cursor().shape != QtCore.Qt.CursorShape.PointingHandCursor:
+                self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
         else:
-            self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
+            self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.IBeamCursor))
 
     def contextMenuEvent(self, event):
         textMenu = self.createStandardContextMenu()
         a = textMenu.actions()
         a[0].setText("Copy Plain Text")
         a[0].setShortcut(self.tr("Ctrl+C"))
-        textMenu.exec_(event.globalPos())
+        textMenu.exec(event.globalPos())

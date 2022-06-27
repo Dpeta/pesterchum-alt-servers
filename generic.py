@@ -1,4 +1,4 @@
-from PyQt5 import QtGui, QtWidgets
+from PyQt6 import QtGui, QtWidgets
 from datetime import timedelta
 
 class mysteryTime(timedelta):
@@ -44,7 +44,7 @@ class PesterIcon(QtGui.QIcon):
 class RightClickList(QtWidgets.QListWidget):
     def contextMenuEvent(self, event):
         #fuckin Qt <--- I feel that </3
-        if event.reason() == QtGui.QContextMenuEvent.Mouse:
+        if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
             listing = self.itemAt(event.pos())
             self.setCurrentItem(listing)
             optionsMenu = self.getOptionsMenu()
@@ -55,7 +55,7 @@ class RightClickList(QtWidgets.QListWidget):
 
 class RightClickTree(QtWidgets.QTreeWidget):
     def contextMenuEvent(self, event):
-        if event.reason() == QtGui.QContextMenuEvent.Mouse:
+        if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
             listing = self.itemAt(event.pos())
             self.setCurrentItem(listing)
             optionsMenu = self.getOptionsMenu()
@@ -95,8 +95,8 @@ class MultiTextDialog(QtWidgets.QDialog):
 
         self.setLayout(layout_0)
     def getText(self):
-        r = self.exec_()
-        if r == QtWidgets.QDialog.Accepted:
+        r = self.exec()
+        if r == QtWidgets.QDialog.DialogCode.Accepted:
             retval = {}
             for (name, widget) in self.inputs.items():
                 retval[name] = str(widget.text())
@@ -128,7 +128,7 @@ class MovingWindow(QtWidgets.QFrame):
                 if event.button() == 1:
                     self.moving = event.globalPos() - self.pos()
         except AttributeError as e:
-            print("PyQt5 <= 5.14?")
+            print("PyQt6 <= 5.14?")
             print(str(e))
             if event.button() == 1:
                     self.moving = event.globalPos() - self.pos()

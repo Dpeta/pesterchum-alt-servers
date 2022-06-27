@@ -4,7 +4,7 @@ import inspect
 import logging
 import logging.config
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 import ostools
 
@@ -197,19 +197,19 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
         self.time = time
 
         if ostools.isWin32():
-            self.setWindowFlags(QtCore.Qt.ToolTip)
+            self.setWindowFlags(QtCore.Qt.WindowType.ToolTip)
         else:
-            self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.X11BypassWindowManagerHint | QtCore.Qt.ToolTip)
+            self.setWindowFlags(QtCore.Qt.WindowType.WindowStaysOnTopHint | QtCore.Qt.WindowType.X11BypassWindowManagerHint | QtCore.Qt.WindowType.ToolTip)
 
         self.m_animation = QtCore.QParallelAnimationGroup()
         anim = QtCore.QPropertyAnimation(self)
         anim.setTargetObject(self)
         self.m_animation.addAnimation(anim)
-        anim.setEasingCurve(QtCore.QEasingCurve.OutBounce)
+        anim.setEasingCurve(QtCore.QEasingCurve.Type.OutBounce)
         anim.setDuration(1000)
         anim.finished.connect(self.reverseTrigger)
 
-        self.m_animation.setDirection(QtCore.QAnimationGroup.Forward)
+        self.m_animation.setDirection(QtCore.QAbstractAnimation.Direction.Forward)
 
         self.title = QtWidgets.QLabel(title, self)
         self.msg = QtWidgets.QLabel(msg, self)
@@ -230,7 +230,7 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
             layout_1 = QtWidgets.QGridLayout()
             layout_1.addWidget(self.icon, 0,0, 1,1)
             layout_1.addWidget(self.title, 0,1, 1,7)
-            layout_1.setAlignment(self.msg, QtCore.Qt.AlignTop)
+            layout_1.setAlignment(self.msg, QtCore.Qt.AlignmentFlag.AlignTop)
             layout_0.addLayout(layout_1)
         else:
             layout_0.addWidget(self.title)
@@ -252,11 +252,13 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
 
         self.msg.setText(PesterToast.wrapText(self.msg.font(), str(self.msg.text()), self.parent().theme["toasts/width"], self.parent().theme["toasts/content/style"]))
 
-        p = QtWidgets.QApplication.desktop().availableGeometry(self).bottomRight()
-        o = QtWidgets.QApplication.desktop().screenGeometry(self).bottomRight()
-        anim.setStartValue(p.y() - o.y())
-        anim.setEndValue(100)
-        anim.valueChanged[QtCore.QVariant].connect(self.updateBottomLeftAnimation)
+        for screen in QtWidgets.QApplication.screens():
+            # This 100% doesn't work with multiple screens.
+            p = screen.availableGeometry().bottomRight()
+            o = screen.geometry().bottomRight()
+            anim.setStartValue(p.y() - o.y())
+            anim.setEndValue(100)
+            anim.valueChanged[QtCore.QVariant].connect(self.updateBottomLeftAnimation)
 
         self.byebye = False
 
@@ -286,15 +288,17 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
         if not self.byebye:
             self.byebye = True
             anim = self.m_animation.animationAt(0)
-            self.m_animation.setDirection(QtCore.QAnimationGroup.Backward)
-            anim.setEasingCurve(QtCore.QEasingCurve.InCubic)
+            self.m_animation.setDirection(QtCore.QAbstractAnimation.Direction.Backward)
+            anim.setEasingCurve(QtCore.QEasingCurve.Type.InCubic)
             anim.finished.disconnect(self.reverseTrigger)
             anim.finished.connect(self.done)
             self.m_animation.start()
 
     @QtCore.pyqtSlot(QtCore.QVariant)
     def updateBottomLeftAnimation(self, value):
-        p = QtWidgets.QApplication.desktop().availableGeometry(self).bottomRight()
+        #p = QtWidgets.QApplication.desktop().availableGeometry(self).bottomRight()
+        for screen in QtWidgets.QApplication.screens():
+            p = screen.availableGeometry().bottomRight()
         val = (self.height())/100
         # Does type casting this to an int have any negative consequences?
         self.move(int(p.x()-self.width()), int(p.y() - (value * val) +1))
@@ -302,9 +306,9 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
         QtWidgets.QWidget.show(self)
 
     def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.RightButton:
+        if event.button() == QtCore.Qt.MouseButton.RightButton:
             self.reverseStart()
-        elif event.button() == QtCore.Qt.LeftButton:
+        elif event.button() == QtCore.Qt.MouseButton.LeftButton:
             pass
 
     @staticmethod
@@ -351,20 +355,20 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
                     if stuff.isdigit():
                         maxwidth -= int(stuff)
 
-        if metric.width(text) < maxwidth:
+        if metric.horizontalAdvance(text) < maxwidth:
             return text
-        while metric.width(text) > maxwidth:
+        while metric.horizontalAdvance(text) > maxwidth:
             lastspace = text.find(" ")
             curspace = lastspace
-            while metric.width(text, curspace) < maxwidth:
+            while metric.horizontalAdvance(text, curspace) < maxwidth:
                 lastspace = curspace
                 curspace = text.find(" ", lastspace+1)
                 if curspace == -1:
                     break
-            if (metric.width(text[:lastspace]) > maxwidth) or \
+            if (metric.horizontalAdvance(text[:lastspace]) > maxwidth) or \
                len(text[:lastspace]) < 1:
                 for i in range(len(text)):
-                    if metric.width(text[:i]) > maxwidth:
+                    if metric.horizontalAdvance(text[:i]) > maxwidth:
                         lastspace = i-1
                         break
             ret.append(text[:lastspace])

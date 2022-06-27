@@ -78,7 +78,7 @@ class ScriptQuirks(object):
                 #msgbox = QtWidgets.QMessageBox()
                 #msgbox.setWindowTitle("Error!")
                 #msgbox.setText("Error loading %s: %s (in quirks.py)" % (os.path.basename(filename), e))
-                #msgbox.exec_()
+                #msgbox.exec()
             else:
                 if self.modHas(module, 'setup'):
                     module.setup()

@@ -1,7 +1,7 @@
 import re
 from os import remove
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 import ostools
 import parsetools
@@ -48,32 +48,35 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
             self.addItem(item, False)
         self.changeCheckState()
         #self.setDragEnabled(True)
-        #self.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+        #self.setDragDropMode(QtGui.QAbstractItemView.DragDropMode.InternalMove)
         self.setDropIndicatorShown(True)
         self.setSortingEnabled(False)
         self.setIndentation(15)
         self.header().hide()
 
     def addItem(self, item, new=True):
-        item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+        item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable
+                      | QtCore.Qt.ItemFlag.ItemIsDragEnabled
+                      | QtCore.Qt.ItemFlag.ItemIsUserCheckable
+                      | QtCore.Qt.ItemFlag.ItemIsEnabled)
         if item.quirk.on:
-            item.setCheckState(0, 2)
+            item.setCheckState(0, QtCore.Qt.CheckState.Checked)
         else:
-            item.setCheckState(0, 0)
+            item.setCheckState(0, QtCore.Qt.CheckState.Unchecked)
         if new:
             curgroup = self.currentItem()
             if curgroup:
                 if curgroup.parent(): curgroup = curgroup.parent()
                 item.quirk.quirk["group"] = item.quirk.group = curgroup.text(0)
-        found = self.findItems(item.quirk.group, QtCore.Qt.MatchExactly)
+        found = self.findItems(item.quirk.group, QtCore.Qt.MatchFlag.MatchExactly)
         if len(found) > 0:
             found[0].addChild(item)
         else:
             child_1 = QtWidgets.QTreeWidgetItem([item.quirk.group])
             self.addTopLevelItem(child_1)
-            child_1.setFlags(child_1.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-            child_1.setChildIndicatorPolicy(QtWidgets.QTreeWidgetItem.DontShowIndicatorWhenChildless)
-            child_1.setCheckState(0,0)
+            child_1.setFlags(child_1.flags() | QtCore.Qt.ItemFlag.ItemIsUserCheckable | QtCore.Qt.ItemFlag.ItemIsEnabled)
+            child_1.setChildIndicatorPolicy(QtWidgets.QTreeWidgetItem.ChildIndicatorPolicy.DontShowIndicatorWhenChildless)
+            child_1.setCheckState(0, QtCore.Qt.CheckState.Unchecked)
             child_1.setExpanded(True)
             child_1.addChild(item)
         self.changeCheckState()
@@ -85,7 +88,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
 
     @QtCore.pyqtSlot()
     def upShiftQuirk(self):
-        found = self.findItems(self.currentItem().text(0), QtCore.Qt.MatchExactly)
+        found = self.findItems(self.currentItem().text(0), QtCore.MatchFlag.Qt.MatchExactly)
         if len(found): # group
             i = self.indexOfTopLevelItem(found[0])
             if i > 0:
@@ -95,7 +98,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                 shifted_item.setExpanded(expand)
                 self.setCurrentItem(shifted_item)
         else: # quirk
-            found = self.findItems(self.currentItem().text(0), QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive)
+            found = self.findItems(self.currentItem().text(0), QtCore.Qt.MatchFlag.MatchExactly | QtCore.Qt.MatchFlag.MatchRecursive)
             for f in found:
                 if not f.isSelected(): continue
                 if not f.parent(): continue
@@ -115,7 +118,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
 
     @QtCore.pyqtSlot()
     def downShiftQuirk(self):
-        found = self.findItems(self.currentItem().text(0), QtCore.Qt.MatchExactly)
+        found = self.findItems(self.currentItem().text(0), QtCore.Qt.MatchFlag.MatchExactly)
         if len(found): # group
             i = self.indexOfTopLevelItem(found[0])
             if i < self.topLevelItemCount()-1 and i >= 0:
@@ -125,7 +128,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                 shifted_item.setExpanded(expand)
                 self.setCurrentItem(shifted_item)
         else: # quirk
-            found = self.findItems(self.currentItem().text(0), QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive)
+            found = self.findItems(self.currentItem().text(0), QtCore.Qt.MatchFlag.MatchExactly | QtCore.Qt.MatchFlag.MatchRecursive)
             for f in found:
                 if not f.isSelected(): continue
                 if not f.parent(): continue
@@ -146,7 +149,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
     @QtCore.pyqtSlot()
     def removeCurrent(self):
         i = self.currentItem()
-        found = self.findItems(i.text(0), QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive)
+        found = self.findItems(i.text(0), QtCore.Qt.MatchFlag.MatchExactly | QtCore.Qt.MatchFlag.MatchRecursive)
         for f in found:
             if not f.isSelected(): continue
             if not f.parent(): # group
@@ -166,7 +169,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                         # already stealing focus
                         b.setFocus()
                         break
-                ret = msgbox.exec_()
+                ret = msgbox.exec()
                 if ret == QtWidgets.QMessageBox.Ok:
                     self.takeTopLevelItem(self.indexOfTopLevelItem(f))
             else:
@@ -185,21 +188,21 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
                     msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                    msgbox.exec_()
+                    msgbox.exec()
                     self.addgroupdialog = None
                     return
-                found = self.findItems(gname, QtCore.Qt.MatchExactly)
+                found = self.findItems(gname, QtCore.Qt.MatchFlag.MatchExactly)
                 if found:
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS QUIRK GROUP ALREADY EXISTS")
                     msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                    msgbox.exec_()
+                    msgbox.exec()
                     return
                 child_1 = QtWidgets.QTreeWidgetItem([gname])
                 self.addTopLevelItem(child_1)
-                child_1.setFlags(child_1.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-                child_1.setChildIndicatorPolicy(QtWidgets.QTreeWidgetItem.DontShowIndicatorWhenChildless)
-                child_1.setCheckState(0,0)
+                child_1.setFlags(child_1.flags() | QtCore.Qt.ItemFlag.ItemIsUserCheckable | QtCore.Qt.ItemFlag.ItemIsEnabled)
+                child_1.setChildIndicatorPolicy(QtWidgets.QTreeWidgetItem.ChildIndicatorPolicy.DontShowIndicatorWhenChildless)
+                child_1.setCheckState(0, QtCore.Qt.CheckState.Unchecked)
                 child_1.setExpanded(True)
 
             self.addgroupdialog = None
@@ -216,9 +219,9 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                         noneChecked = False
                     else:
                         allChecked = False
-                if allChecked:    self.topLevelItem(i).setCheckState(0, 2)
-                elif noneChecked: self.topLevelItem(i).setCheckState(0, 0)
-                else:             self.topLevelItem(i).setCheckState(0, 1)
+                if allChecked:    self.topLevelItem(i).setCheckState(0, QtCore.Qt.CheckState.Checked)
+                elif noneChecked: self.topLevelItem(i).setCheckState(0, QtCore.Qt.CheckState.PartiallyChecked)
+                else:             self.topLevelItem(i).setCheckState(0, QtCore.Qt.CheckState.Checked)
         else:
             state = self.topLevelItem(index).checkState(0)
             for j in range(self.topLevelItem(index).childCount()):
@@ -293,18 +296,18 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         self.cancel = QtWidgets.QPushButton("Cancel", self)
         self.cancel.clicked.connect(self.reject)
         layout_2 = QtWidgets.QHBoxLayout()
-        layout_2.setAlignment(QtCore.Qt.AlignRight)
+        layout_2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
         layout_2.addWidget(self.back)
         layout_2.addWidget(self.next)
         layout_2.addSpacing(5)
         layout_2.addWidget(self.cancel)
 
         vr = QtWidgets.QFrame()
-        vr.setFrameShape(QtWidgets.QFrame.VLine)
-        vr.setFrameShadow(QtWidgets.QFrame.Sunken)
+        vr.setFrameShape(QtWidgets.QFrame.Shape.VLine)
+        vr.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         vr2 = QtWidgets.QFrame()
-        vr2.setFrameShape(QtWidgets.QFrame.VLine)
-        vr2.setFrameShadow(QtWidgets.QFrame.Sunken)
+        vr2.setFrameShape(QtWidgets.QFrame.Shape.VLine)
+        vr2.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
 
         self.funclist = QtWidgets.QListWidget(self)
         self.funclist.setStyleSheet("color: #000000; background-color: #FFFFFF;")
@@ -340,7 +343,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         widget = QtWidgets.QWidget()
         self.pages.addWidget(widget)
         layout_select = QtWidgets.QVBoxLayout(widget)
-        layout_select.setAlignment(QtCore.Qt.AlignTop)
+        layout_select.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         self.radios = []
         self.radios.append(QtWidgets.QRadioButton("Prefix", self))
         self.radios.append(QtWidgets.QRadioButton("Suffix", self))
@@ -357,7 +360,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         widget = QtWidgets.QWidget()
         self.pages.addWidget(widget)
         layout_prefix = QtWidgets.QVBoxLayout(widget)
-        layout_prefix.setAlignment(QtCore.Qt.AlignTop)
+        layout_prefix.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_prefix.addWidget(QtWidgets.QLabel("Prefix"))
         layout_3 = QtWidgets.QHBoxLayout()
         layout_3.addWidget(QtWidgets.QLabel("Value:"))
@@ -368,7 +371,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         widget = QtWidgets.QWidget()
         self.pages.addWidget(widget)
         layout_suffix = QtWidgets.QVBoxLayout(widget)
-        layout_suffix.setAlignment(QtCore.Qt.AlignTop)
+        layout_suffix.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_suffix.addWidget(QtWidgets.QLabel("Suffix"))
         layout_3 = QtWidgets.QHBoxLayout()
         layout_3.addWidget(QtWidgets.QLabel("Value:"))
@@ -379,7 +382,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         widget = QtWidgets.QWidget()
         self.pages.addWidget(widget)
         layout_replace = QtWidgets.QVBoxLayout(widget)
-        layout_replace.setAlignment(QtCore.Qt.AlignTop)
+        layout_replace.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_replace.addWidget(QtWidgets.QLabel("Simple Replace"))
         layout_3 = QtWidgets.QHBoxLayout()
         layout_3.addWidget(QtWidgets.QLabel("Replace:"))
@@ -401,7 +404,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         self.pages.addWidget(widget)
         layout_all = QtWidgets.QHBoxLayout(widget)
         layout_regexp = QtWidgets.QVBoxLayout()
-        layout_regexp.setAlignment(QtCore.Qt.AlignTop)
+        layout_regexp.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_regexp.addWidget(QtWidgets.QLabel("Regexp Replace"))
         layout_3 = QtWidgets.QHBoxLayout()
         layout_3.addWidget(QtWidgets.QLabel("Regexp:"))
@@ -427,7 +430,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         self.pages.addWidget(widget)
         layout_all = QtWidgets.QHBoxLayout(widget)
         layout_random = QtWidgets.QVBoxLayout()
-        layout_random.setAlignment(QtCore.Qt.AlignTop)
+        layout_random.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_random.addWidget(QtWidgets.QLabel("Random Replace"))
         layout_5 = QtWidgets.QHBoxLayout()
         regexpl = QtWidgets.QLabel("Regexp:", self)
@@ -467,14 +470,14 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         widget = QtWidgets.QWidget()
         self.pages.addWidget(widget)
         layout_mispeller = QtWidgets.QVBoxLayout(widget)
-        layout_mispeller.setAlignment(QtCore.Qt.AlignTop)
+        layout_mispeller.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_mispeller.addWidget(QtWidgets.QLabel("Mispeller"))
         layout_1 = QtWidgets.QHBoxLayout()
         zero = QtWidgets.QLabel("1%", self)
         hund = QtWidgets.QLabel("100%", self)
         self.current = QtWidgets.QLabel("50%", self)
-        self.current.setAlignment(QtCore.Qt.AlignHCenter)
-        self.slider = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.current.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
+        self.slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal, self)
         self.slider.setMinimum(1)
         self.slider.setMaximum(100)
         self.slider.setValue(50)
@@ -510,14 +513,14 @@ class PesterQuirkTypes(QtWidgets.QDialog):
                 page.itemAt(1).layout().itemAt(1).widget().setText(q["from"])
                 page.itemAt(2).layout().itemAt(1).widget().setText(q["to"])
                 try:
-                    page.itemAt(3).layout().itemAt(0).widget().setCheckState(int(q["checkstate"]))
+                    page.itemAt(3).layout().itemAt(0).widget().setCheckState(QtCore.Qt.CheckState(int(q["checkstate"])))
                 except (KeyError, ValueError) as e:
                     print("KeyError: %s" % str(e))
             elif q["type"] == "regexp":
                 page.itemAt(2).layout().itemAt(1).layout().itemAt(1).widget().setText(q["from"])
                 page.itemAt(2).layout().itemAt(2).layout().itemAt(1).widget().setText(q["to"])
                 try:
-                    page.itemAt(2).layout().itemAt(3).layout().itemAt(0).widget().setCheckState(int(q["checkstate"]))
+                    page.itemAt(2).layout().itemAt(3).layout().itemAt(0).widget().setCheckState(QtCore.Qt.CheckState(int(q["checkstate"])))
                 except (KeyError, ValueError) as e:
                     print("KeyError: %s" % str(e))
             elif q["type"] == "random":
@@ -525,13 +528,13 @@ class PesterQuirkTypes(QtWidgets.QDialog):
                 for v in q["randomlist"]:
                     item = QtWidgets.QListWidgetItem(v, self.replacelist)
                 try:
-                    page.itemAt(2).layout().itemAt(2).layout().itemAt(0).widget().setCheckState(int(q["checkstate"]))
+                    page.itemAt(2).layout().itemAt(2).layout().itemAt(0).widget().setCheckState(QtCore.Qt.CheckState(int(q["checkstate"])))
                 except (KeyError, ValueError) as e:
                     print("KeyError: %s" % str(e))
             elif q["type"] == "spelling":
                 self.slider.setValue(q["percentage"])
                 try:
-                    page.itemAt(3).layout().itemAt(0).widget().setCheckState(int(q["checkstate"]))
+                    page.itemAt(3).layout().itemAt(0).widget().setCheckState(QtCore.Qt.CheckState(int(q["checkstate"])))
                 except (KeyError, ValueError) as e:
                     print("KeyError: %s" % str(e))
 
@@ -673,7 +676,7 @@ class PesterChooseQuirks(QtWidgets.QDialog):
         for i in range(self.quirkList.topLevelItemCount()):
             for j in range(self.quirkList.topLevelItem(i).childCount()):
                 item = self.quirkList.topLevelItem(i).child(j)
-                if (item.checkState(0) == QtCore.Qt.Checked):
+                if (item.checkState(0) == QtCore.Qt.CheckState.Checked):
                     u.append(item.quirk)
         return u
 
@@ -714,20 +717,20 @@ class PesterChooseQuirks(QtWidgets.QDialog):
         elif vdict["type"] == "replace":
             vdict["from"] = str(page.itemAt(1).layout().itemAt(1).widget().text())
             vdict["to"] = str(page.itemAt(2).layout().itemAt(1).widget().text())
-            vdict["checkstate"] = str(page.itemAt(3).layout().itemAt(0).widget().checkState())
+            vdict["checkstate"] = str(page.itemAt(3).layout().itemAt(0).widget().checkState().value)
         elif vdict["type"] == "regexp":
             vdict["from"] = str(page.itemAt(2).layout().itemAt(1).layout().itemAt(1).widget().text())
             vdict["to"] = str(page.itemAt(2).layout().itemAt(2).layout().itemAt(1).widget().text())
-            vdict["checkstate"] = str(page.itemAt(2).layout().itemAt(3).layout().itemAt(0).widget().checkState())
+            vdict["checkstate"] = str(page.itemAt(2).layout().itemAt(3).layout().itemAt(0).widget().checkState().value)
         elif vdict["type"] == "random":
             vdict["from"] = str(self.quirkadd.regexp.text())
-            vdict["checkstate"] = str(page.itemAt(2).layout().itemAt(2).layout().itemAt(0).widget().checkState())
+            vdict["checkstate"] = str(page.itemAt(2).layout().itemAt(2).layout().itemAt(0).widget().checkState().value)
             randomlist = [str(self.quirkadd.replacelist.item(i).text())
                           for i in range(0,self.quirkadd.replacelist.count())]
             vdict["randomlist"] = randomlist
         elif vdict["type"] == "spelling":
             vdict["percentage"] = self.quirkadd.slider.value()
-            vdict["checkstate"] = str(page.itemAt(3).layout().itemAt(0).widget().checkState())
+            vdict["checkstate"] = str(page.itemAt(3).layout().itemAt(0).widget().checkState().value)
         if vdict["type"] in ("regexp", "random"):
             try:
                 re.compile(vdict["from"])
@@ -735,7 +738,7 @@ class PesterChooseQuirks(QtWidgets.QDialog):
                 quirkWarning = QtWidgets.QMessageBox(self)
                 quirkWarning.setText("Not a valid regular expression!")
                 quirkWarning.setInformativeText("H3R3S WHY DUMP4SS: %s" % (e))
-                quirkWarning.exec_()
+                quirkWarning.exec()
                 self.quirkadd = None
                 return
 
@@ -846,7 +849,7 @@ class PesterChooseProfile(QtWidgets.QDialog):
             collision_warning = QtWidgets.QLabel("%s is taken already! Pick a new profile." % (collision))
             layout_0.addWidget(collision_warning)
         else:
-            layout_0.addWidget(self.currentHandle, alignment=QtCore.Qt.AlignHCenter)
+            layout_0.addWidget(self.currentHandle, alignment=QtCore.Qt.AlignmentFlag.AlignHCenter)
         layout_0.addLayout(layout_1)
         if avail_profiles:
             profileLabel = QtWidgets.QLabel("Or choose an existing profile:", self)
@@ -897,7 +900,7 @@ class PesterChooseProfile(QtWidgets.QDialog):
                 problem.setWindowTitle("Problem!")
                 problem.setInformativeText("You can't delete the profile you're currently using!")
                 problem.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                problem.exec_()
+                problem.exec()
                 return
             # TODO: Make this select 'no' as the default, as usual.
             msgbox = QtWidgets.QMessageBox()
@@ -905,7 +908,7 @@ class PesterChooseProfile(QtWidgets.QDialog):
             msgbox.setWindowTitle("WARNING!")
             msgbox.setInformativeText("Are you sure you want to delete the profile: %s" % (handle))
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
-            ret = msgbox.exec_()
+            ret = msgbox.exec()
             if ret == QtWidgets.QMessageBox.Ok:
                 try:
                     remove(_datadir+"profiles/%s.js" % (handle))
@@ -916,7 +919,7 @@ class PesterChooseProfile(QtWidgets.QDialog):
                     problem.setWindowTitle("Problem!")
                     problem.setInformativeText("There was a problem deleting the profile: %s" % (handle))
                     problem.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                    problem.exec_()
+                    problem.exec()
 
 class PesterMentions(QtWidgets.QDialog):
     def __init__(self, window, theme, parent):
@@ -979,7 +982,7 @@ class PesterMentions(QtWidgets.QDialog):
             quirkWarning = QtWidgets.QMessageBox(self)
             quirkWarning.setText("Not a valid regular expression!")
             quirkWarning.setInformativeText("H3R3S WHY DUMP4SS: %s" % (e))
-            quirkWarning.exec_()
+            quirkWarning.exec()
         else:
             if mitem is None:
                 self.mentionlist.addItem(pdict["value"])
@@ -1004,17 +1007,17 @@ class PesterOptions(QtWidgets.QDialog):
         layout_4 = QtWidgets.QVBoxLayout()
 
         hr = QtWidgets.QFrame()
-        hr.setFrameShape(QtWidgets.QFrame.HLine)
-        hr.setFrameShadow(QtWidgets.QFrame.Sunken)
+        hr.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        hr.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         vr = QtWidgets.QFrame()
-        vr.setFrameShape(QtWidgets.QFrame.VLine)
-        vr.setFrameShadow(QtWidgets.QFrame.Sunken)
+        vr.setFrameShape(QtWidgets.QFrame.Shape.VLine)
+        vr.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
 
         self.tabs = QtWidgets.QButtonGroup(self)
-        self.tabs.buttonClicked[int].connect(self.changePage)
-        tabNames = ["Chum List", "Conversations", "Interface", "Sound", "Notifications", "Logging", "Idle/Updates", "Theme", "Connection"]
-        if parent.advanced: tabNames.append("Advanced")
-        for t in tabNames:
+        self.tabs.buttonClicked.connect(self.changePage)  # Verify working
+        self.tabNames = ["Chum List", "Conversations", "Interface", "Sound", "Notifications", "Logging", "Idle/Updates", "Theme", "Connection"]
+        if parent.advanced: self.tabNames.append("Advanced")
+        for t in self.tabNames:
             button = QtWidgets.QPushButton(t)
             self.tabs.addButton(button)
             layout_4.addWidget(button)
@@ -1036,7 +1039,7 @@ class PesterOptions(QtWidgets.QDialog):
         self.autonickserv.stateChanged[int].connect(self.autoNickServChange)
         self.nickservpass = QtWidgets.QLineEdit(self)
         self.nickservpass.setPlaceholderText("NickServ Password")
-        self.nickservpass.setEchoMode(QtWidgets.QLineEdit.PasswordEchoOnEdit)
+        self.nickservpass.setEchoMode(QtWidgets.QLineEdit.EchoMode.PasswordEchoOnEdit)
         self.nickservpass.setText(parent.userprofile.getNickServPass())
 
         self.autojoinlist = QtWidgets.QListWidget(self)
@@ -1081,7 +1084,7 @@ class PesterOptions(QtWidgets.QDialog):
         self.editMentions2 = QtWidgets.QPushButton("Edit Mentions", self)
         self.editMentions2.clicked.connect(self.openMentions)
 
-        self.volume = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.volume = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal, self)
         self.volume.setMinimum(0)
         self.volume.setMaximum(100)
         self.volume.setValue(self.config.volume())
@@ -1098,7 +1101,7 @@ class PesterOptions(QtWidgets.QDialog):
             self.currentVol = QtWidgets.QLabel(
                     "(Disabled: Sound Mixer Error)", self)
             self.volume.setEnabled(False)
-        self.currentVol.setAlignment(QtCore.Qt.AlignHCenter)
+        self.currentVol.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
 
 
         self.timestampcheck = QtWidgets.QCheckBox("Time Stamps", self)
@@ -1282,7 +1285,7 @@ class PesterOptions(QtWidgets.QDialog):
         # Chum List
         widget = QtWidgets.QWidget()
         layout_chumlist = QtWidgets.QVBoxLayout(widget)
-        layout_chumlist.setAlignment(QtCore.Qt.AlignTop)
+        layout_chumlist.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_chumlist.addWidget(self.hideOffline)
         #layout_chumlist.addWidget(self.groupscheck)
         layout_chumlist.addWidget(self.showemptycheck)
@@ -1293,7 +1296,7 @@ class PesterOptions(QtWidgets.QDialog):
         # Conversations
         widget = QtWidgets.QWidget()
         layout_chat = QtWidgets.QVBoxLayout(widget)
-        layout_chat.setAlignment(QtCore.Qt.AlignTop)
+        layout_chat.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_chat.addWidget(self.timestampcheck)
         layout_chat.addWidget(self.timestampBox)
         layout_chat.addWidget(self.secondscheck)
@@ -1311,7 +1314,7 @@ class PesterOptions(QtWidgets.QDialog):
         # Interface
         widget = QtWidgets.QWidget()
         layout_interface = QtWidgets.QVBoxLayout(widget)
-        layout_interface.setAlignment(QtCore.Qt.AlignTop)
+        layout_interface.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_interface.addWidget(self.tabcheck)
         layout_interface.addWidget(self.tabmemocheck)
         layout_interface.addLayout(layout_mini)
@@ -1323,7 +1326,7 @@ class PesterOptions(QtWidgets.QDialog):
         # Sound
         widget = QtWidgets.QWidget()
         layout_sound = QtWidgets.QVBoxLayout(widget)
-        layout_sound.setAlignment(QtCore.Qt.AlignTop)
+        layout_sound.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_sound.addWidget(self.soundcheck)
         layout_indent = QtWidgets.QVBoxLayout()
         layout_indent.addWidget(self.chatsoundcheck)
@@ -1351,7 +1354,7 @@ class PesterOptions(QtWidgets.QDialog):
         # Notifications
         widget = QtWidgets.QWidget()
         layout_notify = QtWidgets.QVBoxLayout(widget)
-        layout_notify.setAlignment(QtCore.Qt.AlignTop)
+        layout_notify.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_notify.addWidget(self.notifycheck)
         layout_indent = QtWidgets.QVBoxLayout()
         layout_indent.addLayout(layout_type)
@@ -1371,7 +1374,7 @@ class PesterOptions(QtWidgets.QDialog):
         # Logging
         widget = QtWidgets.QWidget()
         layout_logs = QtWidgets.QVBoxLayout(widget)
-        layout_logs.setAlignment(QtCore.Qt.AlignTop)
+        layout_logs.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_logs.addWidget(self.logpesterscheck)
         layout_logs.addWidget(self.logmemoscheck)
         layout_logs.addWidget(self.stamppestercheck)
@@ -1381,7 +1384,7 @@ class PesterOptions(QtWidgets.QDialog):
         # Idle/Updates
         widget = QtWidgets.QWidget()
         layout_idle = QtWidgets.QVBoxLayout(widget)
-        layout_idle.setAlignment(QtCore.Qt.AlignTop)
+        layout_idle.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_idle.addLayout(layout_5)
         layout_idle.addLayout(layout_6)
         #if not ostools.isOSXLeopard():
@@ -1391,7 +1394,7 @@ class PesterOptions(QtWidgets.QDialog):
         # Theme
         widget = QtWidgets.QWidget()
         layout_theme = QtWidgets.QVBoxLayout(widget)
-        layout_theme.setAlignment(QtCore.Qt.AlignTop)
+        layout_theme.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_theme.addWidget(QtWidgets.QLabel("Pick a Theme:"))
         layout_theme.addWidget(self.themeBox)
         layout_theme.addWidget(self.refreshtheme)
@@ -1401,7 +1404,7 @@ class PesterOptions(QtWidgets.QDialog):
         # Connection
         widget = QtWidgets.QWidget()
         layout_connect = QtWidgets.QVBoxLayout(widget)
-        layout_connect.setAlignment(QtCore.Qt.AlignTop)
+        layout_connect.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_connect.addWidget(self.bandwidthcheck)
         layout_connect.addWidget(bandwidthLabel)
         layout_connect.addWidget(self.autonickserv)
@@ -1421,7 +1424,7 @@ class PesterOptions(QtWidgets.QDialog):
         if parent.advanced:
             widget = QtWidgets.QWidget()
             layout_advanced = QtWidgets.QVBoxLayout(widget)
-            layout_advanced.setAlignment(QtCore.Qt.AlignTop)
+            layout_advanced.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
             layout_advanced.addWidget(QtWidgets.QLabel("Current User Mode: %s" % parent.modes))
             layout_advanced.addLayout(layout_change)
             self.pages.addWidget(widget)
@@ -1437,12 +1440,9 @@ class PesterOptions(QtWidgets.QDialog):
 
         self.setLayout(layout_0)
 
-    @QtCore.pyqtSlot(int)
-    def changePage(self, page):
-        self.tabs.button(page).setChecked(True)
-        # What is this, I don't even. qt, fuck
-        page = -page - 2
-        self.pages.setCurrentIndex(page)
+    @QtCore.pyqtSlot(QtWidgets.QAbstractButton)
+    def changePage(self, button):
+        self.pages.setCurrentIndex(self.tabNames.index(button.text()))
 
     @QtCore.pyqtSlot(int)
     def notifyChange(self, state):
@@ -1477,7 +1477,7 @@ class PesterOptions(QtWidgets.QDialog):
             return
         pdict["value"] = "#" + pdict["value"]
         if mitem is None:
-            items = self.autojoinlist.findItems(pdict["value"], QtCore.Qt.MatchFixedString)
+            items = self.autojoinlist.findItems(pdict["value"], QtCore.Qt.MatchFlag.MatchFixedString)
             if len(items) == 0:
                 self.autojoinlist.addItem(pdict["value"])
         else:
@@ -1555,9 +1555,9 @@ class PesterUserlist(QtWidgets.QDialog):
         self.userarea.setStyleSheet(self.theme["main/chums/style"])
         self.userarea.optionsMenu = QtWidgets.QMenu(self)
 
-        self.addChumAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
+        self.addChumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
         self.addChumAction.triggered.connect(self.addChumSlot)
-        self.pesterChumAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
+        self.pesterChumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
         self.pesterChumAction.triggered.connect(self.pesterChumSlot)
         self.userarea.optionsMenu.addAction(self.addChumAction)
         self.userarea.optionsMenu.addAction(self.pesterChumAction)
@@ -1586,6 +1586,8 @@ class PesterUserlist(QtWidgets.QDialog):
         self.userarea.clear()
         for n in names:
             if str(self.searchbox.text()) == "" or n.lower().find(str(self.searchbox.text()).lower()) != -1:
+                # Strip channel membership prefixes
+                n = n.strip('~').strip('@').strip('+').strip('&').strip('%')
                 item = QtWidgets.QListWidgetItem(n)
                 item.setForeground(QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"])))
                 self.userarea.addItem(item)
@@ -1607,7 +1609,7 @@ class PesterUserlist(QtWidgets.QDialog):
         self.userarea.addItem(item)
         self.userarea.sortItems()
     def delUser(self, name):
-        matches = self.userarea.findItems(name, QtCore.Qt.MatchFlags(0))
+        matches = self.userarea.findItems(name, QtCore.Qt.MatchFlag.MatchExactly)
         for m in matches:
             self.userarea.takeItem(self.userarea.row(m))
 
@@ -1657,7 +1659,7 @@ class PesterMemoList(QtWidgets.QDialog):
 
         self.label = QtWidgets.QLabel("MEMOS")
         self.channelarea = RightClickTree(self)
-        self.channelarea.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.channelarea.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.channelarea.setStyleSheet(self.theme["main/chums/style"])
         self.channelarea.optionsMenu = QtWidgets.QMenu(self)
         self.channelarea.setColumnCount(2)
@@ -1666,7 +1668,7 @@ class PesterMemoList(QtWidgets.QDialog):
         self.channelarea.setColumnWidth(0,200)
         self.channelarea.setColumnWidth(1,10)
         self.channelarea.setSortingEnabled(True)
-        self.channelarea.sortByColumn(0, QtCore.Qt.AscendingOrder)
+        self.channelarea.sortByColumn(0, QtCore.Qt.SortOrder.AscendingOrder)
         self.channelarea.itemDoubleClicked[QtWidgets.QTreeWidgetItem, int].connect(self.AcceptSelection)
 
         self.orjoinlabel = QtWidgets.QLabel("OR MAKE A NEW MEMO:")
@@ -1675,7 +1677,7 @@ class PesterMemoList(QtWidgets.QDialog):
         self.inviteChannel = QtWidgets.QCheckBox("INVITATION ONLY?", self)
 
         self.timelabel = QtWidgets.QLabel("TIMEFRAME:")
-        self.timeslider = TimeSlider(QtCore.Qt.Horizontal, self)
+        self.timeslider = TimeSlider(QtCore.Qt.Orientation.Horizontal, self)
         self.timeinput = TimeInput(self.timeslider, self)
 
         self.cancel = QtWidgets.QPushButton("CANCEL", self)
@@ -1689,7 +1691,7 @@ class PesterMemoList(QtWidgets.QDialog):
 
         layout_left  = QtWidgets.QVBoxLayout()
         layout_right = QtWidgets.QVBoxLayout()
-        layout_right.setAlignment(QtCore.Qt.AlignTop)
+        layout_right.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_0 = QtWidgets.QVBoxLayout()
         layout_1 = QtWidgets.QHBoxLayout()
         layout_left.addWidget(self.label)
@@ -1746,8 +1748,8 @@ class LoadingScreen(QtWidgets.QDialog):
     tryAgain = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
-        QtWidgets.QDialog.__init__(self, parent, (QtCore.Qt.CustomizeWindowHint |
-                                              QtCore.Qt.FramelessWindowHint))
+        QtWidgets.QDialog.__init__(self, parent, (QtCore.Qt.WindowType.CustomizeWindowHint |
+                                              QtCore.Qt.WindowType.FramelessWindowHint))
         self.mainwindow = parent
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
 

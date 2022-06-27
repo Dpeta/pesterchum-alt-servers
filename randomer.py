@@ -1,7 +1,7 @@
 import logging
 import logging.config
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 import ostools
 
@@ -70,7 +70,7 @@ class RandomHandler(QtCore.QObject):
                 msgbox = QtWidgets.QMessageBox()
                 msgbox.setText("Unable to fetch you a random encounter!")
                 msgbox.setInformativeText("Try again later :(")
-                msgbox.exec_()
+                msgbox.exec()
                 return
             name = str(l[1])
             PchumLog.info("Random Encounter name is: " + name)

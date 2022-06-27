@@ -11,7 +11,7 @@ from string import Template
 from datetime import datetime
 from time import strftime
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 import ostools
 from mood import Mood
@@ -71,7 +71,7 @@ class PesterLog(object):
                     errmsg.setText("Warning: Pesterchum could not open the log file for %s!" % (handle))
                     errmsg.setInformativeText("Your log for %s will not be saved because something went wrong. We suggest restarting Pesterchum. Sorry :(" % (handle))
                     errmsg.setWindowTitle(":(")
-                    errmsg.exec_()
+                    errmsg.exec()
                     PchumLog.debug("post-error msg")
                     
                 self.convos[handle][format] = fp
@@ -128,11 +128,11 @@ class userConfig(object):
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Warning)
             msgbox.setWindowTitle(":(")
-            msgbox.setTextFormat(QtCore.Qt.RichText) # Clickable html links
+            msgbox.setTextFormat(QtCore.Qt.TextFormat.RichText) # Clickable html links
             msgbox.setInformativeText("<html><h3>Failed to load pesterchum.js, this might require manual intervention.<br><br>\
 Consider overriding: <a href='%s'>%s</a> <br>\
 with a backup from: <a href='%s'>%s</a></h3></html>" % (_datadir, self.filename, os.path.join(_datadir, "backup"), os.path.join(_datadir, "backup")))
-            msgbox.exec_()
+            msgbox.exec()
             sys.exit()
 
         # Trying to fix:
@@ -472,7 +472,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>" % (_datadir, self.filename,
                 msgBox = QtWidgets.QMessageBox()
                 msgBox.setIcon(QtWidgets.QMessageBox.Warning)
                 msgBox.setWindowTitle(":(")
-                msgBox.setTextFormat(QtCore.Qt.RichText) # Clickable html links
+                msgBox.setTextFormat(QtCore.Qt.TextFormat.RichText) # Clickable html links
                 self.filename = _datadir+"pesterchum.js"
                 msgBox.setText("<html><h3>Failed to load " + x + ", removed from list." + \
                                "<br><br>Consider taking a look at: <a href=" + profileloc + ">"+ os.path.join(profileloc, x + ".js") + "</a>" + \
@@ -481,7 +481,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>" % (_datadir, self.filename,
                                #_datadir+"pesterchum.js" + \
                                #"\"")
                 PchumLog.critical(e)
-                msgBox.exec_()
+                msgBox.exec()
                 
         
         return [userProfile(p) for p in profs]
@@ -521,7 +521,7 @@ class userProfile(object):
                 msgBox = QtWidgets.QMessageBox()
                 msgBox.setIcon(QtWidgets.QMessageBox.Warning)
                 msgBox.setWindowTitle(":(")
-                msgBox.setTextFormat(QtCore.Qt.RichText) # Clickable html links
+                msgBox.setTextFormat(QtCore.Qt.TextFormat.RichText) # Clickable html links
                 self.filename = _datadir+"pesterchum.js"
                 msgBox.setText("<html><h3>Failed to load: " + ("<a href='%s'>%s/%s.js</a>" % (self.profiledir, self.profiledir, user)) + \
                                "<br><br> Try to check for syntax errors if the file exists." + \
@@ -531,7 +531,7 @@ class userProfile(object):
                                #_datadir+"pesterchum.js" + \
                                #"\"")
                 PchumLog.critical(e)
-                msgBox.exec_()
+                msgBox.exec()
                 raise ValueError(e)
 
             try:

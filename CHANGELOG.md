@@ -1,6 +1,11 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.4] - 2022-06-27
+
+### Changed
+ - Transitioned from PyQt5 to PyQt6 🌈
+
 ## [v2.3.1] - 2022-06-23
 
 ### Added

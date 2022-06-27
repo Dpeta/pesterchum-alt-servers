@@ -10,7 +10,7 @@ import os
 import sys
 import re
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 import ostools
 from quirks import ScriptQuirks

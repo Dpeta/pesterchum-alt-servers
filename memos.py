@@ -4,7 +4,7 @@ import re
 from string import Template
 from datetime import timedelta, datetime
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 import ostools
 import parsetools
@@ -302,7 +302,7 @@ class MemoText(PesterText):
         if self.mainwindow.config.animations():
             for m in self.urls:
                 if convertTags(lexmsg).find(self.urls[m].toString()) != -1:
-                    if m.state() == QtGui.QMovie.NotRunning:
+                    if m.state() == QtGui.QMovie.MovieState.NotRunning:
                         m.start()
         chumdb = window.chumdb
         if chum is not me: # SO MUCH WH1T3SP4C3 >:]
@@ -375,14 +375,14 @@ class PesterMemo(PesterConvo):
     # TODO: Clean up inheritance between these!! The inits are ugly.
     def __init__(self, channel, timestr, mainwindow, parent=None):
         QtWidgets.QFrame.__init__(self, parent)
-        self.setAttribute(QtCore.Qt.WA_QuitOnClose, False)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_QuitOnClose, False)
         self.channel = channel
         self.setObjectName(self.channel)
         self.mainwindow = mainwindow
         self.time = TimeTracker(txt2delta(timestr))
         self.setWindowTitle(channel)
         self.channelLabel = QtWidgets.QLabel(self)
-        self.channelLabel.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding))
+        self.channelLabel.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.MinimumExpanding, QtWidgets.QSizePolicy.Policy.Expanding))
 
         self.textArea = MemoText(self.mainwindow.theme, self)
         self.textInput = MemoInput(self.mainwindow.theme, self)
@@ -395,19 +395,19 @@ class PesterMemo(PesterConvo):
 
 
         self.userlist = RightClickList(self)
-        self.userlist.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding))
+        self.userlist.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Expanding))
         self.userlist.optionsMenu = QtWidgets.QMenu(self)
-        self.pesterChumAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
+        self.pesterChumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
         self.pesterChumAction.triggered.connect(self.newPesterSlot)
-        self.addchumAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
+        self.addchumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
         self.addchumAction.triggered.connect(self.addChumSlot)
-        self.banuserAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/banuser"], self)
+        self.banuserAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/banuser"], self)
         self.banuserAction.triggered.connect(self.banSelectedUser)
-        self.opAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/opuser"], self)
+        self.opAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/opuser"], self)
         self.opAction.triggered.connect(self.opSelectedUser)
-        self.voiceAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/voiceuser"], self)
+        self.voiceAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/voiceuser"], self)
         self.voiceAction.triggered.connect(self.voiceSelectedUser)
-        self.quirkDisableAction = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirkkill"], self)
+        self.quirkDisableAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirkkill"], self)
         self.quirkDisableAction.triggered.connect(self.killQuirkUser)
         self.userlist.optionsMenu.addAction(self.pesterChumAction)
         self.userlist.optionsMenu.addAction(self.addchumAction)
@@ -416,38 +416,38 @@ class PesterMemo(PesterConvo):
         self.optionsMenu = QtWidgets.QMenu(self)
         self.optionsMenu.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"]) # So it doesn't inherit the memo's background image.
                                                                                           # Fixes floating "PESTERLOG:"
-        self.oocToggle = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/ooc"], self)
+        self.oocToggle = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/ooc"], self)
         self.oocToggle.setCheckable(True)
         self.oocToggle.toggled[bool].connect(self.toggleOOC)
-        self.quirksOff = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirksoff"], self)
+        self.quirksOff = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirksoff"], self)
         self.quirksOff.setCheckable(True)
         self.quirksOff.toggled[bool].connect(self.toggleQuirks)
-        self.logchum = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/viewlog"], self)
+        self.logchum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/viewlog"], self)
         self.logchum.triggered.connect(self.openChumLogs)
-        self.invitechum = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/invitechum"], self)
+        self.invitechum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/invitechum"], self)
         self.invitechum.triggered.connect(self.inviteChums)
 
         #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/beeponmessage"):
         try:
-            self._beepToggle = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/beeponmessage"], self)
+            self._beepToggle = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/beeponmessage"], self)
         except:
-            self._beepToggle = QtWidgets.QAction("BEEP ON MESSAGE", self)
+            self._beepToggle = QtGui.QAction("BEEP ON MESSAGE", self)
         self._beepToggle.setCheckable(True)
         self._beepToggle.toggled[bool].connect(self.toggleBeep)
 
         #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/flashonmessage"):
         try:
-            self._flashToggle = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/flashonmessage"], self)
+            self._flashToggle = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/flashonmessage"], self)
         except:
-            self._flashToggle = QtWidgets.QAction("FLASH ON MESSAGE", self)
+            self._flashToggle = QtGui.QAction("FLASH ON MESSAGE", self)
         self._flashToggle.setCheckable(True)
         self._flashToggle.toggled[bool].connect(self.toggleFlash)
 
         #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/mutenotifications"):
         try:
-            self._muteToggle = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/mutenotifications"], self)
+            self._muteToggle = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/mutenotifications"], self)
         except:
-            self._muteToggle = QtWidgets.QAction("MUTE NOTIFICATIONS", self)
+            self._muteToggle = QtGui.QAction("MUTE NOTIFICATIONS", self)
         self._muteToggle.setCheckable(True)
         self._muteToggle.toggled[bool].connect(self.toggleMute)
 
@@ -462,16 +462,16 @@ class PesterMemo(PesterConvo):
         self.optionsMenu.addAction(self.invitechum)
 
         self.chanModeMenu = QtWidgets.QMenu(self.mainwindow.theme["main/menus/rclickchumlist/memosetting"], self)
-        self.chanNoquirks = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memonoquirk"], self)
+        self.chanNoquirks = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memonoquirk"], self)
         self.chanNoquirks.setCheckable(True)
         self.chanNoquirks.toggled[bool].connect(self.noquirksChan)
-        self.chanHide = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memohidden"], self)
+        self.chanHide = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memohidden"], self)
         self.chanHide.setCheckable(True)
         self.chanHide.toggled[bool].connect(self.hideChan)
-        self.chanInvite = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memoinvite"], self)
+        self.chanInvite = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memoinvite"], self)
         self.chanInvite.setCheckable(True)
         self.chanInvite.toggled[bool].connect(self.inviteChan)
-        self.chanMod = QtWidgets.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memomute"], self)
+        self.chanMod = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memomute"], self)
         self.chanMod.setCheckable(True)
         self.chanMod.toggled[bool].connect(self.modChan)
         self.chanModeMenu.addAction(self.chanNoquirks)
@@ -480,7 +480,7 @@ class PesterMemo(PesterConvo):
         self.chanModeMenu.addAction(self.chanMod)
         self.chanModeMenu.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"]) # BWAH BWAH FLOATING "PESTERLOG:"
 
-        self.timeslider = TimeSlider(QtCore.Qt.Horizontal, self)
+        self.timeslider = TimeSlider(QtCore.Qt.Orientation.Horizontal, self)
         self.timeinput = TimeInput(self.timeslider, self)
         self.timeinput.setText(timestr)
         self.timeinput.setSlider()
@@ -511,7 +511,7 @@ class PesterMemo(PesterConvo):
         layout_1.addWidget(self.userlist)
 
 #        layout_1 = QtGui.QGridLayout()
-#        layout_1.addWidget(self.timeslider, 0, 1, QtCore.Qt.AlignHCenter)
+#        layout_1.addWidget(self.timeslider, 0, 1, QtCore.Qt.AlignmentFlag.AlignHCenter)
 #        layout_1.addWidget(self.timeinput, 1, 0, 1, 3)
         layout_2 = QtWidgets.QHBoxLayout()
         layout_2.addWidget(self.timeslider)
@@ -582,7 +582,7 @@ class PesterMemo(PesterConvo):
     def updateBlocked(self):
         pass
     def updateColor(self, handle, color):
-        chums = self.userlist.findItems(handle, QtCore.Qt.MatchFlags(0))
+        chums = self.userlist.findItems(handle, QtCore.Qt.MatchFlag.MatchExactly)
         for c in chums:
             c.setForeground(QtGui.QBrush(color))
     def addMessage(self, text, handle):
@@ -1101,10 +1101,10 @@ class PesterMemo(PesterConvo):
             msgbox.setText("%s: Invites only!" % (c))
             msgbox.setInformativeText("This channel is invite-only. You must get an invitation from someone on the inside before entering.")
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            msgbox.exec_()
+            msgbox.exec()
 
     def quirkDisable(self, op, msg):
-        chums = self.userlist.findItems(op, QtCore.Qt.MatchFlags(0))
+        chums = self.userlist.findItems(op, QtCore.Qt.MatchFlag.MatchExactly) 
         for c in chums:
             if c.op:
                 if msg == self.mainwindow.profile().handle:
@@ -1190,7 +1190,7 @@ class PesterMemo(PesterConvo):
                        "+a", "-a", "+v", "-v"]) \
                 and c.lower() != self.channel.lower():
             return
-        chums = self.userlist.findItems(h, QtCore.Qt.MatchFlags(0))
+        chums = self.userlist.findItems(h, QtCore.Qt.MatchFlag.MatchExactly) 
         systemColor = QtGui.QColor(self.mainwindow.theme["memos/systemMsgColor"])
         # print exit
         if update in ("quit", "left", "nick", "netsplit"):
@@ -1217,7 +1217,7 @@ class PesterMemo(PesterConvo):
                     self.mainwindow.chatlog.log(self.channel, msg)
                 if update == "nick":
                     self.addUser(newnick)
-                    newchums = self.userlist.findItems(newnick, QtCore.Qt.MatchFlags(0))
+                    newchums = self.userlist.findItems(newnick, QtCore.Qt.MatchFlag.MatchExactly)
                     for nc in newchums:
                         for c in chums:
                             nc.founder = c.founder
@@ -1292,7 +1292,7 @@ class PesterMemo(PesterConvo):
                         # already stealing focus
                         b.setFocus()
                         break
-                ret = msgbox.exec_()
+                ret = msgbox.exec()
                 if ret == QtWidgets.QMessageBox.Ok:
                     self.userlist.clear()
                     self.time = TimeTracker(curtime)

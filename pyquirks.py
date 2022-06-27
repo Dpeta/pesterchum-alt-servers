@@ -2,7 +2,7 @@ import logging
 import logging.config
 import importlib.util
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 
 import ostools
 from quirks import ScriptQuirks
@@ -51,7 +51,7 @@ class PythonQuirks(ScriptQuirks):
                         msgbox = QtWidgets.QMessageBox()
                         msgbox.setWindowTitle("Error!")
                         msgbox.setText("Quirk malformed: %s" % (obj.command))
-                        msgbox.exec_()
+                        msgbox.exec()
                 else:
                     self.quirks[obj.command] = obj
 

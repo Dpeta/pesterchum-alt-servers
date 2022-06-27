@@ -5,7 +5,7 @@ import collections
 from copy import copy
 from datetime import timedelta
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt6 import QtGui, QtWidgets
 
 import dataobjs
 import ostools
@@ -701,7 +701,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
             err_info = "A quirk seems to be having a problem. (Error: {!s})"
             err_info = err_info.format(err)
             msgbox.setInformativeText(err_info)
-            msgbox.exec_()
+            msgbox.exec()
             return
         
     # Debug output.

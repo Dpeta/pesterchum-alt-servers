@@ -9,7 +9,7 @@ import datetime
 import logging
 import logging.config
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 import dataobjs
 #import generic
@@ -440,23 +440,23 @@ class ConsoleText(QtWidgets.QTextEdit):
         # should.
         # karxi: Test for tab changing?
         if self.window().text.input:
-            if event.key() not in (QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown,
-                                   QtCore.Qt.Key_Up, QtCore.Qt.Key_Down):
+            if event.key() not in (QtCore.Key.Qt.Key_PageUp, QtCore.Qt.Key.Key_PageDown,
+                                   QtCore.Qt.Key.Key_Up, QtCore.Qt.Key.Key_Down):
                 self.window().text.input.keyPressEvent(event)
 
         super(ConsoleText, self).keyPressEvent(event)
 
     def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.LeftButton:
+        if event.button() == QtCore.Qt.MouseButton.LeftButton:
             url = self.anchorAt(event.pos())
             if url != "":
                 # Skip memo/handle recognition
                 # NOTE: Ctrl+Click copies the URL. Maybe it should select it?
-                if event.modifiers() == QtCore.Qt.ControlModifier:
+                if event.modifiers() == QtCore.Qt.KeyboardModifier.ControlModifier:
                     QtWidgets.QApplication.clipboard().setText(url)
                 else:
                     # This'll probably be removed. May change the lexer out.
-                    QtGui.QDesktopServices.openUrl(QtCore.QUrl(url, QtCore.QUrl.TolerantMode))
+                    QtGui.QDesktopServices.openUrl(QtCore.QUrl(url, QtCore.QUrl.ParsingMode.TolerantMode))
 
         super(ConsoleText, self).mousePressEvent(event)
 
@@ -464,14 +464,14 @@ class ConsoleText(QtWidgets.QTextEdit):
         # Change our cursor when we roll over links (anchors).
         super(ConsoleText, self).mouseMoveEvent(event)
         if self.anchorAt(event.pos()):
-            if self.viewport().cursor().shape != QtCore.Qt.PointingHandCursor:
-                self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+            if self.viewport().cursor().shape != QtCore.Qt.CursorShape.PointingHandCursor:
+                self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
         else:
-            self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
+            self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.IBeamCursor))
 
     def contextMenuEvent(self, event):
         textMenu = self.createStandardContextMenu()
-        textMenu.exec_(event.globalPos())
+        textMenu.exec(event.globalPos())
 
 
 class ConsoleInput(QtWidgets.QLineEdit):
@@ -504,16 +504,16 @@ class ConsoleInput(QtWidgets.QLineEdit):
         # messing around in the console? Hm.
         parent.mainwindow.idler.time = 0
         
-        if evtkey == QtCore.Qt.Key_Up:
+        if evtkey == QtCore.Qt.Key.Key_Up:
             text = str(self.text())
             next = parent.text.history.next(text)
             if next is not None:
                 self.setText(next)
-        elif evtkey == QtCore.Qt.Key_Down:
+        elif evtkey == QtCore.Qt.Key.Key_Down:
             prev = parent.text.history.prev()
             if prev is not None:
                 self.setText(prev)
-        elif evtkey in (QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown):
+        elif evtkey in (QtCore.Qt.Key.Key_PageUp, QtCore.Qt.Key.Key_PageDown):
             parent.text.area.keyPressEvent(event)
         else:
             super(ConsoleInput, self).keyPressEvent(event)
