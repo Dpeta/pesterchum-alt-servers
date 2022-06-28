@@ -420,7 +420,7 @@ class ConsoleText(QtWidgets.QTextEdit):
         # Save the old cursor
         oldcur = self.textCursor()
         # Move the cursor to the end of the document for insertion
-        self.moveCursor(QtGui.QTextCursor.End)
+        self.moveCursor(QtGui.QTextCursor.MoveOperation.End)
         # Insert the text
         self.insertPlainText(text)
         # Return the cursor to wherever it was prior
@@ -440,7 +440,7 @@ class ConsoleText(QtWidgets.QTextEdit):
         # should.
         # karxi: Test for tab changing?
         if self.window().text.input:
-            if event.key() not in (QtCore.Key.Qt.Key_PageUp, QtCore.Qt.Key.Key_PageDown,
+            if event.key() not in (QtCore.Qt.Key.Key_PageUp, QtCore.Qt.Key.Key_PageDown,
                                    QtCore.Qt.Key.Key_Up, QtCore.Qt.Key.Key_Down):
                 self.window().text.input.keyPressEvent(event)
 

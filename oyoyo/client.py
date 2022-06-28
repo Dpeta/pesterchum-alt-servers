@@ -109,6 +109,8 @@ class IRCClient:
           str they will be converted to bytes with the encoding specified by the
           'encoding' keyword argument (default 'utf8'). 
         """
+        if self._end == True:
+            return
         # Convert all args to bytes if not already
         encoding = kwargs.get('encoding') or 'utf8'
         bargs = []
@@ -166,11 +168,16 @@ class IRCClient:
                 
             PchumLog.debug("ready_to_write (len %s): " % str(len(ready_to_write)) + str(ready_to_write))
         except Exception as se:
-            PchumLog.warning("socket.error %s" % str(se))                  
-            if not self.blocking and se.errno == 11:
-                pass
-            else:
-                raise se
+            PchumLog.warning("socket.error %s" % str(se))
+            try:
+                if not self.blocking and se.errno == 11:
+                    pass
+                else:
+                    #raise se
+                    _end = True  # This ok?
+            except AttributeError:
+                #raise se
+                _end = True  # This ok?
 
     def connect(self):
         """ initiates the connection to the server set in self.host:self.port 

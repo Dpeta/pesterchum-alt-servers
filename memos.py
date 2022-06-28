@@ -1100,7 +1100,7 @@ class PesterMemo(PesterConvo):
             msgbox.setStyleSheet("QMessageBox{" + self.mainwindow.theme["main/defaultwindow/style"] + "}")
             msgbox.setText("%s: Invites only!" % (c))
             msgbox.setInformativeText("This channel is invite-only. You must get an invitation from someone on the inside before entering.")
-            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
             msgbox.exec()
 
     def quirkDisable(self, op, msg):
@@ -1281,10 +1281,10 @@ class PesterMemo(PesterConvo):
                         # This shouldn't happen
                         PchumLog.warning("kickmsg IndexError: %s" % e)
                 msgbox.setInformativeText(kick_msg)
-                msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+                msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok | QtWidgets.QMessageBox.StandardButton.Cancel)
                 # Find the OK button and make it default
                 for b in msgbox.buttons():
-                    if msgbox.buttonRole(b) == QtWidgets.QMessageBox.AcceptRole:
+                    if msgbox.buttonRole(b) == QtWidgets.QMessageBox.ButtonRole.AcceptRole:
                         # We found the 'OK' button, set it as the default
                         b.setDefault(True)
                         b.setAutoDefault(True)
@@ -1293,7 +1293,7 @@ class PesterMemo(PesterConvo):
                         b.setFocus()
                         break
                 ret = msgbox.exec()
-                if ret == QtWidgets.QMessageBox.Ok:
+                if ret == QtWidgets.QMessageBox.StandardButton.Ok:
                     self.userlist.clear()
                     self.time = TimeTracker(curtime)
                     self.resetSlider(curtime)
@@ -1303,7 +1303,7 @@ class PesterMemo(PesterConvo):
                     msg = me.memoopenmsg(systemColor, self.time.getTime(), self.time.getGrammar(), self.mainwindow.theme["convo/text/openmemo"], self.channel)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
-                elif ret == QtWidgets.QMessageBox.Cancel:
+                elif ret == QtWidgets.QMessageBox.StandardButton.Cancel:
                     if self.parent():
                         i = self.parent().tabIndices[self.channel]
                         self.parent().tabClose(i)

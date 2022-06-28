@@ -186,11 +186,13 @@ class PesterLogViewer(QtWidgets.QDialog):
             self.tree.setSortingEnabled(False)
 
             child_1 = None
-            last = ["",""]
+            last = ["",""] 
+            #blackbrush = QtGui.QBrush(QtCore.Qt.GlobalColor.black)
             for (i,l) in enumerate(self.logList):
                 my = self.fileToMonthYear(l)
                 if my[0] != last[0]:
                     child_1 = QtWidgets.QTreeWidgetItem(["%s %s" % (my[0], my[1])])
+                    #child_1.setForeground(0, blackbrush)
                     self.tree.addTopLevelItem(child_1)
                     if i == 0:
                         child_1.setExpanded(True)

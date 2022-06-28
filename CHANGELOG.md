@@ -1,7 +1,10 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
-## [v2.4] - 2022-06-27
+## [v2.4] - 2022-06-28
+
+### Fixed
+ - Some text using the system's default color instead of black in the 'pesterchum' theme. (white text on white background)
 
 ### Changed
  - Transitioned from PyQt5 to PyQt6 🌈

@@ -88,7 +88,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
 
     @QtCore.pyqtSlot()
     def upShiftQuirk(self):
-        found = self.findItems(self.currentItem().text(0), QtCore.MatchFlag.Qt.MatchExactly)
+        found = self.findItems(self.currentItem().text(0), QtCore.Qt.MatchFlag.MatchExactly)
         if len(found): # group
             i = self.indexOfTopLevelItem(found[0])
             if i > 0:
@@ -158,10 +158,10 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                 msgbox.setObjectName("delquirkwarning")
                 msgbox.setWindowTitle("WARNING!")
                 msgbox.setInformativeText("Are you sure you want to delete the quirk group: %s" % (f.text(0)))
-                msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+                msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok | QtWidgets.QMessageBox.StandardButton.Cancel)
                 # Find the Cancel button and make it default
                 for b in msgbox.buttons():
-                    if msgbox.buttonRole(b) == QtWidgets.QMessageBox.RejectRole:
+                    if msgbox.buttonRole(b) == QtWidgets.QMessageBox.ButtonRole.RejectRole:
                         # We found the 'OK' button, set it as the default
                         b.setDefault(True)
                         b.setAutoDefault(True)
@@ -170,7 +170,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                         b.setFocus()
                         break
                 ret = msgbox.exec()
-                if ret == QtWidgets.QMessageBox.Ok:
+                if ret == QtWidgets.QMessageBox.StandardButton.Ok:
                     self.takeTopLevelItem(self.indexOfTopLevelItem(f))
             else:
                 f.parent().takeChild(f.parent().indexOfChild(f))
@@ -187,7 +187,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                 if re.search("[^A-Za-z0-9_\s]", gname) is not None:
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
-                    msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                    msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
                     msgbox.exec()
                     self.addgroupdialog = None
                     return
@@ -195,7 +195,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                 if found:
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS QUIRK GROUP ALREADY EXISTS")
-                    msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                    msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
                     msgbox.exec()
                     return
                 child_1 = QtWidgets.QTreeWidgetItem([gname])
@@ -899,7 +899,7 @@ class PesterChooseProfile(QtWidgets.QDialog):
                 problem.setStyleSheet(self.theme["main/defaultwindow/style"])
                 problem.setWindowTitle("Problem!")
                 problem.setInformativeText("You can't delete the profile you're currently using!")
-                problem.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                problem.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
                 problem.exec()
                 return
             # TODO: Make this select 'no' as the default, as usual.
@@ -907,9 +907,9 @@ class PesterChooseProfile(QtWidgets.QDialog):
             msgbox.setStyleSheet(self.theme["main/defaultwindow/style"])
             msgbox.setWindowTitle("WARNING!")
             msgbox.setInformativeText("Are you sure you want to delete the profile: %s" % (handle))
-            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok | QtWidgets.QMessageBox.StandardButton.Cancel)
             ret = msgbox.exec()
-            if ret == QtWidgets.QMessageBox.Ok:
+            if ret == QtWidgets.QMessageBox.StandardButton.Ok:
                 try:
                     remove(_datadir+"profiles/%s.js" % (handle))
                 except OSError:
@@ -918,7 +918,7 @@ class PesterChooseProfile(QtWidgets.QDialog):
                     problem.setStyleSheet(self.theme["main/defaultwindow/style"])
                     problem.setWindowTitle("Problem!")
                     problem.setInformativeText("There was a problem deleting the profile: %s" % (handle))
-                    problem.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                    problem.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
                     problem.exec()
 
 class PesterMentions(QtWidgets.QDialog):

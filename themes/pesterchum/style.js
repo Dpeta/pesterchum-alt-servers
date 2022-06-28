@@ -150,7 +150,7 @@
                                      "text": "" },
                     "currentMood": [18, 249]
                   },
-  "defaultwindow": { "style": "background: #fdb302; font-family:'Courier';font:bold;selection-background-color:#919191; "
+  "defaultwindow": { "style": "color: black;background: #fdb302; font-family:'Courier';font:bold;selection-background-color:#919191; "
                    },
   "addchum":  { "style": "background: rgba(255, 255, 0, 0%); border:2px solid #c48a00; font: bold; color: rgba(0, 0, 0, 0%); font-family:'Courier';",
                 "pressed" : "background: rgb(255, 255, 255, 30%);",
@@ -304,7 +304,7 @@
              "maxheight": 47
            },
   "input": { "style": "color: black; background: white; border:2px solid #c48a00;margin-top:5px; margin-right:10px; margin-left:10px; font-size: 12px;" },
-  "textarea": { "style": "background: white;  font-size: 14px;font:bold; border:2px solid #c48a00;text-align:center; margin-right:10px; margin-left:10px;" },
+  "textarea": { "style": "color: black; background: white;  font-size: 14px;font:bold; border:2px solid #c48a00;text-align:center; margin-right:10px; margin-left:10px;" },
   "margins": {"top": 0, "bottom": 6, "left": 0, "right": 0 },
   "userlist": { "width": 150,
                 "style": "border:2px solid #c48a00; background: white;font: bold;font-family: 'Courier';selection-background-color:#646464; font-size: 12px;  margin-left:0px; margin-right:10px;"

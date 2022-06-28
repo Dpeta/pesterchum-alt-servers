@@ -535,7 +535,12 @@ class chumArea(RightClickTree):
                 self.mainwindow.config.saveGroups(gTemp)
         # Drop item is a chum
         else:
-            item = self.itemAt(event.pos())
+            eventpos = event.position()
+            if type(eventpos) == QtCore.QPointF:
+                # Round if float, which it should be in PyQt6
+                item = self.itemAt(eventpos.toPoint())
+            else:
+                item = self.itemAt(eventpos)
             if item:
                 text = str(item.text(0))
                 # Figure out which group to drop into
@@ -968,7 +973,7 @@ class chumArea(RightClickTree):
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setStyleSheet("QMessageBox{" + self.mainwindow.theme["main/defaultwindow/style"] + "}")
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
-                    msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                    msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
                     msgbox.exec()
                     self.addgroupdialog = None
                     return
@@ -1208,7 +1213,7 @@ class PesterWindow(MovingWindow):
                 self.theme = self.userprofile.getTheme()
         except Exception as e:
             msgBox = QtWidgets.QMessageBox()
-            msgBox.setIcon(QtWidgets.QMessageBox.Information)
+            msgBox.setIcon(QtWidgets.QMessageBox.Icon.Information)
             msgBox.setWindowTitle(":(")
             msgBox.setTextFormat(QtCore.Qt.TextFormat.RichText) # Clickable html links
             self.filename = _datadir+"pesterchum.js"
@@ -2252,7 +2257,7 @@ class PesterWindow(MovingWindow):
             msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
             msgbox.setText("This chumhandle has been registered; you may not use it.")
             msgbox.setInformativeText("Your handle is now being changed to %s." % (changedto))
-            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
             msgbox.exec()
         elif h == self.randhandler.randNick:
             self.randhandler.incoming(msg)
@@ -2269,10 +2274,10 @@ class PesterWindow(MovingWindow):
         msgbox.setText("You're invited!")
         msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
         msgbox.setInformativeText("%s has invited you to the memo: %s\nWould you like to join them?" % (handle, channel))
-        msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+        msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok | QtWidgets.QMessageBox.StandardButton.Cancel)
         # Find the Cancel button and make it default
         for b in msgbox.buttons():
-            if msgbox.buttonRole(b) == QtWidgets.QMessageBox.RejectRole:
+            if msgbox.buttonRole(b) == QtWidgets.QMessageBox.ButtonRole.RejectRole:
                 # We found the 'OK' button, set it as the default
                 b.setDefault(True)
                 b.setAutoDefault(True)
@@ -2281,7 +2286,7 @@ class PesterWindow(MovingWindow):
                 b.setFocus()
                 break
         ret = msgbox.exec()
-        if ret == QtWidgets.QMessageBox.Ok:
+        if ret == QtWidgets.QMessageBox.StandardButton.Ok:
             self.newMemo(str(channel), "+0:00")
     @QtCore.pyqtSlot(QString)
     def chanInviteOnly(self, channel):
@@ -2701,7 +2706,7 @@ class PesterWindow(MovingWindow):
                 if re.search("[^A-Za-z0-9_\s]", gname) is not None:
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
-                    msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                    msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
                     msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")#Style :) (memos/style or convo/style works :3 )
                     msgbox.exec()
                     self.addgroupdialog = None
@@ -3032,7 +3037,7 @@ class PesterWindow(MovingWindow):
                 self.changeTheme(self.userprofile.getTheme())
             except (json.JSONDecodeError, FileNotFoundError) as e:
                 msgBox = QtWidgets.QMessageBox()
-                msgBox.setIcon(QtWidgets.QMessageBox.Warning)
+                msgBox.setIcon(QtWidgets.QMessageBox.StandardButton.Warning)
                 msgBox.setWindowTitle(":(")
                 msgBox.setTextFormat(QtCore.Qt.TextFormat.RichText) # Clickable html links
                 self.filename = _datadir+"pesterchum.js"
@@ -3112,10 +3117,10 @@ class PesterWindow(MovingWindow):
             closeWarning = QtWidgets.QMessageBox()
             closeWarning.setText("WARNING: CHANGING PROFILES WILL CLOSE ALL CONVERSATION WINDOWS!")
             closeWarning.setInformativeText("i warned you about windows bro!!!! i told you dog!")
-            closeWarning.setStandardButtons(QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Ok)
-            closeWarning.setDefaultButton(QtWidgets.QMessageBox.Ok)
+            closeWarning.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Cancel | QtWidgets.QMessageBox.StandardButton.Ok)
+            closeWarning.setDefaultButton(QtWidgets.QMessageBox.StandardButton.Ok)
             ret = closeWarning.exec()
-            if ret == QtWidgets.QMessageBox.Cancel:
+            if ret == QtWidgets.QMessageBox.StandardButton.Cancel:
                 return
         self.changeProfile()
         # Update RE bot
@@ -3229,7 +3234,7 @@ class PesterWindow(MovingWindow):
             msgbox.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
             msgbox.setWindowIcon(PesterIcon(self.theme["main/icon"]))
             msgbox.setInformativeText("Incorrect format :(")
-            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
             msgbox.exec()
             self.chooseServer()
             return 1
@@ -3263,12 +3268,12 @@ class PesterWindow(MovingWindow):
             msgbox.setInformativeText("Failed to load server list, do you want to revert to defaults?\n" \
                                       + "If you choose no, Pesterchum will most likely crash unless you manually fix serverlist.json\n" \
                                       + "Please tell me if this error occurs :'3")
-            msgbox.addButton(QtWidgets.QPushButton("Yes"), QtWidgets.QMessageBox.YesRole)
-            msgbox.addButton(QtWidgets.QPushButton("No"), QtWidgets.QMessageBox.NoRole)
+            msgbox.addButton(QtWidgets.QPushButton("Yes"), QtWidgets.QMessageBox.ButtonRole.YesRole)
+            msgbox.addButton(QtWidgets.QPushButton("No"), QtWidgets.QMessageBox.ButtonRole.NoRole)
             msgbox.exec()
             reply = msgbox.buttonRole(msgbox.clickedButton())
 
-            if (reply==QtWidgets.QMessageBox.YesRole):
+            if (reply==QtWidgets.QMessageBox.ButtonRole.YesRole):
                 with open(_datadir + "serverlist.json", "w") as server_file:
                     server_file.write(json.dumps(default_server_list, indent = 4) )
                     server_file.close()

@@ -67,7 +67,7 @@ class PesterLog(object):
                     # Catching this exception does not stop pchum from dying if we run out of file handles </3
                     PchumLog.critical(e)
                     errmsg = QtWidgets.QMessageBox()
-                    errmsg.setIcon(QtWidgets.QMessageBox.Warning)
+                    errmsg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
                     errmsg.setText("Warning: Pesterchum could not open the log file for %s!" % (handle))
                     errmsg.setInformativeText("Your log for %s will not be saved because something went wrong. We suggest restarting Pesterchum. Sorry :(" % (handle))
                     errmsg.setWindowTitle(":(")
@@ -126,7 +126,7 @@ class userConfig(object):
             PchumLog.critical("failed to load pesterchum.js")
             PchumLog.critical(e)
             msgbox = QtWidgets.QMessageBox()
-            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
             msgbox.setWindowTitle(":(")
             msgbox.setTextFormat(QtCore.Qt.TextFormat.RichText) # Clickable html links
             msgbox.setInformativeText("<html><h3>Failed to load pesterchum.js, this might require manual intervention.<br><br>\
@@ -470,7 +470,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>" % (_datadir, self.filename,
                 PchumLog.warning(x + " removed from profile list.")
                 
                 msgBox = QtWidgets.QMessageBox()
-                msgBox.setIcon(QtWidgets.QMessageBox.Warning)
+                msgBox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
                 msgBox.setWindowTitle(":(")
                 msgBox.setTextFormat(QtCore.Qt.TextFormat.RichText) # Clickable html links
                 self.filename = _datadir+"pesterchum.js"
@@ -519,7 +519,7 @@ class userProfile(object):
                     self.userprofile = json.load(fp)
             except (json.JSONDecodeError, FileNotFoundError) as e:
                 msgBox = QtWidgets.QMessageBox()
-                msgBox.setIcon(QtWidgets.QMessageBox.Warning)
+                msgBox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
                 msgBox.setWindowTitle(":(")
                 msgBox.setTextFormat(QtCore.Qt.TextFormat.RichText) # Clickable html links
                 self.filename = _datadir+"pesterchum.js"
