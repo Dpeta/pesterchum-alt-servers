@@ -34,10 +34,10 @@ def getDataDir():
     # in the Pesterchum install directory (like before)
     try:
         if isOSX():
-            return os.path.join(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DataLocation), "Pesterchum/")
+            return os.path.join(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppLocalDataLocation), "Pesterchum/")
         elif isLinux():
             return os.path.join(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation), ".pesterchum/")
         else:
-            return os.path.join(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DataLocation), "pesterchum/")
+            return os.path.join(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppLocalDataLocation), "pesterchum/")
     except UnicodeDecodeError:
         return ''
