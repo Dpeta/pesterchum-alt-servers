@@ -4,6 +4,7 @@ import os
 import shutil
 import getopt
 import configparser
+import traceback
 
 # Python 3
 QString = str
@@ -28,10 +29,10 @@ if ('--help' in sys.argv[1:]) or ('-h' in sys.argv[1:]):
 
 import logging
 import logging.config
-from datetime import timedelta
+import datetime
 import random
 import re
-from time import time
+import time
 try:
     import json
 except:
@@ -88,6 +89,8 @@ import ostools
 _datadir = ostools.getDataDir()
 if not os.path.isdir(_datadir):
     os.makedirs(_datadir)
+if not os.path.isdir(os.path.join(_datadir, 'errorlogs')):
+    os.makedirs(os.path.join(_datadir, 'errorlogs'))
 # See, what I've done here is that _datadir is '' if we're not on OSX, so the
 #  concatination is the same as if it wasn't there.
 # UPDATE 2011-11-28 <Kiooeht>:
@@ -255,7 +258,7 @@ import pytwmn
 #                 "caligulasAquarium", "cuttlefishCuller", "carcinoGeneticist", "centaursTesticle", \
 #                 "grimAuxiliatrix", "gallowsCalibrator", "gardenGnostic", "ectoBiologist", \
 #                 "twinArmageddons", "terminallyCapricious", "turntechGodhead", "tentacleTherapist"]
-canon_handles = ["",]# Unused, kept to prevent unexpected calls causing a crash.
+#canon_handles = ["",]# Unused, kept to prevent unexpected calls causing a crash.
 CUSTOMBOTS = ["CALSPRITE", RANDNICK.upper()]
 BOTNAMES = ["NICKSERV", "CHANSERV", "MEMOSERV", "OPERSERV", "HELPSERV", "HOSTSERV", "BOTSERV"]
 BOTNAMES.extend(CUSTOMBOTS)
@@ -1487,7 +1490,7 @@ class PesterWindow(MovingWindow):
 
         self.pingtimer = QtCore.QTimer()
         self.pingtimer.timeout.connect(self.checkPing)
-        self.lastping = int(time())
+        self.lastping = int(time.time())
         self.pingtimer.start(1000*90)
 
         self.mychumhandleLabel.adjustSize() # Required so "CHUMHANDLE:" regardless of style-sheet.
@@ -1532,7 +1535,7 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot()
     def checkPing(self):
-        curtime = int(time())
+        curtime = int(time.time())
         if curtime - self.lastping > 600:
             self.pingServer.emit()
 
@@ -1650,7 +1653,7 @@ class PesterWindow(MovingWindow):
         msg = str(msg)
         if handle not in memo.times:
             # new chum! time current
-            newtime = timedelta(0)
+            newtime = datetime.timedelta(0)
             time = TimeTracker(newtime)
             memo.times[handle] = time
         if not (msg.startswith("/me") or msg.startswith("PESTERCHUM:ME")):
@@ -3271,7 +3274,6 @@ class PesterWindow(MovingWindow):
             msgbox.addButton(QtWidgets.QPushButton("Yes"), QtWidgets.QMessageBox.ButtonRole.YesRole)
             msgbox.addButton(QtWidgets.QPushButton("No"), QtWidgets.QMessageBox.ButtonRole.NoRole)
             msgbox.exec()
-            reply = msgbox.buttonRole(msgbox.clickedButton())
 
             if (reply==QtWidgets.QMessageBox.ButtonRole.YesRole):
                 with open(_datadir + "serverlist.json", "w") as server_file:
@@ -3577,12 +3579,15 @@ class MainProgram(QtCore.QObject):
     def __init__(self):
         super(MainProgram, self).__init__()
 
+        _oldhook = sys.excepthook
+        sys.excepthook = self.uncaughtException
+
         if os.name.upper() == "NT":
             # karxi: Before we do *anything* else, we have to make a special
             # exception for Windows. Otherwise, the icon won't work properly.
             # NOTE: This is presently being tested, since I don't have a
             # Windows computer at the moment. Hopefully it'll work.
-            # See http://stackoverflow.com/a/1552105 for more details.
+            # See https://stackoverflow.com/a/1552105 for more details.
             from ctypes import windll
             # Note that this has to be unicode.
             wid = "mspa.homestuck.pesterchum.314"
@@ -3927,6 +3932,39 @@ Click this message to never see this again.")
                 options["honk"] = False
         return options
 
+    def uncaughtException(self, exc, value, tb):
+        # Show error to end user and log.
+        try:
+            # Log to log file
+            PchumLog.error(exc, value, tb)
+
+            # Try to write to separate logfile
+            try:
+                lt = time.localtime()
+                lt_str = time.strftime("%Y-%m-%d %H-%M", lt)
+                f = open(os.path.join(_datadir, 'errorlogs', ('pestererror %s.log' % lt_str)), 'a')
+                traceback.print_tb(tb, file=f)
+                f.close()
+            except Exception as e:
+                print(str(e))
+                
+            # Show msgbox
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Icon.Critical)
+            try:
+                msgbox.setStyleSheet("QMessageBox{" + self.widget.theme["main/defaultwindow/style"] + "}")
+            except Exception as e:
+                print(str(e))
+            msgbox.setStyleSheet("background-color: red; color: black; font-size: x-large;")
+            msgbox.setText("An uncaught exception occurred: %s \n%s \n%s "
+                           % (exc,
+                              value,
+                              ''.join(traceback.format_tb(tb))))
+            msgbox.exec()
+        except Exception as e:
+            print("failed to process uncaught except: " + str(e))
+            PchumLog.exception("app error")
+
     def run(self):
         #PchumLog.critical("mreowww") <--- debug thingy :3
         sys.exit(self.app.exec())
@@ -3942,5 +3980,11 @@ def _retrieveGlobals():
 
 if __name__ == "__main__":
     # We're being run as a script - not being imported.
-    pesterchum = MainProgram()
-    pesterchum.run()
+    try:
+        pesterchum = MainProgram()
+        try:
+            pesterchum.run()
+        except SystemExit:
+            pass
+    except:
+        PchumLog.exception("app error: ")
