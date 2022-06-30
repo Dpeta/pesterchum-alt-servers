@@ -216,14 +216,13 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
         self.content = msg
         if icon:
             self.icon = QtWidgets.QLabel("")
-            self.icon.setPixmap(QtGui.QPixmap(icon).scaledToWidth(30))
-        else:
-            self.icon = QtWidgets.QLabel("")
-            self.icon.setPixmap(QtGui.QPixmap(30, 30))
-            self.icon.pixmap().fill(QtGui.QColor(0,0,0,0))
+            iconPixmap = QtGui.QPixmap(icon).scaledToWidth(30)
+            self.icon.setPixmap(iconPixmap)
+        #else:
+        #    self.icon.setPixmap(QtGui.QPixmap(30, 30))
+        #    self.icon.pixmap().fill(QtGui.QColor(0,0,0,0))
 
         layout_0 = QtWidgets.QVBoxLayout()
-        layout_0.setContentsMargins(0, 0, 0, 0)
         layout_0.setContentsMargins(0, 0, 0, 0)
 
         if self.icon:
@@ -250,15 +249,19 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
         self.msg.setStyleSheet(self.parent().theme["toasts/content/style"])
         self.layout().setSpacing(0)
 
-        self.msg.setText(PesterToast.wrapText(self.msg.font(), str(self.msg.text()), self.parent().theme["toasts/width"], self.parent().theme["toasts/content/style"]))
+        self.msg.setText(PesterToast.wrapText(self.msg.font(),
+                                              str(self.msg.text()),
+                                              self.parent().theme["toasts/width"],
+                                              self.parent().theme["toasts/content/style"]))
 
-        for screen in QtWidgets.QApplication.screens():
-            # This 100% doesn't work with multiple screens.
-            p = screen.availableGeometry().bottomRight()
-            o = screen.geometry().bottomRight()
-            anim.setStartValue(p.y() - o.y())
-            anim.setEndValue(100)
-            anim.valueChanged[QtCore.QVariant].connect(self.updateBottomLeftAnimation)
+        screens = QtWidgets.QApplication.screens()
+        screen = screens[0] #  Should be the main one right???
+        # This 100% doesn't work with multiple screens.
+        p = screen.availableGeometry().bottomRight()
+        o = screen.geometry().bottomRight()
+        anim.setStartValue(p.y() - o.y())
+        anim.setEndValue(100)
+        anim.valueChanged[QtCore.QVariant].connect(self.updateBottomLeftAnimation)
 
         self.byebye = False
 

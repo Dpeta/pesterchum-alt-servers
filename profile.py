@@ -55,41 +55,43 @@ class PesterLog(object):
         html = log_time + convertTags(msg, "html")+"<br />"
         msg = log_time +convertTags(msg, "text")
         modes = {"bbcode": bbcodemsg, "html": html, "text": msg}
-        if handle not in self.convos:
-            log_time = datetime.now().strftime("%Y-%m-%d.%H.%M")
-            self.convos[handle] = {}
-            for (format, t) in modes.items():
-                if not os.path.exists("%s/%s/%s/%s" % (self.logpath, self.handle, handle, format)):
-                    os.makedirs("%s/%s/%s/%s" % (self.logpath, self.handle, handle, format))
-                try:
+        try:
+            if handle not in self.convos:
+                log_time = datetime.now().strftime("%Y-%m-%d.%H.%M")
+                self.convos[handle] = {}
+                for (format, t) in modes.items():
+                    if not os.path.exists("%s/%s/%s/%s" % (self.logpath, self.handle, handle, format)):
+                        os.makedirs("%s/%s/%s/%s" % (self.logpath, self.handle, handle, format))
                     fp = codecs.open("%s/%s/%s/%s/%s.%s.txt" % (self.logpath, self.handle, handle, format, handle, log_time), encoding='utf-8', mode='a')
-                except (IOError, OSError) as e:
-                    # Catching this exception does not stop pchum from dying if we run out of file handles </3
-                    PchumLog.critical(e)
-                    errmsg = QtWidgets.QMessageBox()
-                    errmsg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
-                    errmsg.setText("Warning: Pesterchum could not open the log file for %s!" % (handle))
-                    errmsg.setInformativeText("Your log for %s will not be saved because something went wrong. We suggest restarting Pesterchum. Sorry :(" % (handle))
-                    errmsg.setWindowTitle(":(")
-                    errmsg.exec()
-                    PchumLog.debug("post-error msg")
+                    self.convos[handle][format] = fp
                     
-                self.convos[handle][format] = fp
-                
-        for (format, t) in modes.items():
-            f = self.convos[handle][format]
-            f.write(t+"\r\n")
-            # flush + fsync force a write,
-            # makes sure logs are saved in the case of a crash.
-            f.flush()
-            os.fsync(f.fileno())
-        
-        # This way the file descriptors are closed and reopened for every message,
-        # which is sub-optimal and definitely a performance drain but,
-        # otherwise we still run into the ulimit on platforms like MacOS fairly easily.
-        if ostools.isOSX() == True:
             for (format, t) in modes.items():
-                self.finish(handle)
+                f = self.convos[handle][format]
+                f.write(t+"\r\n")
+                # flush + fsync force a write,
+                # makes sure logs are saved in the case of a crash.
+                f.flush()
+                os.fsync(f.fileno())
+
+            # This way the file descriptors are closed and reopened for every message,
+            # which is sub-optimal and definitely a performance drain but,
+            # otherwise we still run into the ulimit on platforms like MacOS fairly easily.
+            #if ostools.isOSX() == True:
+            #    for (format, t) in modes.items():
+            #        self.finish(handle)
+                    
+        except (IOError, OSError, KeyError, IndexError, ValueError) as e:
+            # Catching this exception does not stop pchum from dying if we run out of file handles </3
+            PchumLog.critical(e)
+            errmsg = QtWidgets.QMessageBox()
+            errmsg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+            errmsg.setText("Warning: Pesterchum could not open the log file for %s!" % (handle))
+            errmsg.setInformativeText("Your log for %s will not be saved because something went wrong. We suggest restarting Pesterchum. Sorry :(" % (handle)
+                                      + '\n'
+                                      + str(e))
+            errmsg.setWindowTitle(":(")
+            errmsg.exec()
+            PchumLog.debug("post-error msg")
             
     def finish(self, handle):
         if handle not in self.convos:

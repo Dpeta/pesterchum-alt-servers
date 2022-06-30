@@ -1,16 +1,15 @@
 # TODO LIST : )
 
 ## ADD
- - Memoserv support.
- - Use memopermabanmsg function?
+ - ~~Memoserv support.~~
+ - ~~Use memopermabanmsg function?~~ <--- Permabans just give a KICK server response, there's no way to check for this.
 
 ## FIX
  - Mask & target not being passed to ``_max_msg_len``.
- - No error message when Pesterchum fails to join a channel. (For example, when the channel name length is over CHANNELLEN)
+    - Is this even possible to keep updated reliably?
+ - ~~No error message when Pesterchum fails to join a channel. (For example, when the channel name length is over CHANNELLEN)~~
  - Choose memo window doesn't get updated on theme change.
  - Right click menu's color doesn't get updated on theme change in memos.
- - Closed windows sometimes stay open.
-    - Should confirm if this is still an issue.
  - help() causes console to crash...? 
     - Console is hopelessly broken, it'd be easier to make a list of what commands *don't* cause it to crash. Does anyone use this?
 

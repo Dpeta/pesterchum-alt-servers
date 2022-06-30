@@ -259,9 +259,11 @@ import pytwmn
 #                 "grimAuxiliatrix", "gallowsCalibrator", "gardenGnostic", "ectoBiologist", \
 #                 "twinArmageddons", "terminallyCapricious", "turntechGodhead", "tentacleTherapist"]
 #canon_handles = ["",]# Unused, kept to prevent unexpected calls causing a crash.
+BOTNAMES = []
 CUSTOMBOTS = ["CALSPRITE", RANDNICK.upper()]
-BOTNAMES = ["NICKSERV", "CHANSERV", "MEMOSERV", "OPERSERV", "HELPSERV", "HOSTSERV", "BOTSERV"]
+SERVICES = ["NICKSERV", "CHANSERV", "MEMOSERV", "OPERSERV", "HELPSERV", "HOSTSERV", "BOTSERV"]
 BOTNAMES.extend(CUSTOMBOTS)
+BOTNAMES.extend(SERVICES)
 
 # Save the main app. From here, we should be able to get everything else in
 # order, for console use.
@@ -1825,6 +1827,7 @@ class PesterWindow(MovingWindow):
             memoWindow = PesterMemo(channel, timestr, self, None)
         # connect signals
         self.inviteOnlyChan['QString'].connect(memoWindow.closeInviteOnly)
+        self.forbiddenChan['QString', 'QString'].connect(memoWindow.closeForbidden)
         memoWindow.messageSent['QString', 'QString'].connect(self.sendMessage['QString', 'QString'])
         memoWindow.windowClosed['QString'].connect(self.closeMemo)
         self.namesUpdated['QString'].connect(memoWindow.namesUpdated)
@@ -2220,7 +2223,10 @@ class PesterWindow(MovingWindow):
         try:
             del self.memos[c]
         except KeyError:
-            del self.memos[c.lower()]
+            try:
+                del self.memos[c.lower()]
+            except KeyError:
+                pass
     @QtCore.pyqtSlot()
     def tabsClosed(self):
         del self.tabconvo
@@ -2271,6 +2277,12 @@ class PesterWindow(MovingWindow):
             if m:
                 t = self.tm.Toast("NickServ:", m)
                 t.show()
+        elif ("PESTERCHUM:" not in m) and (h.upper() in SERVICES):
+            # Show toast for rest services notices
+            # "Your VHOST is actived", "You have one new memo", etc.
+            t = self.tm.Toast("%s:" % h, m)
+            t.show()
+            
     @QtCore.pyqtSlot(QString, QString)
     def deliverInvite(self, handle, channel):
         msgbox = QtWidgets.QMessageBox()
@@ -2326,7 +2338,7 @@ class PesterWindow(MovingWindow):
     def userPresentUpdate(self, handle, channel, update):
         c = str(channel)
         n = str(handle)
-        #PchumLog.debug("c=%s\nn=%s\nupdate=%s\n" % (c, n, update))
+        print("c=%s\nn=%s\nupdate=%s\n" % (c, n, update))
         if update == "nick":
             l = n.split(":")
             oldnick = l[0]
@@ -2359,6 +2371,9 @@ class PesterWindow(MovingWindow):
                 except KeyError:
                     pass
         elif update == "join":
+            # SAJOIN-ed?
+            if (n == self.profile().handle) and (c not in self.memos):
+                self.newMemo(channel, "+0:00")
             try:
                 i = self.namesdb[c].index(n)
             except ValueError:
@@ -3200,7 +3215,12 @@ class PesterWindow(MovingWindow):
         msg = QtWidgets.QMessageBox(self)
         msg.setText("D: TOO MANY PEOPLE!!!")
         msg.setInformativeText("The server has hit max capacity. Please try again later.")
-        msg.show()
+        #msg.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
+        msg.exec()
+
+    @QtCore.pyqtSlot(QString, QString)
+    def forbiddenchannel(self, channel, reason):
+        self.forbiddenChan.emit(channel, reason)
 
     @QtCore.pyqtSlot()
     def quit(self):
@@ -3553,6 +3573,7 @@ class PesterWindow(MovingWindow):
     channelNames = QtCore.pyqtSignal('QString')
     inviteChum = QtCore.pyqtSignal('QString', 'QString')
     inviteOnlyChan = QtCore.pyqtSignal('QString')
+    forbiddenChan = QtCore.pyqtSignal('QString', 'QString')
     closeSignal = QtCore.pyqtSignal()
     reconnectIRC = QtCore.pyqtSignal()
     gainAttention = QtCore.pyqtSignal(QtWidgets.QWidget)
@@ -3768,7 +3789,9 @@ Click this message to never see this again.")
                   ('tooManyPeeps()',
                    'tooManyPeeps()'),
                   ('quirkDisable(QString, QString, QString)',
-                   'quirkDisable(QString, QString, QString)')
+                   'quirkDisable(QString, QString, QString)'),
+                  ('forbiddenchannel(QString)',
+                   'forbiddenchannel(QString)')
                   ]
     def ircQtConnections(self, irc, widget):
         # IRC --> Main window
@@ -3813,6 +3836,7 @@ Click this message to never see this again.")
                 (irc.chanInviteOnly, widget.chanInviteOnly),
                 (irc.modesUpdated, widget.modesUpdated),
                 (irc.cannotSendToChan, widget.cannotSendToChan),
+                (irc.forbiddenchannel, widget.forbiddenchannel),
                 (irc.tooManyPeeps, widget.tooManyPeeps),
                 (irc.quirkDisable, widget.quirkDisable))
     def connectWidgets(self, irc, widget):

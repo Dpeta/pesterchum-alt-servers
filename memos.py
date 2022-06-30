@@ -1103,6 +1103,24 @@ class PesterMemo(PesterConvo):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
             msgbox.exec()
 
+    @QtCore.pyqtSlot(QString, QString)
+    def closeForbidden(self, channel, reason):
+        c = str(channel)
+        if c.lower() == self.channel.lower():
+            self.mainwindow.forbiddenChan['QString', 'QString'].disconnect(self.closeForbidden)
+            if self.parent():
+                PchumLog.info(self.channel)
+                i = self.parent().tabIndices[self.channel]
+                self.parent().tabClose(i)
+            else:
+                self.close()
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setStyleSheet("QMessageBox{" + self.mainwindow.theme["main/defaultwindow/style"] + "}")
+            msgbox.setText("%s: D: CANT JOIN MEMO!!!" % (c))
+            msgbox.setInformativeText(reason)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+            msgbox.exec()
+
     def quirkDisable(self, op, msg):
         chums = self.userlist.findItems(op, QtCore.Qt.MatchFlag.MatchExactly) 
         for c in chums:
@@ -1167,6 +1185,7 @@ class PesterMemo(PesterConvo):
 
     @QtCore.pyqtSlot(QString, QString, QString)
     def userPresentChange(self, handle, channel, update):
+        #print("handle: %s, channel: %s, update: %s" % (handle, channel, update))
         h = str(handle)
         c = str(channel)
         update = str(update)

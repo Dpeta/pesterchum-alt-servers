@@ -180,6 +180,12 @@ numeric_events = {
     "502": "usersdontmatch",
 }
 
+# Unrealircd extras
+unrealircd_events = {
+    "448": "forbiddenchannel",
+}
+numeric_events.update(unrealircd_events)
+
 # IRC metadata draft specification
 # https://gist.github.com/k4bek4be/92c2937cefd49990fbebd001faf2b237
 metadata_numeric_events = {
@@ -221,5 +227,7 @@ protocol_events = [
     "tagmsg", # IRCv3 message tags extension
 ]
 
-all_events = generated_events + protocol_events + list(numeric_events.values())
+all_events = (generated_events
+              + protocol_events
+              + list(numeric_events.values()))
 

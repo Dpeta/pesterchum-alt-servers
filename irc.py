@@ -392,6 +392,7 @@ class PesterIRC(QtCore.QThread):
     cannotSendToChan = QtCore.pyqtSignal('QString', 'QString')
     tooManyPeeps = QtCore.pyqtSignal()
     quirkDisable = QtCore.pyqtSignal('QString', 'QString', 'QString')
+    forbiddenchannel = QtCore.pyqtSignal('QString', 'QString')
 
 class PesterHandler(DefaultCommandHandler):
     def notice(self, nick, chan, msg):
@@ -777,7 +778,7 @@ class PesterHandler(DefaultCommandHandler):
                 if chandle in namelist:
                     lesschums.append(c)
             self.getMood(*lesschums)
-
+    
     def liststart(self, server, handle, *info):
         self.channel_list = []
         info = list(info)
@@ -802,14 +803,18 @@ class PesterHandler(DefaultCommandHandler):
         self.parent.inviteReceived.emit(handle, channel)
     def inviteonlychan(self, server, handle, channel, msg):
         self.parent.chanInviteOnly.emit(channel)
-    # This can cause a crash without mode_params, channelmodeis can have six arguments.
+    # channelmodeis can have six arguments.
     def channelmodeis(self, server, handle, channel, modes, mode_params=""):
         self.parent.modesUpdated.emit(channel, modes)
     def cannotsendtochan(self, server, handle, channel, msg):
         self.parent.cannotSendToChan.emit(channel, msg)
     def toomanypeeps(self, *stuff):
         self.parent.tooManyPeeps.emit()
-
+    def forbiddenchannel(self, server, handle, channel, msg):
+        # Channel is forbidden.
+        self.parent.forbiddenchannel.emit(channel, msg)
+        self.parent.userPresentUpdate.emit(handle, channel, "left")
+        
     def ping(self, prefix, server):
         self.parent.mainwindow.lastping = int(time.time())
         self.client.send('PONG', server)

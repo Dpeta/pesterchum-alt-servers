@@ -375,9 +375,8 @@ class PesterProfile(object):
                 else:
                     return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>." % \
                         (opchum.colorhtml(), opinit, self.colorhtml(), initials, str(reason))
-    """
-    # Currently unused, might be neat to use in the future?
 
+    # As far as I'm aware, there's no IRC reply for this, this seems impossible to check for in practice.
     def memopermabanmsg(self, opchum, opgrammar, syscolor, timeGrammar):
         initials = (timeGrammar.pcf
                     + self.initials()
@@ -387,7 +386,7 @@ class PesterProfile(object):
                   + opgrammar.number)
         return "<c=%s>%s</c> permabanned <c=%s>%s</c> from the memo." % \
             (opchum.colorhtml(), opinit, self.colorhtml(), initials)
-    """
+    
     def memojoinmsg(self, syscolor, td, timeGrammar, verb):
         #(temporal, pcf, when) = (timeGrammar.temporal, timeGrammar.pcf, timeGrammar.when)
         timetext = timeDifference(td)
