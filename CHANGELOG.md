@@ -1,13 +1,20 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
-## [v2.4] - 2022-06-28
+## [v2.4] - 2022-06-30
+
+### Added
+ - Error message when server gives forbiddenchannel reply, for example, if the memo name is over the allowed length.
+ - Services messages from bots like memoServ now also show up as toasts/notifications.
 
 ### Fixed
  - Some text using the system's default color instead of black in the 'pesterchum' theme. (white text on white background)
+ - Toasts/Notifications without icons being filled with garbage colors.
 
 ### Changed
  - Transitioned from PyQt5 to PyQt6 🌈
+    - High-DPI scaling is now enabled, so Pesterchum will be bigger for people with higher resolutions/higher scaling factors.
+ - Exception hook is overwriten to give an error message box and create a log instead of always ending the process.
 
 ## [v2.3.1] - 2022-06-23
 
