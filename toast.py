@@ -300,8 +300,9 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
     @QtCore.pyqtSlot(QtCore.QVariant)
     def updateBottomLeftAnimation(self, value):
         #p = QtWidgets.QApplication.desktop().availableGeometry(self).bottomRight()
-        for screen in QtWidgets.QApplication.screens():
-            p = screen.availableGeometry().bottomRight()
+        screens = QtWidgets.QApplication.screens()
+        screen = screens[0]  # Main window?
+        p = screen.availableGeometry().bottomRight()
         val = (self.height())/100
         # Does type casting this to an int have any negative consequences?
         self.move(int(p.x()-self.width()), int(p.y() - (value * val) +1))

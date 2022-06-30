@@ -810,6 +810,10 @@ class PesterHandler(DefaultCommandHandler):
         self.parent.cannotSendToChan.emit(channel, msg)
     def toomanypeeps(self, *stuff):
         self.parent.tooManyPeeps.emit()
+    #def badchanmask(channel, *args):
+    #    # Channel name is not valid.
+    #    msg = ' '.join(args)
+    #    self.parent.forbiddenchannel.emit(channel, msg)
     def forbiddenchannel(self, server, handle, channel, msg):
         # Channel is forbidden.
         self.parent.forbiddenchannel.emit(channel, msg)
