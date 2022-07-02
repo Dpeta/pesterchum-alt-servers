@@ -1,30 +1,43 @@
-# PESTERCHUM
+<h1 align="center" style="font-family: 'Courier New';">
+    <b>
+        <img alt="PESTERCHUM" src="https://www.pesterchum.xyz/img/translogo23.png">
+        </b>
+    <a href="https://github.com/Dpeta/pesterchum-alt-servers/releases"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/Dpeta/pesterchum-alt-servers/total?style=for-the-badge"></a>
+    <a href="https://discord.gg/BbHvdwN"><img alt="Community Discord" src="https://img.shields.io/discord/761299023121350726?color=blue&label=COMMUNITY%20DISCORD&logo=discord&style=for-the-badge"></a>
+    <a href="https://discord.gg/eKbP6pvUmZ"><img alt="Support Discord" src="https://img.shields.io/discord/906250212362842143?color=blue&label=SUPPORT%20DISCORD&logo=discord&style=for-the-badge"></a>
+    <br>
+    <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/y/Dpeta/pesterchum-alt-servers?style=for-the-badge">
+    <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/Dpeta/pesterchum-alt-servers?style=for-the-badge">
+</h1>
+<img alt="PESTERCHUM" align="right" src="Pesterchum.png">
+
 Pesterchum is an instant messaging client copying the look and feel of clients from Andrew Hussie's webcomic Homestuck.
 
-Maintained repository of ghostDunk's Pesterchum. Prompts the user to choose a server at launch (irc.pesterchum.xyz by default).
+Contributions in any form are very welcome!! Including for extra themes, bug fixes, features, etc. Just hmu in the support server or make a pull request :3
 
-This repository builds on (and was mirrored from!) pesterchum-karxi + Hydrothermal's nickserv fix.
+There's a [Russian translation of this repository](https://github.com/Daosp/pesterchum-Dpeta-rus) available, it's somewhat outdated though.
 
-Check out [CHANGELOG.md] file to see what's changed!
+This repository is a maintained version of [ghostDunk's Pesterchum](https://github.com/illuminatedwax/pesterchum/), originally forked from <a href= "https://github.com/karxi/pesterchum">pesterchum-karxi</a> + [Hydrothermal](https://github.com/Hydrothermal)'s fix of the "YOUR NICK IS BEING CHANGED TO X" msgbox-spam exploit.
+
+## NEW FEATURES <img width="40" src="https://www.pesterchum.xyz/img/bigsleek.png">
+ - Updated codebase; [Python 2 --> Python 3](https://www.python.org/doc/sunset-python-2/), [Qt4 --> Qt6](https://www.qt.io/blog/2014/11/27/qt-4-8-x-support-to-be-extended-for-another-year)
+     - Size scales with resolution via Qt's [high DPI scaling](https://doc.qt.io/qt-6/highdpi.html)
+ - GUI for choosing a server
+ - Secure connection with [TLS/SSL](https://en.wikipedia.org/wiki/Transport_Layer_Security) 
+ - UTF-8 text, annoy chums with 😿💀😱
+ - Get moods privately via [METADATA](https://github.com/pirc-pl/unrealircd-modules#metadata), <a href="CHANGELOG.md#v23---2022-06-06">IRC-stalking is harder</a>
+ - Tentative support for communicating color and timeline via [IRCv3 Message Tags/TAGMSG](https://ircv3.net/specs/extensions/message-tags#the-tagmsg-tag-only-message)
+ - More options for quirks (<a href="quirks/gradient.py">build-in gradient function</a>, <a href="CHANGELOG.md#v231---2022-06-23"> exclude smilies/links</a>)
+ - Funky [win95-theme](https://www.pesterchum.xyz/img/win95.png) by [cubicSimulation](https://twitter.com/cubicSimulation) <img width="24" src="themes/win95chum/trayicon.png">
+ - [Wayland](https://en.wikipedia.org/wiki/Wayland_(display_server_protocol)) compatibility
+ - Excecutables build with PyInstaller
+ - Lots of fixes for miscellaneous crashes/issues. . . check out the <a href="CHANGELOG.md">CHANGELOG</a>! :3
 
 [CHANGELOG.md]: https://github.com/Dpeta/pesterchum-alt-servers/blob/main/CHANGELOG.md
 [TODO.md]: https://github.com/Dpeta/pesterchum-alt-servers/blob/main/TODO.md
 
-## GUIDES
+## INSTALLATION <img width="40" src="smilies/headbonk.gif">
 
-The old READMEs and guides can be viewed in the [docs] folder.
-I'd highly recommend you take a look at the following files if you're new to Pesterchum:
-- [README-pesterchum.mkdn]
-- [trollquirks.mkdn]
-
-Guides for python quirks and themes are also in the [docs] folder. If you want to set up a gradient quirk you should take a look at [these guides][gradient-guide].
-
-[gradient-guide]: https://paste.0xfc.de/?e60df5a155e93583#AmcgN9cRnCcBycmVMvw6KJ1YLKPXGbaSzZLbgAhoNCQD
-[trollquirks.mkdn]: https://github.com/Dpeta/pesterchum-alt-servers/blob/main/docs/trollquirks.mkdn
-[README-pesterchum.mkdn]: https://github.com/Dpeta/pesterchum-alt-servers/blob/main/docs/README-pesterchum.mkdn
-[docs]: https://github.com/Dpeta/pesterchum-alt-servers/tree/main/docs/
-
-## INSTALLATION
 1. Download the appropriate release for your platform and architecture from [releases][releases].
 2. Extract the zip file.
 3. Run the executable:
@@ -45,7 +58,26 @@ Guides for python quirks and themes are also in the [docs] folder. If you want t
  
 [releases]: https://github.com/Dpeta/pesterchum-alt-servers/releases
 
-## RUNNING FROM SOURCE
+
+## DOCUMENTATION <img width="40" src="smilies/theprofessor.png">
+
+The old documentation can be found in [docs](docs), these have aged pretty well:
+ - <a href="docs/themes.txt">HOW TO MAKE YOUR OWN THEME</a>
+ - <a href="docs/trollquirks.mkdn">Canon troll quirk guide (REGEXP REPLACE)</a>
+ - <a href="docs/PYQUIRKS.mkdn">Guide for setting up Python quirk functions</a>
+
+Some useful off-repo guides:
+ - [How to register your handle with nickServ](https://squidmaid.tumblr.com/post/67595522089/how-to-register-your-pesterchum-handle-the-actual)
+ - [Collection of gradient quirk function guides](https://paste.0xfc.de/?e60df5a155e93583#AmcgN9cRnCcBycmVMvw6KJ1YLKPXGbaSzZLbgAhoNCQD
+)
+
+The old READMEs are also preserved in the [docs](docs) folder:
+- <a href="docs/README-pesterchum.mkdn"> illuminatedWax's README</a>
+- <a href="docs/README-karxi.mkdn "> karxi's README</a>
+- <a href="docs/TODO.mkdn "> karxi's TODO</a>
+- <a href="docs/CHANGELOG-karxi.mkdn "> karxi's CHANGELOG</a>
+
+## RUNNING FROM SOURCE <img src="smilies/tab.gif">
 Pesterchum is a Python script. This means that as long as you have Python installed you can run it without requiring a build/executable. This is useful if there's no compatible build for your system.
 
 ### REQUIREMENTS
@@ -73,7 +105,7 @@ Pesterchum is a Python script. This means that as long as you have Python instal
 [PyQt6]: https://pypi.org/project/PyQt6/
 [pygame]: https://pypi.org/project/pygame/
  
-## FREEZE / BUILD
+## FREEZE / BUILD <img src="themes/win95chum/admin.png">
 Here's a quick guide on how to freeze Pesterchum, (that is, packaging it with python as an executable). :3
 
 Ideally, you'll want to create and activate a [virtual environment](https://docs.python.org/3/library/venv.html) before anything else, this is not 100% required though.
@@ -86,14 +118,14 @@ Ideally, you'll want to create and activate a [virtual environment](https://docs
 1. ``pip install pyinstaller``
 2. ``python3 pyinstaller.py``
 
-## SMILIES
-Just for easy reference. :3 (Taken from docs/README-karxi.mkdn)
+## SMILIES <img height="32" src="smilies/whatdidyoudo.gif">
+<img align="right" src="https://www.pesterchum.xyz/img/scrunkle3.gif">
 
-* `:rancorous:`
-* `:apple:`
-* `:bathearst:`
-* `:cathearst:`
-* `:woeful:`
+* `:rancorous:` 
+* `:apple:` 
+* `:bathearst:` 
+* `:cathearst:` 
+* `:woeful:` 
 * `:pleasant:`
 * `:blueghost:`
 * `:slimer:`
