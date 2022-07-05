@@ -791,7 +791,7 @@ class PesterChooseTheme(QtWidgets.QDialog):
         self.rejected.connect(parent.closeTheme)
 
 class PesterChooseProfile(QtWidgets.QDialog):
-    def __init__(self, userprofile, config, theme, parent, collision=None):
+    def __init__(self, userprofile, config, theme, parent, collision=None, svsnick=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.userprofile = userprofile
         self.theme = theme
@@ -848,6 +848,9 @@ class PesterChooseProfile(QtWidgets.QDialog):
         if collision:
             collision_warning = QtWidgets.QLabel("%s is taken already! Pick a new profile." % (collision))
             layout_0.addWidget(collision_warning)
+        elif svsnick != None:
+            svsnick_warning = QtWidgets.QLabel("Your handle got changed from %s to %s! Pick a new profile." % svsnick)
+            layout_0.addWidget(svsnick_warning)
         else:
             layout_0.addWidget(self.currentHandle, alignment=QtCore.Qt.AlignmentFlag.AlignHCenter)
         layout_0.addLayout(layout_1)
@@ -1753,6 +1756,8 @@ class LoadingScreen(QtWidgets.QDialog):
         self.mainwindow = parent
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
 
+        #self.setWindowModality(QtCore.Qt.WindowModality.NonModal)  # useless
+        #self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)  # useless
         self.loadinglabel = QtWidgets.QLabel("CONN3CT1NG", self)
         self.cancel = QtWidgets.QPushButton("QU1T >:?", self)
         self.ok = QtWidgets.QPushButton("R3CONN3CT >:]", self)
@@ -1761,6 +1766,7 @@ class LoadingScreen(QtWidgets.QDialog):
         self.ok.setAutoDefault(True)
         self.cancel.clicked.connect(self.reject)
         self.ok.clicked.connect(self.tryAgain)
+        #self.finished.connect(self.finishedEvent)
 
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.addWidget(self.loadinglabel)
@@ -1774,6 +1780,9 @@ class LoadingScreen(QtWidgets.QDialog):
         self.ok.setDefault(True)
         self.ok.setFocus()
         self.timer = None
+    
+    #def finishedEvent(self, result):
+    #    self.close()
 
     def hideReconnect(self, safe=True):
         self.ok.hide()
@@ -1791,8 +1800,6 @@ class LoadingScreen(QtWidgets.QDialog):
     @QtCore.pyqtSlot()
     def enableQuit(self):
         self.cancel.setEnabled(True)
-
-    tryAgain = QtCore.pyqtSignal()
 
 class AboutPesterchum(QtWidgets.QDialog):
     def __init__(self, parent=None):

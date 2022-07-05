@@ -1171,7 +1171,7 @@ class TrollSlumWindow(QtWidgets.QFrame):
     unblockChumSignal = QtCore.pyqtSignal('QString')
 
 class PesterWindow(MovingWindow):
-    reconnectIRC = QtCore.pyqtSignal()
+    disconnectIRC = QtCore.pyqtSignal()
     sendMessage = QtCore.pyqtSignal('QString', 'QString')
 
     def __init__(self, options, parent=None, app=None):
@@ -1292,7 +1292,7 @@ class PesterWindow(MovingWindow):
         opts.triggered.connect(self.openOpts)
         exitaction = QtGui.QAction(self.theme["main/menus/client/exit"], self)
         self.exitaction = exitaction
-        exitaction.triggered.connect(self.quit)
+        exitaction.triggered.connect(self.killApp, QtCore.Qt.ConnectionType.QueuedConnection)
         userlistaction = QtGui.QAction(self.theme["main/menus/client/userlist"], self)
         self.userlistaction = userlistaction
         userlistaction.triggered.connect(self.showAllUsers)
@@ -1305,7 +1305,7 @@ class PesterWindow(MovingWindow):
         self.idleaction.setCheckable(True)
         self.idleaction.toggled[bool].connect(self.toggleIdle)
         self.reconnectAction = QtGui.QAction(self.theme["main/menus/client/reconnect"], self)
-        self.reconnectAction.triggered.connect(self.reconnectIRC)
+        self.reconnectAction.triggered.connect(self.disconnectIRC)
 
         self.menu = QtWidgets.QMenuBar(self)
         self.menu.setNativeMenuBar(False)
@@ -1583,7 +1583,6 @@ class PesterWindow(MovingWindow):
         self.hide()
         self.closeToTraySignal.emit()
     def closeEvent(self, event):
-        # This gets called directly if Pesterchum is closed from the taskbar, annoyingly enough.
         if hasattr(self, 'trollslum') and self.trollslum:
             self.trollslum.close()
         try:
@@ -1597,8 +1596,7 @@ class PesterWindow(MovingWindow):
             self.closeToTray()
         elif setting == 2: # quit
             self.closeConversations()
-            self.quit() # Shut down IRC & Pesterchum fully.
-            self.closeSignal.emit() # <-- A close signal here on it's own shuts down QT but not the Python and the IRC connection :(
+            self.closeSignal.emit()
         event.accept()
     def newMessage(self, handle, msg):
         if handle in self.config.getBlocklist():
@@ -1863,11 +1861,16 @@ class PesterWindow(MovingWindow):
             self.chumList.showOnlineNumbers()
 
 
-    def changeProfile(self, collision=None):
+    def changeProfile(self, collision=None, svsnick=None):
         if not hasattr(self, 'chooseprofile'):
             self.chooseprofile = None
         if not self.chooseprofile:
-            self.chooseprofile = PesterChooseProfile(self.userprofile, self.config, self.theme, self, collision=collision)
+            self.chooseprofile = PesterChooseProfile(self.userprofile,
+                                                     self.config,
+                                                     self.theme,
+                                                     self,
+                                                     collision=collision,
+                                                     svsnick=svsnick)
             self.chooseprofile.exec()
 
     def themePicker(self):
@@ -2338,7 +2341,7 @@ class PesterWindow(MovingWindow):
     def userPresentUpdate(self, handle, channel, update):
         c = str(channel)
         n = str(handle)
-        print("c=%s\nn=%s\nupdate=%s\n" % (c, n, update))
+        #print("c=%s\nn=%s\nupdate=%s\n" % (c, n, update))
         if update == "nick":
             l = n.split(":")
             oldnick = l[0]
@@ -3180,6 +3183,11 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot(QString, QString)
     def nickCollision(self, handle, tmphandle):
+        if hasattr(self, 'loadingscreen'):
+            if self.loadingscreen != None:
+                self.loadingscreen.done(QtWidgets.QDialog.DialogCode.Accepted)
+                self.loadingscreen = None
+        
         self.mychumhandle.setText(tmphandle)
         self.userprofile = userProfile(PesterProfile("pesterClient%d" % (random.randint(100,999)), QtGui.QColor("black"), Mood(0)))
         self.changeTheme(self.userprofile.getTheme())
@@ -3189,6 +3197,24 @@ class PesterWindow(MovingWindow):
         if not self.chooseprofile:
             h = str(handle)
             self.changeProfile(collision=h)
+
+    @QtCore.pyqtSlot(QString, QString)
+    def getSvsnickedOn(self, oldhandle, newhandle):
+        if hasattr(self, 'loadingscreen'):
+            if self.loadingscreen != None:
+                self.loadingscreen.done(QtWidgets.QDialog.DialogCode.Accepted)
+                self.loadingscreen = None
+        
+        self.mychumhandle.setText(newhandle)
+        self.userprofile = userProfile(PesterProfile(newhandle,
+                                                     QtGui.QColor("black"),
+                                                     Mood(0)))
+        self.changeTheme(self.userprofile.getTheme())
+
+        if not hasattr(self, 'chooseprofile'):
+            self.chooseprofile = None
+        if not self.chooseprofile:
+            self.changeProfile(svsnick=(oldhandle, newhandle))
     @QtCore.pyqtSlot(QString)
     def myHandleChanged(self, handle):
         if self.profile().handle == handle:
@@ -3223,28 +3249,17 @@ class PesterWindow(MovingWindow):
         self.forbiddenChan.emit(channel, reason)
 
     @QtCore.pyqtSlot()
-    def quit(self):
-        try:
-            self.irc.quit_dc()    # Actually send QUIT to server
-        except Exception as e:
-            # Not connected?
-            PchumLog.warning("QUIT failed: " + str(e))
-        try:
-            self.parent.trayicon.hide()  #
-            self.app.quit()
-        except AttributeError as e:
-            # Called from outside main Window?
-            PchumLog.warning("Unelegant quit: " + str(e))
-            sys.exit()
+    def killApp(self):
+        self.disconnectIRC.emit()
+        self.parent.trayicon.hide()
+        self.app.quit()
 
     def passIRC(self, irc):
         self.irc = irc
 
     def updateServerJson(self):
         PchumLog.info(self.customServerPrompt_qline.text() + " chosen")
-
         server_and_port = self.customServerPrompt_qline.text().split(':')
-
         try:
             server = {
                 "server": server_and_port[0],
@@ -3539,7 +3554,7 @@ class PesterWindow(MovingWindow):
         
         # Connect
         self.chooseServerWidged.accepted.connect(self.setServer)
-        self.chooseServerWidged.rejected.connect(self.quit)
+        self.chooseServerWidged.rejected.connect(self.killApp, QtCore.Qt.ConnectionType.QueuedConnection)
 
         # Show
         self.chooseServerWidged.show()
@@ -3575,7 +3590,7 @@ class PesterWindow(MovingWindow):
     inviteOnlyChan = QtCore.pyqtSignal('QString')
     forbiddenChan = QtCore.pyqtSignal('QString', 'QString')
     closeSignal = QtCore.pyqtSignal()
-    reconnectIRC = QtCore.pyqtSignal()
+    disconnectIRC = QtCore.pyqtSignal()
     gainAttention = QtCore.pyqtSignal(QtWidgets.QWidget)
     pingServer = QtCore.pyqtSignal()
     setAway = QtCore.pyqtSignal(bool)
@@ -3627,7 +3642,7 @@ class MainProgram(QtCore.QObject):
 
         self.app = QtWidgets.QApplication(sys.argv)
         self.app.setApplicationName("Pesterchum")
-        self.app.setQuitOnLastWindowClosed(False)
+        #self.app.setQuitOnLastWindowClosed(False)
 
         options = self.oppts(sys.argv[1:])
         
@@ -3678,7 +3693,7 @@ class MainProgram(QtCore.QObject):
         miniAction = QtGui.QAction("MINIMIZE", self)
         miniAction.triggered.connect(self.widget.showMinimized)
         exitAction = QtGui.QAction("EXIT", self)
-        exitAction.triggered.connect(PesterWindow.quit)
+        exitAction.triggered.connect(self.widget.killApp, QtCore.Qt.ConnectionType.QueuedConnection)
         self.traymenu.addAction(miniAction)
         self.traymenu.addAction(exitAction)
 
@@ -3698,8 +3713,21 @@ class MainProgram(QtCore.QObject):
 
         self.widget.passIRC(self.irc) # Maybe this is absolutely terrible in practice, but screw it.
         self.widget.gainAttention[QtWidgets.QWidget].connect(self.alertWindow)
-        
 
+        #self.app.lastWindowClosed.connect(self.lastWindow)
+        self.app.aboutToQuit.connect(self.death)
+
+    def death(self):
+        # app murder in progress
+        #print("death inbound")
+        if hasattr(self, 'widget'):
+            self.widget.killApp()
+
+    #def lastWindow(self):
+    #    print("all windows closed")
+    #    if hasattr(self, 'widget'):
+    #        self.widget.killApp()
+    
     @QtCore.pyqtSlot(QtWidgets.QWidget)
     def alertWindow(self, widget):
         self.app.alert(widget)
@@ -3708,9 +3736,8 @@ class MainProgram(QtCore.QObject):
     def trayiconShow(self):
         self.trayicon.show()
         if self.widget.config.trayMessage():
-            self.trayicon.showMessage("Pesterchum", "Pesterchum is still running in the system tray.\n\
-Right click to close it.\n\
-Click this message to never see this again.")
+            self.trayicon.showMessage("Pesterchum", ("Pesterchum is still running in the system tray."
+                                                     + '\n' + "Right click to close it."))
 
     @QtCore.pyqtSlot()
     def trayMessageClick(self):
@@ -3752,7 +3779,7 @@ Click this message to never see this again.")
                   ('setAway(bool)', 'setAway(bool)'),
                   ('killSomeQuirks(QString, QString)',
                    'killSomeQuirks(QString, QString)'),
-                  ('reconnectIRC()', 'reconnectIRC()')
+                  ('disconnectIRC()', 'disconnectIRC()')
                   ]
 # IRC --> Main window
     irc2widget = [('connected()', 'connected()'),
@@ -3770,6 +3797,8 @@ Click this message to never see this again.")
                    'deliverInvite(QString, QString)'),
                   ('nickCollision(QString, QString)',
                    'nickCollision(QString, QString)'),
+                  ('getSvsnickedOn(QString, QString)',
+                   'getSvsnickedOn(QString, QString)'),
                   ('myHandleChanged(QString)',
                    'myHandleChanged(QString)'),
                   ('namesReceived(QString, PyQt_PyObject)',
@@ -3818,7 +3847,7 @@ Click this message to never see this again.")
                 (widget.pingServer, irc.pingServer),
                 (widget.setAway, irc.setAway),
                 (widget.killSomeQuirks, irc.killSomeQuirks),
-                (widget.reconnectIRC, irc.reconnectIRC),
+                (widget.disconnectIRC, irc.disconnectIRC),
                  # Main window --> IRC    
                 (irc.connected, widget.connected),
                 (irc.moodUpdated, widget.updateMoodSlot),
@@ -3828,6 +3857,7 @@ Click this message to never see this again.")
                 (irc.noticeReceived, widget.deliverNotice),
                 (irc.inviteReceived, widget.deliverInvite),
                 (irc.nickCollision, widget.nickCollision),
+                (irc.getSvsnickedOn, widget.getSvsnickedOn),
                 (irc.myHandleChanged, widget.myHandleChanged),
                 (irc.namesReceived, widget.updateNames),
                 (irc.userPresentUpdate, widget.userPresentUpdate),
@@ -3887,17 +3917,7 @@ Click this message to never see this again.")
                 widget.loadingscreen.showReconnect()
             else:
                 widget.loadingscreen.hideReconnect()
-            status = widget.loadingscreen.exec()
-            if status == QtWidgets.QDialog.DialogCode.Rejected:
-                sys.exit(0)
-            else:
-                if self.widget.tabmemo:
-                    for c in self.widget.tabmemo.convos:
-                        self.irc.joinChannel(c)
-                else:
-                    for c in list(self.widget.memos.values()):
-                        self.irc.joinChannel(c.channel)
-                return True
+            widget.loadingscreen.open()
 
     @QtCore.pyqtSlot()
     def connected(self):
@@ -3911,8 +3931,7 @@ Click this message to never see this again.")
             self.widget.loadingscreen = None
         self.attempts += 1
         if hasattr(self, 'irc') and self.irc:
-            self.irc.reconnectIRC()
-            self.irc.quit()
+            self.irc.disconnectIRC()
         else:
             self.restartIRC()
     @QtCore.pyqtSlot()

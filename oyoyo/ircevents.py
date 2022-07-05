@@ -223,8 +223,10 @@ protocol_events = [
     "quit",
     "invite",
     "pong",
-    "metadata", # Metadata specification
-    "tagmsg", # IRCv3 message tags extension
+    "nick",  # We can get svsnicked
+    "metadata",  # Metadata specification
+    "tagmsg",  # IRCv3 message tags extension
+    "cap"  # IRCv3 Client Capability Negotiation
 ]
 
 all_events = (generated_events

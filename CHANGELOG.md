@@ -1,6 +1,24 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.4.1] - 2022-07-05
+
+### Added
+ - Support for more IRC replies/commands that imply a (forced) nick/handle change.
+
+### Fixed
+ - Connecting dialog not disappearing when theme was changed.
+ - Client not sending QUIT on manual reconnect or exit via tray.
+ - Manual reconnect occasionally failing.
+ 
+### Changed
+ - LoadingScreen/connecting dialog is no longer blocking.
+ - Console output is less verbose.
+ 
+### Deprecated
+ - Removed the weird metadata support timeout thingy, I think ought to just get the full 005 before we try to get moods.
+ - Replaced instances of socket.error excepts with OSError, since it's depreciated.
+
 ## [v2.4] - 2022-06-30
 
 ### Added

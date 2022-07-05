@@ -704,14 +704,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
             msgbox.exec()
             return
         
-    # Debug output.
-    try:
-        # Turns out that Windows consoles can't handle unicode, heh...who'da
-        # thunk. We have to repr() this, as such.
-        print(repr(msg))
-    except Exception as err:
-        print("(Couldn't print processed message: {!s})".format(err))
-
+    PchumLog.info("--> recv \"%s\"" % msg)
     # karxi: We have a list...but I'm not sure if we ever get anything else, so
     # best to play it safe. I may remove this during later refactoring.
     if isinstance(msg, list):
@@ -728,10 +721,10 @@ def kxhandleInput(ctx, text=None, flavor=None):
     msg = kxlexMsg(msg)
 
     # Debug output.
-    try:
-        print(repr(msg))
-    except Exception as err:
-        print("(Couldn't print lexed message: {!s})".format(err))
+    #try:
+    #    print(repr(msg))
+    #except Exception as err:
+    #    print("(Couldn't print lexed message: {!s})".format(err))
 
     # Remove coloring if this is a /me!
     if is_action:

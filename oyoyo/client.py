@@ -82,7 +82,8 @@ class IRCClient:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
         self.nick = None
-        self.real_name = None
+        self.realname = None
+        self.username = None
         self.host = None
         self.port = None
         self.connect_cb = None
@@ -131,6 +132,12 @@ class IRCClient:
         try:
             tries = 1
             while tries < 10:
+                # Check if alive
+                if self._end == True:
+                    break
+                if self.socket.fileno() == -1:
+                    self._end = True
+                    break
                 try:
                     ready_to_read, ready_to_write, in_error = select.select([], [self.socket], [])
                     for x in ready_to_write:
@@ -156,9 +163,8 @@ class IRCClient:
                     raise socket.timeout
                 except (OSError,
                         IndexError,
-                        ValueError) as e:
-                    # Unknown error, might as well retry?
-                    # index/value can happen if the socket breaks.
+                        ValueError,
+                        Exception) as e:
                     PchumLog.warning("Unkown error on send, " + str(e))
                     if tries >= 9:
                         raise e
@@ -168,7 +174,7 @@ class IRCClient:
                 
             PchumLog.debug("ready_to_write (len %s): " % str(len(ready_to_write)) + str(ready_to_write))
         except Exception as se:
-            PchumLog.warning("socket.error %s" % str(se))
+            PchumLog.warning("Send Exception %s" % str(se))
             try:
                 if not self.blocking and se.errno == 11:
                     pass
@@ -190,7 +196,7 @@ class IRCClient:
             context.check_hostname = False
             context.verify_mode = ssl.CERT_NONE
             
-            bare_sock = socket.create_connection(("%s" % self.host, self.port))
+            bare_sock = socket.create_connection((self.host, self.port))
             self.socket = context.wrap_socket(bare_sock,
                                               server_hostname=self.host,
                                               do_handshake_on_connect=False)
@@ -206,7 +212,7 @@ class IRCClient:
             PchumLog.info("secure sockets version is %s" % self.socket.version())
 
         else:
-            self.socket = socket.create_connection(("%s" % self.host, self.port))
+            self.socket = socket.create_connection((self.host, self.port))
 
         # setblocking is a shorthand for timeout,
         # we shouldn't use both.
@@ -218,7 +224,7 @@ class IRCClient:
             self.socket.setblocking(True)
         
         helpers.nick(self, self.nick)
-        helpers.user(self, self.nick, self.real_name)
+        helpers.user(self, self.username, self.realname)
         if self.connect_cb:
             self.connect_cb(self)
             
@@ -231,6 +237,12 @@ class IRCClient:
                 try:
                     tries = 1
                     while tries < 10:
+                        # Check if alive
+                        if self._end == True:
+                            break
+                        if self.socket.fileno() == -1:
+                            self._end = True
+                            break
                         try:
                             ready_to_read, ready_to_write, in_error = select.select([self.socket], [], [])
                             for x in ready_to_read:
@@ -249,14 +261,16 @@ class IRCClient:
                         except ssl.SSLEOFError as e:
                             # ssl.SSLEOFError guarantees a broken connection.
                             PchumLog.warning("ssl.SSLEOFError in on send, " + str(e))
-                            raise ssl.SSLEOFError
+                            raise e
                         except (socket.timeout, TimeoutError) as e:
                             # socket.timeout is deprecated in 3.10
                             PchumLog.warning("TimeoutError in on send, " + str(e))
                             raise socket.timeout
-                        except (OSError, IndexError) as e:
-                            # Unknown error, might as well retry?
-                            PchumLog.warning("Unkown error, " + str(e))
+                        except (OSError,
+                                IndexError,
+                                ValueError,
+                                Exception) as e:
+                            PchumLog.warning("Unkown error in conn, " + str(e))
                             if tries >= 9:
                                 raise e
                         tries += 1
@@ -268,8 +282,8 @@ class IRCClient:
                     if self._end:
                         break
                     raise e
-                except ssl.SSLEOFError:
-                    raise ssl.SSLEOFError
+                except ssl.SSLEOFError as e:
+                    raise e
                 except OSError as e:
                     PchumLog.warning("conn exception %s in %s" % (e, self))
                     if self._end:
@@ -287,7 +301,7 @@ class IRCClient:
                         break
                     if len(buffer) == 0 and self.blocking:
                         PchumLog.debug("len(buffer) = 0")
-                        raise socket.error("Connection closed")
+                        raise OSError("Connection closed")
 
                     data = buffer.split(bytes("\n", "UTF-8"))
                     buffer = data.pop()
@@ -303,13 +317,13 @@ class IRCClient:
                             else:
                                 self.command_handler.run(command, prefix, *args)
                         except CommandError as e:
-                            PchumLog.debug("CommandError %s" % str(e))
+                            PchumLog.warning("CommandError %s" % str(e))
 
                 yield True
         except socket.timeout as se:
             PchumLog.debug("passing timeout")
             raise se
-        except (socket.error, ssl.SSLEOFError) as se:
+        except (OSError, ssl.SSLEOFError) as se:
             PchumLog.debug("problem: %s" % (str(se)))
             if self.socket:
                 PchumLog.info('error: closing socket')
@@ -333,15 +347,11 @@ class IRCClient:
             try:
                 self.socket.shutdown(socket.SHUT_RDWR)
             except OSError as e:
-                PchumLog.warning("Error while shutting down socket, already broken? %s" % str(e))                
+                PchumLog.debug("Error while shutting down socket, already broken? %s" % str(e))                
             try:
                 self.socket.close()
             except OSError as e:
-                PchumLog.warning("Error while closing socket, already broken? %s" % str(e))   
-
-    def quit(self, msg):
-        PchumLog.info("QUIT")
-        self.socket.sendall(bytes(msg + "\n", "UTF-8"))
+                PchumLog.debug("Error while closing socket, already broken? %s" % str(e))   
         
 class IRCApp:
     """ This class manages several IRCClient instances without the use of threads.

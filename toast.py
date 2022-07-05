@@ -189,7 +189,6 @@ class ToastMachine(object):
 
 class PesterToast(QtWidgets.QWidget, DefaultToast):
     def __init__(self, machine, title, msg, icon, time=3000, parent=None):
-        PchumLog.info(isinstance(parent, QtWidgets.QWidget))
         kwds = dict(machine=machine, title=title, msg=msg, icon=icon)
         super().__init__(parent, **kwds)
 

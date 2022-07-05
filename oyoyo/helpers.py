@@ -101,14 +101,14 @@ def identify(cli, passwd, authuser="NickServ"):
     msg(cli, authuser, "IDENTIFY %s" % passwd)
 
 def quit(cli, msg):
-    msg = "QUIT :%s" % msg
-    cli.quit(msg)
-    cli.close()
-    cli._end = 1
+    cli.send("QUIT %s" % (msg))
 
-def user(cli, username, realname=None):
-    cli.send("USER", realname or username, cli.host, cli.host,
-        realname or username)
+def user(cli, username, realname):
+    cli.send("USER",
+             username,
+             '0',
+             '*',
+             ':' + realname)
 
 _simple = (
     'join',
@@ -140,4 +140,3 @@ def _addNumerics():
         setattr(m, name, numericcmd(num, name))
 
 _addNumerics()
-

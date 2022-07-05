@@ -97,7 +97,8 @@ class CommandHandler(object):
 
         try:
             f = self.get(command)
-        except NoSuchCommandError:
+        except NoSuchCommandError as e:
+            PchumLog.info(e)
             self.__unhandled__(command, *args)
             return
 
@@ -106,7 +107,9 @@ class CommandHandler(object):
         try:
             f(*args)
         except TypeError as e:
-            logging.exception("Failed to pass command, did the server pass an unsupported paramater?\n%s" % str(e))
+            logging.warning("Failed to pass command, did the server pass an unsupported paramater? " + str(e))
+        except Exception as e:
+            logging.warning("Failed to pass command, %s" % str(e))
 
     @protected
     def __unhandled__(self, cmd, *args):

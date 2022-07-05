@@ -26,7 +26,6 @@ logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 def parse_raw_irc_command(element):
-    print(element)
     """
     This function parses a raw irc command and returns a tuple
     of (prefix, command, args).
