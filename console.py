@@ -448,7 +448,7 @@ class ConsoleText(QtWidgets.QTextEdit):
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
-            url = self.anchorAt(event.pos())
+            url = self.anchorAt(event.position().toPoint())
             if url != "":
                 # Skip memo/handle recognition
                 # NOTE: Ctrl+Click copies the URL. Maybe it should select it?
@@ -463,7 +463,7 @@ class ConsoleText(QtWidgets.QTextEdit):
     def mouseMoveEvent(self, event):
         # Change our cursor when we roll over links (anchors).
         super(ConsoleText, self).mouseMoveEvent(event)
-        if self.anchorAt(event.pos()):
+        if self.anchorAt(event.position().toPoint()):
             if self.viewport().cursor().shape != QtCore.Qt.CursorShape.PointingHandCursor:
                 self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
         else:

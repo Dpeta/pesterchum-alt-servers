@@ -45,7 +45,7 @@ class RightClickList(QtWidgets.QListWidget):
     def contextMenuEvent(self, event):
         #fuckin Qt <--- I feel that </3
         if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
-            listing = self.itemAt(event.pos())
+            listing = self.itemAt(event.position().toPoint())
             self.setCurrentItem(listing)
             optionsMenu = self.getOptionsMenu()
             if optionsMenu:
@@ -56,7 +56,7 @@ class RightClickList(QtWidgets.QListWidget):
 class RightClickTree(QtWidgets.QTreeWidget):
     def contextMenuEvent(self, event):
         if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
-            listing = self.itemAt(event.pos())
+            listing = self.itemAt(event.position().toPoint())
             self.setCurrentItem(listing)
             optionsMenu = self.getOptionsMenu()
             if optionsMenu:

@@ -1,6 +1,11 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.4.2] - 2022-07-08
+
+### Fixed
+ - Error when manually moving group.
+
 ## [v2.4.1] - 2022-07-05
 
 ### Added

@@ -153,7 +153,7 @@ class PesterTabWindow(QtWidgets.QFrame):
 
     def contextMenuEvent(self, event):
         #~if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
-        tabi = self.tabs.tabAt(event.pos())
+        tabi = self.tabs.tabAt(event.position().toPoint())
         if tabi < 0:
             tabi = self.tabs.currentIndex()
         for h, i in list(self.tabIndices.items()):
@@ -501,7 +501,7 @@ class PesterText(QtWidgets.QTextEdit):
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
-            url = self.anchorAt(event.pos())
+            url = self.anchorAt(event.position().toPoint())
             if url != "":
                 if url[0] == "#" and url != "#pesterchum":
                     self.parent().mainwindow.showMemos(url[1:])
@@ -516,7 +516,7 @@ class PesterText(QtWidgets.QTextEdit):
         QtWidgets.QTextEdit.mousePressEvent(self, event)
     def mouseMoveEvent(self, event):
         QtWidgets.QTextEdit.mouseMoveEvent(self, event)
-        if self.anchorAt(event.pos()):
+        if self.anchorAt(event.position().toPoint()):
             if self.viewport().cursor().shape != QtCore.Qt.CursorShape.PointingHandCursor:
                 self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
         else:

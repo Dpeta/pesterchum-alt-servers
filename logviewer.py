@@ -272,7 +272,7 @@ class PesterLogText(PesterText):
     def focusInEvent(self, event):
         QtWidgets.QTextEdit.focusInEvent(self, event)
     def mousePressEvent(self, event):
-        url = self.anchorAt(event.pos())
+        url = self.anchorAt(event.position().toPoint())
         if url != "":
             if url[0] == "#" and url != "#pesterchum":
                 self.parent().parent.showMemos(url[1:])
@@ -284,7 +284,7 @@ class PesterLogText(PesterText):
         QtWidgets.QTextEdit.mousePressEvent(self, event)
     def mouseMoveEvent(self, event):
         QtWidgets.QTextEdit.mouseMoveEvent(self, event)
-        if self.anchorAt(event.pos()):
+        if self.anchorAt(event.position().toPoint()):
             if self.viewport().cursor().shape != QtCore.Qt.CursorShape.PointingHandCursor:
                 self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
         else:

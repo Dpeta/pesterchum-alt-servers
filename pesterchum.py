@@ -518,14 +518,14 @@ class chumArea(RightClickTree):
         if thisitem.rfind(" (") != -1:
             thisitem = thisitem[0:thisitem.rfind(" (")]
         if thisitem == "Chums" or thisitem in self.groups:
-            droppos = self.itemAt(event.pos())
+            droppos = self.itemAt(event.position().toPoint())
             if not droppos: return
             droppos = str(droppos.text(0))
             if droppos.rfind(" ") != -1:
                 droppos = droppos[0:droppos.rfind(" ")]
             if droppos == "Chums" or droppos in self.groups:
                 saveOpen = event.source().currentItem().isExpanded()
-                saveDrop = self.itemAt(event.pos())
+                saveDrop = self.itemAt(event.position().toPoint())
                 saveItem = self.takeTopLevelItem(self.indexOfTopLevelItem(event.source().currentItem()))
                 self.insertTopLevelItems(self.indexOfTopLevelItem(saveDrop)+1, [saveItem])
                 if saveOpen:
@@ -540,12 +540,8 @@ class chumArea(RightClickTree):
                 self.mainwindow.config.saveGroups(gTemp)
         # Drop item is a chum
         else:
-            eventpos = event.position()
-            if type(eventpos) == QtCore.QPointF:
-                # Round if float, which it should be in PyQt6
-                item = self.itemAt(eventpos.toPoint())
-            else:
-                item = self.itemAt(eventpos)
+            eventpos = event.position().toPoint()
+            item = self.itemAt(eventpos)
             if item:
                 text = str(item.text(0))
                 # Figure out which group to drop into
@@ -1077,7 +1073,7 @@ class trollSlum(chumArea):
     def contextMenuEvent(self, event):
         #fuckin Qt
         if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
-            listing = self.itemAt(event.pos())
+            listing = self.itemAt(event.position().toPoint())
             self.setCurrentItem(listing)
             if self.currentItem().text(0) != "":
                 self.optionsMenu.popup(event.globalPos())
