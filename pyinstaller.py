@@ -5,7 +5,11 @@ import shutil
 import PyInstaller.__main__
 
 is_64bit = sys.maxsize > 2**32
+#is_linux = sys.platform.startswith("linux")
 exclude_modules = []
+#if is_linux == False:
+#    print("Not Linux, excluding pygame.")
+#    exclude_modules.append('pygame')
 add_data = ['quirks;quirks',
         'smilies;smilies',
         'themes;themes',
@@ -32,8 +36,8 @@ data_files_linux = {'README.md': 'README.md',
 # Some of these might not be required anymore,
 # newer versions of PyInstaller claim to exclude certain problematic DDLs automatically.
 upx_exclude = ["qwindows.dll",
-    "Qt5Core.dll",
-    "Qt5Gui.dll",
+    "Qt6Core.dll",
+    "Qt6Gui.dll",
     "vcruntime140.dll",
     "MSVCP140.dll",
     "MSVCP140_1.dll"

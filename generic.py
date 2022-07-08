@@ -45,7 +45,7 @@ class RightClickList(QtWidgets.QListWidget):
     def contextMenuEvent(self, event):
         #fuckin Qt <--- I feel that </3
         if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
-            listing = self.itemAt(event.position().toPoint())
+            listing = self.itemAt(event.pos())
             self.setCurrentItem(listing)
             optionsMenu = self.getOptionsMenu()
             if optionsMenu:
@@ -56,7 +56,7 @@ class RightClickList(QtWidgets.QListWidget):
 class RightClickTree(QtWidgets.QTreeWidget):
     def contextMenuEvent(self, event):
         if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
-            listing = self.itemAt(event.position().toPoint())
+            listing = self.itemAt(event.pos())
             self.setCurrentItem(listing)
             optionsMenu = self.getOptionsMenu()
             if optionsMenu:
@@ -142,6 +142,7 @@ class NoneSound(object):
         pass
     def play(self): pass
     def setVolume(self, v): pass
+    def set_volume(self, v): pass
 
 class WMButton(QtWidgets.QPushButton):
     def __init__(self, icon, parent=None):

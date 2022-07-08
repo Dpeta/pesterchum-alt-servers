@@ -83,7 +83,7 @@ Pesterchum is a Python script. This means that as long as you have Python instal
 ### REQUIREMENTS
  - [Python 3]
  - [PyQt6]
- - [pygame] (Only required for audio, Pesterchum will probably still run without it.)
+ - On Linux, optionally [pygame] for audio. (QtMultimedia has a [GStreamer] dependency on Linux)
  
 ### WALKTHROUGH
 
@@ -104,6 +104,7 @@ Pesterchum is a Python script. This means that as long as you have Python instal
 [pip]: https://pypi.org/project/pip/
 [PyQt6]: https://pypi.org/project/PyQt6/
 [pygame]: https://pypi.org/project/pygame/
+[GStreamer]: https://gstreamer.freedesktop.org/
  
 ## FREEZE / BUILD <img src="themes/win95chum/admin.png">
 Here's a quick guide on how to freeze Pesterchum, (that is, packaging it with python as an executable). :3

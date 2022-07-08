@@ -153,7 +153,7 @@ class PesterTabWindow(QtWidgets.QFrame):
 
     def contextMenuEvent(self, event):
         #~if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
-        tabi = self.tabs.tabAt(event.position().toPoint())
+        tabi = self.tabs.tabAt(event.pos())
         if tabi < 0:
             tabi = self.tabs.currentIndex()
         for h, i in list(self.tabIndices.items()):
