@@ -1585,7 +1585,11 @@ class PesterUserlist(QtWidgets.QDialog):
         self.searchbox.setFocus()
     @QtCore.pyqtSlot()
     def updateUsers(self):
-        names = self.mainwindow.namesdb["#pesterchum"]
+        try:
+            names = self.mainwindow.namesdb["#pesterchum"]
+        except KeyError:
+            # Not in #pesterchum?
+            return
         self.userarea.clear()
         for n in names:
             if str(self.searchbox.text()) == "" or n.lower().find(str(self.searchbox.text()).lower()) != -1:

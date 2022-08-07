@@ -1,20 +1,22 @@
 import logging
 import logging.config
-import ostools
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
-PchumLog = logging.getLogger('pchumLogger')
 from string import Template
 from time import strftime
 from datetime import datetime, timedelta
+
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+import ostools
 from dataobjs import PesterHistory
-from parsetools import convertTags, lexMessage, mecmd, colorBegin, colorEnd, \
-    smiledict#, img2smiley
+from parsetools import (convertTags, lexMessage, mecmd, colorBegin, colorEnd,
+                        smiledict)
 import parsetools
-
 from pnc.dep.attrdict import AttrDict
+
+
+_datadir = ostools.getDataDir()
+logging.config.fileConfig(_datadir + "logging.ini")
+PchumLog = logging.getLogger('pchumLogger')
 
 class PesterTabWindow(QtWidgets.QFrame):
     def __init__(self, mainwindow, parent=None, convo="convo"):
@@ -206,7 +208,9 @@ class PesterTabWindow(QtWidgets.QFrame):
             return False
     def notifyNewMessage(self, handle):
         i = self.tabIndices[handle]
-        self.tabs.setTabTextColor(i, QtGui.QColor(self.mainwindow.theme["%s/tabs/newmsgcolor" % (self.type)]))
+        self.tabs.setTabTextColor(i,
+                                  QtGui.QColor(self.mainwindow.theme["%s/tabs/newmsgcolor"
+                                                                     % (self.type)]))
         convo = self.convos[handle]
         # Create a function for the icon to use
         # TODO: Let us disable this.
@@ -225,7 +229,9 @@ class PesterTabWindow(QtWidgets.QFrame):
         self.resize(*theme["convo/size"])
         self.setStyleSheet(theme["convo/tabwindow/style"])
         self.tabs.setShape(QtWidgets.QTabBar.Shape(theme["convo/tabs/tabstyle"]))
-        self.tabs.setStyleSheet("QTabBar::tab{ %s } QTabBar::tab:selected { %s }" % (theme["convo/tabs/style"], theme["convo/tabs/selectedstyle"]))
+        self.tabs.setStyleSheet("QTabBar::tab{ %s } QTabBar::tab:selected { %s }"
+                                % (theme["convo/tabs/style"],
+                                   theme["convo/tabs/selectedstyle"]))
 
     def changeTheme(self, theme):
         self.initTheme(theme)
@@ -382,7 +388,20 @@ class PesterText(QtWidgets.QTextEdit):
         self.textSelected = ready
     def initTheme(self, theme):
         if "convo/scrollbar" in theme:
-            self.setStyleSheet("QTextEdit { %s } QScrollBar:vertical { %s } QScrollBar::handle:vertical { %s } QScrollBar::add-line:vertical { %s } QScrollBar::sub-line:vertical { %s } QScrollBar:up-arrow:vertical { %s } QScrollBar:down-arrow:vertical { %s }" % (theme["convo/textarea/style"], theme["convo/scrollbar/style"], theme["convo/scrollbar/handle"], theme["convo/scrollbar/downarrow"], theme["convo/scrollbar/uparrow"], theme["convo/scrollbar/uarrowstyle"], theme["convo/scrollbar/darrowstyle"] ))
+            self.setStyleSheet("QTextEdit { %s }"
+                               "QScrollBar:vertical { %s }"
+                               "QScrollBar::handle:vertical { %s }"
+                               "QScrollBar::add-line:vertical { %s }"
+                               "QScrollBar::sub-line:vertical { %s }"
+                               "QScrollBar:up-arrow:vertical { %s }"
+                               "QScrollBar:down-arrow:vertical { %s }"
+                               % (theme["convo/textarea/style"],
+                                  theme["convo/scrollbar/style"],
+                                  theme["convo/scrollbar/handle"],
+                                  theme["convo/scrollbar/downarrow"],
+                                  theme["convo/scrollbar/uparrow"],
+                                  theme["convo/scrollbar/uarrowstyle"],
+                                  theme["convo/scrollbar/darrowstyle"]))
         else:
             self.setStyleSheet("QTextEdit { %s }" % (theme["convo/textarea/style"]))
     def addMessage(self, lexmsg, chum):
@@ -453,7 +472,10 @@ class PesterText(QtWidgets.QTextEdit):
             lexmsg[0:0] = [colorBegin("<c=%s>" % (color), color),
                            "%s: " % (initials)]
             lexmsg.append(colorEnd("</c>"))
-            self.append("<span style=\"color:#000000\">" + time + convertTags(lexmsg) + "</span>")
+            self.append("<span style=\"color:#000000\">"
+                        + time
+                        + convertTags(lexmsg)
+                        + "</span>")
             #self.append('<img src="/Users/lexi/pesterchum-lex/smilies/tab.gif" />'
             #            + '<img src="/Users/lexi/pesterchum/smilies/tab.gif" />'
             #            + '<img src="/Applications/Pesterchum.app/Contents/Resources/smilies/tab.gif" />'
@@ -512,7 +534,8 @@ class PesterText(QtWidgets.QTextEdit):
                     if event.modifiers() == QtCore.Qt.KeyboardModifier.ControlModifier:
                         QtWidgets.QApplication.clipboard().setText(url)
                     else:
-                        QtGui.QDesktopServices.openUrl(QtCore.QUrl(url, QtCore.QUrl.ParsingMode.TolerantMode))
+                        QtGui.QDesktopServices.openUrl(QtCore.QUrl(url,
+                                                                   QtCore.QUrl.ParsingMode.TolerantMode))
         QtWidgets.QTextEdit.mousePressEvent(self, event)
     def mouseMoveEvent(self, event):
         QtWidgets.QTextEdit.mouseMoveEvent(self, event)
@@ -569,7 +592,9 @@ class PesterConvo(QtWidgets.QFrame):
         self.mainwindow = mainwindow
         theme = self.mainwindow.theme
         self.resize(*theme["convo/size"])
-        self.setStyleSheet("QtWidgets.QFrame#%s { %s }" % (chum.handle, theme["convo/style"]))
+        self.setStyleSheet("QtWidgets.QFrame#%s { %s }"
+                           % (chum.handle,
+                              theme["convo/style"]))
         self.setWindowIcon(self.icon())
         self.setWindowTitle(self.title())
 
@@ -577,10 +602,12 @@ class PesterConvo(QtWidgets.QFrame):
 
         self.chumLabel = QtWidgets.QLabel(t.safe_substitute(handle=chum.handle), self)
         self.chumLabel.setStyleSheet(self.mainwindow.theme["convo/chumlabel/style"])
-        self.chumLabel.setAlignment(self.aligndict["h"][self.mainwindow.theme["convo/chumlabel/align/h"]] | self.aligndict["v"][self.mainwindow.theme["convo/chumlabel/align/v"]])
+        self.chumLabel.setAlignment(self.aligndict["h"][self.mainwindow.theme["convo/chumlabel/align/h"]]
+                                    | self.aligndict["v"][self.mainwindow.theme["convo/chumlabel/align/v"]])
         self.chumLabel.setMaximumHeight(self.mainwindow.theme["convo/chumlabel/maxheight"])
         self.chumLabel.setMinimumHeight(self.mainwindow.theme["convo/chumlabel/minheight"])
-        self.chumLabel.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.MinimumExpanding, QtWidgets.QSizePolicy.Policy.MinimumExpanding))
+        self.chumLabel.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+                                                           QtWidgets.QSizePolicy.Policy.MinimumExpanding))
         self.textArea = PesterText(self.mainwindow.theme, self)
         self.textInput = PesterInput(self.mainwindow.theme, self)
         self.textInput.setFocus()
@@ -909,7 +936,10 @@ class PesterConvo(QtWidgets.QFrame):
     @QtCore.pyqtSlot()
     def openChumLogs(self):
         currentChum = self.chum.handle
-        self.mainwindow.chumList.pesterlogviewer = PesterLogViewer(currentChum, self.mainwindow.config, self.mainwindow.theme, self.mainwindow)
+        self.mainwindow.chumList.pesterlogviewer = PesterLogViewer(currentChum,
+                                                                   self.mainwindow.config,
+                                                                   self.mainwindow.theme,
+                                                                   self.mainwindow)
         self.mainwindow.chumList.pesterlogviewer.rejected.connect(self.mainwindow.chumList.closeActiveLog)
         self.mainwindow.chumList.pesterlogviewer.show()
         self.mainwindow.chumList.pesterlogviewer.raise_()

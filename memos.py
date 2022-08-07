@@ -11,8 +11,8 @@ import parsetools
 from dataobjs import PesterProfile, PesterHistory
 from generic import PesterIcon, RightClickList, mysteryTime
 from convo import PesterConvo, PesterInput, PesterText, PesterTabWindow
-from parsetools import convertTags, timeProtocol, \
-    lexMessage, colorBegin, mecmd, smiledict
+from parsetools import (convertTags, timeProtocol, lexMessage, colorBegin,
+                        mecmd, smiledict)
 from logviewer import PesterLogViewer
 
 _datadir = ostools.getDataDir()
@@ -248,7 +248,8 @@ class MemoTabWindow(PesterTabWindow):
         newindex = self.tabs.addTab(convo.channel)
         self.tabIndices[convo.channel] = newindex
         self.tabs.setCurrentIndex(newindex)
-        self.tabs.setTabIcon(newindex, PesterIcon(self.mainwindow.theme["memos/memoicon"]))
+        self.tabs.setTabIcon(newindex,
+                             PesterIcon(self.mainwindow.theme["memos/memoicon"]))
     def updateBlocked(self):
         pass
     def updateMood(self):
@@ -275,19 +276,35 @@ class MemoText(PesterText):
         self.copyAvailable[bool].connect(self.textReady)
         self.urls = {}
         for k in smiledict:
-            self.addAnimation(QtCore.QUrl("smilies/%s" % (smiledict[k])), "smilies/%s" % (smiledict[k]))
+            self.addAnimation(QtCore.QUrl("smilies/%s" % (smiledict[k])),
+                              "smilies/%s" % (smiledict[k]))
         #self.mainwindow.animationSetting[bool].connect(self.animateChanged)
 
     def initTheme(self, theme):
         if "memos/scrollbar" in theme:
-            self.setStyleSheet("QTextEdit { %s } QScrollBar:vertical { %s } QScrollBar::handle:vertical { %s } QScrollBar::add-line:vertical { %s } QScrollBar::sub-line:vertical { %s } QScrollBar:up-arrow:vertical { %s } QScrollBar:down-arrow:vertical { %s }" % (theme["memos/textarea/style"], theme["memos/scrollbar/style"], theme["memos/scrollbar/handle"], theme["memos/scrollbar/downarrow"], theme["memos/scrollbar/uparrow"], theme["memos/scrollbar/uarrowstyle"], theme["memos/scrollbar/darrowstyle"] ))
+            self.setStyleSheet("QTextEdit { %s }"
+                               "QScrollBar:vertical { %s }"
+                               "QScrollBar::handle:vertical { %s }"
+                               "QScrollBar::add-line:vertical { %s }"
+                               "QScrollBar::sub-line:vertical { %s }"
+                               "QScrollBar:up-arrow:vertical { %s }"
+                               "QScrollBar:down-arrow:vertical { %s }"
+                               % (theme["memos/textarea/style"],
+                                  theme["memos/scrollbar/style"],
+                                  theme["memos/scrollbar/handle"],
+                                  theme["memos/scrollbar/downarrow"],
+                                  theme["memos/scrollbar/uparrow"],
+                                  theme["memos/scrollbar/uarrowstyle"],
+                                  theme["memos/scrollbar/darrowstyle"] ))
         else:
             self.setStyleSheet("QTextEdit { %s }" % theme["memos/textarea/style"])
 
         # So it doesn't inherit the memo's background image.
         # Fixes floating "PESTERLOG:"
         try:
-            self.setStyleSheet(self.styleSheet() + " QMenu{" + theme["main/defaultwindow/style"] + "}")
+            self.setStyleSheet(self.styleSheet()
+                               + ("QMenu{ %s }"
+                                  % theme["main/defaultwindow/style"]))
         except:
             pass
 
@@ -343,7 +360,10 @@ class MemoText(PesterText):
 
         if time.isFirstTime():
             grammar = time.getGrammar()
-            joinmsg = chum.memojoinmsg(systemColor, time.getTime(), grammar, window.theme["convo/text/joinmemo"])
+            joinmsg = chum.memojoinmsg(systemColor,
+                                       time.getTime(),
+                                       grammar,
+                                       window.theme["convo/text/joinmemo"])
             self.append(convertTags(joinmsg))
             parent.mainwindow.chatlog.log(parent.channel, joinmsg)
             time.openCurrentTime()
@@ -369,7 +389,6 @@ class MemoInput(PesterInput):
     # karxi: Because of the use of stylesheet_path, we don't have to rewrite
     # this code.
     # Neat, huh?
-    pass # So vim recognizes the end of this class
 
 class PesterMemo(PesterConvo):
     # TODO: Clean up inheritance between these!! The inits are ugly.
@@ -382,7 +401,8 @@ class PesterMemo(PesterConvo):
         self.time = TimeTracker(txt2delta(timestr))
         self.setWindowTitle(channel)
         self.channelLabel = QtWidgets.QLabel(self)
-        self.channelLabel.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.MinimumExpanding, QtWidgets.QSizePolicy.Policy.Expanding))
+        self.channelLabel.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+                                                              QtWidgets.QSizePolicy.Policy.Expanding))
 
         self.textArea = MemoText(self.mainwindow.theme, self)
         self.textInput = MemoInput(self.mainwindow.theme, self)
@@ -395,7 +415,8 @@ class PesterMemo(PesterConvo):
 
 
         self.userlist = RightClickList(self)
-        self.userlist.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Expanding))
+        self.userlist.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed,
+                                                          QtWidgets.QSizePolicy.Policy.Expanding))
         self.userlist.optionsMenu = QtWidgets.QMenu(self)
         self.pesterChumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
         self.pesterChumAction.triggered.connect(self.newPesterSlot)
@@ -538,7 +559,11 @@ class PesterMemo(PesterConvo):
         p = self.mainwindow.profile()
         timeGrammar = self.time.getGrammar()
         systemColor = QtGui.QColor(self.mainwindow.theme["memos/systemMsgColor"])
-        msg = p.memoopenmsg(systemColor, self.time.getTime(), timeGrammar, self.mainwindow.theme["convo/text/openmemo"], self.channel)
+        msg = p.memoopenmsg(systemColor,
+                            self.time.getTime(),
+                            timeGrammar,
+                            self.mainwindow.theme["convo/text/openmemo"],
+                            self.channel)
         self.time.openCurrentTime()
         self.textArea.append(convertTags(msg))
         self.mainwindow.chatlog.log(self.channel, msg)
@@ -558,11 +583,13 @@ class PesterMemo(PesterConvo):
         if self.userlist.isHidden():
             self.userlist.show()
             self.miniUserlist.setText(">\n>")
-            self.miniUserlist.setStyleSheet("%s border-width: 2px 0px 2px 2px;" % self.miniUserlist.styleSheet())
+            self.miniUserlist.setStyleSheet("%s border-width: 2px 0px 2px 2px;"
+                                            % self.miniUserlist.styleSheet())
         else:
             self.userlist.hide()
             self.miniUserlist.setText("<\n<")
-            self.miniUserlist.setStyleSheet("%s border-width: 2px;" % self.miniUserlist.styleSheet())
+            self.miniUserlist.setStyleSheet("%s border-width: 2px;"
+                                            % self.miniUserlist.styleSheet())
 
     def title(self):
         return self.channel
@@ -603,25 +630,63 @@ class PesterMemo(PesterConvo):
         else:
             self.channelLabel.setText(t.safe_substitute(channel=self.channel))
         self.channelLabel.setStyleSheet(theme["memos/label/style"])
-        self.channelLabel.setAlignment(self.aligndict["h"][theme["memos/label/align/h"]] | self.aligndict["v"][theme["memos/label/align/v"]])
+        self.channelLabel.setAlignment(self.aligndict["h"][theme["memos/label/align/h"]]
+                                       | self.aligndict["v"][theme["memos/label/align/v"]])
         self.channelLabel.setMaximumHeight(theme["memos/label/maxheight"])
         self.channelLabel.setMinimumHeight(theme["memos/label/minheight"])
 
         self.userlist.optionsMenu.setStyleSheet(theme["main/defaultwindow/style"])
         scrolls = "width: 12px; height: 12px; border: 0; padding: 0;"
         if "main/chums/scrollbar" in theme:
-            self.userlist.setStyleSheet("QListWidget { %s } QScrollBar { %s } QScrollBar::handle { %s } QScrollBar::add-line { %s } QScrollBar::sub-line { %s } QScrollBar:up-arrow { %s } QScrollBar:down-arrow { %s }" % (theme["memos/userlist/style"], theme["main/chums/scrollbar/style"] + scrolls, theme["main/chums/scrollbar/handle"], theme["main/chums/scrollbar/downarrow"], theme["main/chums/scrollbar/uparrow"], theme["main/chums/scrollbar/uarrowstyle"], theme["main/chums/scrollbar/darrowstyle"] ))
+            self.userlist.setStyleSheet("QListWidget { %s }"
+                                        "QScrollBar { %s }"
+                                        "QScrollBar::handle { %s }"
+                                        "QScrollBar::add-line { %s }"
+                                        "QScrollBar::sub-line { %s }"
+                                        "QScrollBar:up-arrow { %s }"
+                                        "QScrollBar:down-arrow { %s }"
+                                        % (theme["memos/userlist/style"],
+                                           theme["main/chums/scrollbar/style"] + scrolls,
+                                           theme["main/chums/scrollbar/handle"],
+                                           theme["main/chums/scrollbar/downarrow"],
+                                           theme["main/chums/scrollbar/uparrow"],
+                                           theme["main/chums/scrollbar/uarrowstyle"],
+                                           theme["main/chums/scrollbar/darrowstyle"]))
         elif "convo/scrollbar" in theme:
-            self.userlist.setStyleSheet("QListWidget { %s } QScrollBar { %s } QScrollBar::handle { %s } QScrollBar::add-line { %s } QScrollBar::sub-line { %s } QScrollBar:up-arrow { %s } QScrollBar:down-arrow { %s }" % (theme["memos/userlist/style"], theme["convo/scrollbar/style"] + scrolls, theme["convo/scrollbar/handle"], "display:none;", "display:none;", "display:none;", "display:none;" ))
+            self.userlist.setStyleSheet("QListWidget { %s }"
+                                        "QScrollBar { %s }"
+                                        "QScrollBar::handle { %s }"
+                                        "QScrollBar::add-line { %s }"
+                                        "QScrollBar::sub-line { %s }"
+                                        "QScrollBar:up-arrow { %s }"
+                                        "QScrollBar:down-arrow { %s }"
+                                        % (theme["memos/userlist/style"],
+                                           theme["convo/scrollbar/style"] + scrolls,
+                                           theme["convo/scrollbar/handle"],
+                                           "display: none;",
+                                           "display: none;",
+                                           "display: none;",
+                                           "display: none;"))
         else:
-            self.userlist.setStyleSheet("QListWidget { %s } QScrollBar { %s } QScrollBar::handle { %s }" % (theme["memos/userlist/style"], scrolls, "background-color: black;"))
+            self.userlist.setStyleSheet("QListWidget { %s }"
+                                        "QScrollBar { %s }"
+                                        "QScrollBar::handle { %s }"
+                                        % (theme["memos/userlist/style"],
+                                           scrolls,
+                                           "background-color: black;"))
         self.userlist.setFixedWidth(theme["memos/userlist/width"])
 
         if self.userlist.isHidden():
             borders = "border-width: 2px;"
         else:
             borders = "border-width: 2px 0px 2px 2px;"
-        self.miniUserlist.setStyleSheet("%s padding: 0px; margin: 0px; margin-left: 5px; width: 10px; height: 90px; %s" % (theme["memos/userlist/style"], borders))
+        self.miniUserlist.setStyleSheet("padding: 0px;"
+                                        "margin: 0px;"
+                                        "margin-left: 5px;"
+                                        "width: 10px;"
+                                        "height: 90px;"
+                                        + borders
+                                        + theme["memos/userlist/style"])
 
         self.addchumAction.setText(theme["main/menus/rclickchumlist/addchum"])
         self.banuserAction.setText(theme["main/menus/rclickchumlist/banuser"])
@@ -639,7 +704,12 @@ class PesterMemo(PesterConvo):
 
         self.timeinput.setFixedWidth(theme["memos/time/text/width"])
         self.timeinput.setStyleSheet(theme["memos/time/text/style"])
-        slidercss = "QSlider { %s } QSlider::groove { %s } QSlider::handle { %s }" % (theme["memos/time/slider/style"], theme["memos/time/slider/groove"], theme["memos/time/slider/handle"])
+        slidercss = ("QSlider { %s }"
+                    "Slider::groove { %s }"
+                    "QSlider::handle { %s }"
+                     % (theme["memos/time/slider/style"],
+                        theme["memos/time/slider/groove"],
+                        theme["memos/time/slider/handle"]))
         self.timeslider.setStyleSheet(slidercss)
 
         larrow = PesterIcon(self.mainwindow.theme["memos/time/arrows/left"])
@@ -1012,7 +1082,8 @@ class PesterMemo(PesterConvo):
         self.modes = "+" + "".join(chanmodes)
         if self.mainwindow.advanced:
             t = Template(self.mainwindow.theme["memos/label/text"])
-            self.channelLabel.setText(t.safe_substitute(channel=self.channel) + "(%s)" % (self.modes))
+            self.channelLabel.setText(t.safe_substitute(channel=self.channel)
+                                      + "(%s)" % (self.modes))
 
     def timeUpdate(self, handle, cmd):
         window = self.mainwindow
@@ -1051,7 +1122,9 @@ class PesterMemo(PesterConvo):
                     self.times[handle].setCurrent(close)
                     grammar = self.times[handle].getGrammar()
                     self.times[handle].removeTime(close)
-                    msg = chum.memoclosemsg(systemColor, grammar, window.theme["convo/text/closememo"])
+                    msg = chum.memoclosemsg(systemColor,
+                                            grammar,
+                                            window.theme["convo/text/closememo"])
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
             elif timed not in self.times[handle]:
@@ -1097,9 +1170,11 @@ class PesterMemo(PesterConvo):
             else:
                 self.close()
             msgbox = QtWidgets.QMessageBox()
-            msgbox.setStyleSheet("QMessageBox{" + self.mainwindow.theme["main/defaultwindow/style"] + "}")
+            msgbox.setStyleSheet("QMessageBox{ %s }"
+                                 % self.mainwindow.theme["main/defaultwindow/style"])
             msgbox.setText("%s: Invites only!" % (c))
-            msgbox.setInformativeText("This channel is invite-only. You must get an invitation from someone on the inside before entering.")
+            msgbox.setInformativeText("This channel is invite-only. "
+                                      "You must get an invitation from someone on the inside before entering.")
             msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
             msgbox.exec()
 
@@ -1115,7 +1190,8 @@ class PesterMemo(PesterConvo):
             else:
                 self.close()
             msgbox = QtWidgets.QMessageBox()
-            msgbox.setStyleSheet("QMessageBox{" + self.mainwindow.theme["main/defaultwindow/style"] + "}")
+            msgbox.setStyleSheet("QMessageBox{ %s }"
+                                 % self.mainwindow.theme["main/defaultwindow/style"])
             msgbox.setText("%s: D: CANT JOIN MEMO!!!" % (c))
             msgbox.setInformativeText(reason)
             msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
@@ -1216,7 +1292,9 @@ class PesterMemo(PesterConvo):
             if update == "netsplit":
                 if not hasattr(self, "netsplit"):
                     self.netsplit = []
-                    QtCore.QTimer.singleShot(1500, self, QtCore.SLOT('dumpNetsplit()'))
+                    QtCore.QTimer.singleShot(1500,
+                                             self,
+                                             QtCore.SLOT('dumpNetsplit()'))
             for c in chums:
                 chum = PesterProfile(h)
                 self.userlist.takeItem(self.userlist.row(c))
@@ -1226,17 +1304,22 @@ class PesterMemo(PesterConvo):
                 while self.times[h].getTime() is not None:
                     t = self.times[h]
                     grammar = t.getGrammar()
-                    allinitials.append("%s%s%s" % (grammar.pcf, chum.initials(), grammar.number))
+                    allinitials.append("%s%s%s" % (grammar.pcf,
+                                                   chum.initials(),
+                                                   grammar.number))
                     self.times[h].removeTime(t.getTime())
                 if update == "netsplit":
                     self.netsplit.extend(allinitials)
                 else:
-                    msg = chum.memoclosemsg(systemColor, allinitials, self.mainwindow.theme["convo/text/closememo"])
+                    msg = chum.memoclosemsg(systemColor,
+                                            allinitials,
+                                            self.mainwindow.theme["convo/text/closememo"])
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
                 if update == "nick":
                     self.addUser(newnick)
-                    newchums = self.userlist.findItems(newnick, QtCore.Qt.MatchFlag.MatchExactly)
+                    newchums = self.userlist.findItems(newnick,
+                                                       QtCore.Qt.MatchFlag.MatchExactly)
                     for nc in newchums:
                         for c in chums:
                             nc.founder = c.founder
@@ -1277,7 +1360,8 @@ class PesterMemo(PesterConvo):
             if chum is self.mainwindow.profile():
                 # are you next?
                 msgbox = QtWidgets.QMessageBox()
-                msgbox.setStyleSheet("QMessageBox{" + self.mainwindow.theme["main/defaultwindow/style"] + "}")
+                msgbox.setStyleSheet("QMessageBox{ %s }"
+                                     % self.mainwindow.theme["main/defaultwindow/style"])
                 msgbox.setText(self.mainwindow.theme["convo/text/kickedmemo"])
 
                 # Add ban(kick) reason
@@ -1319,7 +1403,11 @@ class PesterMemo(PesterConvo):
                     self.mainwindow.joinChannel.emit(self.channel)
                     me = self.mainwindow.profile()
                     self.time.openCurrentTime()
-                    msg = me.memoopenmsg(systemColor, self.time.getTime(), self.time.getGrammar(), self.mainwindow.theme["convo/text/openmemo"], self.channel)
+                    msg = me.memoopenmsg(systemColor,
+                                         self.time.getTime(),
+                                         self.time.getGrammar(),
+                                         self.mainwindow.theme["convo/text/openmemo"],
+                                         self.channel)
                     self.textArea.append(convertTags(msg))
                     self.mainwindow.chatlog.log(self.channel, msg)
                 elif ret == QtWidgets.QMessageBox.StandardButton.Cancel:
@@ -1349,9 +1437,10 @@ class PesterMemo(PesterConvo):
         elif update == "+o":
             if self.mainwindow.config.opvoiceMessages():
                 (chum, opchum, opgrammar) = self.chumOPstuff(h, op)
-                PchumLog.debug("chum.handle = %s\nopchum.handle = %s\nopgrammar = %s\n systemColor = %s\n" % (chum.handle, opchum.handle, opgrammar, systemColor))
+                #PchumLog.debug("chum.handle = %s\nopchum.handle = %s\nopgrammar = %s\n systemColor = %s\n"
+                #               % (chum.handle, opchum.handle, opgrammar, systemColor))
                 msg = chum.memoopmsg(opchum, opgrammar, systemColor)
-                PchumLog.debug("post memoopmsg")
+                #PchumLog.debug("post memoopmsg")
                 self.textArea.append(convertTags(msg))
                 self.mainwindow.chatlog.log(self.channel, msg)
             for c in chums:
@@ -1469,7 +1558,9 @@ class PesterMemo(PesterConvo):
         if not self.userlist.currentItem():
             return
         currentHandle = str(self.userlist.currentItem().text())
-        (reason, ok) = QtWidgets.QInputDialog.getText(self, "Ban User", "Enter the reason you are banning this user (optional):")
+        (reason, ok) = QtWidgets.QInputDialog.getText(self,
+                                                      "Ban User",
+                                                      "Enter the reason you are banning this user (optional):")
         if ok:
             self.mainwindow.kickUser.emit("%s:%s" % (currentHandle, reason), self.channel)
     @QtCore.pyqtSlot()
@@ -1500,7 +1591,10 @@ class PesterMemo(PesterConvo):
     @QtCore.pyqtSlot()
     def openChumLogs(self):
         currentChum = self.channel
-        self.mainwindow.chumList.pesterlogviewer = PesterLogViewer(currentChum, self.mainwindow.config, self.mainwindow.theme, self.mainwindow)
+        self.mainwindow.chumList.pesterlogviewer = PesterLogViewer(currentChum,
+                                                                   self.mainwindow.config,
+                                                                   self.mainwindow.theme,
+                                                                   self.mainwindow)
         self.mainwindow.chumList.pesterlogviewer.rejected.connect(self.mainwindow.chumList.closeActiveLog)
         self.mainwindow.chumList.pesterlogviewer.show()
         self.mainwindow.chumList.pesterlogviewer.raise_()
@@ -1511,7 +1605,9 @@ class PesterMemo(PesterConvo):
         if not hasattr(self, 'invitechums'):
             self.invitechums = None
         if not self.invitechums:
-            (chum, ok) = QtWidgets.QInputDialog.getText(self, "Invite to Chat", "Enter the chumhandle of the user you'd like to invite:")
+            (chum, ok) = QtWidgets.QInputDialog.getText(self,
+                                                        "Invite to Chat",
+                                                        "Enter the chumhandle of the user you'd like to invite:")
             if ok:
                 chum = str(chum)
                 self.mainwindow.inviteChum.emit(chum, self.channel)
@@ -1581,7 +1677,107 @@ class PesterMemo(PesterConvo):
     windowClosed = QtCore.pyqtSignal('QString')
 
 
-timelist = ["0:00", "0:01", "0:02", "0:04", "0:06", "0:10", "0:14", "0:22", "0:30", "0:41", "1:00", "1:34", "2:16", "3:14", "4:13", "4:20", "5:25", "6:12", "7:30", "8:44", "10:25", "11:34", "14:13", "16:12", "17:44", "22:22", "25:10", "33:33", "42:00", "43:14", "50:00", "62:12", "75:00", "88:44", "100", "133", "143", "188", "200", "222", "250", "314", "333", "413", "420", "500", "600", "612", "888", "1000", "1025"]
+timelist = ["0:00",
+            "0:01",
+            "0:02",
+            "0:04",
+            "0:06",
+            "0:10",
+            "0:14",
+            "0:22",
+            "0:30",
+            "0:41",
+            "1:00",
+            "1:34",
+            "2:16",
+            "3:14",
+            "4:13",
+            "4:20",
+            "5:25",
+            "6:12",
+            "7:30",
+            "8:44",
+            "10:25",
+            "11:34",
+            "14:13",
+            "16:12",
+            "17:44",
+            "22:22",
+            "25:10",
+            "33:33",
+            "42:00",
+            "43:14",
+            "50:00",
+            "62:12",
+            "75:00",
+            "88:44",
+            "100",
+            "133",
+            "143",
+            "188",
+            "200",
+            "222",
+            "250",
+            "314",
+            "333",
+            "413",
+            "420",
+            "500",
+            "600",
+            "612",
+            "888",
+            "1000",
+            "1025"]
 
-timedlist = [timedelta(0), timedelta(0, 60), timedelta(0, 120), timedelta(0, 240), timedelta(0, 360), timedelta(0, 600), timedelta(0, 840), timedelta(0, 1320), timedelta(0, 1800), timedelta(0, 2460), timedelta(0, 3600), timedelta(0, 5640), timedelta(0, 8160), timedelta(0, 11640), timedelta(0, 15180), timedelta(0, 15600), timedelta(0, 19500), timedelta(0, 22320), timedelta(0, 27000), timedelta(0, 31440), timedelta(0, 37500), timedelta(0, 41640), timedelta(0, 51180), timedelta(0, 58320), timedelta(0, 63840), timedelta(0, 80520), timedelta(1, 4200), timedelta(1, 34380), timedelta(1, 64800), timedelta(1, 69240), timedelta(2, 7200), timedelta(2, 51120), timedelta(3, 10800), timedelta(3, 60240), timedelta(4, 14400), timedelta(5, 46800), timedelta(5, 82800), timedelta(7, 72000), timedelta(8, 28800), timedelta(9, 21600), timedelta(10, 36000), timedelta(13, 7200), timedelta(13, 75600), timedelta(17, 18000), timedelta(17, 43200), timedelta(20, 72000), timedelta(25), timedelta(25, 43200), timedelta(37), timedelta(41, 57600), timedelta(42, 61200)]
+timedlist = [timedelta(0),
+             timedelta(0, 60),
+             timedelta(0, 120),
+             timedelta(0, 240),
+             timedelta(0, 360),
+             timedelta(0, 600),
+             timedelta(0, 840),
+             timedelta(0, 1320),
+             timedelta(0, 1800),
+             timedelta(0, 2460),
+             timedelta(0, 3600),
+             timedelta(0, 5640),
+             timedelta(0, 8160),
+             timedelta(0, 11640),
+             timedelta(0, 15180),
+             timedelta(0, 15600),
+             timedelta(0, 19500),
+             timedelta(0, 22320),
+             timedelta(0, 27000),
+             timedelta(0, 31440),
+             timedelta(0, 37500),
+             timedelta(0, 41640),
+             timedelta(0, 51180),
+             timedelta(0, 58320),
+             timedelta(0, 63840),
+             timedelta(0, 80520),
+             timedelta(1, 4200),
+             timedelta(1, 34380),
+             timedelta(1, 64800),
+             timedelta(1, 69240),
+             timedelta(2, 7200),
+             timedelta(2, 51120),
+             timedelta(3, 10800),
+             timedelta(3, 60240),
+             timedelta(4, 14400),
+             timedelta(5, 46800),
+             timedelta(5, 82800),
+             timedelta(7, 72000),
+             timedelta(8, 28800),
+             timedelta(9, 21600),
+             timedelta(10, 36000),
+             timedelta(13, 7200),
+             timedelta(13, 75600),
+             timedelta(17, 18000),
+             timedelta(17, 43200),
+             timedelta(20, 72000),
+             timedelta(25),
+             timedelta(25, 43200),
+             timedelta(37),
+             timedelta(41, 57600),
+             timedelta(42, 61200)]
 

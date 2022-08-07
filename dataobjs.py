@@ -202,9 +202,9 @@ class pesterQuirks(object):
                                 recvparts.append(q.apply(part))
                         # Reconstruct and update string.
                         string = ''
-                        print("excludes: " + str(excludes))
-                        print("sendparts: " + str(sendparts))
-                        print("recvparts: " + str(recvparts))
+                        #print("excludes: " + str(excludes))
+                        #print("sendparts: " + str(sendparts))
+                        #print("recvparts: " + str(recvparts))
                         for part in range(0, len(excludes)):
                             string += recvparts[part]
                             string += excludes[part].group()
@@ -235,10 +235,6 @@ class pesterQuirks(object):
                         string = q.apply(string)
                     elif q.type == 'suffix' and lastStr:
                         string = q.apply(string)
-                    
-                
-                
-                    
             newlist.append(string)
         final = []
         for n in newlist:
