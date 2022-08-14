@@ -1,10 +1,17 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
-## [v2.4.2] - 2022-07-08
+## [v2.4.2] - 2022-08-14
+
+### Added
+ - Application-level connection checks:
+    - Send ping if we haven't received any data from the server in 30 seconds.
+    - Show S3RV3R NOT R3SPOND1NG if the server hasn't responded in 45 seconds. (15 seconds after ping)
+    - Close connection and try to reconnect if the server hasn't responded in 90 seconds. (60 seconds after ping)
 
 ### Fixed
  - Error when manually moving group.
+ - EOF on send not resulting in a disconnect.
 
 ## [v2.4.1] - 2022-07-05
 

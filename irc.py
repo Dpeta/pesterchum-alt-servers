@@ -40,6 +40,7 @@ class PesterIRC(QtCore.QThread):
         QtCore.QThread.__init__(self)
         self.mainwindow = window
         self.config = config
+        self.unresponsive = False
         self.registeredIRC = False
         self.metadata_supported = False
         self.stopIRC = None
@@ -68,6 +69,7 @@ class PesterIRC(QtCore.QThread):
             res = True
             try:
                 PchumLog.debug("updateIRC()")
+                self.mainwindow.sincerecv = 0
                 res = self.updateIRC()
             except socket.timeout as se:
                 PchumLog.debug("timeout in thread %s" % (self))
@@ -340,7 +342,8 @@ class PesterIRC(QtCore.QThread):
     @QtCore.pyqtSlot()
     def pingServer(self):
         try:
-            self.cli.send("PING %s" % int(time.time()))
+            self.cli.send("PING :B33")
+            #self.cli.send("PING %s" % int(time.time()))
         except OSError as e:
             PchumLog.warning(e)
             self.setConnectionBroken()
@@ -537,6 +540,13 @@ class PesterHandler(DefaultCommandHandler):
                 self.parent.messageReceived.emit(handle, msg)
 
 
+    def pong(self, *args):
+        # source, server, token
+        #print("PONG", source, server, token)
+        #self.parent.mainwindow.lastrecv = time.time()
+        #print("PONG TIME: %s" % self.parent.mainwindow.lastpong)
+        pass
+            
     def welcome(self, server, nick, msg):
         self.parent.setConnected()
         #mychumhandle = self.mainwindow.profile().handle
@@ -839,7 +849,7 @@ class PesterHandler(DefaultCommandHandler):
         self.parent.userPresentUpdate.emit(handle, channel, "left")
         
     def ping(self, prefix, server):
-        self.parent.mainwindow.lastping = int(time.time())
+        #self.parent.mainwindow.lastping = time.time()
         self.client.send('PONG', server)
 
     def getMood(self, *chums):

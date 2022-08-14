@@ -180,10 +180,10 @@ class IRCClient:
                     pass
                 else:
                     #raise se
-                    _end = True  # This ok?
+                    self._end = True  # This ok?
             except AttributeError:
                 #raise se
-                _end = True  # This ok?
+                self._end = True  # This ok?
 
     def connect(self):
         """ initiates the connection to the server set in self.host:self.port 
@@ -222,6 +222,17 @@ class IRCClient:
             self.socket.setblocking(False)
         elif self.blocking:
             self.socket.setblocking(True)
+
+        #try:
+        #    self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        #    if hasattr(socket, "TCP_KEEPIDLE"):
+        #        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)
+        #    if hasattr(socket, "TCP_KEEPINTVL"):
+        #        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 1)
+        #    if hasattr(socket, "TCP_KEEPCNT"):
+        #        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 1)
+        #except Exception as e:
+        #    print(e)
         
         helpers.nick(self, self.nick)
         helpers.user(self, self.username, self.realname)

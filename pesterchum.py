@@ -1500,8 +1500,8 @@ class PesterWindow(MovingWindow):
 
         self.pingtimer = QtCore.QTimer()
         self.pingtimer.timeout.connect(self.checkPing)
-        self.lastping = int(time.time())
-        self.pingtimer.start(1000*90)
+        self.sincerecv = 0 # Time since last recv
+        self.pingtimer.start(1000*15) # time in ms
 
         self.mychumhandleLabel.adjustSize() # Required so "CHUMHANDLE:" regardless of style-sheet.
         self.moodsLabel.adjustSize()        # Required so "MOOD:" regardless of style-sheet.
@@ -1545,9 +1545,35 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot()
     def checkPing(self):
-        curtime = int(time.time())
-        if curtime - self.lastping > 600:
+        '''Check if server is alive on app level,
+        this function is called every 15sec'''
+        # Return without irc
+        if hasattr(self.parent, 'irc') == False:
+            return
+        
+        # Presume connection is dead after 90 seconds of silence.
+        if self.sincerecv >= 90:
+            self.disconnectIRC.emit()
+
+        # Show unresponsive if timing out
+        if self.sincerecv >= 45:
+            if self.parent.irc.unresponsive == False:
+                self.parent.irc.unresponsive = True
+                self.parent.showLoading(self.parent.widget,
+                                        "S3RV3R NOT R3SPOND1NG >:?")
+                self.show()
+                self.setFocus()
+        else:
+            self.parent.irc.unresponsive = False
+            if self.loadingscreen:
+                self.loadingscreen.done(QtWidgets.QDialog.DialogCode.Accepted)
+            
+        
+        # Send a ping if it's been 30 seconds since we've heard from the server.
+        if self.sincerecv >= 30:
             self.pingServer.emit()
+
+        self.sincerecv += 15 # Only updating every 10s is better for performance.
 
     def profile(self):
         return self.userprofile.chat
@@ -3972,7 +3998,9 @@ class MainProgram(QtCore.QObject):
             widget.loadingscreen.loadinglabel.setText(msg)
             widget.loadingscreen.rejected.connect(widget.app.quit)
             self.widget.loadingscreen.tryAgain.connect(self.tryAgain)
-            if hasattr(self, 'irc') and self.irc.registeredIRC:
+            if (hasattr(self, 'irc')
+                and self.irc.registeredIRC
+                and self.irc.unresponsive == False):
                 return
             if self.reconnectok:
                 widget.loadingscreen.showReconnect()
