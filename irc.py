@@ -754,14 +754,17 @@ class PesterHandler(DefaultCommandHandler):
                 #self.parent.userPresentUpdate.emit("", channel, m+":%s" % (op))
                 
     def nick(self, oldnick, newnick, hopcount=0):
-        # NICK from/to us
+        PchumLog.info("%s, %s" % (oldnick, newnick))
+        # svsnick
         if oldnick == self.mainwindow.profile().handle:
             # Server changed our handle, svsnick?
             self.parent.getSvsnickedOn.emit(oldnick, newnick)
 
-        # NICK from/to someone else
+        # etc.
         oldhandle = oldnick[0:oldnick.find("!")]
-        if oldhandle == self.mainwindow.profile().handle:
+        if ((oldhandle == self.mainwindow.profile().handle)
+            or (newnick == self.mainwindow.profile().handle)):
+            #print('hewwo')
             self.parent.myHandleChanged.emit(newnick)
         newchum = PesterProfile(newnick, chumdb=self.mainwindow.chumdb)
         self.parent.moodUpdated.emit(oldhandle, Mood("offline"))
@@ -792,7 +795,14 @@ class PesterHandler(DefaultCommandHandler):
     #        helpers.msg(self.client, "#pesterchum", getglub)
             
     def endofnames(self, server, nick, channel, msg):
-        namelist = self.channelnames[channel]
+        try:
+            namelist = self.channelnames[channel]
+        except KeyError:
+            # EON seems to return with wrong capitalization sometimes?
+            for cn in self.channelnames.keys():
+                if channel.lower() == cn.lower():
+                    channel = cn
+                    namelist = self.channelnames[channel]
         pl = PesterList(namelist)
         del self.channelnames[channel]
         self.parent.namesReceived.emit(channel, pl)

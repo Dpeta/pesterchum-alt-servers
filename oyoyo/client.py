@@ -321,6 +321,7 @@ class IRCClient:
 
                     for el in data:
                         tags, prefix, command, args = parse_raw_irc_command(el)
+                        print(tags, prefix, command, args)
                         try:
                             # Only need tags with tagmsg
                             if command.upper() == "TAGMSG":

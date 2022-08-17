@@ -1573,7 +1573,7 @@ class PesterWindow(MovingWindow):
         if self.sincerecv >= 30:
             self.pingServer.emit()
 
-        self.sincerecv += 15 # Only updating every 10s is better for performance.
+        self.sincerecv += 15 # Only updating every 15s is better for performance.
 
     def profile(self):
         return self.userprofile.chat
@@ -3316,6 +3316,9 @@ class PesterWindow(MovingWindow):
             self.changeProfile(svsnick=(oldhandle, newhandle))
     @QtCore.pyqtSlot(QString)
     def myHandleChanged(self, handle):
+        # Update nick in channels
+        for memo in self.memos.keys():
+            self.requestNames.emit(memo)
         if self.profile().handle == handle:
             self.doAutoIdentify()
             self.doAutoJoins()
