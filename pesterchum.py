@@ -1244,7 +1244,7 @@ class PesterWindow(MovingWindow):
             msgBox.setWindowTitle(":(")
             msgBox.setTextFormat(QtCore.Qt.TextFormat.RichText) # Clickable html links
             self.filename = _datadir+"pesterchum.js"
-            msgBox.setText("<html><h3>A profile error occured,"
+            msgBox.setText("<html><h3>A profile error occured, "
                            "trying to switch to default pesterClient profile."
                            "<br><br>%s<\h3><\html>" % e)
             PchumLog.critical(e)
@@ -3772,7 +3772,21 @@ class MainProgram(QtCore.QObject):
         #self.app.setQuitOnLastWindowClosed(False)
 
         options = self.oppts(sys.argv[1:])
-
+        
+        # Check if the user is a silly little guy
+        for folder in ['smilies', 'themes']:
+            if not os.path.isdir(folder):
+                msgbox = QtWidgets.QMessageBox()
+                msg = ("'%s' folder not found, Pesterchum will "
+                       "probably not function correctly."
+                       "\nIf this is an excecutable build, "
+                       "verify you extracted the zipfile." % folder)
+                msgbox.setWindowTitle("SK1LL 1SSU3 >:[")
+                msgbox.setInformativeText(msg)
+                msgbox.setIcon(QtWidgets.QMessageBox.Icon.Critical)
+                msgbox.exec()
+            
+        
         # If we're using pygame for sound we need to init
         if 'pygame' in sys.modules:
             # we could set the frequency higher but i love how cheesy it sounds

@@ -9,6 +9,7 @@
     - Show S3RV3R NOT R3SPOND1NG if the server hasn't responded in 45 seconds. (15 seconds after ping)
     - Close connection and try to reconnect if the server hasn't responded in 90 seconds. (60 seconds after ping)
  - Fallback to PyQt5. (for Windows 7 users mainly)
+ - Warning for people who forgot to extract the zipfile.
  
 ### Fixed
  - Error when manually moving group.
