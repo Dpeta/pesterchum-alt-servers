@@ -1,10 +1,17 @@
+import sys
 import logging
 import logging.config
 from string import Template
 from time import strftime
 from datetime import datetime, timedelta
 
-from PyQt6 import QtCore, QtGui, QtWidgets
+try:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+    from PyQt6.QtGui import QShortcut, QAction
+except ImportError:
+    print("PyQt5 fallback (convo.py)")
+    from PyQt5 import QtCore, QtGui, QtWidgets
+    from PyQt5.QtWidgets import QAction, QShortcut
 
 import ostools
 from dataobjs import PesterHistory
@@ -33,17 +40,17 @@ class PesterTabWindow(QtWidgets.QFrame):
         self.tabs.tabMoved[int, int].connect(self.tabMoved)
 
         self.shortcuts = AttrDict()
-        self.shortcuts.tabNext = QtGui.QShortcut(
+        self.shortcuts.tabNext = QShortcut(
                 QtGui.QKeySequence('Ctrl+j'), self,
                 context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        self.shortcuts.tabLast = QtGui.QShortcut(
+        self.shortcuts.tabLast = QShortcut(
                 QtGui.QKeySequence('Ctrl+k'), self,
                 context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut)
         # Note that we use reversed keys here.
-        self.shortcuts.tabUp = QtGui.QShortcut(
+        self.shortcuts.tabUp = QShortcut(
                 QtGui.QKeySequence('Ctrl+PgDown'), self,
                 context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        self.shortcuts.tabDn = QtGui.QShortcut(
+        self.shortcuts.tabDn = QShortcut(
                 QtGui.QKeySequence('Ctrl+PgUp'), self,
                 context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut)
 
@@ -523,7 +530,10 @@ class PesterText(QtWidgets.QTextEdit):
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
-            url = self.anchorAt(event.position().toPoint())
+            if 'PyQt6' in sys.modules:
+                url = self.anchorAt(event.position().toPoint())
+            if 'PyQt5' in sys.modules:
+                url = self.anchorAt(event.pos())
             if url != "":
                 if url[0] == "#" and url != "#pesterchum":
                     self.parent().mainwindow.showMemos(url[1:])
@@ -539,7 +549,11 @@ class PesterText(QtWidgets.QTextEdit):
         QtWidgets.QTextEdit.mousePressEvent(self, event)
     def mouseMoveEvent(self, event):
         QtWidgets.QTextEdit.mouseMoveEvent(self, event)
-        if self.anchorAt(event.position().toPoint()):
+        if 'PyQt6' in sys.modules:
+            pos = event.position().toPoint()
+        if 'PyQt5' in sys.modules:
+            pos = event.pos()
+        if self.anchorAt(pos):
             if self.viewport().cursor().shape != QtCore.Qt.CursorShape.PointingHandCursor:
                 self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
         else:
@@ -627,21 +641,21 @@ class PesterConvo(QtWidgets.QFrame):
 
         self.optionsMenu = QtWidgets.QMenu(self)
         self.optionsMenu.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
-        self.addChumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
+        self.addChumAction = QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
         self.addChumAction.triggered.connect(self.addThisChum)
-        self.blockAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/blockchum"], self)
+        self.blockAction = QAction(self.mainwindow.theme["main/menus/rclickchumlist/blockchum"], self)
         self.blockAction.triggered.connect(self.blockThisChum)
-        self.quirksOff = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirksoff"], self)
+        self.quirksOff = QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirksoff"], self)
         self.quirksOff.setCheckable(True)
         self.quirksOff.toggled[bool].connect(self.toggleQuirks)
-        self.oocToggle = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/ooc"], self)
+        self.oocToggle = QAction(self.mainwindow.theme["main/menus/rclickchumlist/ooc"], self)
         self.oocToggle.setCheckable(True)
         self.oocToggle.toggled[bool].connect(self.toggleOOC)
-        self.unblockchum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/unblockchum"], self)
+        self.unblockchum = QAction(self.mainwindow.theme["main/menus/rclickchumlist/unblockchum"], self)
         self.unblockchum.triggered.connect(self.unblockChumSlot)
-        self.reportchum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/report"], self)
+        self.reportchum = QAction(self.mainwindow.theme["main/menus/rclickchumlist/report"], self)
         self.reportchum.triggered.connect(self.reportThisChum)
-        self.logchum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/viewlog"], self)
+        self.logchum = QAction(self.mainwindow.theme["main/menus/rclickchumlist/viewlog"], self)
         self.logchum.triggered.connect(self.openChumLogs)
 
         # For this, we'll want to use setChecked to toggle these so they match
@@ -654,25 +668,25 @@ class PesterConvo(QtWidgets.QFrame):
         # Theme support :3c
         #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/beeponmessage"):
         try:
-            self._beepToggle = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/beeponmessage"], self)
+            self._beepToggle = QAction(self.mainwindow.theme["main/menus/rclickchumlist/beeponmessage"], self)
         except:
-            self._beepToggle = QtGui.QAction("BEEP ON MESSAGE", self)
+            self._beepToggle = QAction("BEEP ON MESSAGE", self)
         self._beepToggle.setCheckable(True)
         self._beepToggle.toggled[bool].connect(self.toggleBeep)
 
         #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/flashonmessage"):
         try:
-            self._flashToggle = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/flashonmessage"], self)
+            self._flashToggle = QAction(self.mainwindow.theme["main/menus/rclickchumlist/flashonmessage"], self)
         except:
-            self._flashToggle = QtGui.QAction("FLASH ON MESSAGE", self)
+            self._flashToggle = QAction("FLASH ON MESSAGE", self)
         self._flashToggle.setCheckable(True)
         self._flashToggle.toggled[bool].connect(self.toggleFlash)
 
         #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/mutenotifications"):
         try:
-            self._muteToggle = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/mutenotifications"], self)
+            self._muteToggle = QAction(self.mainwindow.theme["main/menus/rclickchumlist/mutenotifications"], self)
         except:
-            self._muteToggle = QtGui.QAction("MUTE NOTIFICATIONS", self)
+            self._muteToggle = QAction("MUTE NOTIFICATIONS", self)
         self._muteToggle.setCheckable(True)
         self._muteToggle.toggled[bool].connect(self.toggleMute)
 

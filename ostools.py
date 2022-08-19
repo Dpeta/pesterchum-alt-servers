@@ -2,7 +2,11 @@ import os
 import sys
 import platform
 
-from PyQt6.QtCore import QStandardPaths
+try:
+    from PyQt6.QtCore import QStandardPaths
+except ImportError:
+    print("PyQt5 fallback (ostools.py)")
+    from PyQt5.QtCore import QStandardPaths
 
 def isOSX():
     return sys.platform == "darwin"

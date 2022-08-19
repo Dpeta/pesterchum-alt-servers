@@ -2,7 +2,11 @@ import logging
 import logging.config
 import importlib.util
 
-from PyQt6 import QtWidgets
+try:
+    from PyQt6 import QtWidgets
+except ImportError:
+    print("PyQt5 fallback (pyquirks.py)")
+    from PyQt5 import QtWidgets
 
 import ostools
 from quirks import ScriptQuirks

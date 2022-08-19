@@ -1,7 +1,11 @@
 import logging
 import logging.config
 
-from PyQt6 import QtCore, QtWidgets
+try:
+    from PyQt6 import QtCore, QtWidgets
+except ImportError:
+    print("PyQt5 fallback (randomer.py)")
+    from PyQt5 import QtCore, QtWidgets
 
 import ostools
 

@@ -5,7 +5,11 @@ import collections
 from copy import copy
 from datetime import timedelta
 
-from PyQt6 import QtGui, QtWidgets
+try:
+    from PyQt6 import QtGui, QtWidgets
+except ImportError:
+    print("PyQt5 fallback (parsetools.py)")
+    from PyQt5 import QtGui, QtWidgets
 
 import dataobjs
 import ostools

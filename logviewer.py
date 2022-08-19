@@ -1,9 +1,14 @@
 import os
+import sys
 import codecs
 import re
 import ostools
 from time import strftime, strptime
-from PyQt6 import QtCore, QtGui, QtWidgets
+try:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+except ImportError:
+    print("PyQt5 fallback (logviewer.py)")
+    from PyQt5 import QtCore, QtGui, QtWidgets
 from generic import RightClickList, RightClickTree
 from parsetools import convertTags
 from convo import PesterText
@@ -272,7 +277,10 @@ class PesterLogText(PesterText):
     def focusInEvent(self, event):
         QtWidgets.QTextEdit.focusInEvent(self, event)
     def mousePressEvent(self, event):
-        url = self.anchorAt(event.position().toPoint())
+        if 'PyQt6' in sys.modules:
+            url = self.anchorAt(event.position().toPoint())
+        if 'PyQt5' in sys.modules:
+            url = self.anchorAt(event.pos())
         if url != "":
             if url[0] == "#" and url != "#pesterchum":
                 self.parent().parent.showMemos(url[1:])
@@ -284,7 +292,11 @@ class PesterLogText(PesterText):
         QtWidgets.QTextEdit.mousePressEvent(self, event)
     def mouseMoveEvent(self, event):
         QtWidgets.QTextEdit.mouseMoveEvent(self, event)
-        if self.anchorAt(event.position().toPoint()):
+        if 'PyQt6' in sys.modules:
+            pos = event.position().toPoint()
+        if 'PyQt5' in sys.modules:
+            pos = event.pos()
+        if self.anchorAt(pos):
             if self.viewport().cursor().shape != QtCore.Qt.CursorShape.PointingHandCursor:
                 self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
         else:

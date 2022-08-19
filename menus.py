@@ -1,7 +1,13 @@
 import re
 from os import remove
 
-from PyQt6 import QtCore, QtGui, QtWidgets
+try:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+    from PyQt6.QtGui import QAction
+except ImportError:
+    print("PyQt5 fallback (menus.py)")
+    from PyQt5 import QtCore, QtGui, QtWidgets
+    from PyQt5.QtWidgets import QAction
 
 import ostools
 import parsetools
@@ -1558,9 +1564,9 @@ class PesterUserlist(QtWidgets.QDialog):
         self.userarea.setStyleSheet(self.theme["main/chums/style"])
         self.userarea.optionsMenu = QtWidgets.QMenu(self)
 
-        self.addChumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
+        self.addChumAction = QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
         self.addChumAction.triggered.connect(self.addChumSlot)
-        self.pesterChumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
+        self.pesterChumAction = QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
         self.pesterChumAction.triggered.connect(self.pesterChumSlot)
         self.userarea.optionsMenu.addAction(self.addChumAction)
         self.userarea.optionsMenu.addAction(self.pesterChumAction)

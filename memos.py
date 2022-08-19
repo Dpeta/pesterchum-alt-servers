@@ -4,7 +4,13 @@ import re
 from string import Template
 from datetime import timedelta, datetime
 
-from PyQt6 import QtCore, QtGui, QtWidgets
+try:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+    from PyQt6.QtGui import QAction
+except ImportError:
+    print("PyQt5 fallback (memos.py)")
+    from PyQt5 import QtCore, QtGui, QtWidgets
+    from PyQt5.QtWidgets import QAction
 
 import ostools
 import parsetools
@@ -418,17 +424,17 @@ class PesterMemo(PesterConvo):
         self.userlist.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed,
                                                           QtWidgets.QSizePolicy.Policy.Expanding))
         self.userlist.optionsMenu = QtWidgets.QMenu(self)
-        self.pesterChumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
+        self.pesterChumAction = QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
         self.pesterChumAction.triggered.connect(self.newPesterSlot)
-        self.addchumAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
+        self.addchumAction = QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
         self.addchumAction.triggered.connect(self.addChumSlot)
-        self.banuserAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/banuser"], self)
+        self.banuserAction = QAction(self.mainwindow.theme["main/menus/rclickchumlist/banuser"], self)
         self.banuserAction.triggered.connect(self.banSelectedUser)
-        self.opAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/opuser"], self)
+        self.opAction = QAction(self.mainwindow.theme["main/menus/rclickchumlist/opuser"], self)
         self.opAction.triggered.connect(self.opSelectedUser)
-        self.voiceAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/voiceuser"], self)
+        self.voiceAction = QAction(self.mainwindow.theme["main/menus/rclickchumlist/voiceuser"], self)
         self.voiceAction.triggered.connect(self.voiceSelectedUser)
-        self.quirkDisableAction = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirkkill"], self)
+        self.quirkDisableAction = QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirkkill"], self)
         self.quirkDisableAction.triggered.connect(self.killQuirkUser)
         self.userlist.optionsMenu.addAction(self.pesterChumAction)
         self.userlist.optionsMenu.addAction(self.addchumAction)
@@ -437,38 +443,38 @@ class PesterMemo(PesterConvo):
         self.optionsMenu = QtWidgets.QMenu(self)
         self.optionsMenu.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"]) # So it doesn't inherit the memo's background image.
                                                                                           # Fixes floating "PESTERLOG:"
-        self.oocToggle = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/ooc"], self)
+        self.oocToggle = QAction(self.mainwindow.theme["main/menus/rclickchumlist/ooc"], self)
         self.oocToggle.setCheckable(True)
         self.oocToggle.toggled[bool].connect(self.toggleOOC)
-        self.quirksOff = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirksoff"], self)
+        self.quirksOff = QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirksoff"], self)
         self.quirksOff.setCheckable(True)
         self.quirksOff.toggled[bool].connect(self.toggleQuirks)
-        self.logchum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/viewlog"], self)
+        self.logchum = QAction(self.mainwindow.theme["main/menus/rclickchumlist/viewlog"], self)
         self.logchum.triggered.connect(self.openChumLogs)
-        self.invitechum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/invitechum"], self)
+        self.invitechum = QAction(self.mainwindow.theme["main/menus/rclickchumlist/invitechum"], self)
         self.invitechum.triggered.connect(self.inviteChums)
 
         #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/beeponmessage"):
         try:
-            self._beepToggle = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/beeponmessage"], self)
+            self._beepToggle = QAction(self.mainwindow.theme["main/menus/rclickchumlist/beeponmessage"], self)
         except:
-            self._beepToggle = QtGui.QAction("BEEP ON MESSAGE", self)
+            self._beepToggle = QAction("BEEP ON MESSAGE", self)
         self._beepToggle.setCheckable(True)
         self._beepToggle.toggled[bool].connect(self.toggleBeep)
 
         #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/flashonmessage"):
         try:
-            self._flashToggle = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/flashonmessage"], self)
+            self._flashToggle = QAction(self.mainwindow.theme["main/menus/rclickchumlist/flashonmessage"], self)
         except:
-            self._flashToggle = QtGui.QAction("FLASH ON MESSAGE", self)
+            self._flashToggle = QAction("FLASH ON MESSAGE", self)
         self._flashToggle.setCheckable(True)
         self._flashToggle.toggled[bool].connect(self.toggleFlash)
 
         #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/mutenotifications"):
         try:
-            self._muteToggle = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/mutenotifications"], self)
+            self._muteToggle = QAction(self.mainwindow.theme["main/menus/rclickchumlist/mutenotifications"], self)
         except:
-            self._muteToggle = QtGui.QAction("MUTE NOTIFICATIONS", self)
+            self._muteToggle = QAction("MUTE NOTIFICATIONS", self)
         self._muteToggle.setCheckable(True)
         self._muteToggle.toggled[bool].connect(self.toggleMute)
 
@@ -483,16 +489,16 @@ class PesterMemo(PesterConvo):
         self.optionsMenu.addAction(self.invitechum)
 
         self.chanModeMenu = QtWidgets.QMenu(self.mainwindow.theme["main/menus/rclickchumlist/memosetting"], self)
-        self.chanNoquirks = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memonoquirk"], self)
+        self.chanNoquirks = QAction(self.mainwindow.theme["main/menus/rclickchumlist/memonoquirk"], self)
         self.chanNoquirks.setCheckable(True)
         self.chanNoquirks.toggled[bool].connect(self.noquirksChan)
-        self.chanHide = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memohidden"], self)
+        self.chanHide = QAction(self.mainwindow.theme["main/menus/rclickchumlist/memohidden"], self)
         self.chanHide.setCheckable(True)
         self.chanHide.toggled[bool].connect(self.hideChan)
-        self.chanInvite = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memoinvite"], self)
+        self.chanInvite = QAction(self.mainwindow.theme["main/menus/rclickchumlist/memoinvite"], self)
         self.chanInvite.setCheckable(True)
         self.chanInvite.toggled[bool].connect(self.inviteChan)
-        self.chanMod = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/memomute"], self)
+        self.chanMod = QAction(self.mainwindow.theme["main/menus/rclickchumlist/memomute"], self)
         self.chanMod.setCheckable(True)
         self.chanMod.toggled[bool].connect(self.modChan)
         self.chanModeMenu.addAction(self.chanNoquirks)

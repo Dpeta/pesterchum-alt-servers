@@ -35,9 +35,9 @@ includefiles = ["quirks",
                 "PCskins.png",
                 "Pesterchum.png"]
 build_exe_options = {
-    "includes": ['PyQt6.QtCore',
-        'PyQt6.QtGui',
-        'PyQt6.QtWidgets'],
+#    "includes": ['PyQt6.QtCore',
+#        'PyQt6.QtGui',
+#        'PyQt6.QtWidgets'],
     "excludes": ['collections.sys',
         'collections._sre',
         'collections._json',

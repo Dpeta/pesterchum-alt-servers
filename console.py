@@ -9,7 +9,13 @@ import datetime
 import logging
 import logging.config
 
-from PyQt6 import QtCore, QtGui, QtWidgets
+try:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+    from PyQt6.QtGui import QAction
+except ImportError:
+    print("PyQt5 fallback (console.py)")
+    from PyQt5 import QtCore, QtGui, QtWidgets
+    from PyQt5.QtWidgets import QAction
 
 import dataobjs
 #import generic
@@ -448,7 +454,12 @@ class ConsoleText(QtWidgets.QTextEdit):
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
-            url = self.anchorAt(event.position().toPoint())
+            if 'PyQt6' in sys.modules:
+                # PyQt6
+                url = self.anchorAt(event.position().toPoint())
+            elif 'PyQt5' in sys.modules:
+                # PyQt5
+                url = self.anchorAt(event.pos())
             if url != "":
                 # Skip memo/handle recognition
                 # NOTE: Ctrl+Click copies the URL. Maybe it should select it?
@@ -463,7 +474,11 @@ class ConsoleText(QtWidgets.QTextEdit):
     def mouseMoveEvent(self, event):
         # Change our cursor when we roll over links (anchors).
         super(ConsoleText, self).mouseMoveEvent(event)
-        if self.anchorAt(event.position().toPoint()):
+        if 'PyQt6' in sys.modules:
+            pos = event.position().toPoint()
+        elif 'PyQt5' in sys.modules:
+            pos = event.pos()
+        if self.anchorAt(pos):
             if self.viewport().cursor().shape != QtCore.Qt.CursorShape.PointingHandCursor:
                 self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
         else:

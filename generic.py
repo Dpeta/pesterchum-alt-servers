@@ -1,4 +1,8 @@
-from PyQt6 import QtGui, QtWidgets
+try:
+    from PyQt6 import QtGui, QtWidgets
+except ImportError:
+    print("PyQt5 fallback (generic.py)")
+    from PyQt5 import QtGui, QtWidgets
 from datetime import timedelta
 
 class mysteryTime(timedelta):
@@ -128,7 +132,7 @@ class MovingWindow(QtWidgets.QFrame):
                 if event.button() == 1:
                     self.moving = event.globalPos() - self.pos()
         except AttributeError as e:
-            print("PyQt6 <= 5.14?")
+            print("PyQt <= 5.14?")
             print(str(e))
             if event.button() == 1:
                     self.moving = event.globalPos() - self.pos()

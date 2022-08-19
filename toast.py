@@ -4,7 +4,11 @@ import inspect
 import logging
 import logging.config
 
-from PyQt6 import QtCore, QtGui, QtWidgets
+try:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+except ImportError:
+    print("PyQt5 fallback (toast.py)")
+    from PyQt5 import QtCore, QtGui, QtWidgets
 
 import ostools
 

@@ -4,7 +4,11 @@ import ostools
 _datadir = ostools.getDataDir()
 logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
-from PyQt6 import QtGui
+try:
+    from PyQt6 import QtGui
+except ImportError:
+    print("PyQt5 fallback (dataobjs.py)")
+    from PyQt5 import QtGui
 from datetime import datetime
 import re
 import random

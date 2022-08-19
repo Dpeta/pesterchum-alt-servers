@@ -5,7 +5,11 @@ import random
 import time
 import json
 
-from PyQt6 import QtCore, QtGui
+try:
+    from PyQt6 import QtCore, QtGui
+except ImportError:
+    print("PyQt5 fallback (irc.py)")
+    from PyQt5 import QtCore, QtGui
 
 import ostools
 from mood import Mood
@@ -342,8 +346,8 @@ class PesterIRC(QtCore.QThread):
     @QtCore.pyqtSlot()
     def pingServer(self):
         try:
-            self.cli.send("PING :B33")
-            #self.cli.send("PING %s" % int(time.time()))
+            if hasattr(self, 'cli'):
+                self.cli.send("PING :B33")
         except OSError as e:
             PchumLog.warning(e)
             self.setConnectionBroken()

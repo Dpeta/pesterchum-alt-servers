@@ -37,18 +37,24 @@ import time
 import json
 from pnc.dep.attrdict import AttrDict
 
-from PyQt6 import QtCore, QtGui, QtWidgets
+try:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+    from PyQt6.QtGui import QShortcut, QAction, QActionGroup
+except ImportError:
+    print("PyQt5 fallback (pesterchum.py)")
+    from PyQt5 import QtCore, QtGui, QtWidgets
+    from PyQt5.QtWidgets import QAction, QShortcut, QActionGroup
 
-vnum = QtCore.qVersion()
-major = int(vnum[:vnum.find(".")])
-if vnum.find(".", vnum.find(".")+1) != -1:
-    minor = int(vnum[vnum.find(".")+1:vnum.find(".", vnum.find(".")+1)])
-else:
-    minor = int(vnum[vnum.find(".")+1:])
-if (major < 6) or ((major > 6) and (minor < 2)):
-    print("ERROR: Pesterchum requires at least Qt version >= 6.2")
-    print("You currently have version " + str(vnum) + ". Please upgrade Qt.")
-    sys.exit()
+#vnum = QtCore.qVersion()
+#major = int(vnum[:vnum.find(".")])
+#if vnum.find(".", vnum.find(".")+1) != -1:
+#    minor = int(vnum[vnum.find(".")+1:vnum.find(".", vnum.find(".")+1)])
+#else:
+#    minor = int(vnum[vnum.find(".")+1:])
+#if (major < 6) or ((major > 6) and (minor < 2)):
+#    print("ERROR: Pesterchum requires at least Qt version >= 6.2")
+#    print("You currently have version " + str(vnum) + ". Please upgrade Qt.")
+#    sys.exit()
 
 import ostools
 # Placed here before importing the rest of pesterchum, since bits of it need
@@ -389,23 +395,23 @@ class chumArea(RightClickTree):
         self.groupMenu = QtWidgets.QMenu(self)
         self.canonMenu = QtWidgets.QMenu(self)
         self.optionsMenu = QtWidgets.QMenu(self)
-        self.pester = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
+        self.pester = QAction(self.mainwindow.theme["main/menus/rclickchumlist/pester"], self)
         self.pester.triggered.connect(self.activateChum)
-        self.removechum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/removechum"], self)
+        self.removechum = QAction(self.mainwindow.theme["main/menus/rclickchumlist/removechum"], self)
         self.removechum.triggered.connect(self.removeChum)
-        self.blockchum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/blockchum"], self)
+        self.blockchum = QAction(self.mainwindow.theme["main/menus/rclickchumlist/blockchum"], self)
         self.blockchum.triggered.connect(self.blockChum)
-        self.logchum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/viewlog"], self)
+        self.logchum = QAction(self.mainwindow.theme["main/menus/rclickchumlist/viewlog"], self)
         self.logchum.triggered.connect(self.openChumLogs)
-        self.reportchum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/report"], self)
+        self.reportchum = QAction(self.mainwindow.theme["main/menus/rclickchumlist/report"], self)
         self.reportchum.triggered.connect(self.reportChum)
-        self.findalts = QtGui.QAction("Find Alts", self)
+        self.findalts = QAction("Find Alts", self)
         self.findalts.triggered.connect(self.findAlts)
-        self.removegroup = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/removegroup"], self)
+        self.removegroup = QAction(self.mainwindow.theme["main/menus/rclickchumlist/removegroup"], self)
         self.removegroup.triggered.connect(self.removeGroup)
-        self.renamegroup = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/renamegroup"], self)
+        self.renamegroup = QAction(self.mainwindow.theme["main/menus/rclickchumlist/renamegroup"], self)
         self.renamegroup.triggered.connect(self.renameGroup)
-        self.notes = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/notes"], self)
+        self.notes = QAction(self.mainwindow.theme["main/menus/rclickchumlist/notes"], self)
         self.notes.triggered.connect(self.editNotes)
 
         self.optionsMenu.addAction(self.pester)
@@ -509,14 +515,20 @@ class chumArea(RightClickTree):
         if thisitem.rfind(" (") != -1:
             thisitem = thisitem[0:thisitem.rfind(" (")]
         if thisitem == "Chums" or thisitem in self.groups:
-            droppos = self.itemAt(event.position().toPoint())
+            if 'PyQt6' in sys.modules:
+                droppos = self.itemAt(event.position().toPoint())
+            elif 'PyQt5' in sys.modules:
+                droppos = self.itemAt(event.pos())
             if not droppos: return
             droppos = str(droppos.text(0))
             if droppos.rfind(" ") != -1:
                 droppos = droppos[0:droppos.rfind(" ")]
             if droppos == "Chums" or droppos in self.groups:
                 saveOpen = event.source().currentItem().isExpanded()
-                saveDrop = self.itemAt(event.position().toPoint())
+                if 'PyQt6' in sys.modules:
+                    saveDrop = self.itemAt(event.position().toPoint())
+                if 'PyQt5' in sys.modules:
+                    saveDrop = self.itemAt(event.pos())
                 saveItem = self.takeTopLevelItem(self.indexOfTopLevelItem(event.source().currentItem()))
                 self.insertTopLevelItems(self.indexOfTopLevelItem(saveDrop)+1, [saveItem])
                 if saveOpen:
@@ -531,7 +543,10 @@ class chumArea(RightClickTree):
                 self.mainwindow.config.saveGroups(gTemp)
         # Drop item is a chum
         else:
-            eventpos = event.position().toPoint()
+            if 'PyQt6' in sys.modules:
+                eventpos = event.position().toPoint()
+            if 'PyQt5' in sys.modules:
+                eventpos = event.pos()
             item = self.itemAt(eventpos)
             if item:
                 text = str(item.text(0))
@@ -584,7 +599,7 @@ class chumArea(RightClickTree):
                 text = text[0:text.rfind(" (")]
             currentGroup = text
         self.moveMenu.clear()
-        actGroup = QtGui.QActionGroup(self)
+        actGroup = QActionGroup(self)
 
         groups = self.groups[:]
         for gtext in groups:
@@ -592,7 +607,7 @@ class chumArea(RightClickTree):
                 continue
             movegroup = self.moveMenu.addAction(gtext)
             actGroup.addAction(movegroup)
-        actGroup.triggered[QtGui.QAction].connect(self.moveToGroup)
+        actGroup.triggered[QAction].connect(self.moveToGroup)
 
     def addChum(self, chum):
         if len([c for c in self.chums if c.handle == chum.handle]) != 0:
@@ -1029,7 +1044,7 @@ class chumArea(RightClickTree):
             self.takeItem(chumLabel)
             self.addItem(chumLabel)
         self.takeTopLevelItem(i)
-    @QtCore.pyqtSlot(QtGui.QAction)
+    @QtCore.pyqtSlot(QAction)
     def moveToGroup(self, item):
         if not item:
             return
@@ -1071,7 +1086,7 @@ class trollSlum(chumArea):
         self.setIndentation(0)
 
         self.optionsMenu = QtWidgets.QMenu(self)
-        self.unblockchum = QtGui.QAction(self.mainwindow.theme["main/menus/rclickchumlist/unblockchum"], self)
+        self.unblockchum = QAction(self.mainwindow.theme["main/menus/rclickchumlist/unblockchum"], self)
         self.unblockchum.triggered.connect(self.unblockChumSignal)
         self.optionsMenu.addAction(self.unblockchum)
 
@@ -1284,35 +1299,35 @@ class PesterWindow(MovingWindow):
 
         self.move(100, 100)
 
-        talk = QtGui.QAction(self.theme["main/menus/client/talk"], self)
+        talk = QAction(self.theme["main/menus/client/talk"], self)
         self.talk = talk
         talk.triggered.connect(self.openChat)
-        logv = QtGui.QAction(self.theme["main/menus/client/logviewer"], self)
+        logv = QAction(self.theme["main/menus/client/logviewer"], self)
         self.logv = logv
         logv.triggered.connect(self.openLogv)
-        grps = QtGui.QAction(self.theme["main/menus/client/addgroup"], self)
+        grps = QAction(self.theme["main/menus/client/addgroup"], self)
         self.grps = grps
         grps.triggered.connect(self.addGroupWindow)
-        self.rand = QtGui.QAction(self.theme["main/menus/client/randen"], self)
+        self.rand = QAction(self.theme["main/menus/client/randen"], self)
         self.rand.triggered.connect(self.randhandler.getEncounter)
-        opts = QtGui.QAction(self.theme["main/menus/client/options"], self)
+        opts = QAction(self.theme["main/menus/client/options"], self)
         self.opts = opts
         opts.triggered.connect(self.openOpts)
-        exitaction = QtGui.QAction(self.theme["main/menus/client/exit"], self)
+        exitaction = QAction(self.theme["main/menus/client/exit"], self)
         self.exitaction = exitaction
         exitaction.triggered.connect(self.killApp, QtCore.Qt.ConnectionType.QueuedConnection)
-        userlistaction = QtGui.QAction(self.theme["main/menus/client/userlist"], self)
+        userlistaction = QAction(self.theme["main/menus/client/userlist"], self)
         self.userlistaction = userlistaction
         userlistaction.triggered.connect(self.showAllUsers)
-        memoaction = QtGui.QAction(self.theme["main/menus/client/memos"], self)
+        memoaction = QAction(self.theme["main/menus/client/memos"], self)
         self.memoaction = memoaction
         memoaction.triggered.connect(self.showMemos)
-        self.importaction = QtGui.QAction(self.theme["main/menus/client/import"], self)
+        self.importaction = QAction(self.theme["main/menus/client/import"], self)
         self.importaction.triggered.connect(self.importExternalConfig)
-        self.idleaction = QtGui.QAction(self.theme["main/menus/client/idle"], self)
+        self.idleaction = QAction(self.theme["main/menus/client/idle"], self)
         self.idleaction.setCheckable(True)
         self.idleaction.toggled[bool].connect(self.toggleIdle)
-        self.reconnectAction = QtGui.QAction(self.theme["main/menus/client/reconnect"], self)
+        self.reconnectAction = QAction(self.theme["main/menus/client/reconnect"], self)
         self.reconnectAction.triggered.connect(self.disconnectIRC)
 
         self.menu = QtWidgets.QMenuBar(self)
@@ -1322,19 +1337,19 @@ class PesterWindow(MovingWindow):
         if self.theme.has_key("main/menus/client/console"):
             self.console = AttrDict(dict(
                 window = None,
-                action = QtGui.QAction(self.theme["main/menus/client/console"], self),
+                action = QAction(self.theme["main/menus/client/console"], self),
                 is_open = False
                 ))
         else:
             self.console = AttrDict(dict(
                 window = None,
-                action = QtGui.QAction("Console", self),
+                action = QAction("Console", self),
                 is_open = False
                 ))
         self.console.shortcuts = AttrDict(dict(
-            conkey = QtGui.QShortcut(QtGui.QKeySequence("Ctrl+`"), self,
+            conkey = QShortcut(QtGui.QKeySequence("Ctrl+`"), self,
                 context=QtCore.Qt.ShortcutContext.ApplicationShortcut),
-            curwgt = QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Alt+w"), self,
+            curwgt = QShortcut(QtGui.QKeySequence("Ctrl+Alt+w"), self,
                 context=QtCore.Qt.ShortcutContext.ApplicationShortcut)
             ))
         self.console.action.triggered.connect(self.toggleConsole)
@@ -1367,18 +1382,18 @@ class PesterWindow(MovingWindow):
         filemenu.addAction(self.reconnectAction)
         filemenu.addAction(exitaction)
 
-        changequirks = QtGui.QAction(self.theme["main/menus/profile/quirks"], self)
+        changequirks = QAction(self.theme["main/menus/profile/quirks"], self)
         self.changequirks = changequirks
         changequirks.triggered.connect(self.openQuirks)
-        loadslum = QtGui.QAction(self.theme["main/menus/profile/block"], self)
+        loadslum = QAction(self.theme["main/menus/profile/block"], self)
         self.loadslum = loadslum
         loadslum.triggered.connect(self.showTrollSlum)
 
-        changecoloraction = QtGui.QAction(self.theme["main/menus/profile/color"], self)
+        changecoloraction = QAction(self.theme["main/menus/profile/color"], self)
         self.changecoloraction = changecoloraction
         changecoloraction.triggered.connect(self.changeMyColor)
 
-        switch = QtGui.QAction(self.theme["main/menus/profile/switch"], self)
+        switch = QAction(self.theme["main/menus/profile/switch"], self)
         self.switch = switch
         switch.triggered.connect(self.switchProfile)
 
@@ -1389,27 +1404,27 @@ class PesterWindow(MovingWindow):
         profilemenu.addAction(changecoloraction)
         profilemenu.addAction(switch)
 
-        self.helpAction = QtGui.QAction(self.theme["main/menus/help/help"], self)
+        self.helpAction = QAction(self.theme["main/menus/help/help"], self)
         self.helpAction.triggered.connect(self.launchHelp)
-        self.botAction = QtGui.QAction(self.theme["main/menus/help/calsprite"], self)
+        self.botAction = QAction(self.theme["main/menus/help/calsprite"], self)
         self.botAction.triggered.connect(self.loadCalsprite)
-        self.nickServAction = QtGui.QAction(self.theme["main/menus/help/nickserv"], self)
+        self.nickServAction = QAction(self.theme["main/menus/help/nickserv"], self)
         self.nickServAction.triggered.connect(self.loadNickServ)
-        self.chanServAction = QtGui.QAction(self.theme["main/menus/help/chanserv"], self)
+        self.chanServAction = QAction(self.theme["main/menus/help/chanserv"], self)
         self.chanServAction.triggered.connect(self.loadChanServ)
-        self.aboutAction = QtGui.QAction(self.theme["main/menus/help/about"], self)
+        self.aboutAction = QAction(self.theme["main/menus/help/about"], self)
         self.aboutAction.triggered.connect(self.aboutPesterchum)
 
         # Because I can't expect all themes to have this included.
         #if self.theme.has_key("main/menus/help/reportbug"):
         try:
-            self.reportBugAction = QtGui.QAction(self.theme["main/menus/help/reportbug"], self)
+            self.reportBugAction = QAction(self.theme["main/menus/help/reportbug"], self)
         except:
-            self.reportBugAction = QtGui.QAction("REPORT BUG", self)
+            self.reportBugAction = QAction("REPORT BUG", self)
         try:
-            self.xyzRulesAction = QtGui.QAction(self.theme["main/menus/help/rules"], self)
+            self.xyzRulesAction = QAction(self.theme["main/menus/help/rules"], self)
         except:
-            self.xyzRulesAction = QtGui.QAction("RULES", self)
+            self.xyzRulesAction = QAction("RULES", self)
         
         self.reportBugAction.triggered.connect(self.reportBug)
         self.xyzRulesAction.triggered.connect(self.xyzRules)
@@ -1498,11 +1513,6 @@ class PesterWindow(MovingWindow):
 
         self.pcUpdate['QString', 'QString'].connect(self.updateMsg)
 
-        self.pingtimer = QtCore.QTimer()
-        self.pingtimer.timeout.connect(self.checkPing)
-        self.sincerecv = 0 # Time since last recv
-        self.pingtimer.start(1000*15) # time in ms
-
         self.mychumhandleLabel.adjustSize() # Required so "CHUMHANDLE:" regardless of style-sheet.
         self.moodsLabel.adjustSize()        # Required so "MOOD:" regardless of style-sheet.
 
@@ -1518,6 +1528,11 @@ class PesterWindow(MovingWindow):
             self.sendNotice.emit(code, RANDNICK)
         except:
             PchumLog.warning("No randomEncounter set in userconfig?")
+
+        # Client --> Server pings
+        self.pingtimer = QtCore.QTimer()
+        self.pingtimer.timeout.connect(self.checkPing)
+        self.sincerecv = 0 # Time since last recv
     
     @QtCore.pyqtSlot(QString, QString)
     def updateMsg(self, ver, url):
@@ -2244,6 +2259,12 @@ class PesterWindow(MovingWindow):
 
         self.doAutoIdentify()
         self.doAutoJoins()
+
+        # Start client --> server pings
+        if hasattr(self, 'pingtimer') == False:
+            self.pingtimer.start(1000*15) # time in ms
+        else:
+            self.pingtimer.start(1000*15)
 
     @QtCore.pyqtSlot()
     def blockSelectedChum(self):
@@ -3774,14 +3795,14 @@ class MainProgram(QtCore.QObject):
             moodCategories[k] = moodMenu.addMenu(k.upper())
         self.moodactions = {}
         for (i,m) in enumerate(Mood.moods):
-            maction = QtGui.QAction(m.upper(), self)
+            maction = QAction(m.upper(), self)
             mobj = PesterMoodAction(i, self.widget.moods.updateMood)
             maction.triggered.connect(mobj.updateMood)
             self.moodactions[i] = mobj
             moodCategories[Mood.revmoodcats[m]].addAction(maction)
-        miniAction = QtGui.QAction("MINIMIZE", self)
+        miniAction = QAction("MINIMIZE", self)
         miniAction.triggered.connect(self.widget.showMinimized)
-        exitAction = QtGui.QAction("EXIT", self)
+        exitAction = QAction("EXIT", self)
         exitAction.triggered.connect(self.widget.killApp, QtCore.Qt.ConnectionType.QueuedConnection)
         self.traymenu.addAction(miniAction)
         self.traymenu.addAction(exitAction)

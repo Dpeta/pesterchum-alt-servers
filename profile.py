@@ -11,7 +11,11 @@ from string import Template
 from datetime import datetime
 from time import strftime
 
-from PyQt6 import QtCore, QtGui, QtWidgets
+try:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+except ImportError:
+    print("PyQt5 fallback (profile.py)")
+    from PyQt5 import QtCore, QtGui, QtWidgets
 
 import ostools
 from mood import Mood

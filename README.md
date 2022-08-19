@@ -82,8 +82,8 @@ Pesterchum is a Python script. This means that as long as you have Python instal
 
 ### REQUIREMENTS
  - [Python 3]
- - [PyQt6]
- - On Linux, optionally [pygame] for audio. (QtMultimedia has a [GStreamer] dependency on Linux)
+ - [PyQt6] or [PyQt5]
+ - (Linux-specific) [pygame] or [GStreamer] for audio.
  
 ### WALKTHROUGH
 
@@ -102,6 +102,7 @@ Pesterchum is a Python script. This means that as long as you have Python instal
 
 [Python 3]: https://www.python.org/downloads/
 [pip]: https://pypi.org/project/pip/
+[PyQt5]: https://pypi.org/project/PyQt5/
 [PyQt6]: https://pypi.org/project/PyQt6/
 [pygame]: https://pypi.org/project/pygame/
 [GStreamer]: https://gstreamer.freedesktop.org/

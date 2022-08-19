@@ -1,4 +1,8 @@
-from PyQt6 import QtCore, QtWidgets
+try:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+except ImportError:
+    print("PyQt5 fallback (mood.py)")
+    from PyQt5 import QtCore, QtGui, QtWidgets
 
 from generic import PesterIcon
 
