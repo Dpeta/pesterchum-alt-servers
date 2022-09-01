@@ -1,3 +1,4 @@
+import sys
 import re
 from os import remove
 
@@ -723,20 +724,40 @@ class PesterChooseQuirks(QtWidgets.QDialog):
         elif vdict["type"] == "replace":
             vdict["from"] = str(page.itemAt(1).layout().itemAt(1).widget().text())
             vdict["to"] = str(page.itemAt(2).layout().itemAt(1).widget().text())
-            vdict["checkstate"] = str(page.itemAt(3).layout().itemAt(0).widget().checkState().value)
+            try:
+                # PyQt6
+                vdict["checkstate"] = str(page.itemAt(3).layout().itemAt(0).widget().checkState().value)
+            except AttributeError:
+                # PyQt5
+                vdict["checkstate"] = str(page.itemAt(3).layout().itemAt(0).widget().checkState())
         elif vdict["type"] == "regexp":
             vdict["from"] = str(page.itemAt(2).layout().itemAt(1).layout().itemAt(1).widget().text())
             vdict["to"] = str(page.itemAt(2).layout().itemAt(2).layout().itemAt(1).widget().text())
-            vdict["checkstate"] = str(page.itemAt(2).layout().itemAt(3).layout().itemAt(0).widget().checkState().value)
+            try:
+                # PyQt6
+                vdict["checkstate"] = str(page.itemAt(2).layout().itemAt(3).layout().itemAt(0).widget().checkState().value)
+            except AttributeError:
+                # PyQt5
+                vdict["checkstate"] = str(page.itemAt(2).layout().itemAt(3).layout().itemAt(0).widget().checkState())
         elif vdict["type"] == "random":
             vdict["from"] = str(self.quirkadd.regexp.text())
-            vdict["checkstate"] = str(page.itemAt(2).layout().itemAt(2).layout().itemAt(0).widget().checkState().value)
+            try:
+                # PyQt6
+                vdict["checkstate"] = str(page.itemAt(2).layout().itemAt(2).layout().itemAt(0).widget().checkState().value)
+            except AttributeError:
+                # PyQt5
+                vdict["checkstate"] = str(page.itemAt(2).layout().itemAt(2).layout().itemAt(0).widget().checkState())
             randomlist = [str(self.quirkadd.replacelist.item(i).text())
                           for i in range(0,self.quirkadd.replacelist.count())]
             vdict["randomlist"] = randomlist
         elif vdict["type"] == "spelling":
             vdict["percentage"] = self.quirkadd.slider.value()
-            vdict["checkstate"] = str(page.itemAt(3).layout().itemAt(0).widget().checkState().value)
+            try:
+                # PyQt6
+                vdict["checkstate"] = str(page.itemAt(3).layout().itemAt(0).widget().checkState().value)
+            except AttributeError:
+                # PyQt5
+                vdict["checkstate"] = str(page.itemAt(3).layout().itemAt(0).widget().checkState())
         if vdict["type"] in ("regexp", "random"):
             try:
                 re.compile(vdict["from"])

@@ -454,10 +454,10 @@ class ConsoleText(QtWidgets.QTextEdit):
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
-            if 'PyQt6' in sys.modules:
+            try:
                 # PyQt6
                 url = self.anchorAt(event.position().toPoint())
-            elif 'PyQt5' in sys.modules:
+            except AttributeError:
                 # PyQt5
                 url = self.anchorAt(event.pos())
             if url != "":
@@ -474,9 +474,11 @@ class ConsoleText(QtWidgets.QTextEdit):
     def mouseMoveEvent(self, event):
         # Change our cursor when we roll over links (anchors).
         super(ConsoleText, self).mouseMoveEvent(event)
-        if 'PyQt6' in sys.modules:
+        try:
+            # PyQt6
             pos = event.position().toPoint()
-        elif 'PyQt5' in sys.modules:
+        except AttributeError:
+            # PyQt5
             pos = event.pos()
         if self.anchorAt(pos):
             if self.viewport().cursor().shape != QtCore.Qt.CursorShape.PointingHandCursor:

@@ -515,9 +515,11 @@ class chumArea(RightClickTree):
         if thisitem.rfind(" (") != -1:
             thisitem = thisitem[0:thisitem.rfind(" (")]
         if thisitem == "Chums" or thisitem in self.groups:
-            if 'PyQt6' in sys.modules:
+            try:
+                # PyQt6
                 droppos = self.itemAt(event.position().toPoint())
-            elif 'PyQt5' in sys.modules:
+            except AttributeError:
+                # PyQt5
                 droppos = self.itemAt(event.pos())
             if not droppos: return
             droppos = str(droppos.text(0))
@@ -525,9 +527,11 @@ class chumArea(RightClickTree):
                 droppos = droppos[0:droppos.rfind(" ")]
             if droppos == "Chums" or droppos in self.groups:
                 saveOpen = event.source().currentItem().isExpanded()
-                if 'PyQt6' in sys.modules:
+                try:
+                    # PyQt6
                     saveDrop = self.itemAt(event.position().toPoint())
-                if 'PyQt5' in sys.modules:
+                except AttributeError:
+                    # PyQt5
                     saveDrop = self.itemAt(event.pos())
                 saveItem = self.takeTopLevelItem(self.indexOfTopLevelItem(event.source().currentItem()))
                 self.insertTopLevelItems(self.indexOfTopLevelItem(saveDrop)+1, [saveItem])
@@ -543,9 +547,11 @@ class chumArea(RightClickTree):
                 self.mainwindow.config.saveGroups(gTemp)
         # Drop item is a chum
         else:
-            if 'PyQt6' in sys.modules:
+            try:
+                # PyQt6
                 eventpos = event.position().toPoint()
-            if 'PyQt5' in sys.modules:
+            except AttributeError:
+                # PyQt5
                 eventpos = event.pos()
             item = self.itemAt(eventpos)
             if item:
@@ -2099,16 +2105,17 @@ class PesterWindow(MovingWindow):
     def _setup_sounds(self, soundclass=None):
         """Set up the event sounds for later use."""
         # Set up the sounds we're using.
-        if 'pygame' in sys.modules:
-            # Pygame is imported (Linux)
+        try:
+            # Pygame
             soundclass = pygame.mixer.Sound
-        elif 'PyQt6.QtMultimedia' in sys.modules:
-            # QtMultimedia is imported (Windows, MacOS)
-            soundclass = QtMultimedia.QSoundEffect
-        else:
-            # death
-            soundclass = NoneSound
-            PchumLog.warning("No sound module loaded?")
+        except:
+            try:
+                # QtMultimedia
+                soundclass = QtMultimedia.QSoundEffect
+            except:
+                # death
+                soundclass = NoneSound
+                PchumLog.warning("No sound module loaded?")
 
         self.sound_type = soundclass
 
@@ -3792,7 +3799,7 @@ class MainProgram(QtCore.QObject):
             # we could set the frequency higher but i love how cheesy it sounds
             try:
                 pygame.mixer.init()
-            except pygame.error as err:
+            except (pygame.error, Exception) as err:
                 print("Warning: No sound! (pygame error: %s)" % err)
                     
         self.widget = PesterWindow(options, parent=self, app=self.app)

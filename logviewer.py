@@ -277,9 +277,11 @@ class PesterLogText(PesterText):
     def focusInEvent(self, event):
         QtWidgets.QTextEdit.focusInEvent(self, event)
     def mousePressEvent(self, event):
-        if 'PyQt6' in sys.modules:
+        try:
+            # PyQt6
             url = self.anchorAt(event.position().toPoint())
-        if 'PyQt5' in sys.modules:
+        except AttributeError:
+            # PyQt5
             url = self.anchorAt(event.pos())
         if url != "":
             if url[0] == "#" and url != "#pesterchum":
@@ -292,9 +294,11 @@ class PesterLogText(PesterText):
         QtWidgets.QTextEdit.mousePressEvent(self, event)
     def mouseMoveEvent(self, event):
         QtWidgets.QTextEdit.mouseMoveEvent(self, event)
-        if 'PyQt6' in sys.modules:
+        try:
+            # PyQt6
             pos = event.position().toPoint()
-        if 'PyQt5' in sys.modules:
+        except AttributeError:
+            # PyQt5
             pos = event.pos()
         if self.anchorAt(pos):
             if self.viewport().cursor().shape != QtCore.Qt.CursorShape.PointingHandCursor:
