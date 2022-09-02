@@ -14,4 +14,4 @@
     - Console is hopelessly broken, it'd be easier to make a list of what commands *don't* cause it to crash. Does anyone use this?
 
 ## CHANGE
- - When everything has been tested and more people have compatible versions, switch Pesterchum over to using metadata and message tags by default instead of wraping its protocol in PRIVMSG. The current method should stay availible for compatibility.
+ - When everything has been tested and more people have compatible versions, switch Pesterchum over to using metadata and message tags by default instead of wrapping its protocol in PRIVMSG. The current method should stay available for compatibility.

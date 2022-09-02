@@ -5,6 +5,11 @@
 
 ### Added
  - Support for color via IRCv3 metadata draft.
+ - Prompt for connecting anyway when certificate validation fails.
+
+### Changed
+ - Reenabled server certificate validation when using SSL.
+    - Uses the system's local certificates, so might fail on some installations.
  
 ### Fixed
  - Error when setting quirk with PyQt5.

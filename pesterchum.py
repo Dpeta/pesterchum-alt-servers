@@ -3694,6 +3694,26 @@ class PesterWindow(MovingWindow):
         self.chooseServerWidged.show()
         self.chooseServerWidged.setFocus()
 
+    @QtCore.pyqtSlot(Exception)
+    def connectAnyway(self, e):
+        # Prompt user to connect anyway
+        msgbox = QtWidgets.QMessageBox()
+        msgbox.setStyleSheet("QMessageBox{ %s }"
+                             % self.theme["main/defaultwindow/style"])
+        msgbox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+        msgbox.setText("Server certificate validation failed")
+        msgbox.setInformativeText("Reason: \"%s (%s)\"" % (e.verify_message, e.verify_code)
+                                  + "\n\nConnect anyway?")
+        msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Yes
+                                  | QtWidgets.QMessageBox.StandardButton.No)
+        msgbox.setDefaultButton(QtWidgets.QMessageBox.StandardButton.No)
+        ret = msgbox.exec()
+        if ret == QtWidgets.QMessageBox.StandardButton.Yes:
+            self.parent.restartIRC(verify_hostname=False)
+        else:
+            return False
+            
+
     pcUpdate = QtCore.pyqtSignal('QString', 'QString')
     closeToTraySignal = QtCore.pyqtSignal()
     newConvoStarted = QtCore.pyqtSignal('QString', bool, name="newConvoStarted")
@@ -3982,6 +4002,7 @@ class MainProgram(QtCore.QObject):
                 (widget.disconnectIRC, irc.disconnectIRC),
                  # Main window --> IRC    
                 (irc.connected, widget.connected),
+                (irc.askToConnect, widget.connectAnyway),
                 (irc.moodUpdated, widget.updateMoodSlot),
                 (irc.colorUpdated, widget.updateColorSlot),
                 (irc.messageReceived, widget.deliverMessage),
@@ -4069,7 +4090,7 @@ class MainProgram(QtCore.QObject):
         else:
             self.restartIRC()
     @QtCore.pyqtSlot()
-    def restartIRC(self):
+    def restartIRC(self, verify_hostname=True):
         if hasattr(self, 'irc') and self.irc:
             self.disconnectWidgets(self.irc, self.widget)
             stop = self.irc.stopIRC
@@ -4077,7 +4098,7 @@ class MainProgram(QtCore.QObject):
         else:
             stop = None
         if stop is None:
-            self.irc = PesterIRC(self.widget.config, self.widget)
+            self.irc = PesterIRC(self.widget.config, self.widget, verify_hostname=verify_hostname)
             self.connectWidgets(self.irc, self.widget)
             self.irc.start()
             if self.attempts == 1:

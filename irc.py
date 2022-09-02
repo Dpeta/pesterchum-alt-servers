@@ -4,6 +4,7 @@ import socket
 import random
 import time
 import json
+import ssl
 
 try:
     from PyQt6 import QtCore, QtGui
@@ -40,12 +41,13 @@ QString = str
 #    logging.basicConfig(level=logging.WARNING)
 
 class PesterIRC(QtCore.QThread):
-    def __init__(self, config, window):
+    def __init__(self, config, window, verify_hostname=True):
         QtCore.QThread.__init__(self)
         self.mainwindow = window
         self.config = config
         self.unresponsive = False
         self.registeredIRC = False
+        self.verify_hostname = verify_hostname
         self.metadata_supported = False
         self.stopIRC = None
         self.NickServ = services.NickServ()
@@ -61,7 +63,12 @@ class PesterIRC(QtCore.QThread):
                              timeout=120)
         self.cli.command_handler.parent = self
         self.cli.command_handler.mainwindow = self.mainwindow
-        self.cli.connect()
+        try:
+            self.cli.connect(self.verify_hostname)
+        except ssl.SSLCertVerificationError as e:
+            # Ask if users wants to connect anyway
+            self.askToConnect.emit(e)
+            raise e
         self.conn = self.cli.conn()
     def run(self):
         try:
@@ -395,6 +402,7 @@ class PesterIRC(QtCore.QThread):
     chanInviteOnly = QtCore.pyqtSignal('QString')
     modesUpdated = QtCore.pyqtSignal('QString', 'QString')
     connected = QtCore.pyqtSignal()
+    askToConnect = QtCore.pyqtSignal(Exception)
     userPresentUpdate = QtCore.pyqtSignal('QString', 'QString',
                                    'QString')
     cannotSendToChan = QtCore.pyqtSignal('QString', 'QString')

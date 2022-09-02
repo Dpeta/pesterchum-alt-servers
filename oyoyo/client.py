@@ -185,17 +185,17 @@ class IRCClient:
                 #raise se
                 self._end = True  # This ok?
 
-    def connect(self):
+    def connect(self, verify_hostname=True):
         """ initiates the connection to the server set in self.host:self.port 
         """
         PchumLog.info('connecting to %s:%s' % (self.host, self.port))
         
         if self.ssl == True:
             context = ssl.create_default_context()
-            # Checking relies on the system
-            context.check_hostname = False
-            context.verify_mode = ssl.CERT_NONE
-            
+            if verify_hostname == False:
+                context.check_hostname = False
+                context.verify_mode = ssl.CERT_NONE
+
             bare_sock = socket.create_connection((self.host, self.port))
             self.socket = context.wrap_socket(bare_sock,
                                               server_hostname=self.host,
@@ -208,6 +208,11 @@ class IRCClient:
                     select.select([self.socket], [], [])
                 except ssl.SSLWantWriteError:
                     select.select([], [self.socket], [])
+                except ssl.SSLCertVerificationError as e:
+                    # Disconnect for now
+                    self.socket.close()
+                    bare_sock.close()
+                    raise e                            
                     
             PchumLog.info("secure sockets version is %s" % self.socket.version())
 
