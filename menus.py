@@ -81,7 +81,9 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
         else:
             child_1 = QtWidgets.QTreeWidgetItem([item.quirk.group])
             self.addTopLevelItem(child_1)
-            child_1.setFlags(child_1.flags() | QtCore.Qt.ItemFlag.ItemIsUserCheckable | QtCore.Qt.ItemFlag.ItemIsEnabled)
+            child_1.setFlags(child_1.flags()
+                             | QtCore.Qt.ItemFlag.ItemIsUserCheckable
+                             | QtCore.Qt.ItemFlag.ItemIsEnabled)
             child_1.setChildIndicatorPolicy(QtWidgets.QTreeWidgetItem.ChildIndicatorPolicy.DontShowIndicatorWhenChildless)
             child_1.setCheckState(0, QtCore.Qt.CheckState.Unchecked)
             child_1.setExpanded(True)
@@ -95,7 +97,8 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
 
     @QtCore.pyqtSlot()
     def upShiftQuirk(self):
-        found = self.findItems(self.currentItem().text(0), QtCore.Qt.MatchFlag.MatchExactly)
+        found = self.findItems(self.currentItem().text(0),
+                               QtCore.Qt.MatchFlag.MatchExactly)
         if len(found): # group
             i = self.indexOfTopLevelItem(found[0])
             if i > 0:
@@ -105,7 +108,9 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                 shifted_item.setExpanded(expand)
                 self.setCurrentItem(shifted_item)
         else: # quirk
-            found = self.findItems(self.currentItem().text(0), QtCore.Qt.MatchFlag.MatchExactly | QtCore.Qt.MatchFlag.MatchRecursive)
+            found = self.findItems(self.currentItem().text(0),
+                                   QtCore.Qt.MatchFlag.MatchExactly
+                                   | QtCore.Qt.MatchFlag.MatchRecursive)
             for f in found:
                 if not f.isSelected(): continue
                 if not f.parent(): continue
@@ -125,7 +130,8 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
 
     @QtCore.pyqtSlot()
     def downShiftQuirk(self):
-        found = self.findItems(self.currentItem().text(0), QtCore.Qt.MatchFlag.MatchExactly)
+        found = self.findItems(self.currentItem().text(0),
+                               QtCore.Qt.MatchFlag.MatchExactly)
         if len(found): # group
             i = self.indexOfTopLevelItem(found[0])
             if i < self.topLevelItemCount()-1 and i >= 0:
@@ -135,7 +141,9 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                 shifted_item.setExpanded(expand)
                 self.setCurrentItem(shifted_item)
         else: # quirk
-            found = self.findItems(self.currentItem().text(0), QtCore.Qt.MatchFlag.MatchExactly | QtCore.Qt.MatchFlag.MatchRecursive)
+            found = self.findItems(self.currentItem().text(0),
+                                   QtCore.Qt.MatchFlag.MatchExactly
+                                   | QtCore.Qt.MatchFlag.MatchRecursive)
             for f in found:
                 if not f.isSelected(): continue
                 if not f.parent(): continue
@@ -156,7 +164,9 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
     @QtCore.pyqtSlot()
     def removeCurrent(self):
         i = self.currentItem()
-        found = self.findItems(i.text(0), QtCore.Qt.MatchFlag.MatchExactly | QtCore.Qt.MatchFlag.MatchRecursive)
+        found = self.findItems(i.text(0),
+                               QtCore.Qt.MatchFlag.MatchExactly
+                               | QtCore.Qt.MatchFlag.MatchRecursive)
         for f in found:
             if not f.isSelected(): continue
             if not f.parent(): # group
@@ -165,7 +175,8 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                 msgbox.setObjectName("delquirkwarning")
                 msgbox.setWindowTitle("WARNING!")
                 msgbox.setInformativeText("Are you sure you want to delete the quirk group: %s" % (f.text(0)))
-                msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok | QtWidgets.QMessageBox.StandardButton.Cancel)
+                msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok
+                                          | QtWidgets.QMessageBox.StandardButton.Cancel)
                 # Find the Cancel button and make it default
                 for b in msgbox.buttons():
                     if msgbox.buttonRole(b) == QtWidgets.QMessageBox.ButtonRole.RejectRole:
@@ -207,7 +218,9 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                     return
                 child_1 = QtWidgets.QTreeWidgetItem([gname])
                 self.addTopLevelItem(child_1)
-                child_1.setFlags(child_1.flags() | QtCore.Qt.ItemFlag.ItemIsUserCheckable | QtCore.Qt.ItemFlag.ItemIsEnabled)
+                child_1.setFlags(child_1.flags()
+                                 | QtCore.Qt.ItemFlag.ItemIsUserCheckable
+                                 | QtCore.Qt.ItemFlag.ItemIsEnabled)
                 child_1.setChildIndicatorPolicy(QtWidgets.QTreeWidgetItem.ChildIndicatorPolicy.DontShowIndicatorWhenChildless)
                 child_1.setCheckState(0, QtCore.Qt.CheckState.Unchecked)
                 child_1.setExpanded(True)
@@ -715,7 +728,7 @@ class PesterChooseQuirks(QtWidgets.QDialog):
         self.quirkadd.show()
     @QtCore.pyqtSlot()
     def addQuirk(self):
-        types = ["prefix","suffix","replace","regexp","random","spelling"]
+        types = ["prefix", "suffix", "replace", "regexp", "random", "spelling"]
         vdict = {}
         vdict["type"] = types[self.quirkadd.pages.currentIndex()-1]
         page = self.quirkadd.pages.currentWidget().layout()
@@ -937,7 +950,8 @@ class PesterChooseProfile(QtWidgets.QDialog):
             msgbox.setStyleSheet(self.theme["main/defaultwindow/style"])
             msgbox.setWindowTitle("WARNING!")
             msgbox.setInformativeText("Are you sure you want to delete the profile: %s" % (handle))
-            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok | QtWidgets.QMessageBox.StandardButton.Cancel)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok
+                                      | QtWidgets.QMessageBox.StandardButton.Cancel)
             ret = msgbox.exec()
             if ret == QtWidgets.QMessageBox.StandardButton.Ok:
                 try:
@@ -1045,7 +1059,15 @@ class PesterOptions(QtWidgets.QDialog):
 
         self.tabs = QtWidgets.QButtonGroup(self)
         self.tabs.buttonClicked.connect(self.changePage)  # Verify working
-        self.tabNames = ["Chum List", "Conversations", "Interface", "Sound", "Notifications", "Logging", "Idle/Updates", "Theme", "Connection"]
+        self.tabNames = ["Chum List",
+                         "Conversations",
+                         "Interface",
+                         "Sound",
+                         "Notifications",
+                         "Logging",
+                         "Idle/Updates",
+                         "Theme",
+                         "Connection"]
         if parent.advanced: self.tabNames.append("Advanced")
         for t in self.tabNames:
             button = QtWidgets.QPushButton(t)
@@ -1059,7 +1081,7 @@ class PesterOptions(QtWidgets.QDialog):
         if self.config.lowBandwidth():
             self.bandwidthcheck.setChecked(True)
         bandwidthLabel = QtWidgets.QLabel("(Stops you for receiving the flood of MOODS,\n"
-                                      " though stops chumlist from working properly)")
+                                          " though stops chumlist from working properly)")
         font = bandwidthLabel.font()
         font.setPointSize(8)
         bandwidthLabel.setFont(font)
@@ -1507,7 +1529,8 @@ class PesterOptions(QtWidgets.QDialog):
             return
         pdict["value"] = "#" + pdict["value"]
         if mitem is None:
-            items = self.autojoinlist.findItems(pdict["value"], QtCore.Qt.MatchFlag.MatchFixedString)
+            items = self.autojoinlist.findItems(pdict["value"],
+                                                QtCore.Qt.MatchFlag.MatchFixedString)
             if len(items) == 0:
                 self.autojoinlist.addItem(pdict["value"])
         else:
@@ -1782,8 +1805,10 @@ class LoadingScreen(QtWidgets.QDialog):
     tryAgain = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
-        QtWidgets.QDialog.__init__(self, parent, (QtCore.Qt.WindowType.CustomizeWindowHint |
-                                              QtCore.Qt.WindowType.FramelessWindowHint))
+        QtWidgets.QDialog.__init__(self,
+                                   parent,
+                                   QtCore.Qt.WindowType.CustomizeWindowHint
+                                   | QtCore.Qt.WindowType.FramelessWindowHint)
         self.mainwindow = parent
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
 
@@ -1839,25 +1864,26 @@ class AboutPesterchum(QtWidgets.QDialog):
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
 
         self.title = QtWidgets.QLabel("P3ST3RCHUM %s" % (_pcVersion))
-        self.credits = QtWidgets.QLabel("Programming by:\n\
-  illuminatedwax (ghostDunk)\n\
-  Kiooeht (evacipatedBox)\n\
-  Lexi (lexicalNuance)\n\
-  oakwhiz\n\
-  alGore\n\
-  Cerxi (binaryCabalist)\n\
-  Arcane (arcaneAgilmente)\n\
-  karxi (Midna)\n\
-  Shou :)\n\
-\n\
-Art by:\n\
-  Grimlive (aquaMarinist)\n\
-  Cerxi (binaryCabalist)\n\
-\n\
-Special Thanks:\n\
-  ABT\n\
-  gamblingGenocider\n\
-  Eco-Mono")
+        self.credits = QtWidgets.QLabel("Programming by:"
+                                        "\n  illuminatedwax (ghostDunk)"
+                                        "\n  Kiooeht (evacipatedBox)"
+                                        "\n  Lexi (lexicalNuance)"
+                                        "\n  oakwhiz"
+                                        "\n  alGore"
+                                        "\n  Cerxi (binaryCabalist)"
+                                        "\n  Arcane (arcaneAgilmente)"
+                                        "\n  karxi (Midna)"
+                                        "\n  Shou/Dpeta 🐱"
+                                        "\n"
+                                        "\nArt by:"
+                                        "\n  Grimlive (aquaMarinist)"
+                                        "\n  Cerxi (binaryCabalist)"
+                                        "\n  cubicSimulation"
+                                        "\n"
+                                        "\nSpecial Thanks:"
+                                        "\n  ABT"
+                                        "\n  gamblingGenocider"
+                                        "\n  Eco-Mono")
 
         self.ok = QtWidgets.QPushButton("OK", self)
         self.ok.clicked.connect(self.reject)

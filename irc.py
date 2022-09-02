@@ -413,9 +413,15 @@ class PesterHandler(DefaultCommandHandler):
     def metadata(self, target, nick, key, visibility, value):
         # The format of the METADATA server notication is:
         # METADATA <Target> <Key> <Visibility> <Value>
-        if key == "mood":
-            mood = Mood(int(value))
-            self.parent.moodUpdated.emit(nick, mood)
+        if key.lower() == "mood":
+            try:
+                mood = Mood(int(value))
+                self.parent.moodUpdated.emit(nick, mood)
+            except ValueError:
+                PchumLog.warning("Invalid mood value, %s, %s" % (nick, mood))
+        elif key.lower() == "color":
+            color = QtGui.QColor(value) # Invalid color becomes rgb 0,0,0
+            self.parent.colorUpdated.emit(nick, color)
 
     def tagmsg(self, prefix, tags, *args):
         PchumLog.info('TAGMSG: %s %s %s' % (prefix, tags, str(args)))
@@ -555,17 +561,22 @@ class PesterHandler(DefaultCommandHandler):
         self.parent.setConnected()
         #mychumhandle = self.mainwindow.profile().handle
         mymood = self.mainwindow.profile().mood.value()
+        color = self.mainwindow.profile().color
         if not self.mainwindow.config.lowBandwidth():
+            # Negotiate capabilities
+            helpers.cap(self.client, "REQ", "message-tags")
+            helpers.cap(self.client, "REQ", "draft/metadata-notify-2") # <--- Not required in the unreal5 module implementation
+            helpers.cap(self.client, "REQ", "pesterchum-tag") # <--- Currently not using this
             time.sleep(0.413 + 0.097) # <--- somehow, this actually helps.
             helpers.join(self.client, "#pesterchum")
             # Moods via metadata
             helpers.metadata(self.client, '*', 'sub', 'mood')
             helpers.metadata(self.client, '*', "set", "mood", str(mymood))
+            # Color via metadata
+            helpers.metadata(self.client, '*', 'sub', 'color')
+            helpers.metadata(self.client, '*', "set", "color", str(color.name()))
             # Backwards compatible moods
             helpers.msg(self.client, "#pesterchum", "MOOD >%d" % (mymood))
-            # Negotiate Pesterchum message tags
-            helpers.cap(self.client, "REQ", "message-tags")
-            helpers.cap(self.client, "REQ", "pesterchum-tag")
 
     def erroneusnickname(self, *args):
         # Server is not allowing us to connect.

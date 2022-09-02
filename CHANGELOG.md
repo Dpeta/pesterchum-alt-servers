@@ -1,6 +1,14 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.4.3] - 2022-09-01
+
+### Added
+ - Support for color via IRCv3 metadata draft.
+ 
+### Fixed
+ - Error when setting quirk with PyQt5.
+
 ## [v2.4.2] - 2022-08-14
 
 ### Added
