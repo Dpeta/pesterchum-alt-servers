@@ -1,10 +1,11 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
-## [v2.4.3] - 2022-09-01
+## [v2.4.3] - 2022-09-05
 
 ### Added
  - Support for color via IRCv3 metadata draft.
+    - This way clients can keep track of each other's colors without requiring them to send a message first.
  - Prompt for connecting anyway when certificate validation fails.
 
 ### Changed

@@ -3273,6 +3273,7 @@ class PesterWindow(MovingWindow):
             self.sendNotice.emit(code, RANDNICK)
         except:
             PchumLog.warning("No randomEncounter set in userconfig?")
+        self.mycolorUpdated.emit()
             
     def aboutPesterchum(self):
         if hasattr(self, 'aboutwindow') and self.aboutwindow:
@@ -3698,8 +3699,11 @@ class PesterWindow(MovingWindow):
     def connectAnyway(self, e):
         # Prompt user to connect anyway
         msgbox = QtWidgets.QMessageBox()
-        msgbox.setStyleSheet("QMessageBox{ %s }"
-                             % self.theme["main/defaultwindow/style"])
+        try:
+            msgbox.setStyleSheet("QMessageBox{ %s }"
+                                 % self.theme["main/defaultwindow/style"])
+        except:
+            pass
         msgbox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
         msgbox.setText("Server certificate validation failed")
         msgbox.setInformativeText("Reason: \"%s (%s)\"" % (e.verify_message, e.verify_code)
@@ -3709,10 +3713,7 @@ class PesterWindow(MovingWindow):
         msgbox.setDefaultButton(QtWidgets.QMessageBox.StandardButton.No)
         ret = msgbox.exec()
         if ret == QtWidgets.QMessageBox.StandardButton.Yes:
-            self.parent.restartIRC(verify_hostname=False)
-        else:
-            return False
-            
+            self.parent.restartIRC(verify_hostname=False)    
 
     pcUpdate = QtCore.pyqtSignal('QString', 'QString')
     closeToTraySignal = QtCore.pyqtSignal()

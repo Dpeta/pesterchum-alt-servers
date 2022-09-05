@@ -247,6 +247,14 @@ class PesterIRC(QtCore.QThread):
     def updateColor(self):
         #PchumLog.debug("irc updateColor (outgoing)")
         #me = self.mainwindow.profile()
+        # Update color metadata field
+        try:
+            color = self.mainwindow.profile().color
+            helpers.metadata(self.cli, '*', "set", "color", str(color.name()))
+        except OSError as e:
+            PchumLog.warning(e)
+            self.setConnectionBroken()
+        # Send color messages
         for h in list(self.mainwindow.convos.keys()):
             try:
                 helpers.msg(self.cli, h, "COLOR >%s" % (self.mainwindow.profile().colorcmd()))
