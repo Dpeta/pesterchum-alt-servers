@@ -1,5 +1,4 @@
 import logging
-import logging.config
 import re
 from string import Template
 from datetime import timedelta, datetime
@@ -21,8 +20,6 @@ from parsetools import (convertTags, timeProtocol, lexMessage, colorBegin,
                         mecmd, smiledict)
 from logviewer import PesterLogViewer
 
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 # Python 3
@@ -412,7 +409,6 @@ class PesterMemo(PesterConvo):
 
         self.textArea = MemoText(self.mainwindow.theme, self)
         self.textInput = MemoInput(self.mainwindow.theme, self)
-        print(self.textInput)
         self.textInput.setFocus()
 
         self.miniUserlist = QtWidgets.QPushButton(">\n>", self)

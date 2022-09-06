@@ -15,17 +15,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import logging
-import logging.config
-import ostools
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
-PchumLog = logging.getLogger('pchumLogger')
-
 import inspect
-import logging
 
 from oyoyo import helpers
 from oyoyo.parse import parse_nick
+
+PchumLog = logging.getLogger('pchumLogger')
 
 def protected(func):
     """ decorator to protect functions from being called """

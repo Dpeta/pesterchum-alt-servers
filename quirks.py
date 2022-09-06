@@ -1,11 +1,9 @@
 import os
 import logging
-import logging.config
 
 import ostools
 
 _datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 class ScriptQuirks(object):
@@ -37,7 +35,7 @@ class ScriptQuirks(object):
                 if self.last[k] == self.quirks[k]:
                     del self.quirks[k]
         #print self.quirks
-        if self.quirks:
+        if hasattr(self, 'quirks'):
             # See https://stackoverflow.com/questions/12843099/python-logging-typeerror-not-all-arguments-converted-during-string-formatting
             reg_quirks = ('Registered quirks:', '(), '.join(self.quirks) + "()")
             PchumLog.info(reg_quirks)
@@ -53,13 +51,13 @@ class ScriptQuirks(object):
         extension = self.getExtension()
         filenames = []
         if not os.path.exists(os.path.join(self.home, 'quirks')):
-            os.mkdir(os.path.join(self.home, 'quirks'))
+            os.makedirs(os.path.join(self.home, 'quirks'), exist_ok=True)
         for fn in os.listdir(os.path.join(self.home, 'quirks')):
             if fn.endswith(extension) and not fn.startswith('_'):
                 filenames.append(os.path.join(self.home, 'quirks', fn))
-        if self._datadir:
+        if hasattr(self, '_datadir'):
             if not os.path.exists(os.path.join(self._datadir, 'quirks')):
-                os.mkdir(os.path.join(self._datadir, 'quirks'))
+                os.makedirs(os.path.join(self._datadir, 'quirks'), exist_ok=True)
             for fn in os.listdir(os.path.join(self._datadir, 'quirks')):
                 if fn.endswith(extension) and not fn.startswith('_'):
                     filenames.append(os.path.join(self._datadir, 'quirks', fn))
@@ -75,10 +73,6 @@ class ScriptQuirks(object):
                     continue
             except Exception as e:
                 PchumLog.warning("Error loading %s: %s (in quirks.py)" % (os.path.basename(name), e))
-                #msgbox = QtWidgets.QMessageBox()
-                #msgbox.setWindowTitle("Error!")
-                #msgbox.setText("Error loading %s: %s (in quirks.py)" % (os.path.basename(filename), e))
-                #msgbox.exec()
             else:
                 if self.modHas(module, 'setup'):
                     module.setup()
@@ -91,7 +85,7 @@ class ScriptQuirks(object):
                     del self.quirks[k]
 
     def funcre(self):
-        if not self.quirks:
+        if not hasattr(self, 'quirks'):
             return r"\\[0-9]+"
         f = r"("
         for q in self.quirks:

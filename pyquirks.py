@@ -1,5 +1,4 @@
 import logging
-import logging.config
 import importlib.util
 
 try:
@@ -11,8 +10,6 @@ except ImportError:
 import ostools
 from quirks import ScriptQuirks
 
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 class PythonQuirks(ScriptQuirks):

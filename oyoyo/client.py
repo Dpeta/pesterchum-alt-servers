@@ -16,10 +16,6 @@
 # THE SOFTWARE.
 
 import logging
-import logging.config
-import ostools
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 import logging
@@ -326,7 +322,7 @@ class IRCClient:
 
                     for el in data:
                         tags, prefix, command, args = parse_raw_irc_command(el)
-                        print(tags, prefix, command, args)
+                        #print(tags, prefix, command, args)
                         try:
                             # Only need tags with tagmsg
                             if command.upper() == "TAGMSG":

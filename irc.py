@@ -1,5 +1,4 @@
 import logging
-import logging.config
 import socket
 import random
 import time
@@ -22,8 +21,6 @@ from oyoyo.client import IRCClient
 from oyoyo.cmdhandler import DefaultCommandHandler
 from oyoyo import helpers, services
 
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 # Python 3

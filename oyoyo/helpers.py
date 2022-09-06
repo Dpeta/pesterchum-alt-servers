@@ -18,12 +18,9 @@
 """ contains helper functions for common irc commands """
 
 import logging
-import logging.config
-import ostools
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
-PchumLog = logging.getLogger('pchumLogger')
 import random
+
+PchumLog = logging.getLogger('pchumLogger')
 
 def msg(cli, user, msg):
     for line in msg.split('\n'):

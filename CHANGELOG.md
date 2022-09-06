@@ -1,7 +1,7 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
-## [v2.4.3] - 2022-09-05
+## [v2.4.3] - 2022-09-06
 
 ### Added
  - Support for color via IRCv3 metadata draft.
@@ -11,10 +11,16 @@
 ### Changed
  - Reenabled server certificate validation when using SSL.
     - Uses the system's local certificates, so might fail on some installations.
+ - Redid command-line handling with the argparse module instead of getopt.
+ - Restructured imports & data directory checks in pesterchum.py
  
 ### Fixed
  - Error when setting quirk with PyQt5.
 
+### Depreciated
+ - Disabled the console for now since no one seems to use it and it caused an issue on import.
+ - Logging.config/configparser logging configuration, not aware of anyone that actually used this. Logging level can still be specified with command line arguments. (-l --logging)
+ 
 ## [v2.4.2] - 2022-08-14
 
 ### Added

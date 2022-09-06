@@ -1,41 +1,60 @@
 #!/usr/bin/env python3
-import sys
 import os
+import sys
 import shutil
-import getopt
-import configparser
+import argparse
 import traceback
-
-# Python 3
-QString = str
-
-if os.path.dirname(sys.argv[0]):
-    os.chdir(os.path.dirname(sys.argv[0]))
-print("Usage: pesterchum.py [OPTIONS]")
-print("Use -h/--help to see the available options."
-      "\nLogging is configured in logging.ini")
-# Help
-if ('--help' in sys.argv[1:]) or ('-h' in sys.argv[1:]):
-    print("Possible arguments:")
-    help_arguments = (" -l, --logging\n    Specify level of logging, possible values are:\n"
-                     "    CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET.\n" 
-                     "    The default value is WARNING.\n" 
-                     "    (See https://docs.python.org/3/library/logging.html)\n\n" 
-                     " -s, --server\n    Specify server override. (legacy)\n\n"
-                     " -p, --port\n    Specify port override. (legacy)\n\n"
-                     " --advanced\n    Enable advanced.\n\n"
-                     " --no-honk\n    Disable honking.\n")
-    print(help_arguments)
-    sys.exit()
-
 import logging
-import logging.config
 import datetime
 import random
 import re
 import time
 import json
+
+import ostools
+import nickservmsgs
+import pytwmn
+#import console
 from pnc.dep.attrdict import AttrDict
+from profile import (userConfig,
+                     userProfile,
+                     pesterTheme,
+                     PesterLog,
+                     PesterProfileDB)
+from menus import (PesterChooseQuirks,
+                   PesterChooseTheme,
+                   PesterChooseProfile,
+                   PesterOptions,
+                   PesterUserlist,
+                   PesterMemoList,
+                   LoadingScreen,
+                   AboutPesterchum,
+                   UpdatePesterchum,
+                   AddChumDialog)
+from mood import (Mood,
+                  PesterMoodAction,
+                  PesterMoodHandler,
+                  PesterMoodButton)
+from dataobjs import PesterProfile, pesterQuirk, pesterQuirks
+from generic import (PesterIcon,
+                     RightClickTree,
+                     PesterList,
+                     CaseInsensitiveDict,
+                     MovingWindow,
+                     NoneSound,
+                     WMButton)
+from convo import (PesterTabWindow,
+                   PesterConvo)
+from parsetools import (convertTags,
+                        addTimeInitial,
+                        themeChecker,
+                        ThemeException,
+                        loadQuirks)
+from memos import PesterMemo, MemoTabWindow, TimeTracker
+from irc import PesterIRC
+from logviewer import PesterLogUserSelect, PesterLogViewer
+from randomer import RandomHandler, RANDNICK
+from toast import PesterToastMachine, PesterToast
 
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets
@@ -45,199 +64,69 @@ except ImportError:
     from PyQt5 import QtCore, QtGui, QtWidgets
     from PyQt5.QtWidgets import QAction, QShortcut, QActionGroup
 
-#vnum = QtCore.qVersion()
-#major = int(vnum[:vnum.find(".")])
-#if vnum.find(".", vnum.find(".")+1) != -1:
-#    minor = int(vnum[vnum.find(".")+1:vnum.find(".", vnum.find(".")+1)])
-#else:
-#    minor = int(vnum[vnum.find(".")+1:])
-#if (major < 6) or ((major > 6) and (minor < 2)):
-#    print("ERROR: Pesterchum requires at least Qt version >= 6.2")
-#    print("You currently have version " + str(vnum) + ". Please upgrade Qt.")
-#    sys.exit()
-
-import ostools
-# Placed here before importing the rest of pesterchum, since bits of it need
-#  OSX's data directory and it doesn't hurt to have everything set up before
-#  plowing on. :o)
-# ~Lex
+# Data directory
+ostools.validateDataDir()
 _datadir = ostools.getDataDir()
-if not os.path.isdir(_datadir):
-    os.makedirs(_datadir)
-if not os.path.isdir(os.path.join(_datadir, 'errorlogs')):
-    os.makedirs(os.path.join(_datadir, 'errorlogs'))
-# See, what I've done here is that _datadir is '' if we're not on OSX, so the
-#  concatination is the same as if it wasn't there.
-# UPDATE 2011-11-28 <Kiooeht>:
-#   Now using data directory as defined by QDesktopServices on all platforms
-#   (on Linux, same as using xdg). To stay safe with older versions, copy any
-#   data (profiles, logs, etc) from old location to new data directory.
 
-config = configparser.ConfigParser()
-# Create logging.ini
-#if os.path.exists(_datadir + "logging.ini") == False:
-try:
-    config.read(_datadir + 'logging.ini')
+# Data directory dependent actions
+loadQuirks()
 
-    # Test load
-    logging.config.fileConfig(_datadir + "logging.ini")
-    PchumLog = logging.getLogger('pchumLogger')
-except:
-    #config.read('logging.ini.example')
-    config = configparser.ConfigParser()
+# Command line options
+parser = argparse.ArgumentParser()
+parser.add_argument("--server",
+                    "-s",
+                    metavar="ADDRESS",
+                    help="Specify server override. (legacy)")
+parser.add_argument("--port",
+                    "-p",
+                    metavar="PORT",
+                    help="Specify port override. (legacy)")
+parser.add_argument("--logging",
+                    "-l",
+                    metavar="LEVEL",
+                    default="WARNING",
+                    help=("Specify level of logging, possible values are:"
+                     " CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET."
+                     " (https://docs.python.org/3/library/logging.html)"))
+parser.add_argument("--advanced",
+                    action="store_true",
+                    help=("Enable 'advanced' mode. Adds an 'advanced' tab"
+                          " to settings for setting user mode and adds"
+                          " channel modes in memo titles."
+                          " This feature is currently not maintained."))
+parser.add_argument("--nohonk",
+                    action="store_true",
+                    help="Disables the honk soundeffect 🤡📣")
 
-    # Default setup
-    config['loggers'] = {'keys': 'root,pchumLogger'}
-    config['handlers'] = {'keys': 'consoleHandler,FileHandler'}
-    config['formatters'] = {'keys': 'simpleFormatter'}
-    config['logger_root'] = {'level': 'WARNING',
-                             'handlers': 'consoleHandler'}
-    config['handler_consoleHandler'] = {'class': 'StreamHandler',
-                                        'level': 'WARNING',
-                                        'formatter': 'simpleFormatter',
-                                        'args': '(sys.stdout,)'}
-    config['handler_FileHandler'] = {'class': 'FileHandler',
-                                        'level': 'WARNING',
-                                        'formatter': 'simpleFormatter'}
-    config['logger_pchumLogger'] = {'level': 'WARNING',
-                                        'handlers': 'consoleHandler,FileHandler',
-                                        'qualname': 'pchumLogger',
-                                        'propagate': '0'}
-    config['formatter_simpleFormatter'] = {'format': '%(levelname)s - %(module)s - %(message)s',
-                                        'datefmt': ''}
-    
-    # Enable file logging
-    config['handlers']['keys'] = 'consoleHandler,FileHandler'
-    config['logger_pchumLogger']['handlers'] = 'consoleHandler,FileHandler'
-    #(r'C:\Users\X\AppData\Local\pesterchum\pesterchum.log', 'a')
-    config['handler_FileHandler'] = {'class': 'FileHandler',
-                                'level': 'WARNING',
-                                'formatter': 'simpleFormatter',
-                                'args': (_datadir + 'pesterchum.log', 'a')}
-
-    print(config.sections())
-    
-    
-loglevel = "30"# Warning (Default)
-if ('--logging' in sys.argv[1:]) or ('-l' in sys.argv[1:]) & (False == ('--logging' in sys.argv[1:]) and ('-l' in sys.argv[1:])):
-    try:
-        # If both are specified, this does not run.
-        if ('-l' in sys.argv[1:]):
-            loglevel = sys.argv[sys.argv.index('-l') + 1]
-        if ('--logging' in sys.argv[1:]):
-            loglevel = sys.argv[sys.argv.index('--logging') + 1]
-
-        loglevel = loglevel.upper().strip()
-
-        config.read(_datadir + 'logging.ini')
-        
-        print("loglevel = " + loglevel)
-
-        if loglevel == "50" or loglevel == "CRITICAL":
-            loglevel = "CRITICAL"
-            print("Logging Level is CRITICAL")
-        elif loglevel == "40" or loglevel == "ERROR":
-            loglevel = "ERROR"
-            print("Logging Level is ERROR")
-        elif loglevel == "30" or loglevel == "WARNING":
-            loglevel = "WARNING"
-            print("Logging Level is WARNING")
-        elif loglevel == "20" or loglevel == "INFO":
-            loglevel = "INFO"
-            print("Logging Level is INFO")
-        elif loglevel == "10" or loglevel == "DEBUG":
-            loglevel = "DEBUG"
-            print("Logging Level is DEBUG")
-        elif loglevel == "0" or loglevel == "NOTSET":
-            loglevel = "NOTSET"
-            print("Logging Level is NOTSET")
-        else:
-            loglevel = "WARNING"
-            print("Logging Level is WARNING")
-
-        config['logger_root']['level'] = loglevel
-        config['logger_pchumLogger']['level'] = loglevel
-        config['handler_consoleHandler']['level'] = loglevel
-        config['handler_FileHandler']['level'] = loglevel
-        
-        # Remove from argv because the rest of the code can't handle it :/
-        if ('-l' in sys.argv[1:]):
-                sys.argv.pop(sys.argv.index('-l') + 1)
-                sys.argv.pop(sys.argv.index('-l'))
-        if ('--logging' in sys.argv[1:]):
-            sys.argv.pop(sys.argv.index('--logging') + 1)
-            sys.argv.pop(sys.argv.index('--logging'))
-    except:
-        logging.exception("Invalid syntax?")
-
-# Update logging.ini
-with open(_datadir + "logging.ini", 'w') as configfile:
-        config.write(configfile)
-
-# Load logging.ini
-logging.config.fileConfig(_datadir + "logging.ini")
+# Set logging config section, log level is in oppts.
+# Logger
 PchumLog = logging.getLogger('pchumLogger')
+# Handlers
+file_handler = logging.FileHandler(os.path.join(_datadir, 'pesterchum.log'))
+stream_handler = logging.StreamHandler()
+# Format
+formatter = logging.Formatter('%(asctime)s - %(module)s  - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+stream_handler.setFormatter(formatter)
+# Add handlers
+PchumLog.addHandler(file_handler)
+PchumLog.addHandler(stream_handler)
 
-try:
-    import console
-    _CONSOLE = True
-except ImportError:
-    _CONSOLE = False
-    logging.warning("Console file not shipped; skipping.")
-
-if _datadir:
-    if not os.path.exists(_datadir):
-        os.makedirs(_datadir)
-    if not os.path.exists(_datadir+"profiles/") and os.path.exists("profiles/"):
-        shutil.move("profiles/", _datadir+"profiles/")
-    if not os.path.exists(_datadir+"pesterchum.js") and os.path.exists("pesterchum.js"):
-        shutil.move("pesterchum.js", _datadir+"pesterchum.js")
-    if not os.path.exists(_datadir+"logs/") and os.path.exists("logs/"):
-        shutil.move("logs/", _datadir+"logs/")
-
-if not os.path.exists(_datadir+"profiles"):
-    os.mkdir(_datadir+"profiles")
-if not os.path.exists(_datadir+"pesterchum.js"):
-    f = open(_datadir+"pesterchum.js", 'w')
-    f.write("{}")
-    f.close()
-if not os.path.exists(_datadir+"logs"):
-    os.mkdir(_datadir+"logs")
-
-from profile import userConfig, userProfile, pesterTheme, PesterLog, \
-     PesterProfileDB
-from menus import PesterChooseQuirks, PesterChooseTheme, \
-    PesterChooseProfile, PesterOptions, PesterUserlist, PesterMemoList, \
-    LoadingScreen, AboutPesterchum, UpdatePesterchum, AddChumDialog
-from mood import Mood, PesterMoodAction, PesterMoodHandler, PesterMoodButton
-from dataobjs import PesterProfile, pesterQuirk, pesterQuirks
-from generic import PesterIcon, RightClickTree, \
-    PesterList, CaseInsensitiveDict, MovingWindow, \
-    NoneSound, WMButton
-from convo import PesterTabWindow, PesterConvo
-from parsetools import convertTags, addTimeInitial, themeChecker, ThemeException
-from memos import PesterMemo, MemoTabWindow, TimeTracker
-from irc import PesterIRC
-from logviewer import PesterLogUserSelect, PesterLogViewer
-from randomer import RandomHandler, RANDNICK
-import nickservmsgs
-from toast import PesterToastMachine, PesterToast
-import pytwmn
-
-#canon_handles = ["apocalypseArisen", "arsenicCatnip", "arachnidsGrip", "adiosToreador",
-#                 "caligulasAquarium", "cuttlefishCuller", "carcinoGeneticist", "centaursTesticle",
-#                 "grimAuxiliatrix", "gallowsCalibrator", "gardenGnostic", "ectoBiologist",
-#                 "twinArmageddons", "terminallyCapricious", "turntechGodhead", "tentacleTherapist"]
+# Global variables
 BOTNAMES = []
 CUSTOMBOTS = ["CALSPRITE", RANDNICK.upper()]
 SERVICES = ["NICKSERV", "CHANSERV", "MEMOSERV", "OPERSERV", "HELPSERV", "HOSTSERV", "BOTSERV"]
 BOTNAMES.extend(CUSTOMBOTS)
 BOTNAMES.extend(SERVICES)
-
 # Save the main app. From here, we should be able to get everything else in
 # order, for console use.
+_CONSOLE = False
 _CONSOLE_ENV = AttrDict()
 _CONSOLE_ENV.PAPP = None
+# Python 3
+QString = str
+# Command line arguments
+_ARGUMENTS = parser.parse_args()
 
 # Import audio module
 if ostools.isLinux():
@@ -250,7 +139,8 @@ if ostools.isLinux():
         import pygame
     except ImportError:
         print("Failed to import pygame, falling back to QtMultimedia. "
-              + "For QtMultimedia to work on Linux you need GStreamer"
+              + "This should also work fine, but for QtMultimedia to work "
+              + "on Linux you need GStreamer"
               + " + a plugin for decoding the wave format.")
         try:
             from PyQt6 import QtMultimedia
@@ -682,32 +572,32 @@ class chumArea(RightClickTree):
             self.showOnlineNumbers()
     def showOnlineNumbers(self):
         if hasattr(self, 'groups'):
-          self.hideOnlineNumbers()
-          totals = {'Chums': 0}
-          online = {'Chums': 0}
-          for g in self.groups:
-              totals[str(g)] = 0
-              online[str(g)] = 0
-          for c in self.chums:
-              yes = c.mood.name() != "offline"
-              if c.group == "Chums":
-                  totals[str(c.group)] = totals[str(c.group)]+1
-                  if yes:
-                      online[str(c.group)] = online[str(c.group)]+1
-              elif c.group in totals:
-                  totals[str(c.group)] = totals[str(c.group)]+1
-                  if yes:
-                      online[str(c.group)] = online[str(c.group)]+1
-              else:
-                  totals["Chums"] = totals["Chums"]+1
-                  if yes:
-                      online["Chums"] = online["Chums"]+1
-          for i in range(self.topLevelItemCount()):
-              text = str(self.topLevelItem(i).text(0))
-              if text.rfind(" (") != -1:
-                  text = text[0:text.rfind(" (")]
-              if text in online:
-                  self.topLevelItem(i).setText(0, "%s (%i/%i)" % (text, online[text], totals[text]))
+            self.hideOnlineNumbers()
+            totals = {'Chums': 0}
+            online = {'Chums': 0}
+            for g in self.groups:
+                totals[str(g)] = 0
+                online[str(g)] = 0
+            for c in self.chums:
+                yes = c.mood.name() != "offline"
+                if c.group == "Chums":
+                    totals[str(c.group)] = totals[str(c.group)]+1
+                    if yes:
+                        online[str(c.group)] = online[str(c.group)]+1
+                elif c.group in totals:
+                    totals[str(c.group)] = totals[str(c.group)]+1
+                    if yes:
+                        online[str(c.group)] = online[str(c.group)]+1
+                else:
+                    totals["Chums"] = totals["Chums"]+1
+                    if yes:
+                        online["Chums"] = online["Chums"]+1
+            for i in range(self.topLevelItemCount()):
+                text = str(self.topLevelItem(i).text(0))
+                if text.rfind(" (") != -1:
+                    text = text[0:text.rfind(" (")]
+                if text in online:
+                    self.topLevelItem(i).setText(0, "%s (%i/%i)" % (text, online[text], totals[text]))
     def hideOnlineNumbers(self):
         for i in range(self.topLevelItemCount()):
             text = str(self.topLevelItem(i).text(0))
@@ -1270,15 +1160,16 @@ class PesterWindow(MovingWindow):
         # This was almost certainly intentional.
         if "advanced" in options:
               self.advanced = options["advanced"]
-        else: self.advanced = False
+        else:
+            self.advanced = False
         if "server" in options:
             self.serverOverride = options["server"]
         if "port" in options:
             self.portOverride = options["port"]
         if "honk" in options:
               self.honk = options["honk"]
-            
-        else: self.honk = True
+        else:
+            self.honk = True
         self.modes = ""
 
         self.sound_type = None
@@ -2969,9 +2860,9 @@ class PesterWindow(MovingWindow):
             self.config.set("showTimeStamps", timestampsetting)
             timeformatsetting = str(self.optionmenu.timestampBox.currentText())
             if timeformatsetting == "12 hour":
-              self.config.set("time12Format", True)
+                self.config.set("time12Format", True)
             else:
-              self.config.set("time12Format", False)
+                self.config.set("time12Format", False)
             secondssetting = self.optionmenu.secondscheck.isChecked()
             self.config.set("showSeconds", secondssetting)
             # groups
@@ -3066,12 +2957,12 @@ class PesterWindow(MovingWindow):
             # Taskbar blink
             blinksetting = 0
             if self.optionmenu.pesterBlink.isChecked():
-              blinksetting |= self.config.PBLINK
+                blinksetting |= self.config.PBLINK
             if self.optionmenu.memoBlink.isChecked():
-              blinksetting |= self.config.MBLINK
+                blinksetting |= self.config.MBLINK
             curblink = self.config.blink()
             if blinksetting != curblink:
-              self.config.set('blink', blinksetting)
+                self.config.set('blink', blinksetting)
             # toast notifications
             self.tm.setEnabled(self.optionmenu.notifycheck.isChecked())
             self.tm.setCurrentType(str(self.optionmenu.notifyOptions.currentText()))
@@ -3623,7 +3514,7 @@ class PesterWindow(MovingWindow):
                     server_file.write(json.dumps(json_server_file, indent = 4) )
                     server_file.close()
             except:
-                    PchumLog.error("Failed to set server :(")
+                PchumLog.error("Failed to set server :(")
 
             # Continue running Pesterchum as usual
             # Sorry-
@@ -4116,19 +4007,27 @@ class MainProgram(QtCore.QObject):
 
     def oppts(self, argv):
         options = {}
+        # The parser and arguments are defined globally,
+        # since --help causes Qt to raise an exception otherwise.
+        args = _ARGUMENTS
         try:
-            opts, args = getopt.getopt(argv, "s:p:", ["server=", "port=", "advanced", "no-honk"])
-        except getopt.GetoptError:
-            return options
-        for opt, arg in opts:
-            if opt in ("-s", "--server"):
-                options["server"] = arg
-            elif opt in ("-p", "--port"):
-                options["port"] = arg
-            elif opt in ("--advanced"):
-                options["advanced"] = True
-            elif opt in ("--no-honk"):
+            if args.server != None:
+                options["server"] = args.server
+            if args.port != None:
+                options["port"] = args.port
+            # Set log level
+            PchumLog.setLevel(args.logging.upper())
+            file_handler.setLevel(args.logging.upper())
+            stream_handler.setLevel(args.logging.upper())
+            # Enable advanced
+            options["advanced"] = args.advanced
+            # Disable honks
+            if args.nohonk == True:
                 options["honk"] = False
+        except Exception as e:
+            print(e)
+            return options
+        
         return options
 
     def uncaughtException(self, exc, value, tb):

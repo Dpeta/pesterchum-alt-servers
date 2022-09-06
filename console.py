@@ -7,7 +7,6 @@ import traceback
 import time
 import datetime
 import logging
-import logging.config
 
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets
@@ -25,10 +24,7 @@ import ostools
 #from version import _pcVersion
 from pnc.dep.attrdict import AttrDict
 
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
-
 
 class ConsoleWindow(QtWidgets.QDialog):
 #~class ConsoleWindow(styler.PesterBaseWindow):

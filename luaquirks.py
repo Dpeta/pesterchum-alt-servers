@@ -5,7 +5,6 @@ Hard for me to work on this since I know absolutely nothing about lua, plus I'm 
  + I asked and there doesn't seem to be a single person who actually used this 💀
 
 import logging
-import logging.config
 import os
 import sys
 import re
@@ -15,8 +14,6 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 import ostools
 from quirks import ScriptQuirks
 
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 try:

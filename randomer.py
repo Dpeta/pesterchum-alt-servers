@@ -1,5 +1,4 @@
 import logging
-import logging.config
 
 try:
     from PyQt6 import QtCore, QtWidgets
@@ -9,8 +8,6 @@ except ImportError:
 
 import ostools
 
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 RANDNICK = "randomEncounter"

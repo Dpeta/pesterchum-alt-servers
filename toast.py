@@ -2,7 +2,6 @@ import os
 #import time
 import inspect
 import logging
-import logging.config
 
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets
@@ -13,7 +12,6 @@ except ImportError:
 import ostools
 
 _datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 #try:

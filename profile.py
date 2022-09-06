@@ -6,7 +6,6 @@ import codecs
 import shutil
 import zipfile
 import logging
-import logging.config
 from string import Template
 from datetime import datetime
 from time import strftime
@@ -23,7 +22,6 @@ from dataobjs import PesterProfile, pesterQuirks
 from parsetools import convertTags
 
 _datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 
@@ -274,20 +272,20 @@ with a backup from: <a href='%s'>%s</a></h3></html>" % (_datadir, self.filename,
         return self.config.get('opvMessages', True)
     def animations(self):
         return self.config.get('animations', True)
-    def checkForUpdates(self):
-        u = self.config.get('checkUpdates', 0)
-        if type(u) == type(bool()):
-            if u: u = 2
-            else: u = 3
-        return u
-        # Once a day
-        # Once a week
-        # Only on start
-        # Never
-    def lastUCheck(self):
-        return self.config.get('lastUCheck', 0)
-    def checkMSPA(self):
-        return self.config.get('mspa', False)
+    #def checkForUpdates(self):
+    #    u = self.config.get('checkUpdates', 0)
+    #    if type(u) == type(bool()):
+    #        if u: u = 2
+    #        else: u = 3
+    #    return u
+    #    # Once a day
+    #    # Once a week
+    #    # Only on start
+    #    # Never
+    #def lastUCheck(self):
+    #    return self.config.get('lastUCheck', 0)
+    #def checkMSPA(self):
+    #    return self.config.get('mspa', False)
     def blink(self):
         return self.config.get('blink', self.PBLINK | self.MBLINK)
     def notify(self):

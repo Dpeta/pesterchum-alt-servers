@@ -16,13 +16,9 @@
 # THE SOFTWARE.
 
 import logging
-import logging.config
 
-import ostools
 from oyoyo.ircevents import numeric_events
 
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 def parse_raw_irc_command(element):

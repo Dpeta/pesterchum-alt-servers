@@ -1,6 +1,5 @@
 import sys
 import logging
-import logging.config
 from string import Template
 from time import strftime
 from datetime import datetime, timedelta
@@ -15,14 +14,15 @@ except ImportError:
 
 import ostools
 from dataobjs import PesterHistory
-from parsetools import (convertTags, lexMessage, mecmd, colorBegin, colorEnd,
+from parsetools import (convertTags,
+                        lexMessage,
+                        mecmd,
+                        colorBegin,
+                        colorEnd,
                         smiledict)
 import parsetools
 from pnc.dep.attrdict import AttrDict
 
-
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 class PesterTabWindow(QtWidgets.QFrame):

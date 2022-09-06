@@ -1,5 +1,4 @@
 import logging
-import logging.config
 import re
 import collections
 from copy import copy
@@ -20,8 +19,6 @@ from quirks import ScriptQuirks
 from pyquirks import PythonQuirks
 #from luaquirks import LuaQuirks
 
-_datadir = ostools.getDataDir()
-logging.config.fileConfig(_datadir + "logging.ini")
 PchumLog = logging.getLogger('pchumLogger')
 
 # I'll clean up the things that are no longer needed once the transition is
@@ -42,16 +39,18 @@ _oocre = re.compile(r"([\[(\{])\1.*([\])\}])\2")
 _format_begin = re.compile(r'(?i)<([ibu])>')
 _format_end = re.compile(r'(?i)</([ibu])>')
 _honk = re.compile(r"(?i)\bhonk\b")
+_groupre = re.compile(r"\\([0-9]+)")
 
 quirkloader = ScriptQuirks()
-quirkloader.add(PythonQuirks())
-#quirkloader.add(LuaQuirks())
-quirkloader.loadAll()
-# Quirks are already listed in quirks.py, so logging is redundant here. 
-#PchumLog.debug(quirkloader.funcre())
-quirkloader.funcre()
-_functionre = re.compile(r"%s" % quirkloader.funcre())
-_groupre = re.compile(r"\\([0-9]+)")
+_functionre = None
+
+def loadQuirks():
+    global quirkloader, _functionre
+    quirkloader.add(PythonQuirks())
+    #quirkloader.add(LuaQuirks())
+    quirkloader.loadAll()
+    quirkloader.funcre()
+    _functionre = re.compile(r"%s" % quirkloader.funcre())
 
 def reloadQuirkFunctions():
     quirkloader.loadAll()

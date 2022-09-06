@@ -1,7 +1,7 @@
 import os
 import sys
 import platform
-
+    
 try:
     from PyQt6.QtCore import QStandardPaths
 except ImportError:
@@ -32,6 +32,27 @@ def osVer():
     elif isLinux():
         return " ".join(platform.linux_distribution())
 
+def validateDataDir():
+    """Checks if data directory is present"""
+    # Define paths
+    datadir = getDataDir()
+    profile = os.path.join(datadir, "profiles")
+    quirks = os.path.join(datadir, "quirks")
+    logs = os.path.join(datadir, "logs")
+    errorlogs = os.path.join(datadir, "errorlogs")
+    backup = os.path.join(datadir, "backup")
+    js_pchum = os.path.join(datadir, "pesterchum.js")
+    
+    dirs = [datadir, profile, quirks, logs, errorlogs, backup]
+    for d in dirs:
+        if (os.path.isdir(d) == False) or (os.path.exists(d) == False):
+            os.makedirs(d, exist_ok=True)
+
+    # pesterchum.js
+    if not os.path.exists(js_pchum):
+        with open(js_pchum, 'w') as f:
+            f.write("{}")
+
 def getDataDir():
     # Temporary fix for non-ascii usernames
     # If username has non-ascii characters, just store userdata
@@ -43,5 +64,6 @@ def getDataDir():
             return os.path.join(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation), ".pesterchum/")
         else:
             return os.path.join(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppLocalDataLocation), "pesterchum/")
-    except UnicodeDecodeError:
+    except UnicodeDecodeError as e:
+        print(e)
         return ''
