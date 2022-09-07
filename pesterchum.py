@@ -11,6 +11,10 @@ import re
 import time
 import json
 
+# Set working directory
+if os.path.dirname(sys.argv[0]):
+    os.chdir(os.path.dirname(sys.argv[0]))
+
 import ostools
 import nickservmsgs
 import pytwmn
