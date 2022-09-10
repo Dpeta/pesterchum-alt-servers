@@ -958,7 +958,7 @@ smiledict = {
     ":chummy:": "pc_chummy.png",
     ":cool:": "pccool.png",
     ":smooth:": "pccool.png",
-    ":distraughtfirman": "pc_distraughtfirman.png",
+    ":distraughtfirman:": "pc_distraughtfirman.png",
     ":distraught:": "pc_distraught.png",
     ":insolent:": "pc_insolent.png",
     ":bemused:": "pc_bemused.png",

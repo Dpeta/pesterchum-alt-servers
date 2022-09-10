@@ -154,7 +154,7 @@ Ideally, you'll want to create and activate a [virtual environment](https://docs
 |`:chummy:`|<img alt=':chummy: pesterchum smilie/emote' src='smilies/pc_chummy.png'>|
 |`:cool:`|<img alt=':cool: pesterchum smilie/emote' src='smilies/pccool.png'>|
 |`:smooth:`|<img alt=':smooth: pesterchum smilie/emote' src='smilies/pccool.png'>|
-|`:distraughtfirman`|<img alt=':distraughtfirman pesterchum smilie/emote' src='smilies/pc_distraughtfirman.png'>|
+|`:distraughtfirman:`|<img alt=':distraughtfirman: pesterchum smilie/emote' src='smilies/pc_distraughtfirman.png'>|
 |`:distraught:`|<img alt=':distraught: pesterchum smilie/emote' src='smilies/pc_distraught.png'>|
 |`:insolent:`|<img alt=':insolent: pesterchum smilie/emote' src='smilies/pc_insolent.png'>|
 |`:bemused:`|<img alt=':bemused: pesterchum smilie/emote' src='smilies/pc_bemused.png'>|

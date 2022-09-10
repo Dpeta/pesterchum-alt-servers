@@ -1815,6 +1815,8 @@ class LoadingScreen(QtWidgets.QDialog):
         #self.setWindowModality(QtCore.Qt.WindowModality.NonModal)  # useless
         #self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)  # useless
         self.loadinglabel = QtWidgets.QLabel("CONN3CT1NG", self)
+        #self.loadinglabel.setTextFormat(QtCore.Qt.TextFormat.RichText) # Clickable html links
+        #self.loadinglabel.setWordWrap(True) # Unusable because of QT clipping bug (QTBUG-92381)
         self.cancel = QtWidgets.QPushButton("QU1T >:?", self)
         self.ok = QtWidgets.QPushButton("R3CONN3CT >:]", self)
         # Help reduce the number of accidental Pesterchum closures... :|

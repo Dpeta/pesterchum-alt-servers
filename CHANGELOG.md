@@ -1,6 +1,17 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.4.4] - 2022-09-10
+
+### Added
+ - Desync check, verify connection is alive when system time changes by multiple minutes.
+
+### Changed
+ - Made outgoing irc.py functions do an extra check if connection/cli exists.
+ 
+### Fixed
+ - The string for the distraughtfirman smilie being ":distraughtfirman" instead of ":distraughtfirman:".
+ 
 ## [v2.4.3] - 2022-09-06
 
 ### Added

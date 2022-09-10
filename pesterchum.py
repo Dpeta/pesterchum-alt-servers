@@ -1434,6 +1434,7 @@ class PesterWindow(MovingWindow):
         self.pingtimer = QtCore.QTimer()
         self.pingtimer.timeout.connect(self.checkPing)
         self.sincerecv = 0 # Time since last recv
+        self.lastCheckPing = None
     
     @QtCore.pyqtSlot(QString, QString)
     def updateMsg(self, ver, url):
@@ -1465,7 +1466,20 @@ class PesterWindow(MovingWindow):
         this function is called every 15sec'''
         # Return without irc
         if hasattr(self.parent, 'irc') == False:
+            self.lastCheckPing = None
+            self.sincerecv = 0
             return
+
+        # Desync check, happens if pc comes out of sleep.
+        currentTime = time.time()
+        timeDif = abs(currentTime - self.lastCheckPing)
+        if timeDif > 180:  # default UnrealIRCd ping timeout time.
+            # 180 is the default UnrealIRCd ping timeout time.
+            PchumLog.warning(("Possible desync, system time changed by %s "
+                              "seconds since last check. abs(%s - %s)")
+                             % (timeDif, currentTime, self.lastCheckPing))
+            self.sincerecv = 85  # Allows one more ping attempt before disconnect.
+        self.lastCheckPing = time.time()
         
         # Presume connection is dead after 90 seconds of silence.
         if self.sincerecv >= 90:
@@ -1481,15 +1495,17 @@ class PesterWindow(MovingWindow):
                 self.setFocus()
         else:
             self.parent.irc.unresponsive = False
-            if self.loadingscreen:
-                self.loadingscreen.done(QtWidgets.QDialog.DialogCode.Accepted)
-            
+            if hasattr(self, 'loadingscreen'):
+                if self.loadingscreen != None:
+                    PchumLog.warning("Server alive !! :O")
+                    self.loadingscreen.done(QtWidgets.QDialog.DialogCode.Accepted)
+                    self.loadingscreen = None
         
         # Send a ping if it's been 30 seconds since we've heard from the server.
         if self.sincerecv >= 30:
             self.pingServer.emit()
 
-        self.sincerecv += 15 # Only updating every 15s is better for performance.
+        self.sincerecv += 5 # Not updating too frequently is better for performance.
 
     def profile(self):
         return self.userprofile.chat
@@ -2163,11 +2179,17 @@ class PesterWindow(MovingWindow):
         self.doAutoJoins()
 
         # Start client --> server pings
-        if hasattr(self, 'pingtimer') == False:
-            self.pingtimer.start(1000*15) # time in ms
+        if hasattr(self, 'pingtimer'):
+            self.pingtimer.start(1000*5) # time in ms
         else:
-            self.pingtimer.start(1000*15)
+            PchumLog.warning("No ping timer.")
 
+        # Desync check
+        if hasattr(self, 'lastCheckPing'):
+            self.lastCheckPing = time.time()
+        else:
+            PchumLog.warning("No ping timer.")
+        
     @QtCore.pyqtSlot()
     def blockSelectedChum(self):
         curChumListing = self.chumList.currentItem()

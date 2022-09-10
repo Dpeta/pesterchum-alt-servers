@@ -123,267 +123,287 @@ class PesterIRC(QtCore.QThread):
 
     @QtCore.pyqtSlot(PesterProfile)
     def getMood(self, *chums):
-        self.cli.command_handler.getMood(*chums)
+        if hasattr(self, 'cli'):
+            self.cli.command_handler.getMood(*chums)
     @QtCore.pyqtSlot(PesterList)
     def getMoods(self, chums):
-        self.cli.command_handler.getMood(*chums)
+        if hasattr(self, 'cli'):
+            self.cli.command_handler.getMood(*chums)
     @QtCore.pyqtSlot(QString, QString)
     def sendNotice(self, text, handle):
-        h = str(handle)
-        t = str(text)
-        try:
-            helpers.notice(self.cli, h, t)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            h = str(handle)
+            t = str(text)
+            try:
+                helpers.notice(self.cli, h, t)
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
     @QtCore.pyqtSlot(QString, QString)
     def sendMessage(self, text, handle):
-        h = str(handle)
-        textl = [str(text)]
-        def splittext(l):
-            if len(l[0]) > 450:
-                space = l[0].rfind(" ", 0,430)
-                if space == -1:
-                    space = 450
-                elif l[0][space+1:space+5] == "</c>":
-                    space = space+4
-                a = l[0][0:space+1]
-                b = l[0][space+1:]
-                if a.count("<c") > a.count("</c>"):
-                    # oh god ctags will break!! D=
-                    hanging = []
-                    usedends = []
-                    c = a.rfind("<c")
-                    while c != -1:
-                        d = a.find("</c>", c)
-                        while d in usedends:
-                            d = a.find("</c>", d+1)
-                        if d != -1: usedends.append(d)
-                        else:
-                            f = a.find(">", c)+1
-                            hanging.append(a[c:f])
-                        c = a.rfind("<c",0,c)
+        if hasattr(self, 'cli'):
+            h = str(handle)
+            textl = [str(text)]
+            def splittext(l):
+                if len(l[0]) > 450:
+                    space = l[0].rfind(" ", 0,430)
+                    if space == -1:
+                        space = 450
+                    elif l[0][space+1:space+5] == "</c>":
+                        space = space+4
+                    a = l[0][0:space+1]
+                    b = l[0][space+1:]
+                    if a.count("<c") > a.count("</c>"):
+                        # oh god ctags will break!! D=
+                        hanging = []
+                        usedends = []
+                        c = a.rfind("<c")
+                        while c != -1:
+                            d = a.find("</c>", c)
+                            while d in usedends:
+                                d = a.find("</c>", d+1)
+                            if d != -1: usedends.append(d)
+                            else:
+                                f = a.find(">", c)+1
+                                hanging.append(a[c:f])
+                            c = a.rfind("<c",0,c)
 
-                    # end all ctags in first part
-                    for i in range(a.count("<c")-a.count("</c>")):
-                        a = a + "</c>"
-                    #start them up again in the second part
-                    for c in hanging:
-                        b = c + b
-                if len(b) > 0:
-                    return [a] + splittext([b])
+                        # end all ctags in first part
+                        for i in range(a.count("<c")-a.count("</c>")):
+                            a = a + "</c>"
+                        #start them up again in the second part
+                        for c in hanging:
+                            b = c + b
+                    if len(b) > 0:
+                        return [a] + splittext([b])
+                    else:
+                        return [a]
                 else:
-                    return [a]
-            else:
-                return l
-        textl = splittext(textl)
-        try:
-            for t in textl:
-                helpers.msg(self.cli, h, t)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+                    return l
+            textl = splittext(textl)
+            try:
+                for t in textl:
+                    helpers.msg(self.cli, h, t)
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
     @QtCore.pyqtSlot(QString, QString,)
     def sendCTCP(self, handle, text):
-        #cmd = text.split(' ')[0]
-        #msg = text.replace(cmd + ' ', '')
-        #msg = msg.replace(cmd, '')
-        try:
-            helpers.ctcp(self.cli, handle, text)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            try:
+                helpers.ctcp(self.cli, handle, text)
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
     @QtCore.pyqtSlot(QString, bool)
     def startConvo(self, handle, initiated):
-        h = str(handle)
-        try:
-            helpers.msg(self.cli, h, "COLOR >%s" % (self.mainwindow.profile().colorcmd()))
-            if initiated:
-                helpers.msg(self.cli, h, "PESTERCHUM:BEGIN")
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
-    @QtCore.pyqtSlot(QString)
-    def endConvo(self, handle):
-        h = str(handle)
-        try:
-            helpers.msg(self.cli, h, "PESTERCHUM:CEASE")
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
-    @QtCore.pyqtSlot()
-    def updateProfile(self):
-        me = self.mainwindow.profile()
-        handle = me.handle
-        try:
-            helpers.nick(self.cli, handle)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
-        self.mainwindow.closeConversations(True)
-        self.mainwindow.doAutoIdentify()
-        self.mainwindow.autoJoinDone = False
-        self.mainwindow.doAutoJoins()
-        self.updateMood()
-    @QtCore.pyqtSlot()
-    def updateMood(self):
-        me = self.mainwindow.profile()
-        # Moods via metadata
-        try:
-            helpers.metadata(self.cli, '*', "set", "mood", str(me.mood.value()))
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
-        # Backwards compatibility
-        try:
-            helpers.msg(self.cli, "#pesterchum", "MOOD >%d" % (me.mood.value()))
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
-    @QtCore.pyqtSlot()
-    def updateColor(self):
-        #PchumLog.debug("irc updateColor (outgoing)")
-        #me = self.mainwindow.profile()
-        # Update color metadata field
-        try:
-            color = self.mainwindow.profile().color
-            helpers.metadata(self.cli, '*', "set", "color", str(color.name()))
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
-        # Send color messages
-        for h in list(self.mainwindow.convos.keys()):
+        if hasattr(self, 'cli'):
+            h = str(handle)
             try:
                 helpers.msg(self.cli, h, "COLOR >%s" % (self.mainwindow.profile().colorcmd()))
+                if initiated:
+                    helpers.msg(self.cli, h, "PESTERCHUM:BEGIN")
             except OSError as e:
                 PchumLog.warning(e)
                 self.setConnectionBroken()
     @QtCore.pyqtSlot(QString)
+    def endConvo(self, handle):
+        if hasattr(self, 'cli'):
+            h = str(handle)
+            try:
+                helpers.msg(self.cli, h, "PESTERCHUM:CEASE")
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
+    @QtCore.pyqtSlot()
+    def updateProfile(self):
+        if hasattr(self, 'cli'):
+            me = self.mainwindow.profile()
+            handle = me.handle
+            try:
+                helpers.nick(self.cli, handle)
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
+            self.mainwindow.closeConversations(True)
+            self.mainwindow.doAutoIdentify()
+            self.mainwindow.autoJoinDone = False
+            self.mainwindow.doAutoJoins()
+            self.updateMood()
+    @QtCore.pyqtSlot()
+    def updateMood(self):
+        if hasattr(self, 'cli'):
+            me = self.mainwindow.profile()
+            # Moods via metadata
+            try:
+                helpers.metadata(self.cli, '*', "set", "mood", str(me.mood.value()))
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
+            # Backwards compatibility
+            try:
+                helpers.msg(self.cli, "#pesterchum", "MOOD >%d" % (me.mood.value()))
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
+    @QtCore.pyqtSlot()
+    def updateColor(self):
+        if hasattr(self, 'cli'):
+            #PchumLog.debug("irc updateColor (outgoing)")
+            #me = self.mainwindow.profile()
+            # Update color metadata field
+            try:
+                color = self.mainwindow.profile().color
+                helpers.metadata(self.cli, '*', "set", "color", str(color.name()))
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
+            # Send color messages
+            for h in list(self.mainwindow.convos.keys()):
+                try:
+                    helpers.msg(self.cli, h, "COLOR >%s" % (self.mainwindow.profile().colorcmd()))
+                except OSError as e:
+                    PchumLog.warning(e)
+                    self.setConnectionBroken()
+    @QtCore.pyqtSlot(QString)
     def blockedChum(self, handle):
-        h = str(handle)
-        try:
-            helpers.msg(self.cli, h, "PESTERCHUM:BLOCK")
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            h = str(handle)
+            try:
+                helpers.msg(self.cli, h, "PESTERCHUM:BLOCK")
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
     @QtCore.pyqtSlot(QString)
     def unblockedChum(self, handle):
-        h = str(handle)
-        try:
-            helpers.msg(self.cli, h, "PESTERCHUM:UNBLOCK")
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            h = str(handle)
+            try:
+                helpers.msg(self.cli, h, "PESTERCHUM:UNBLOCK")
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
     @QtCore.pyqtSlot(QString)
     def requestNames(self, channel):
-        c = str(channel)
-        try:
-            helpers.names(self.cli, c)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            c = str(channel)
+            try:
+                helpers.names(self.cli, c)
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
     @QtCore.pyqtSlot()
     def requestChannelList(self):
-        try:
-            helpers.channel_list(self.cli)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            try:
+                helpers.channel_list(self.cli)
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
     @QtCore.pyqtSlot(QString)
     def joinChannel(self, channel):
-        c = str(channel)
-        try:
-            helpers.join(self.cli, c)
-            helpers.mode(self.cli, c, "", None)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            c = str(channel)
+            try:
+                helpers.join(self.cli, c)
+                helpers.mode(self.cli, c, "", None)
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
     @QtCore.pyqtSlot(QString)
     def leftChannel(self, channel):
-        c = str(channel)
-        try:
-            helpers.part(self.cli, c)
-            self.cli.command_handler.joined = False
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            c = str(channel)
+            try:
+                helpers.part(self.cli, c)
+                self.cli.command_handler.joined = False
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
     @QtCore.pyqtSlot(QString, QString)
     def kickUser(self, handle, channel):
-        l = handle.split(":")
-        c = str(channel)
-        h = str(l[0])
-        if len(l) > 1:
-            reason = str(l[1])
-            if len(l) > 2:
-              for x in l[2:]:
-                reason += str(":") + str(x)
-        else:
-            reason = ""
-        try:
-            helpers.kick(self.cli, h, c, reason)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            l = handle.split(":")
+            c = str(channel)
+            h = str(l[0])
+            if len(l) > 1:
+                reason = str(l[1])
+                if len(l) > 2:
+                  for x in l[2:]:
+                    reason += str(":") + str(x)
+            else:
+                reason = ""
+            try:
+                helpers.kick(self.cli, h, c, reason)
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
     @QtCore.pyqtSlot(QString, QString, QString)
     def setChannelMode(self, channel, mode, command):
-        c = str(channel)
-        m = str(mode)
-        cmd = str(command)
-        PchumLog.debug("c=%s\nm=%s\ncmd=%s" % (c,m,cmd))
-        if cmd == "":
-            cmd = None
-        try:
-            helpers.mode(self.cli, c, m, cmd)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            c = str(channel)
+            m = str(mode)
+            cmd = str(command)
+            PchumLog.debug("c=%s\nm=%s\ncmd=%s" % (c,m,cmd))
+            if cmd == "":
+                cmd = None
+            try:
+                helpers.mode(self.cli, c, m, cmd)
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
     @QtCore.pyqtSlot(QString)
     def channelNames(self, channel):
-        c = str(channel)
-        try:
-            helpers.names(self.cli, c)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            c = str(channel)
+            try:
+                helpers.names(self.cli, c)
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
     @QtCore.pyqtSlot(QString, QString)
     def inviteChum(self, handle, channel):
-        h = str(handle)
-        c = str(channel)
-        try:
-            helpers.invite(self.cli, h, c)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            h = str(handle)
+            c = str(channel)
+            try:
+                helpers.invite(self.cli, h, c)
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
 
     @QtCore.pyqtSlot()
     def pingServer(self):
-        try:
-            if hasattr(self, 'cli'):
-                self.cli.send("PING :B33")
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            try:
+                if hasattr(self, 'cli'):
+                    self.cli.send("PING :B33")
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
 
     @QtCore.pyqtSlot(bool)
     def setAway(self, away=True):
-        try:
-            if away:
-                self.cli.send("AWAY Idle")
-            else:
-                self.cli.send("AWAY")
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            try:
+                if away:
+                    self.cli.send("AWAY Idle")
+                else:
+                    self.cli.send("AWAY")
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
 
     @QtCore.pyqtSlot(QString, QString)
     def killSomeQuirks(self, channel, handle):
-        c = str(channel)
-        h = str(handle)
-        try:
-            helpers.ctcp(self.cli, c, "NOQUIRKS", h)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        if hasattr(self, 'cli'):
+            c = str(channel)
+            h = str(handle)
+            try:
+                helpers.ctcp(self.cli, c, "NOQUIRKS", h)
+            except OSError as e:
+                PchumLog.warning(e)
+                self.setConnectionBroken()
 
     @QtCore.pyqtSlot()
     def disconnectIRC(self):
