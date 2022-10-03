@@ -133,33 +133,48 @@ QString = str
 _ARGUMENTS = parser.parse_args()
 
 # Import audio module
-if ostools.isLinux():
-    # QtMultimedia on linux requires GStreamer + a plugin for decoding wave,
-    # so using pygame is prefered.
-    # I think Ubuntu does have this out of the box though.
-    # We could possibly check for the availability of a plugin via the gstreamer python bindings,
-    # but I'm not sure if that'd be worth it, as that'd introduce another dependency.
-    try:
-        import pygame
-    except ImportError:
-        print("Failed to import pygame, falling back to QtMultimedia. "
-              + "This should also work fine, but for QtMultimedia to work "
-              + "on Linux you need GStreamer"
-              + " + a plugin for decoding the wave format.")
+# Qt6.4's ffmpeg audio backend makes using QtMultimedia on linux less risky
+try:
+    # PyQt6, QtMultimedia is prefered.
+    from PyQt6 import QtMultimedia
+    #print("Audio module is PyQt6 QtMultimedia.")
+except ImportError:
+    if ostools.isWin32() or ostools.isOSX():
+        # PyQt5 QtMultimedia has native backends for MacOS and Windows
         try:
-            from PyQt6 import QtMultimedia
+            from PyQt5 import QtMultimedia
+            print("Using PyQt5 QtMultimedia as sound module. (fallback, PyQt6 QtMultimedia not availible)")
         except ImportError:
-            print("Failed to import QtMultimedia, no audio module availible.")
-else:
-    # On Mac and Windows, QtMultimedia should be prefered.
-    try:
-        from PyQt6 import QtMultimedia
-    except ImportError:
-        print("Failed to import QtMultimedia, falling back to pygame.")
+            try:
+                try:
+                    # Mute pygame support print
+                    os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+                except:
+                    pass
+                import pygame
+                print("Using pygame as sound module. (fallback, PyQt6 QtMultimedia and PyQt5 QtMultimedia not availible)")
+            except ImportError:
+                print("All possible audio modules failed to import."
+                      "\nPossible audio modules in order of preference (Windows/MacOS): PyQt6 QtMultimedia > PyQt5 QtMultimedia > pygame")
+    elif ostools.isLinux() or True:
+        # PyQt5 QtMultimedia needs gstreamer on linux, so pygame is prefered.
         try:
+            try:
+                # Mute pygame support print
+                os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+            except:
+                pass
             import pygame
+            print("Using pygame as sound module. (fallback, PyQt6 QtMultimedia not availible)")
         except ImportError:
-            print("Failed to import QtMultimedia, no audio module availible.")
+            try:
+                from PyQt5 import QtMultimedia
+                print("Using PyQt5 QtMultimedia as sound module. (fallback, PyQt6 QtMultimedia and pygame not availible)")
+                print("PyQt5 Multimedia will silently fail without GStreamer with relevant"
+                      " plugins on Linux, pygame is prefered when using PyQt5.")
+            except ImportError:
+                print("All possible audio modules failed to import."
+                      "\nLPossible audio modules in order of preference (Linux/Unknown): PyQt6 QtMultimedia > pygame > PyQt5 QtMultimedia")
 
 class waitingMessageHolder(object):
     def __init__(self, mainwindow, **msgfuncs):
@@ -1449,7 +1464,7 @@ class PesterWindow(MovingWindow):
             self.updatemenu.activateWindow()
 
     """
-    Depreciated
+    Deprecated
     
     @QtCore.pyqtSlot()
     def updatePC(self):
@@ -1497,7 +1512,7 @@ class PesterWindow(MovingWindow):
             self.parent.irc.unresponsive = False
             if hasattr(self, 'loadingscreen'):
                 if self.loadingscreen != None:
-                    PchumLog.warning("Server alive !! :O")
+                    PchumLog.info("Server alive !! :O")
                     self.loadingscreen.done(QtWidgets.QDialog.DialogCode.Accepted)
                     self.loadingscreen = None
         

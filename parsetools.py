@@ -163,7 +163,7 @@ class hyperlink(lexercon.Chunk):
             return self.string
 
 class hyperlink_lazy(hyperlink):
-    """Depreciated since it doesn't seem to turn the full url into a link,
+    """Deprecated since it doesn't seem to turn the full url into a link,
     probably not required anyway, best to require a protocol prefix."""
     def __init__(self, string):
         self.string = "http://" + string

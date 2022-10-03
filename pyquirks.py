@@ -14,7 +14,7 @@ PchumLog = logging.getLogger('pchumLogger')
 
 class PythonQuirks(ScriptQuirks):
     def loadModule(self, name, filename):
-        # imp is depreciated since Python 3.4
+        # imp is deprecated since Python 3.4
         #return imp.load_source(name, filename)
         
         spec = importlib.util.spec_from_file_location(name, filename)

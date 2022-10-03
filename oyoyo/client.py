@@ -282,11 +282,11 @@ class IRCClient:
                                 IndexError,
                                 ValueError,
                                 Exception) as e:
-                            PchumLog.warning("Unkown error in conn, " + str(e))
+                            PchumLog.debug("Miscellaneous exception in conn, " + str(e))
                             if tries >= 9:
                                 raise e
                         tries += 1
-                        PchumLog.warning("Retrying recv. (attempt %s)" % str(tries))
+                        PchumLog.debug("Possibly retrying recv. (attempt %s)" % str(tries))
                         time.sleep(0.1)
                         
                 except socket.timeout as e:

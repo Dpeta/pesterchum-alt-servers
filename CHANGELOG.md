@@ -1,13 +1,17 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
-## [v2.4.4] - 2022-09-10
+## [v2.4.4] - 2022-10-03
 
 ### Added
  - Desync check, verify connection is alive when system time changes by multiple minutes.
 
 ### Changed
  - Made outgoing irc.py functions do an extra check if connection/cli exists.
+ - Slightly less spammy logging.
+ - Qt6.4 introduced a platform-independent FFmpeg backend for QtMultimedia, which is a useful alternative so GStreamer on Linux. As such, the audio backend/module preference and import attempt order is now:
+    - Windows/MacOS: PyQt6 QtMultimedia > PyQt5 QtMultimedia > pygame (used to be PyQt6 QtMultimedia > pygame, PyQt5 QtMultimedia was never imported)
+    - Linux/Unknown: PyQt6 QtMultimedia > pygame > PyQt5 QtMultimedia (used to be pygame > PyQt6 QtMultimedia > PyQt5 QtMultimedia)
  
 ### Fixed
  - The string for the distraughtfirman smilie being ":distraughtfirman" instead of ":distraughtfirman:".
@@ -28,7 +32,7 @@
 ### Fixed
  - Error when setting quirk with PyQt5.
 
-### Depreciated
+### Deprecated
  - Disabled the console for now since no one seems to use it and it caused an issue on import.
  - Logging.config/configparser logging configuration, not aware of anyone that actually used this. Logging level can still be specified with command line arguments. (-l --logging)
  
@@ -63,7 +67,7 @@
  
 ### Deprecated
  - Removed the weird metadata support timeout thingy, I think ought to just get the full 005 before we try to get moods.
- - Replaced instances of socket.error excepts with OSError, since it's depreciated.
+ - Replaced instances of socket.error excepts with OSError, since it's deprecated.
 
 ## [v2.4] - 2022-06-30
 
