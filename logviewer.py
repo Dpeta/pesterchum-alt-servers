@@ -4,6 +4,7 @@ import codecs
 import re
 import ostools
 from time import strftime, strptime
+
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets
 except ImportError:
@@ -15,19 +16,22 @@ from convo import PesterText
 
 _datadir = ostools.getDataDir()
 
+
 class PesterLogSearchInput(QtWidgets.QLineEdit):
     def __init__(self, theme, parent=None):
         QtWidgets.QLineEdit.__init__(self, parent)
         self.setStyleSheet(theme["convo/input/style"] + "; margin-right:0px;")
+
     def keyPressEvent(self, event):
         QtWidgets.QLineEdit.keyPressEvent(self, event)
-        if hasattr(self.parent(), 'textArea'):
+        if hasattr(self.parent(), "textArea"):
             if event.key() == QtCore.Qt.Key.Key_Return:
                 self.parent().logSearch(self.text())
                 if self.parent().textArea.find(self.text()):
                     self.parent().textArea.ensureCursorVisible()
         else:
             self.parent().logSearch(self.text())
+
 
 class PesterLogHighlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, parent):
@@ -36,10 +40,15 @@ class PesterLogHighlighter(QtGui.QSyntaxHighlighter):
         self.hilightstyle = QtGui.QTextCharFormat()
         self.hilightstyle.setBackground(QtGui.QBrush(QtCore.Qt.GlobalColor.green))
         self.hilightstyle.setForeground(QtGui.QBrush(QtCore.Qt.GlobalColor.black))
+
     def highlightBlock(self, text):
-        for i in range(0, len(text)-(len(self.searchTerm)-1)):
-            if str(text[i:i+len(self.searchTerm)]).lower() == str(self.searchTerm).lower():
+        for i in range(0, len(text) - (len(self.searchTerm) - 1)):
+            if (
+                str(text[i : i + len(self.searchTerm)]).lower()
+                == str(self.searchTerm).lower()
+            ):
                 self.setFormat(i, len(self.searchTerm), self.hilightstyle)
+
 
 class PesterLogUserSelect(QtWidgets.QDialog):
     def __init__(self, config, theme, parent):
@@ -49,7 +58,7 @@ class PesterLogUserSelect(QtWidgets.QDialog):
         self.theme = theme
         self.parent = parent
         self.handle = parent.profile().handle
-        self.logpath = _datadir+"logs"
+        self.logpath = _datadir + "logs"
 
         self.setStyleSheet(self.theme["main/defaultwindow/style"])
         self.setWindowTitle("Pesterlogs")
@@ -72,7 +81,9 @@ class PesterLogUserSelect(QtWidgets.QDialog):
 
         for (i, t) in enumerate(chumMemoList):
             item = QtWidgets.QListWidgetItem(t)
-            item.setForeground(QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"])))
+            item.setForeground(
+                QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"]))
+            )
             self.chumsBox.addItem(item)
 
         self.search = PesterLogSearchInput(theme, self)
@@ -109,10 +120,12 @@ class PesterLogUserSelect(QtWidgets.QDialog):
     @QtCore.pyqtSlot()
     def viewActivatedLog(self):
         selectedchum = self.selectedchum().text()
-        if not hasattr(self, 'pesterlogviewer'):
+        if not hasattr(self, "pesterlogviewer"):
             self.pesterlogviewer = None
         if not self.pesterlogviewer:
-            self.pesterlogviewer = PesterLogViewer(selectedchum, self.config, self.theme, self.parent)
+            self.pesterlogviewer = PesterLogViewer(
+                selectedchum, self.config, self.theme, self.parent
+            )
             self.pesterlogviewer.rejected.connect(self.closeActiveLog)
             self.pesterlogviewer.show()
             self.pesterlogviewer.raise_()
@@ -126,7 +139,13 @@ class PesterLogUserSelect(QtWidgets.QDialog):
 
     @QtCore.pyqtSlot()
     def openDir(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file:///" + os.path.join(_datadir, "logs"), QtCore.QUrl.ParsingMode.TolerantMode))
+        QtGui.QDesktopServices.openUrl(
+            QtCore.QUrl(
+                "file:///" + os.path.join(_datadir, "logs"),
+                QtCore.QUrl.ParsingMode.TolerantMode,
+            )
+        )
+
 
 class PesterLogViewer(QtWidgets.QDialog):
     def __init__(self, chum, config, theme, parent):
@@ -140,18 +159,27 @@ class PesterLogViewer(QtWidgets.QDialog):
         self.handle = parent.profile().handle
         self.chum = chum
         self.convos = {}
-        self.logpath = _datadir+"logs"
+        self.logpath = _datadir + "logs"
 
         self.setStyleSheet(self.theme["main/defaultwindow/style"])
         self.setWindowTitle("Pesterlogs with " + self.chum)
 
         self.format = "bbcode"
-        if os.path.exists("%s/%s/%s/%s" % (self.logpath, self.handle, chum, self.format)):
-            self.logList = os.listdir("%s/%s/%s/%s/" % (self.logpath, self.handle, self.chum, self.format))
+        if os.path.exists(
+            "%s/%s/%s/%s" % (self.logpath, self.handle, chum, self.format)
+        ):
+            self.logList = os.listdir(
+                "%s/%s/%s/%s/" % (self.logpath, self.handle, self.chum, self.format)
+            )
         else:
             self.logList = []
 
-        if not os.path.exists("%s/%s/%s/%s" % (self.logpath, self.handle, chum, self.format)) or len(self.logList) == 0:
+        if (
+            not os.path.exists(
+                "%s/%s/%s/%s" % (self.logpath, self.handle, chum, self.format)
+            )
+            or len(self.logList) == 0
+        ):
             instructions = QtWidgets.QLabel("No Pesterlogs were found")
 
             self.ok = QtWidgets.QPushButton("CLOSE", self)
@@ -166,15 +194,28 @@ class PesterLogViewer(QtWidgets.QDialog):
 
             self.setLayout(layout_0)
         else:
-            self.instructions = QtWidgets.QLabel("Pesterlog with " +self.chum+ " on")
+            self.instructions = QtWidgets.QLabel("Pesterlog with " + self.chum + " on")
 
             self.textArea = PesterLogText(theme, self.parent)
             self.textArea.setReadOnly(True)
             self.textArea.setFixedWidth(600)
             if "convo/scrollbar" in theme:
-                self.textArea.setStyleSheet("QTextEdit { width:500px; %s } QScrollBar:vertical { %s } QScrollBar::handle:vertical { %s } QScrollBar::add-line:vertical { %s } QScrollBar::sub-line:vertical { %s } QScrollBar:up-arrow:vertical { %s } QScrollBar:down-arrow:vertical { %s }" % (theme["convo/textarea/style"], theme["convo/scrollbar/style"], theme["convo/scrollbar/handle"], theme["convo/scrollbar/downarrow"], theme["convo/scrollbar/uparrow"], theme["convo/scrollbar/uarrowstyle"], theme["convo/scrollbar/darrowstyle"] ))
+                self.textArea.setStyleSheet(
+                    "QTextEdit { width:500px; %s } QScrollBar:vertical { %s } QScrollBar::handle:vertical { %s } QScrollBar::add-line:vertical { %s } QScrollBar::sub-line:vertical { %s } QScrollBar:up-arrow:vertical { %s } QScrollBar:down-arrow:vertical { %s }"
+                    % (
+                        theme["convo/textarea/style"],
+                        theme["convo/scrollbar/style"],
+                        theme["convo/scrollbar/handle"],
+                        theme["convo/scrollbar/downarrow"],
+                        theme["convo/scrollbar/uparrow"],
+                        theme["convo/scrollbar/uarrowstyle"],
+                        theme["convo/scrollbar/darrowstyle"],
+                    )
+                )
             else:
-                self.textArea.setStyleSheet("QTextEdit { width:500px; %s }" % (theme["convo/textarea/style"]))
+                self.textArea.setStyleSheet(
+                    "QTextEdit { width:500px; %s }" % (theme["convo/textarea/style"])
+                )
 
             self.logList.sort()
             self.logList.reverse()
@@ -184,20 +225,31 @@ class PesterLogViewer(QtWidgets.QDialog):
             self.tree.setFixedSize(260, 300)
             self.tree.header().hide()
             if "convo/scrollbar" in theme:
-                self.tree.setStyleSheet("QTreeWidget { %s } QScrollBar:vertical { %s } QScrollBar::handle:vertical { %s } QScrollBar::add-line:vertical { %s } QScrollBar::sub-line:vertical { %s } QScrollBar:up-arrow:vertical { %s } QScrollBar:down-arrow:vertical { %s }" % (theme["convo/textarea/style"], theme["convo/scrollbar/style"], theme["convo/scrollbar/handle"], theme["convo/scrollbar/downarrow"], theme["convo/scrollbar/uparrow"], theme["convo/scrollbar/uarrowstyle"], theme["convo/scrollbar/darrowstyle"] ))
+                self.tree.setStyleSheet(
+                    "QTreeWidget { %s } QScrollBar:vertical { %s } QScrollBar::handle:vertical { %s } QScrollBar::add-line:vertical { %s } QScrollBar::sub-line:vertical { %s } QScrollBar:up-arrow:vertical { %s } QScrollBar:down-arrow:vertical { %s }"
+                    % (
+                        theme["convo/textarea/style"],
+                        theme["convo/scrollbar/style"],
+                        theme["convo/scrollbar/handle"],
+                        theme["convo/scrollbar/downarrow"],
+                        theme["convo/scrollbar/uparrow"],
+                        theme["convo/scrollbar/uarrowstyle"],
+                        theme["convo/scrollbar/darrowstyle"],
+                    )
+                )
             else:
                 self.tree.setStyleSheet("%s" % (theme["convo/textarea/style"]))
             self.tree.itemSelectionChanged.connect(self.loadSelectedLog)
             self.tree.setSortingEnabled(False)
 
             child_1 = None
-            last = ["",""] 
-            #blackbrush = QtGui.QBrush(QtCore.Qt.GlobalColor.black)
-            for (i,l) in enumerate(self.logList):
+            last = ["", ""]
+            # blackbrush = QtGui.QBrush(QtCore.Qt.GlobalColor.black)
+            for (i, l) in enumerate(self.logList):
                 my = self.fileToMonthYear(l)
                 if my[0] != last[0]:
                     child_1 = QtWidgets.QTreeWidgetItem(["%s %s" % (my[0], my[1])])
-                    #child_1.setForeground(0, blackbrush)
+                    # child_1.setForeground(0, blackbrush)
                     self.tree.addTopLevelItem(child_1)
                     if i == 0:
                         child_1.setExpanded(True)
@@ -205,7 +257,8 @@ class PesterLogViewer(QtWidgets.QDialog):
                 last = self.fileToMonthYear(l)
 
             self.hilight = PesterLogHighlighter(self.textArea)
-            if len(self.logList) > 0: self.loadLog(self.logList[0])
+            if len(self.logList) > 0:
+                self.loadLog(self.logList[0])
 
             self.search = PesterLogSearchInput(theme, self)
             self.search.setFocus()
@@ -246,29 +299,48 @@ class PesterLogViewer(QtWidgets.QDialog):
             self.loadLog(self.timeToFile(self.tree.currentItem().text(0)))
 
     def loadLog(self, fname):
-        fp = codecs.open("%s/%s/%s/%s/%s" % (self.logpath, self.handle, self.chum, self.format, fname), encoding='utf-8', mode='r')
+        fp = codecs.open(
+            "%s/%s/%s/%s/%s"
+            % (self.logpath, self.handle, self.chum, self.format, fname),
+            encoding="utf-8",
+            mode="r",
+        )
         self.textArea.clear()
         for line in fp:
-            cline = line.replace("\r\n", "").replace("[/color]","</c>").replace("[url]","").replace("[/url]","")
+            cline = (
+                line.replace("\r\n", "")
+                .replace("[/color]", "</c>")
+                .replace("[url]", "")
+                .replace("[/url]", "")
+            )
             cline = re.sub("\[color=(#.{6})]", r"<c=\1>", cline)
             self.textArea.append(convertTags(cline))
         textCur = self.textArea.textCursor()
-        #textCur.movePosition(1)
+        # textCur.movePosition(1)
         self.textArea.setTextCursor(textCur)
-        self.instructions.setText("Pesterlog with " +self.chum+ " on " + self.fileToTime(str(fname)))
+        self.instructions.setText(
+            "Pesterlog with " + self.chum + " on " + self.fileToTime(str(fname))
+        )
 
     def logSearch(self, search):
         self.hilight.searchTerm = search
         self.hilight.rehighlight()
 
     def fileToMonthYear(self, fname):
-        time = strptime(fname[(fname.index(".")+1):fname.index(".txt")], "%Y-%m-%d.%H.%M")
+        time = strptime(
+            fname[(fname.index(".") + 1) : fname.index(".txt")], "%Y-%m-%d.%H.%M"
+        )
         return [strftime("%B", time), strftime("%Y", time)]
+
     def fileToTime(self, fname):
-        timestr = fname[(fname.index(".")+1):fname.index(".txt")]
+        timestr = fname[(fname.index(".") + 1) : fname.index(".txt")]
         return strftime("%a %d %b %Y %H %M", strptime(timestr, "%Y-%m-%d.%H.%M"))
+
     def timeToFile(self, time):
-        return self.chum + strftime(".%Y-%m-%d.%H.%M.txt", strptime(str(time), "%a %d %b %Y %H %M"))
+        return self.chum + strftime(
+            ".%Y-%m-%d.%H.%M.txt", strptime(str(time), "%a %d %b %Y %H %M")
+        )
+
 
 class PesterLogText(PesterText):
     def __init__(self, theme, parent=None):
@@ -276,6 +348,7 @@ class PesterLogText(PesterText):
 
     def focusInEvent(self, event):
         QtWidgets.QTextEdit.focusInEvent(self, event)
+
     def mousePressEvent(self, event):
         try:
             # PyQt6
@@ -290,8 +363,11 @@ class PesterLogText(PesterText):
                 handle = str(url[1:])
                 self.parent().parent.newConversation(handle)
             else:
-                QtGui.QDesktopServices.openUrl(QtCore.QUrl(url, QtCore.QUrl.ParsingMode.TolerantMode))
+                QtGui.QDesktopServices.openUrl(
+                    QtCore.QUrl(url, QtCore.QUrl.ParsingMode.TolerantMode)
+                )
         QtWidgets.QTextEdit.mousePressEvent(self, event)
+
     def mouseMoveEvent(self, event):
         QtWidgets.QTextEdit.mouseMoveEvent(self, event)
         try:
@@ -301,8 +377,13 @@ class PesterLogText(PesterText):
             # PyQt5
             pos = event.pos()
         if self.anchorAt(pos):
-            if self.viewport().cursor().shape != QtCore.Qt.CursorShape.PointingHandCursor:
-                self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+            if (
+                self.viewport().cursor().shape
+                != QtCore.Qt.CursorShape.PointingHandCursor
+            ):
+                self.viewport().setCursor(
+                    QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor)
+                )
         else:
             self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.IBeamCursor))
 

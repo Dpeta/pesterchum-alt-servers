@@ -12,50 +12,55 @@ except ImportError:
 
 import dataobjs
 import ostools
+
 # karxi: My own contribution to this - a proper lexer.
 import pnc.lexercon as lexercon
 from generic import mysteryTime
 from quirks import ScriptQuirks
 from pyquirks import PythonQuirks
-#from luaquirks import LuaQuirks
 
-PchumLog = logging.getLogger('pchumLogger')
+# from luaquirks import LuaQuirks
+
+PchumLog = logging.getLogger("pchumLogger")
 
 # I'll clean up the things that are no longer needed once the transition is
 # actually finished.
 QString = str
 
-_ctag_begin = re.compile(r'(?i)<c=(.*?)>')
-_gtag_begin = re.compile(r'(?i)<g[a-f]>')
-_ctag_end = re.compile(r'(?i)</c>')
-_ctag_rgb = re.compile(r'\d+,\d+,\d+')
+_ctag_begin = re.compile(r"(?i)<c=(.*?)>")
+_gtag_begin = re.compile(r"(?i)<g[a-f]>")
+_ctag_end = re.compile(r"(?i)</c>")
+_ctag_rgb = re.compile(r"\d+,\d+,\d+")
 _urlre = re.compile(r"(?i)(?:^|(?<=\s))(?:(?:https?|ftp)://|magnet:)[^\s]+")
-#_url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
+# _url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
 _memore = re.compile(r"(\s|^)(#[A-Za-z0-9_]+)")
 _handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
 _imgre = re.compile(r"""(?i)<img src=['"](\S+)['"]\s*/>""")
 _mecmdre = re.compile(r"^(/me|PESTERCHUM:ME)(\S*)")
 _oocre = re.compile(r"([\[(\{])\1.*([\])\}])\2")
-_format_begin = re.compile(r'(?i)<([ibu])>')
-_format_end = re.compile(r'(?i)</([ibu])>')
+_format_begin = re.compile(r"(?i)<([ibu])>")
+_format_end = re.compile(r"(?i)</([ibu])>")
 _honk = re.compile(r"(?i)\bhonk\b")
 _groupre = re.compile(r"\\([0-9]+)")
 
 quirkloader = ScriptQuirks()
 _functionre = None
 
+
 def loadQuirks():
     global quirkloader, _functionre
     quirkloader.add(PythonQuirks())
-    #quirkloader.add(LuaQuirks())
+    # quirkloader.add(LuaQuirks())
     quirkloader.loadAll()
     quirkloader.funcre()
     _functionre = re.compile(r"%s" % quirkloader.funcre())
+
 
 def reloadQuirkFunctions():
     quirkloader.loadAll()
     global _functionre
     _functionre = re.compile(r"%s" % quirkloader.funcre())
+
 
 def lexer(string, objlist):
     """objlist is a list: [(objecttype, re),...] list is in order of preference"""
@@ -80,6 +85,7 @@ def lexer(string, objlist):
         stringlist = copy(newstringlist)
     return stringlist
 
+
 # karxi: All of these were derived from object before. I changed them to
 # lexercon.Chunk so that I'd have an easier way to match against them until
 # they're redone/removed.
@@ -87,12 +93,13 @@ class colorBegin(lexercon.Chunk):
     def __init__(self, string, color):
         self.string = string
         self.color = color
+
     def convert(self, format):
         color = self.color
         if format == "text":
             return ""
         if _ctag_rgb.match(color) is not None:
-            if format=='ctag':
+            if format == "ctag":
                 return "<c=%s>" % (color)
             try:
                 qc = QtGui.QColor(*[int(c) for c in color.split(",")])
@@ -105,14 +112,16 @@ class colorBegin(lexercon.Chunk):
         if format == "html":
             return '<span style="color:%s">' % (qc.name())
         elif format == "bbcode":
-            return '[color=%s]' % (qc.name())
+            return "[color=%s]" % (qc.name())
         elif format == "ctag":
-            (r,g,b,a) = qc.getRgb()
-            return '<c=%s,%s,%s>' % (r,g,b)
+            (r, g, b, a) = qc.getRgb()
+            return "<c=%s,%s,%s>" % (r, g, b)
+
 
 class colorEnd(lexercon.Chunk):
     def __init__(self, string):
         self.string = string
+
     def convert(self, format):
         if format == "html":
             return "</span>"
@@ -123,10 +132,12 @@ class colorEnd(lexercon.Chunk):
         else:
             return self.string
 
+
 class formatBegin(lexercon.Chunk):
     def __init__(self, string, ftype):
         self.string = string
         self.ftype = ftype
+
     def convert(self, format):
         if format == "html":
             return "<%s>" % (self.ftype)
@@ -137,10 +148,12 @@ class formatBegin(lexercon.Chunk):
         else:
             return self.string
 
+
 class formatEnd(lexercon.Chunk):
     def __init__(self, string, ftype):
         self.string = string
         self.ftype = ftype
+
     def convert(self, format):
         if format == "html":
             return "</%s>" % (self.ftype)
@@ -151,9 +164,11 @@ class formatEnd(lexercon.Chunk):
         else:
             return self.string
 
+
 class hyperlink(lexercon.Chunk):
     def __init__(self, string):
         self.string = string
+
     def convert(self, format):
         if format == "html":
             return "<a href='%s'>%s</a>" % (self.string, self.string)
@@ -162,16 +177,20 @@ class hyperlink(lexercon.Chunk):
         else:
             return self.string
 
+
 class hyperlink_lazy(hyperlink):
     """Deprecated since it doesn't seem to turn the full url into a link,
     probably not required anyway, best to require a protocol prefix."""
+
     def __init__(self, string):
         self.string = "http://" + string
+
 
 class imagelink(lexercon.Chunk):
     def __init__(self, string, img):
         self.string = string
         self.img = img
+
     def convert(self, format):
         if format == "html":
             return self.string
@@ -183,84 +202,104 @@ class imagelink(lexercon.Chunk):
         else:
             return ""
 
+
 class memolex(lexercon.Chunk):
     def __init__(self, string, space, channel):
         self.string = string
         self.space = space
         self.channel = channel
+
     def convert(self, format):
         if format == "html":
             return "%s<a href='%s'>%s</a>" % (self.space, self.channel, self.channel)
         else:
             return self.string
 
+
 class chumhandlelex(lexercon.Chunk):
     def __init__(self, string, space, handle):
         self.string = string
         self.space = space
         self.handle = handle
+
     def convert(self, format):
         if format == "html":
             return "%s<a href='%s'>%s</a>" % (self.space, self.handle, self.handle)
         else:
             return self.string
 
+
 class smiley(lexercon.Chunk):
     def __init__(self, string):
         self.string = string
+
     def convert(self, format):
         if format == "html":
-            return "<img src='smilies/%s' alt='%s' title='%s' />" % (smiledict[self.string], self.string, self.string)
+            return "<img src='smilies/%s' alt='%s' title='%s' />" % (
+                smiledict[self.string],
+                self.string,
+                self.string,
+            )
         else:
             return self.string
+
 
 class honker(lexercon.Chunk):
     def __init__(self, string):
         self.string = string
+
     def convert(self, format):
         # No more 'honk' turning into an emote because everyone hated that :')
-        #if format == "html":
+        # if format == "html":
         #    return "<img src='smilies/honk.png' alt'honk' title='honk' />"
-        #else:
+        # else:
         return self.string
+
 
 class mecmd(lexercon.Chunk):
     def __init__(self, string, mecmd, suffix):
         self.string = string
         self.suffix = suffix
+
     def convert(self, format):
         return self.string
 
+
 kxpclexer = lexercon.Pesterchum()
+
 
 def kxlexMsg(string):
     # Do a bit of sanitization.
     msg = str(string)
     # TODO: Let people paste line-by-line normally. Maybe have a mass-paste
     # right-click option?
-    msg = msg.replace('\n', ' ').replace('\r', ' ')
+    msg = msg.replace("\n", " ").replace("\r", " ")
     # Something the original doesn't seem to have accounted for.
     # Replace tabs with 4 spaces.
-    msg = msg.replace('\t', ' ' * 4)
+    msg = msg.replace("\t", " " * 4)
     # Begin lexing.
     msg = kxpclexer.lex(msg)
     # ...and that's it for this.
     return msg
 
+
 def lexMessage(string):
-    lexlist = [(mecmd, _mecmdre),
-               (colorBegin, _ctag_begin), (colorBegin, _gtag_begin),
-               (colorEnd, _ctag_end),
-               # karxi: Disabled this for now. No common versions of Pesterchum
-               # actually use it, save for Chumdroid...which shouldn't.
-               # When I change out parsers, I might add it back in.
-               ##(formatBegin, _format_begin), (formatEnd, _format_end),
-               (imagelink, _imgre),
-               (hyperlink, _urlre),
-               (memolex, _memore),
-               (chumhandlelex, _handlere),
-               (smiley, _smilere),
-               (honker, _honk)]
+    lexlist = [
+        (mecmd, _mecmdre),
+        (colorBegin, _ctag_begin),
+        (colorBegin, _gtag_begin),
+        (colorEnd, _ctag_end),
+        # karxi: Disabled this for now. No common versions of Pesterchum
+        # actually use it, save for Chumdroid...which shouldn't.
+        # When I change out parsers, I might add it back in.
+        ##(formatBegin, _format_begin), (formatEnd, _format_end),
+        (imagelink, _imgre),
+        (hyperlink, _urlre),
+        (memolex, _memore),
+        (chumhandlelex, _handlere),
+        (smiley, _smilere),
+        (honker, _honk),
+    ]
 
     string = str(string)
     string = string.replace("\n", " ").replace("\r", " ")
@@ -282,13 +321,14 @@ def lexMessage(string):
         else:
             balanced.append(o)
     if beginc > endc:
-        for i in range(0, beginc-endc):
+        for i in range(0, beginc - endc):
             balanced.append(colorEnd("</c>"))
     if len(balanced) == 0:
         balanced.append("")
-    if type(balanced[len(balanced)-1]) not in [str, str]:
+    if type(balanced[len(balanced) - 1]) not in [str, str]:
         balanced.append("")
     return balanced
+
 
 def convertTags(lexed, format="html"):
     if format not in ["html", "bbcode", "ctag", "text"]:
@@ -297,17 +337,20 @@ def convertTags(lexed, format="html"):
     if type(lexed) in [str, str]:
         lexed = lexMessage(lexed)
     escaped = ""
-    #firststr = True
+    # firststr = True
     for (i, o) in enumerate(lexed):
         if type(o) in [str, str]:
             if format == "html":
-                escaped += o.replace("&", "&amp;").replace(">", "&gt;").replace("<","&lt;")
+                escaped += (
+                    o.replace("&", "&amp;").replace(">", "&gt;").replace("<", "&lt;")
+                )
             else:
                 escaped += o
         else:
             escaped += o.convert(format)
 
     return escaped
+
 
 def _max_msg_len(mask=None, target=None, nick=None, ident=None):
     # karxi: Copied from another file of mine, and modified to work with
@@ -330,7 +373,7 @@ def _max_msg_len(mask=None, target=None, nick=None, ident=None):
         # Since we should always be able to fetch this
         # karxi: ... Which we can't, right now, unlike in the old script.
         # TODO: Resolve this issue, give it the necessary information.
-        
+
         # If we CAN'T, stick with a length of 30, since that seems to be
         # the average maximum nowadays
         limit -= len(nick) if nick is not None else 30
@@ -339,7 +382,7 @@ def _max_msg_len(mask=None, target=None, nick=None, ident=None):
         # ident length
         limit -= len(ident) if nick is not None else 10
         # Maximum (?) host length
-        limit -= 63				# RFC 2812
+        limit -= 63  # RFC 2812
     # The target is the place this is getting sent to - a channel or a nick
     if target is not None:
         limit -= len(target)
@@ -351,10 +394,11 @@ def _max_msg_len(mask=None, target=None, nick=None, ident=None):
 
     return limit
 
+
 def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
     """Split messages so that they don't go over the length limit.
     Returns a list of the messages, neatly split.
-    
+
     Keep in mind that there's a little bit of magic involved in this at the
     moment; some unsafe assumptions are made."""
 
@@ -384,11 +428,21 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
     curlen = 0
     # Maximum number of characters *to* use.
     if not maxlen:
-        maxlen = _max_msg_len(None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.realname)
+        maxlen = _max_msg_len(
+            None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.realname
+        )
     elif maxlen < 0:
         # Subtract the (negative) length, giving us less leeway in this
         # function.
-        maxlen = _max_msg_len(None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.realname) + maxlen
+        maxlen = (
+            _max_msg_len(
+                None,
+                None,
+                ctx.mainwindow.profile().handle,
+                ctx.mainwindow.irc.cli.realname,
+            )
+            + maxlen
+        )
 
     # Defined here, but modified in the loop.
     msglen = 0
@@ -398,7 +452,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
         tags that will be needed."""
         return maxlen - curlen - (len(open_ctags) * 4)
 
-    #safekeeping = lexed[:]
+    # safekeeping = lexed[:]
     lexed = collections.deque(lexed)
     rounds = 0
     # NOTE: This entire mess is due for a rewrite. I'll start splitting it into
@@ -448,14 +502,14 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
                     # instead?
                     subround += 1
                     if debug:
-                        PchumLog.info("[Splitting round {}-{}...]".format(
-                                rounds, subround
-                                ))
-                    point = msg.rfind(' ', 0, lenl)
+                        PchumLog.info(
+                            "[Splitting round {}-{}...]".format(rounds, subround)
+                        )
+                    point = msg.rfind(" ", 0, lenl)
                     if point < 0:
                         # No spaces to break on...ugh. Break at the last space
                         # we can instead.
-                        point = lenl ## - 1
+                        point = lenl  ## - 1
                         # NOTE: The - 1 is for safety (but probably isn't
                         # actually necessary.)
                     # Split and push what we have.
@@ -509,16 +563,20 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
             cte = lexercon.CTagEnd("</c>", fmt, None)
             working.extend([cte] * len(open_ctags))
             if debug:
-                print("\tRound {0} linebreak: Added {1} closing ctags".format(
+                print(
+                    "\tRound {0} linebreak: Added {1} closing ctags".format(
                         rounds, len(open_ctags)
-                        ))
+                    )
+                )
 
             # Run it through the lexer again to render it.
-            working = ''.join(kxpclexer.list_convert(working))
+            working = "".join(kxpclexer.list_convert(working))
             if debug:
-                print("\tRound {0} add: len == {1} (of {2})".format(
+                print(
+                    "\tRound {0} add: len == {1} (of {2})".format(
                         rounds, len(working), maxlen
-                        ))
+                    )
+                )
             # Now that it's done the work for us, append and resume.
             output.append(working)
 
@@ -598,22 +656,19 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
         if len(working) > 0:
             if debug:
                 print("Adding end trails: {!r}".format(working))
-            working = ''.join(working)
+            working = "".join(working)
             output.append(working)
 
     # We're...done?
     return output
+
 
 def _is_ooc(msg, strict=True):
     """Check if a line is OOC. Note that Pesterchum *is* kind enough to strip
     trailing spaces for us, even in the older versions, but we don't do that in
     this function. (It's handled by the calling one.)"""
     # Define the matching braces.
-    braces = (
-            ('(', ')'),
-            ('[', ']'),
-            ('{', '}')
-            )
+    braces = (("(", ")"), ("[", "]"), ("{", "}"))
 
     oocDetected = _oocre.match(msg)
     # Somewhat-improved matching.
@@ -629,6 +684,7 @@ def _is_ooc(msg, strict=True):
             # If any of those passes matched, we're good to go; it's OOC.
             return True
     return False
+
 
 def kxhandleInput(ctx, text=None, flavor=None):
     """The function that user input that should be sent to the server is routed
@@ -680,7 +736,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
     # I'm pretty sure that putting a space before a /me *should* break the
     # /me, but in practice, that's not the case.
     is_action = msg.startswith("/me")
-    
+
     # Begin message processing.
     # We use 'text' despite its lack of processing because it's simpler.
     if should_quirk and not (is_action or is_ooc):
@@ -706,8 +762,8 @@ def kxhandleInput(ctx, text=None, flavor=None):
             msgbox.setInformativeText(err_info)
             msgbox.exec()
             return
-        
-    PchumLog.info("--> recv \"%s\"" % msg)
+
+    PchumLog.info('--> recv "%s"' % msg)
     # karxi: We have a list...but I'm not sure if we ever get anything else, so
     # best to play it safe. I may remove this during later refactoring.
     if isinstance(msg, list):
@@ -718,23 +774,21 @@ def kxhandleInput(ctx, text=None, flavor=None):
                 # an object type I provided - just so I could pluck them out
                 # later.
                 msg[i] = m.convert(format="ctag")
-        msg = ''.join(msg)
+        msg = "".join(msg)
 
     # Quirks have been applied. Lex the messages (finally).
     msg = kxlexMsg(msg)
 
     # Debug output.
-    #try:
+    # try:
     #    print(repr(msg))
-    #except Exception as err:
+    # except Exception as err:
     #    print("(Couldn't print lexed message: {!s})".format(err))
 
     # Remove coloring if this is a /me!
     if is_action:
         # Filter out formatting specifiers (just ctags, at the moment).
-        msg = [m for m in msg if not isinstance(m,
-                    (lexercon.CTag, lexercon.CTagEnd)
-                    )]
+        msg = [m for m in msg if not isinstance(m, (lexercon.CTag, lexercon.CTagEnd))]
         # We'll also add /me to the beginning of any new messages, later.
 
     # Put what's necessary in before splitting.
@@ -752,9 +806,11 @@ def kxhandleInput(ctx, text=None, flavor=None):
         # We'll use those later.
 
     # Split the messages so we don't go over the buffer and lose text.
-    maxlen = _max_msg_len(None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.realname)
-         # ctx.mainwindow.profile().handle ==> Get handle
-         # ctx.mainwindow.irc.cli.realname  ==> Get ident (Same as realname in this case.)
+    maxlen = _max_msg_len(
+        None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.realname
+    )
+    # ctx.mainwindow.profile().handle ==> Get handle
+    # ctx.mainwindow.irc.cli.realname  ==> Get ident (Same as realname in this case.)
     # Since we have to do some post-processing, we need to adjust the maximum
     # length we can use.
     if flavor == "convo":
@@ -775,10 +831,8 @@ def kxhandleInput(ctx, text=None, flavor=None):
     # Pester message handling.
     if flavor == "convo":
         # if ceased, rebegin
-        if hasattr(ctx, 'chumopen') and not ctx.chumopen:
-            ctx.mainwindow.newConvoStarted.emit(
-                    QString(ctx.title()), True
-                    )
+        if hasattr(ctx, "chumopen") and not ctx.chumopen:
+            ctx.mainwindow.newConvoStarted.emit(QString(ctx.title()), True)
             ctx.setChumOpen(True)
 
     # Post-process and send the messages.
@@ -804,11 +858,10 @@ def kxhandleInput(ctx, text=None, flavor=None):
             # construct the messages.
 
             clientMsg = "<c={1}>{2}{3}{4}: {0}</c>".format(
-                    clientMsg, colorcmd, grammar.pcf, initials, grammar.number
-                    )
+                clientMsg, colorcmd, grammar.pcf, initials, grammar.number
+            )
             # Not sure if this needs a space at the end...?
-            serverMsg = "<c={1}>{2}: {0}</c>".format(
-                    serverMsg, colorcmd, initials)
+            serverMsg = "<c={1}>{2}: {0}</c>".format(serverMsg, colorcmd, initials)
 
         ctx.addMessage(clientMsg, True)
         if flavor != "menus":
@@ -825,7 +878,14 @@ def addTimeInitial(string, grammar):
     # support Doc Scratch mode
     if (endoftag < 0 or endoftag > 16) or (endofi < 0 or endofi > 17):
         return string
-    return string[0:endoftag+1]+grammar.pcf+string[endoftag+1:endofi]+grammar.number+string[endofi:]
+    return (
+        string[0 : endoftag + 1]
+        + grammar.pcf
+        + string[endoftag + 1 : endofi]
+        + grammar.number
+        + string[endofi:]
+    )
+
 
 def timeProtocol(cmd):
     dir = cmd[0]
@@ -836,31 +896,32 @@ def timeProtocol(cmd):
     try:
         l = [int(x) for x in cmd.split(":")]
     except ValueError:
-        l = [0,0]
-    timed = timedelta(0, l[0]*3600+l[1]*60)
+        l = [0, 0]
+    timed = timedelta(0, l[0] * 3600 + l[1] * 60)
     if dir == "P":
-        timed = timed*-1
+        timed = timed * -1
     return timed
 
+
 def timeDifference(td):
-    if td == timedelta(microseconds=1): # mysteryTime replacement :(
+    if td == timedelta(microseconds=1):  # mysteryTime replacement :(
         return "??:?? FROM ????"
     if td < timedelta(0):
         when = "AGO"
     else:
         when = "FROM NOW"
     atd = abs(td)
-    minutes = (atd.days*86400 + atd.seconds) // 60
+    minutes = (atd.days * 86400 + atd.seconds) // 60
     hours = minutes // 60
     leftoverminutes = minutes % 60
     if atd == timedelta(0):
         timetext = "RIGHT NOW"
-    elif atd < timedelta(0,3600):
+    elif atd < timedelta(0, 3600):
         if minutes == 1:
             timetext = "%d MINUTE %s" % (minutes, when)
         else:
             timetext = "%d MINUTES %s" % (minutes, when)
-    elif atd < timedelta(0,3600*100):
+    elif atd < timedelta(0, 3600 * 100):
         if hours == 1 and leftoverminutes == 0:
             timetext = "%d:%02d HOUR %s" % (hours, leftoverminutes, when)
         else:
@@ -869,16 +930,20 @@ def timeDifference(td):
         timetext = "%d HOURS %s" % (hours, when)
     return timetext
 
+
 def nonerep(text):
     return text
+
 
 class parseLeaf(object):
     def __init__(self, function, parent):
         self.nodes = []
         self.function = function
         self.parent = parent
+
     def append(self, node):
         self.nodes.append(node)
+
     def expand(self, mo):
         out = ""
         for n in self.nodes:
@@ -891,11 +956,14 @@ class parseLeaf(object):
         out = self.function(out)
         return out
 
+
 class backreference(object):
     def __init__(self, number):
         self.number = number
+
     def __str__(self):
         return self.number
+
 
 def parseRegexpFunctions(to):
     parsed = parseLeaf(nonerep, None)
@@ -907,7 +975,7 @@ def parseRegexpFunctions(to):
         mo = _functionre.search(tmp)
         if mo is not None:
             if mo.start() > 0:
-                current.append(to[curi:curi+mo.start()])
+                current.append(to[curi : curi + mo.start()])
             backr = _groupre.search(mo.group())
             if backr is not None:
                 current.append(backreference(backr.group(1)))
@@ -920,7 +988,7 @@ def parseRegexpFunctions(to):
                     current = current.parent
                 else:
                     current.append(")")
-            curi = mo.end()+curi
+            curi = mo.end() + curi
         else:
             current.append(to[curi:])
             curi = len(to)
@@ -929,10 +997,13 @@ def parseRegexpFunctions(to):
 
 def img2smiley(string):
     string = str(string)
+
     def imagerep(mo):
         return reverse_smiley[mo.group(1)]
+
     string = re.sub(r'<img src="smilies/(\S+)" />', imagerep, string)
     return string
+
 
 smiledict = {
     ":rancorous:": "pc_rancorous.png",
@@ -998,78 +1069,166 @@ smiledict = {
     ":scorpio:": "scorpio.gif",
     ":shades:": "shades.png",
     ":honk:": "honk.png",
-    }
+}
 
-reverse_smiley = dict((v,k) for k, v in smiledict.items())
+reverse_smiley = dict((v, k) for k, v in smiledict.items())
 _smilere = re.compile("|".join(list(smiledict.keys())))
+
 
 class ThemeException(Exception):
     def __init__(self, value):
         self.parameter = value
+
     def __str__(self):
         return repr(self.parameter)
 
+
 def themeChecker(theme):
-    needs = ["main/size", "main/icon", "main/windowtitle", "main/style", \
-    "main/background-image", "main/menubar/style", "main/menu/menuitem", \
-    "main/menu/style", "main/menu/selected", "main/close/image", \
-    "main/close/loc", "main/minimize/image", "main/minimize/loc", \
-    "main/menu/loc", "main/menus/client/logviewer", \
-    "main/menus/client/addgroup", "main/menus/client/options", \
-    "main/menus/client/exit", "main/menus/client/userlist", \
-    "main/menus/client/memos", "main/menus/client/import", \
-    "main/menus/client/idle", "main/menus/client/reconnect", \
-    "main/menus/client/_name", "main/menus/profile/quirks", \
-    "main/menus/profile/block", "main/menus/profile/color", \
-    "main/menus/profile/switch", "main/menus/profile/_name", \
-    "main/menus/help/about", "main/menus/help/_name", "main/moodlabel/text", \
-    "main/moodlabel/loc", "main/moodlabel/style", "main/moods", \
-    "main/addchum/style", "main/addchum/text", "main/addchum/size", \
-    "main/addchum/loc", "main/pester/text", "main/pester/size", \
-    "main/pester/loc", "main/block/text", "main/block/size", "main/block/loc", \
-    "main/mychumhandle/label/text", "main/mychumhandle/label/loc", \
-    "main/mychumhandle/label/style", "main/mychumhandle/handle/loc", \
-    "main/mychumhandle/handle/size", "main/mychumhandle/handle/style", \
-    "main/mychumhandle/colorswatch/size", "main/mychumhandle/colorswatch/loc", \
-    "main/defaultmood", "main/chums/size", "main/chums/loc", \
-    "main/chums/style", "main/menus/rclickchumlist/pester", \
-    "main/menus/rclickchumlist/removechum", \
-    "main/menus/rclickchumlist/blockchum", "main/menus/rclickchumlist/viewlog", \
-    "main/menus/rclickchumlist/removegroup", \
-    "main/menus/rclickchumlist/renamegroup", \
-    "main/menus/rclickchumlist/movechum", "convo/size", \
-    "convo/tabwindow/style", "convo/tabs/tabstyle", "convo/tabs/style", \
-    "convo/tabs/selectedstyle", "convo/style", "convo/margins", \
-    "convo/chumlabel/text", "convo/chumlabel/style", "convo/chumlabel/align/h", \
-    "convo/chumlabel/align/v", "convo/chumlabel/maxheight", \
-    "convo/chumlabel/minheight", "main/menus/rclickchumlist/quirksoff", \
-    "main/menus/rclickchumlist/addchum", "main/menus/rclickchumlist/blockchum", \
-    "main/menus/rclickchumlist/unblockchum", \
-    "main/menus/rclickchumlist/viewlog", "main/trollslum/size", \
-    "main/trollslum/style", "main/trollslum/label/text", \
-    "main/trollslum/label/style", "main/menus/profile/block", \
-    "main/chums/moods/blocked/icon", "convo/systemMsgColor", \
-    "convo/textarea/style", "convo/text/beganpester", "convo/text/ceasepester", \
-    "convo/text/blocked", "convo/text/unblocked", "convo/text/blockedmsg", \
-    "convo/text/idle", "convo/input/style", "memos/memoicon", \
-    "memos/textarea/style", "memos/systemMsgColor", "convo/text/joinmemo", \
-    "memos/input/style", "main/menus/rclickchumlist/banuser", \
-    "main/menus/rclickchumlist/opuser", "main/menus/rclickchumlist/voiceuser", \
-    "memos/margins", "convo/text/openmemo", "memos/size", "memos/style", \
-    "memos/label/text", "memos/label/style", "memos/label/align/h", \
-    "memos/label/align/v", "memos/label/maxheight", "memos/label/minheight", \
-    "memos/userlist/style", "memos/userlist/width", "memos/time/text/width", \
-    "memos/time/text/style", "memos/time/arrows/left", \
-    "memos/time/arrows/style", "memos/time/buttons/style", \
-    "memos/time/arrows/right", "memos/op/icon", "memos/voice/icon", \
-    "convo/text/closememo", "convo/text/kickedmemo", \
-    "main/chums/userlistcolor", "main/defaultwindow/style", \
-    "main/chums/moods", "main/chums/moods/chummy/icon", "main/menus/help/help", \
-    "main/menus/help/calsprite", "main/menus/help/nickserv", "main/menus/help/chanserv", \
-    "main/menus/rclickchumlist/invitechum", "main/menus/client/randen", \
-    "main/menus/rclickchumlist/memosetting", "main/menus/rclickchumlist/memonoquirk", \
-    "main/menus/rclickchumlist/memohidden", "main/menus/rclickchumlist/memoinvite", \
-    "main/menus/rclickchumlist/memomute", "main/menus/rclickchumlist/notes"]
+    needs = [
+        "main/size",
+        "main/icon",
+        "main/windowtitle",
+        "main/style",
+        "main/background-image",
+        "main/menubar/style",
+        "main/menu/menuitem",
+        "main/menu/style",
+        "main/menu/selected",
+        "main/close/image",
+        "main/close/loc",
+        "main/minimize/image",
+        "main/minimize/loc",
+        "main/menu/loc",
+        "main/menus/client/logviewer",
+        "main/menus/client/addgroup",
+        "main/menus/client/options",
+        "main/menus/client/exit",
+        "main/menus/client/userlist",
+        "main/menus/client/memos",
+        "main/menus/client/import",
+        "main/menus/client/idle",
+        "main/menus/client/reconnect",
+        "main/menus/client/_name",
+        "main/menus/profile/quirks",
+        "main/menus/profile/block",
+        "main/menus/profile/color",
+        "main/menus/profile/switch",
+        "main/menus/profile/_name",
+        "main/menus/help/about",
+        "main/menus/help/_name",
+        "main/moodlabel/text",
+        "main/moodlabel/loc",
+        "main/moodlabel/style",
+        "main/moods",
+        "main/addchum/style",
+        "main/addchum/text",
+        "main/addchum/size",
+        "main/addchum/loc",
+        "main/pester/text",
+        "main/pester/size",
+        "main/pester/loc",
+        "main/block/text",
+        "main/block/size",
+        "main/block/loc",
+        "main/mychumhandle/label/text",
+        "main/mychumhandle/label/loc",
+        "main/mychumhandle/label/style",
+        "main/mychumhandle/handle/loc",
+        "main/mychumhandle/handle/size",
+        "main/mychumhandle/handle/style",
+        "main/mychumhandle/colorswatch/size",
+        "main/mychumhandle/colorswatch/loc",
+        "main/defaultmood",
+        "main/chums/size",
+        "main/chums/loc",
+        "main/chums/style",
+        "main/menus/rclickchumlist/pester",
+        "main/menus/rclickchumlist/removechum",
+        "main/menus/rclickchumlist/blockchum",
+        "main/menus/rclickchumlist/viewlog",
+        "main/menus/rclickchumlist/removegroup",
+        "main/menus/rclickchumlist/renamegroup",
+        "main/menus/rclickchumlist/movechum",
+        "convo/size",
+        "convo/tabwindow/style",
+        "convo/tabs/tabstyle",
+        "convo/tabs/style",
+        "convo/tabs/selectedstyle",
+        "convo/style",
+        "convo/margins",
+        "convo/chumlabel/text",
+        "convo/chumlabel/style",
+        "convo/chumlabel/align/h",
+        "convo/chumlabel/align/v",
+        "convo/chumlabel/maxheight",
+        "convo/chumlabel/minheight",
+        "main/menus/rclickchumlist/quirksoff",
+        "main/menus/rclickchumlist/addchum",
+        "main/menus/rclickchumlist/blockchum",
+        "main/menus/rclickchumlist/unblockchum",
+        "main/menus/rclickchumlist/viewlog",
+        "main/trollslum/size",
+        "main/trollslum/style",
+        "main/trollslum/label/text",
+        "main/trollslum/label/style",
+        "main/menus/profile/block",
+        "main/chums/moods/blocked/icon",
+        "convo/systemMsgColor",
+        "convo/textarea/style",
+        "convo/text/beganpester",
+        "convo/text/ceasepester",
+        "convo/text/blocked",
+        "convo/text/unblocked",
+        "convo/text/blockedmsg",
+        "convo/text/idle",
+        "convo/input/style",
+        "memos/memoicon",
+        "memos/textarea/style",
+        "memos/systemMsgColor",
+        "convo/text/joinmemo",
+        "memos/input/style",
+        "main/menus/rclickchumlist/banuser",
+        "main/menus/rclickchumlist/opuser",
+        "main/menus/rclickchumlist/voiceuser",
+        "memos/margins",
+        "convo/text/openmemo",
+        "memos/size",
+        "memos/style",
+        "memos/label/text",
+        "memos/label/style",
+        "memos/label/align/h",
+        "memos/label/align/v",
+        "memos/label/maxheight",
+        "memos/label/minheight",
+        "memos/userlist/style",
+        "memos/userlist/width",
+        "memos/time/text/width",
+        "memos/time/text/style",
+        "memos/time/arrows/left",
+        "memos/time/arrows/style",
+        "memos/time/buttons/style",
+        "memos/time/arrows/right",
+        "memos/op/icon",
+        "memos/voice/icon",
+        "convo/text/closememo",
+        "convo/text/kickedmemo",
+        "main/chums/userlistcolor",
+        "main/defaultwindow/style",
+        "main/chums/moods",
+        "main/chums/moods/chummy/icon",
+        "main/menus/help/help",
+        "main/menus/help/calsprite",
+        "main/menus/help/nickserv",
+        "main/menus/help/chanserv",
+        "main/menus/rclickchumlist/invitechum",
+        "main/menus/client/randen",
+        "main/menus/rclickchumlist/memosetting",
+        "main/menus/rclickchumlist/memonoquirk",
+        "main/menus/rclickchumlist/memohidden",
+        "main/menus/rclickchumlist/memoinvite",
+        "main/menus/rclickchumlist/memomute",
+        "main/menus/rclickchumlist/notes",
+    ]
 
     for n in needs:
         try:

@@ -7,13 +7,13 @@ import os
 import sys
 from subprocess import call
 
-#print(sys.argv)
+# print(sys.argv)
 def main(argv):
-    arguments = ''
+    arguments = ""
     for x in argv[1:]:
-        arguments += x + ' '
-    #print(arguments)
-    
+        arguments += x + " "
+    # print(arguments)
+
     directory_path = os.getcwd()
     print("Working directory: " + directory_path)
     os.chdir(os.path.dirname(__file__))
@@ -21,6 +21,7 @@ def main(argv):
     print("Running Pesterchum as subprocess, this is not ideal.")
     retcode = call("python3 pesterchum.py " + " " + str(arguments), shell=True)
     print(retcode)
+
 
 if __name__ == "__main__":
     main(sys.argv)

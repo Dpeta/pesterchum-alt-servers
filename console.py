@@ -1,7 +1,7 @@
 # vim: set autoindent ts=4 sts=4 sw=4 textwidth=79 expandtab:
 # -*- coding=UTF-8; tab-width: 4 -*-
-#import os
-#from os import remove
+# import os
+# from os import remove
 import sys
 import traceback
 import time
@@ -17,17 +17,20 @@ except ImportError:
     from PyQt5.QtWidgets import QAction
 
 import dataobjs
-#import generic
-#import memos
-#import parsetools
+
+# import generic
+# import memos
+# import parsetools
 import ostools
-#from version import _pcVersion
+
+# from version import _pcVersion
 from pnc.dep.attrdict import AttrDict
 
-PchumLog = logging.getLogger('pchumLogger')
+PchumLog = logging.getLogger("pchumLogger")
+
 
 class ConsoleWindow(QtWidgets.QDialog):
-#~class ConsoleWindow(styler.PesterBaseWindow):
+    # ~class ConsoleWindow(styler.PesterBaseWindow):
     # A simple console class, cobbled together from the corpse of another.
 
     stylesheet_path = "main/defaultwindow/style"
@@ -127,7 +130,7 @@ class ConsoleWindow(QtWidgets.QDialog):
     def initTheme(self, theme):
         # Set up our style/window specifics
         self.changeTheme(theme)
-        self.resize(400,600)
+        self.resize(400, 600)
 
     def changeTheme(self, theme):
         self.setStyleSheet(theme[self.stylesheet_path])
@@ -150,18 +153,23 @@ class ConsoleWindow(QtWidgets.QDialog):
         wgt = QtWidgets.QApplication.widgetAt(pos)
         if wgt is None:
             # Don't set None, for now. May change this later.
-            self.addMessage("You need to have your cursor over something " + \
-                    "in Pesterchum to use that.",
-                    direction=direction)
+            self.addMessage(
+                "You need to have your cursor over something "
+                + "in Pesterchum to use that.",
+                direction=direction,
+            )
             return
 
         self.selected_widget = wgt
         nchild = len(wgt.children())
         output = []
         output.append("CONSOLE.selected_widget = {0!r}".format(wgt))
-        output.append("{0: <4}Parent: {1!r}".format('', wgt.parent()))
-        output.append("{0: <4}{1:4d} child{2}".format('',
-            nchild, ("ren" if abs(nchild) != 1 else "") ))
+        output.append("{0: <4}Parent: {1!r}".format("", wgt.parent()))
+        output.append(
+            "{0: <4}{1:4d} child{2}".format(
+                "", nchild, ("ren" if abs(nchild) != 1 else "")
+            )
+        )
         if self.show_info_on_select:
             qtss = None
             uses_ss = None
@@ -211,12 +219,13 @@ class ConsoleWindow(QtWidgets.QDialog):
                 else:
                     # We got a stylesheet out of this!
                     uses_ss, ss_msg = True, "Yes"
-                    #~ss_par_msg = "{0: <4}...on parent ↑{1:d}: {2!r}".format('',
-                    ss_par_msg = "{0: <4}...on parent #{1:d}: {2!r}".format('',
-                            i, ss_par)
+                    # ~ss_par_msg = "{0: <4}...on parent ↑{1:d}: {2!r}".format('',
+                    ss_par_msg = "{0: <4}...on parent #{1:d}: {2!r}".format(
+                        "", i, ss_par
+                    )
 
             msg = []
-            msg.append("{0: <4}QtSS?: {1}".format('', ss_msg))
+            msg.append("{0: <4}QtSS?: {1}".format("", ss_msg))
             # A stylesheet analyzer would be wonderful here. Perhaps something
             # that tells us how many parent classes define stylesheets?
             if uses_ss:
@@ -224,15 +233,14 @@ class ConsoleWindow(QtWidgets.QDialog):
                     # We got this stylesheet from a parent object somewhere.
                     msg.append(ss_par_msg)
                 msg.append("{0: <4}".format("Stylesheet:"))
-                for ln in qtss.split('\n'):
+                for ln in qtss.split("\n"):
                     msg.append("{0: <8}".format(ln))
 
             # Actually add this stuff to the result we're constructing
             output.extend(msg)
 
-        output = '\n'.join(output)
+        output = "\n".join(output)
         self.addMessage(output, direction=direction)
-
 
     # Actual console stuff.
     def execInConsole(self, scriptstr, env=None):
@@ -247,16 +255,16 @@ class ConsoleWindow(QtWidgets.QDialog):
         # Fetch from the class/instance first.
         _CUSTOM_ENV = self._CUSTOM_ENV.copy()
         # Modify with some hard-coded environmental additions.
-        _CUSTOM_ENV.update({
+        _CUSTOM_ENV.update(
+            {
                 "CONSOLE": self,
                 "MAINWIN": self.mainwindow,
                 "PCONFIG": self.mainwindow.config,
-                "exit": lambda: self.mainwindow.exitaction.trigger()
-                })
+                "exit": lambda: self.mainwindow.exitaction.trigger(),
+            }
+        )
         # Aliases.
-        _CUSTOM_ENV.update({
-                "quit": _CUSTOM_ENV["exit"]
-                })
+        _CUSTOM_ENV.update({"quit": _CUSTOM_ENV["exit"]})
         # Add whatever additions were set in the main pesterchum file.
         _CUSTOM_ENV.update(pchum._CONSOLE_ENV)
 
@@ -284,7 +292,7 @@ class ConsoleWindow(QtWidgets.QDialog):
             # Replace the old writer (for now)
             sysout, sys.stdout = sys.stdout, self
             try:
-                code = compile(scriptstr + '\n', "<string>", "single")
+                code = compile(scriptstr + "\n", "<string>", "single")
                 # Will using cenv instead of env cause problems?...
                 result = eval(code, cenv)
             except:
@@ -309,7 +317,7 @@ class ConsoleWindow(QtWidgets.QDialog):
         # We only ever use this for receiving, so it's safe to assume the
         # direction is always -1.
         if not isinstance(data, list):
-            data = data.split('\n')
+            data = data.split("\n")
         for line in data:
             if len(line):
                 self.addMessage(line, -1)
@@ -332,7 +340,7 @@ class ConsoleText(QtWidgets.QTextEdit):
 
     def __init__(self, theme, parent=None):
         super(ConsoleText, self).__init__(parent)
-        if hasattr(self.window(), 'mainwindow'):
+        if hasattr(self.window(), "mainwindow"):
             self.mainwindow = self.window().mainwindow
         else:
             self.mainwindow = self.window()
@@ -362,7 +370,7 @@ class ConsoleText(QtWidgets.QTextEdit):
             # be too hard - it's what dicts are for.
 
             # Add the rest.
-            stylesheet += '\n' + self.stylesheet_template
+            stylesheet += "\n" + self.stylesheet_template
         stylesheet = stylesheet.format(style=theme)
         self.setStyleSheet(stylesheet)
 
@@ -371,12 +379,12 @@ class ConsoleText(QtWidgets.QTextEdit):
         # Direction > 0 == out (sent by us); < 0 == in (sent by script).
         if len(msg) == 0:
             return
-        #~color = chum.colorcmd()
-        #~initials = chum.initials()
+        # ~color = chum.colorcmd()
+        # ~initials = chum.initials()
         parent = self.window()
         mwindow = parent.mainwindow
 
-        #systemColor = QtGui.QColor(mwindow.theme["convo/systemMsgColor"])
+        # systemColor = QtGui.QColor(mwindow.theme["convo/systemMsgColor"])
 
         if mwindow.config.showTimeStamps():
             if mwindow.config.time12Format():
@@ -406,7 +414,7 @@ class ConsoleText(QtWidgets.QTextEdit):
 
         # Later, this will have to escape things so we don't parse them,
         # likely...hm.
-        #~result = "<span style=\"color:#000000\">{} {} {!r}</span>"
+        # ~result = "<span style=\"color:#000000\">{} {} {!r}</span>"
         # The input we get is already repr'd...we pass it via print, and thus
         # do that there.
         result = "{}{} {}\n"
@@ -442,8 +450,12 @@ class ConsoleText(QtWidgets.QTextEdit):
         # should.
         # karxi: Test for tab changing?
         if self.window().text.input:
-            if event.key() not in (QtCore.Qt.Key.Key_PageUp, QtCore.Qt.Key.Key_PageDown,
-                                   QtCore.Qt.Key.Key_Up, QtCore.Qt.Key.Key_Down):
+            if event.key() not in (
+                QtCore.Qt.Key.Key_PageUp,
+                QtCore.Qt.Key.Key_PageDown,
+                QtCore.Qt.Key.Key_Up,
+                QtCore.Qt.Key.Key_Down,
+            ):
                 self.window().text.input.keyPressEvent(event)
 
         super(ConsoleText, self).keyPressEvent(event)
@@ -463,7 +475,9 @@ class ConsoleText(QtWidgets.QTextEdit):
                     QtWidgets.QApplication.clipboard().setText(url)
                 else:
                     # This'll probably be removed. May change the lexer out.
-                    QtGui.QDesktopServices.openUrl(QtCore.QUrl(url, QtCore.QUrl.ParsingMode.TolerantMode))
+                    QtGui.QDesktopServices.openUrl(
+                        QtCore.QUrl(url, QtCore.QUrl.ParsingMode.TolerantMode)
+                    )
 
         super(ConsoleText, self).mousePressEvent(event)
 
@@ -477,8 +491,13 @@ class ConsoleText(QtWidgets.QTextEdit):
             # PyQt5
             pos = event.pos()
         if self.anchorAt(pos):
-            if self.viewport().cursor().shape != QtCore.Qt.CursorShape.PointingHandCursor:
-                self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+            if (
+                self.viewport().cursor().shape
+                != QtCore.Qt.CursorShape.PointingHandCursor
+            ):
+                self.viewport().setCursor(
+                    QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor)
+                )
         else:
             self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.IBeamCursor))
 
@@ -489,6 +508,7 @@ class ConsoleText(QtWidgets.QTextEdit):
 
 class ConsoleInput(QtWidgets.QLineEdit):
     """The actual text entry box on a ConsoleWindow."""
+
     # I honestly feel like this could just be made a private class of
     # ConsoleWindow, but...best not to overcomplicate things.
     stylesheet_path = "convo/input/style"
@@ -516,7 +536,7 @@ class ConsoleInput(QtWidgets.QLineEdit):
         # NOTE: Do we really want everyone knowing we're around if we're
         # messing around in the console? Hm.
         parent.mainwindow.idler.time = 0
-        
+
         if evtkey == QtCore.Qt.Key.Key_Up:
             text = str(self.text())
             next = parent.text.history.next(text)

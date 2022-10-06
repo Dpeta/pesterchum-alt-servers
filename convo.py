@@ -14,16 +14,12 @@ except ImportError:
 
 import ostools
 from dataobjs import PesterHistory
-from parsetools import (convertTags,
-                        lexMessage,
-                        mecmd,
-                        colorBegin,
-                        colorEnd,
-                        smiledict)
+from parsetools import convertTags, lexMessage, mecmd, colorBegin, colorEnd, smiledict
 import parsetools
 from pnc.dep.attrdict import AttrDict
 
-PchumLog = logging.getLogger('pchumLogger')
+PchumLog = logging.getLogger("pchumLogger")
+
 
 class PesterTabWindow(QtWidgets.QFrame):
     def __init__(self, mainwindow, parent=None, convo="convo"):
@@ -41,18 +37,26 @@ class PesterTabWindow(QtWidgets.QFrame):
 
         self.shortcuts = AttrDict()
         self.shortcuts.tabNext = QShortcut(
-                QtGui.QKeySequence('Ctrl+j'), self,
-                context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut)
+            QtGui.QKeySequence("Ctrl+j"),
+            self,
+            context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut,
+        )
         self.shortcuts.tabLast = QShortcut(
-                QtGui.QKeySequence('Ctrl+k'), self,
-                context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut)
+            QtGui.QKeySequence("Ctrl+k"),
+            self,
+            context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut,
+        )
         # Note that we use reversed keys here.
         self.shortcuts.tabUp = QShortcut(
-                QtGui.QKeySequence('Ctrl+PgDown'), self,
-                context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut)
+            QtGui.QKeySequence("Ctrl+PgDown"),
+            self,
+            context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut,
+        )
         self.shortcuts.tabDn = QShortcut(
-                QtGui.QKeySequence('Ctrl+PgUp'), self,
-                context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut)
+            QtGui.QKeySequence("Ctrl+PgUp"),
+            self,
+            context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut,
+        )
 
         self.shortcuts.tabNext.activated.connect(self.nudgeTabNext)
         self.shortcuts.tabUp.activated.connect(self.nudgeTabNext)
@@ -61,7 +65,7 @@ class PesterTabWindow(QtWidgets.QFrame):
 
         self.initTheme(self.mainwindow.theme)
         self.layout = QtWidgets.QVBoxLayout()
-        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
         self.convos = {}
@@ -83,6 +87,7 @@ class PesterTabWindow(QtWidgets.QFrame):
         self.tabs.removeTab(i)
         self.changedTab = False
         return c
+
     def addChat(self, convo):
         self.convos[convo.title()] = convo
         # either addTab or setCurrentIndex will trigger changed()
@@ -90,6 +95,7 @@ class PesterTabWindow(QtWidgets.QFrame):
         self.tabIndices[convo.title()] = newindex
         self.tabs.setCurrentIndex(newindex)
         self.tabs.setTabIcon(newindex, convo.icon())
+
     def showChat(self, handle):
         tabi = self.tabIndices[handle]
         if self.tabs.currentIndex() == tabi:
@@ -98,6 +104,7 @@ class PesterTabWindow(QtWidgets.QFrame):
             self.convos[handle].raiseChat()
         else:
             self.tabs.setCurrentIndex(tabi)
+
     """
     There are two instances of "convoHasFocus" for some reason?
     This one seems to just get redefined.
@@ -107,7 +114,7 @@ class PesterTabWindow(QtWidgets.QFrame):
             self.tabs.tabText(self.tabs.currentIndex()) == convo.title()):
             return True
     """
-    
+
     def isBot(self, *args, **kwargs):
         return self.mainwindow.isBot(*args, **kwargs)
 
@@ -115,29 +122,35 @@ class PesterTabWindow(QtWidgets.QFrame):
         # TODO: Clean this up. Our text areas now call this.
         keypress = event.key()
         mods = event.modifiers()
-        if ((mods & QtCore.Qt.KeyboardModifier.ControlModifier) and
-            keypress == QtCore.Qt.Key.Key_Tab):
+        if (
+            mods & QtCore.Qt.KeyboardModifier.ControlModifier
+        ) and keypress == QtCore.Qt.Key.Key_Tab:
             handles = list(self.convos.keys())
             waiting = self.mainwindow.waitingMessages.waitingHandles()
             waitinghandles = list(set(handles) & set(waiting))
             if len(waitinghandles) > 0:
                 nexti = self.tabIndices[waitinghandles[0]]
             else:
-                nexti = (self.tabIndices[self.currentConvo.title()] + 1) % self.tabs.count()
+                nexti = (
+                    self.tabIndices[self.currentConvo.title()] + 1
+                ) % self.tabs.count()
             self.tabs.setCurrentIndex(nexti)
 
     @QtCore.pyqtSlot()
-    def nudgeTabNext(self): return self.nudgeTabIndex(+1)
+    def nudgeTabNext(self):
+        return self.nudgeTabIndex(+1)
+
     @QtCore.pyqtSlot()
-    def nudgeTabLast(self): return self.nudgeTabIndex(-1)
+    def nudgeTabLast(self):
+        return self.nudgeTabIndex(-1)
 
     def nudgeTabIndex(self, direction):
         # Inverted controls. Might add an option for this if people want
         # it.
-        #~if keypress == QtCore.Qt.Key.Key_PageDown:
-        #~    direction = 1
-        #~elif keypress == QtCore.Qt.Key.Key_PageUp:
-        #~    direction = -1
+        # ~if keypress == QtCore.Qt.Key.Key_PageDown:
+        # ~    direction = 1
+        # ~elif keypress == QtCore.Qt.Key.Key_PageUp:
+        # ~    direction = -1
         # ...Processing...
         tabs = self.tabs
         # Pick our new index by sliding up or down the tab range.
@@ -161,7 +174,7 @@ class PesterTabWindow(QtWidgets.QFrame):
         tabs.setCurrentIndex(nind)
 
     def contextMenuEvent(self, event):
-        #~if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
+        # ~if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
         tabi = self.tabs.tabAt(event.pos())
         if tabi < 0:
             tabi = self.tabs.currentIndex()
@@ -179,12 +192,14 @@ class PesterTabWindow(QtWidgets.QFrame):
     def closeSoft(self):
         self.softclose = True
         self.close()
+
     def updateBlocked(self, handle):
         i = self.tabIndices[handle]
         icon = QtGui.QIcon(self.mainwindow.theme["main/chums/moods/blocked/icon"])
         self.tabs.setTabIcon(i, icon)
         if self.tabs.currentIndex() == i:
             self.setWindowIcon(icon)
+
     def updateMood(self, handle, mood, unblocked=False):
         i = self.tabIndices[handle]
         if handle in self.mainwindow.config.getBlocklist() and not unblocked:
@@ -194,37 +209,42 @@ class PesterTabWindow(QtWidgets.QFrame):
         self.tabs.setTabIcon(i, icon)
         if self.tabs.currentIndex() == i:
             self.setWindowIcon(icon)
+
     def closeEvent(self, event):
         if not self.softclose:
             while self.tabs.count() > 0:
                 self.tabClose(0)
         self.windowClosed.emit()
+
     def focusInEvent(self, event):
         # make sure we're not switching tabs!
         i = self.tabs.tabAt(self.mapFromGlobal(QtGui.QCursor.pos()))
         if i == -1:
-              i = self.tabs.currentIndex()
+            i = self.tabs.currentIndex()
         handle = str(self.tabs.tabText(i))
         self.clearNewMessage(handle)
+
     def convoHasFocus(self, handle):
         i = self.tabIndices[handle]
-        if (self.tabs.currentIndex() == i and
-            (self.hasFocus() or self.tabs.hasFocus())):
+        if self.tabs.currentIndex() == i and (self.hasFocus() or self.tabs.hasFocus()):
             return True
         else:
             return False
+
     def notifyNewMessage(self, handle):
         i = self.tabIndices[handle]
-        self.tabs.setTabTextColor(i,
-                                  QtGui.QColor(self.mainwindow.theme["%s/tabs/newmsgcolor"
-                                                                     % (self.type)]))
+        self.tabs.setTabTextColor(
+            i, QtGui.QColor(self.mainwindow.theme["%s/tabs/newmsgcolor" % (self.type)])
+        )
         convo = self.convos[handle]
         # Create a function for the icon to use
         # TODO: Let us disable this.
         def func():
             convo.showChat()
+
         self.mainwindow.waitingMessages.addMessage(handle, func)
         # set system tray
+
     def clearNewMessage(self, handle):
         try:
             i = self.tabIndices[handle]
@@ -232,13 +252,15 @@ class PesterTabWindow(QtWidgets.QFrame):
         except KeyError:
             pass
         self.mainwindow.waitingMessages.messageAnswered(handle)
+
     def initTheme(self, theme):
         self.resize(*theme["convo/size"])
         self.setStyleSheet(theme["convo/tabwindow/style"])
         self.tabs.setShape(QtWidgets.QTabBar.Shape(theme["convo/tabs/tabstyle"]))
-        self.tabs.setStyleSheet("QTabBar::tab{ %s } QTabBar::tab:selected { %s }"
-                                % (theme["convo/tabs/style"],
-                                   theme["convo/tabs/selectedstyle"]))
+        self.tabs.setStyleSheet(
+            "QTabBar::tab{ %s } QTabBar::tab:selected { %s }"
+            % (theme["convo/tabs/style"], theme["convo/tabs/selectedstyle"])
+        )
 
     def changeTheme(self, theme):
         self.initTheme(theme)
@@ -255,20 +277,20 @@ class PesterTabWindow(QtWidgets.QFrame):
     def tabClose(self, i):
         handle = str(self.tabs.tabText(i))
         self.mainwindow.waitingMessages.messageAnswered(handle)
-        #print(self.convos.keys())
+        # print(self.convos.keys())
         # I, legit don' t know why this is an issue, but, uh, yeah-
         try:
             convo = self.convos[handle]
         except:
-            #handle = handle.replace("&","")
-            handle = ''.join(handle.split('&', 1))
+            # handle = handle.replace("&","")
+            handle = "".join(handle.split("&", 1))
             convo = self.convos[handle]
         del self.convos[handle]
         del self.tabIndices[handle]
         self.tabs.removeTab(i)
         for (h, j) in self.tabIndices.items():
             if j > i:
-                self.tabIndices[h] = j-1
+                self.tabIndices[h] = j - 1
         self.layout.removeWidget(convo)
         convo.close()
         if self.tabs.count() == 0:
@@ -312,10 +334,12 @@ class PesterTabWindow(QtWidgets.QFrame):
 
     windowClosed = QtCore.pyqtSignal()
 
+
 class PesterMovie(QtGui.QMovie):
     def __init__(self, parent):
         super(PesterMovie, self).__init__(parent)
         self.textwindow = parent
+
     @QtCore.pyqtSlot(int)
     def animate(self, frame):
         text = self.textwindow
@@ -327,20 +351,25 @@ class PesterMovie(QtGui.QMovie):
                 if text.hasTabs:
                     i = text.tabobject.tabIndices[text.parent().title()]
                     if text.tabobject.tabs.currentIndex() == i:
-                        text.document().addResource(QtGui.QTextDocument.ResourceType.ImageResource.value,
-                                          text.urls[movie], movie.currentPixmap())
+                        text.document().addResource(
+                            QtGui.QTextDocument.ResourceType.ImageResource.value,
+                            text.urls[movie],
+                            movie.currentPixmap(),
+                        )
                         text.setLineWrapColumnOrWidth(text.lineWrapColumnOrWidth())
                 else:
-                    text.document().addResource(QtGui.QTextDocument.ResourceType.ImageResource.value,
-                                       text.urls[movie], 
-                                       movie.currentPixmap())
+                    text.document().addResource(
+                        QtGui.QTextDocument.ResourceType.ImageResource.value,
+                        text.urls[movie],
+                        movie.currentPixmap(),
+                    )
                     text.setLineWrapColumnOrWidth(text.lineWrapColumnOrWidth())
-    
+
 
 class PesterText(QtWidgets.QTextEdit):
     def __init__(self, theme, parent=None):
         super(PesterText, self).__init__(parent)
-        if hasattr(self.parent(), 'mainwindow'):
+        if hasattr(self.parent(), "mainwindow"):
             self.mainwindow = self.parent().mainwindow
         else:
             self.mainwindow = self.parent()
@@ -356,8 +385,12 @@ class PesterText(QtWidgets.QTextEdit):
         self.copyAvailable[bool].connect(self.textReady)
         self.urls = {}
         for k in smiledict:
-            self.addAnimation(QtCore.QUrl("smilies/%s" % (smiledict[k])), "smilies/%s" % (smiledict[k]))
-        #self.mainwindow.animationSetting[bool].connect(self.animateChanged)
+            self.addAnimation(
+                QtCore.QUrl("smilies/%s" % (smiledict[k])),
+                "smilies/%s" % (smiledict[k]),
+            )
+        # self.mainwindow.animationSetting[bool].connect(self.animateChanged)
+
     def addAnimation(self, url, fileName):
         # We don't need to treat images formats like .png as animation,
         # this always opens a file handler otherwise, "movie.frameCount() > 1" isn't sufficient.
@@ -365,12 +398,12 @@ class PesterText(QtWidgets.QTextEdit):
         # As long as we're only using gifs there's no advantage to that though.
         if not fileName.endswith(".gif"):
             return
-        
+
         movie = PesterMovie(self)
         movie.setFileName(fileName)
         self.urls[movie] = url
         movie.frameChanged[int].connect(movie.animate)
-        
+
     """
     @QtCore.pyqtSlot(bool)
     def animateChanged(self, animate):
@@ -393,29 +426,37 @@ class PesterText(QtWidgets.QTextEdit):
     @QtCore.pyqtSlot(bool)
     def textReady(self, ready):
         self.textSelected = ready
+
     def initTheme(self, theme):
         if "convo/scrollbar" in theme:
-            self.setStyleSheet("QTextEdit { %s }"
-                               "QScrollBar:vertical { %s }"
-                               "QScrollBar::handle:vertical { %s }"
-                               "QScrollBar::add-line:vertical { %s }"
-                               "QScrollBar::sub-line:vertical { %s }"
-                               "QScrollBar:up-arrow:vertical { %s }"
-                               "QScrollBar:down-arrow:vertical { %s }"
-                               % (theme["convo/textarea/style"],
-                                  theme["convo/scrollbar/style"],
-                                  theme["convo/scrollbar/handle"],
-                                  theme["convo/scrollbar/downarrow"],
-                                  theme["convo/scrollbar/uparrow"],
-                                  theme["convo/scrollbar/uarrowstyle"],
-                                  theme["convo/scrollbar/darrowstyle"]))
+            self.setStyleSheet(
+                "QTextEdit { %s }"
+                "QScrollBar:vertical { %s }"
+                "QScrollBar::handle:vertical { %s }"
+                "QScrollBar::add-line:vertical { %s }"
+                "QScrollBar::sub-line:vertical { %s }"
+                "QScrollBar:up-arrow:vertical { %s }"
+                "QScrollBar:down-arrow:vertical { %s }"
+                % (
+                    theme["convo/textarea/style"],
+                    theme["convo/scrollbar/style"],
+                    theme["convo/scrollbar/handle"],
+                    theme["convo/scrollbar/downarrow"],
+                    theme["convo/scrollbar/uparrow"],
+                    theme["convo/scrollbar/uarrowstyle"],
+                    theme["convo/scrollbar/darrowstyle"],
+                )
+            )
         else:
             self.setStyleSheet("QTextEdit { %s }" % (theme["convo/textarea/style"]))
+
     def addMessage(self, lexmsg, chum):
         if len(lexmsg) == 0:
             return
         color = chum.colorcmd()
-        systemColor = QtGui.QColor(self.parent().mainwindow.theme["convo/systemMsgColor"])
+        systemColor = QtGui.QColor(
+            self.parent().mainwindow.theme["convo/systemMsgColor"]
+        )
         initials = chum.initials()
         parent = self.parent()
         window = parent.mainwindow
@@ -438,28 +479,34 @@ class PesterText(QtWidgets.QTextEdit):
             time = ""
         if lexmsg[0] == "PESTERCHUM:BEGIN":
             parent.setChumOpen(True)
-            pmsg = chum.pestermsg(me, systemColor, window.theme["convo/text/beganpester"])
+            pmsg = chum.pestermsg(
+                me, systemColor, window.theme["convo/text/beganpester"]
+            )
             window.chatlog.log(chum.handle, pmsg)
             self.append(convertTags(pmsg))
         elif lexmsg[0] == "PESTERCHUM:CEASE":
             parent.setChumOpen(False)
-            pmsg = chum.pestermsg(me, systemColor, window.theme["convo/text/ceasepester"])
+            pmsg = chum.pestermsg(
+                me, systemColor, window.theme["convo/text/ceasepester"]
+            )
             window.chatlog.log(chum.handle, pmsg)
             self.append(convertTags(pmsg))
         elif lexmsg[0] == "PESTERCHUM:BLOCK":
-            pmsg = chum.pestermsg(me, systemColor, window.theme['convo/text/blocked'])
+            pmsg = chum.pestermsg(me, systemColor, window.theme["convo/text/blocked"])
             window.chatlog.log(chum.handle, pmsg)
             self.append(convertTags(pmsg))
         elif lexmsg[0] == "PESTERCHUM:UNBLOCK":
-            pmsg = chum.pestermsg(me, systemColor, window.theme['convo/text/unblocked'])
+            pmsg = chum.pestermsg(me, systemColor, window.theme["convo/text/unblocked"])
             window.chatlog.log(chum.handle, pmsg)
             self.append(convertTags(pmsg))
         elif lexmsg[0] == "PESTERCHUM:BLOCKED":
-            pmsg = chum.pestermsg(me, systemColor, window.theme['convo/text/blockedmsg'])
+            pmsg = chum.pestermsg(
+                me, systemColor, window.theme["convo/text/blockedmsg"]
+            )
             window.chatlog.log(chum.handle, pmsg)
             self.append(convertTags(pmsg))
         elif lexmsg[0] == "PESTERCHUM:IDLE":
-            imsg = chum.idlemsg(systemColor, window.theme['convo/text/idle'])
+            imsg = chum.idlemsg(systemColor, window.theme["convo/text/idle"])
             window.chatlog.log(chum.handle, imsg)
             self.append(convertTags(imsg))
         elif type(lexmsg[0]) is mecmd:
@@ -471,30 +518,34 @@ class PesterText(QtWidgets.QTextEdit):
             self.append(time + convertTags(memsg))
         else:
             if not parent.chumopen and chum is not me:
-                beginmsg = chum.pestermsg(me, systemColor, window.theme["convo/text/beganpester"])
+                beginmsg = chum.pestermsg(
+                    me, systemColor, window.theme["convo/text/beganpester"]
+                )
                 parent.setChumOpen(True)
                 window.chatlog.log(chum.handle, beginmsg)
                 self.append(convertTags(beginmsg))
 
-            lexmsg[0:0] = [colorBegin("<c=%s>" % (color), color),
-                           "%s: " % (initials)]
+            lexmsg[0:0] = [colorBegin("<c=%s>" % (color), color), "%s: " % (initials)]
             lexmsg.append(colorEnd("</c>"))
-            self.append("<span style=\"color:#000000\">"
-                        + time
-                        + convertTags(lexmsg)
-                        + "</span>")
-            #self.append('<img src="/Users/lexi/pesterchum-lex/smilies/tab.gif" />'
+            self.append(
+                '<span style="color:#000000">' + time + convertTags(lexmsg) + "</span>"
+            )
+            # self.append('<img src="/Users/lexi/pesterchum-lex/smilies/tab.gif" />'
             #            + '<img src="/Users/lexi/pesterchum/smilies/tab.gif" />'
             #            + '<img src="/Applications/Pesterchum.app/Contents/Resources/smilies/tab.gif" />'
             #            + '<img src="smilies/tab.gif" />');
             if chum is me:
                 window.chatlog.log(parent.chum.handle, lexmsg)
             else:
-                if ((window.idler.auto or window.idler.manual) and parent.chumopen
-                        and not parent.isBot(chum.handle)):
+                if (
+                    (window.idler.auto or window.idler.manual)
+                    and parent.chumopen
+                    and not parent.isBot(chum.handle)
+                ):
                     idlethreshhold = 60
-                    if (not hasattr(self, 'lastmsg')) or \
-                            datetime.now() - self.lastmsg > timedelta(0,idlethreshhold):
+                    if (
+                        not hasattr(self, "lastmsg")
+                    ) or datetime.now() - self.lastmsg > timedelta(0, idlethreshhold):
                         verb = window.theme["convo/text/idle"]
                         idlemsg = me.idlemsg(systemColor, verb)
                         parent.textArea.append(convertTags(idlemsg))
@@ -502,10 +553,12 @@ class PesterText(QtWidgets.QTextEdit):
                         parent.messageSent.emit("PESTERCHUM:IDLE", parent.title())
                 self.lastmsg = datetime.now()
                 window.chatlog.log(chum.handle, lexmsg)
+
     def changeTheme(self, theme):
         self.initTheme(theme)
         sb = self.verticalScrollBar()
         sb.setValue(sb.maximum())
+
     def focusInEvent(self, event):
         self.parent().clearNewMessage()
         QtWidgets.QTextEdit.focusInEvent(self, event)
@@ -516,12 +569,16 @@ class PesterText(QtWidgets.QTextEdit):
     def keyPressEvent(self, event):
         # First parent is the PesterConvo containing this.
         # Second parent is the PesterTabWindow containing *it*.
-        pass_to_super = (QtCore.Qt.Key.Key_PageUp, QtCore.Qt.Key.Key_PageDown,
-                QtCore.Qt.Key.Key_Up, QtCore.Qt.Key.Key_Down)
+        pass_to_super = (
+            QtCore.Qt.Key.Key_PageUp,
+            QtCore.Qt.Key.Key_PageDown,
+            QtCore.Qt.Key.Key_Up,
+            QtCore.Qt.Key.Key_Down,
+        )
         parent = self.parent()
         key = event.key()
-        #keymods = event.modifiers()
-        if hasattr(parent, 'textInput') and key not in pass_to_super:
+        # keymods = event.modifiers()
+        if hasattr(parent, "textInput") and key not in pass_to_super:
             # TODO: Shift focus here on bare (no modifiers) alphanumerics.
             parent.textInput.keyPressEvent(event)
 
@@ -546,9 +603,11 @@ class PesterText(QtWidgets.QTextEdit):
                     if event.modifiers() == QtCore.Qt.KeyboardModifier.ControlModifier:
                         QtWidgets.QApplication.clipboard().setText(url)
                     else:
-                        QtGui.QDesktopServices.openUrl(QtCore.QUrl(url,
-                                                                   QtCore.QUrl.ParsingMode.TolerantMode))
+                        QtGui.QDesktopServices.openUrl(
+                            QtCore.QUrl(url, QtCore.QUrl.ParsingMode.TolerantMode)
+                        )
         QtWidgets.QTextEdit.mousePressEvent(self, event)
+
     def mouseMoveEvent(self, event):
         QtWidgets.QTextEdit.mouseMoveEvent(self, event)
         try:
@@ -558,8 +617,13 @@ class PesterText(QtWidgets.QTextEdit):
             # PyQt5
             pos = event.pos()
         if self.anchorAt(pos):
-            if self.viewport().cursor().shape != QtCore.Qt.CursorShape.PointingHandCursor:
-                self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+            if (
+                self.viewport().cursor().shape
+                != QtCore.Qt.CursorShape.PointingHandCursor
+            ):
+                self.viewport().setCursor(
+                    QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor)
+                )
         else:
             self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.IBeamCursor))
 
@@ -567,24 +631,28 @@ class PesterText(QtWidgets.QTextEdit):
         textMenu = self.createStandardContextMenu()
         textMenu.exec(event.globalPos())
 
+
 class PesterInput(QtWidgets.QLineEdit):
     stylesheet_path = "convo/input/style"
+
     def __init__(self, theme, parent=None):
         super(PesterInput, self).__init__(parent)
         self.changeTheme(theme)
+
     def changeTheme(self, theme):
         # Explicitly set color if not already set.
         # (Some platforms seem to default to white instead of black.)
-        
-        StyleSheet = theme[self.stylesheet_path]        
-        if "color:" not in theme[self.stylesheet_path].replace(' ', ''):
+
+        StyleSheet = theme[self.stylesheet_path]
+        if "color:" not in theme[self.stylesheet_path].replace(" ", ""):
             StyleSheet = "color: black; " + StyleSheet
         self.setStyleSheet(StyleSheet)
-        
+
     def focusInEvent(self, event):
         self.parent().clearNewMessage()
         self.parent().textArea.textCursor().clearSelection()
         super(PesterInput, self).focusInEvent(event)
+
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key.Key_Up:
             text = str(self.text())
@@ -600,6 +668,7 @@ class PesterInput(QtWidgets.QLineEdit):
         self.parent().mainwindow.idler.time = 0
         super(PesterInput, self).keyPressEvent(event)
 
+
 class PesterConvo(QtWidgets.QFrame):
     def __init__(self, chum, initiated, mainwindow, parent=None):
         super(PesterConvo, self).__init__(parent)
@@ -610,9 +679,9 @@ class PesterConvo(QtWidgets.QFrame):
         self.mainwindow = mainwindow
         theme = self.mainwindow.theme
         self.resize(*theme["convo/size"])
-        self.setStyleSheet("QtWidgets.QFrame#%s { %s }"
-                           % (chum.handle,
-                              theme["convo/style"]))
+        self.setStyleSheet(
+            "QtWidgets.QFrame#%s { %s }" % (chum.handle, theme["convo/style"])
+        )
         self.setWindowIcon(self.icon())
         self.setWindowTitle(self.title())
 
@@ -620,12 +689,22 @@ class PesterConvo(QtWidgets.QFrame):
 
         self.chumLabel = QtWidgets.QLabel(t.safe_substitute(handle=chum.handle), self)
         self.chumLabel.setStyleSheet(self.mainwindow.theme["convo/chumlabel/style"])
-        self.chumLabel.setAlignment(self.aligndict["h"][self.mainwindow.theme["convo/chumlabel/align/h"]]
-                                    | self.aligndict["v"][self.mainwindow.theme["convo/chumlabel/align/v"]])
-        self.chumLabel.setMaximumHeight(self.mainwindow.theme["convo/chumlabel/maxheight"])
-        self.chumLabel.setMinimumHeight(self.mainwindow.theme["convo/chumlabel/minheight"])
-        self.chumLabel.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.MinimumExpanding,
-                                                           QtWidgets.QSizePolicy.Policy.MinimumExpanding))
+        self.chumLabel.setAlignment(
+            self.aligndict["h"][self.mainwindow.theme["convo/chumlabel/align/h"]]
+            | self.aligndict["v"][self.mainwindow.theme["convo/chumlabel/align/v"]]
+        )
+        self.chumLabel.setMaximumHeight(
+            self.mainwindow.theme["convo/chumlabel/maxheight"]
+        )
+        self.chumLabel.setMinimumHeight(
+            self.mainwindow.theme["convo/chumlabel/minheight"]
+        )
+        self.chumLabel.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+                QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+            )
+        )
         self.textArea = PesterText(self.mainwindow.theme, self)
         self.textInput = PesterInput(self.mainwindow.theme, self)
         self.textInput.setFocus()
@@ -638,28 +717,45 @@ class PesterConvo(QtWidgets.QFrame):
         self.layout.addWidget(self.textInput)
         self.layout.setSpacing(0)
         margins = self.mainwindow.theme["convo/margins"]
-        self.layout.setContentsMargins(margins["left"], margins["top"],
-                                      margins["right"], margins["bottom"])
+        self.layout.setContentsMargins(
+            margins["left"], margins["top"], margins["right"], margins["bottom"]
+        )
 
         self.setLayout(self.layout)
 
         self.optionsMenu = QtWidgets.QMenu(self)
-        self.optionsMenu.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
-        self.addChumAction = QAction(self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self)
+        self.optionsMenu.setStyleSheet(
+            self.mainwindow.theme["main/defaultwindow/style"]
+        )
+        self.addChumAction = QAction(
+            self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self
+        )
         self.addChumAction.triggered.connect(self.addThisChum)
-        self.blockAction = QAction(self.mainwindow.theme["main/menus/rclickchumlist/blockchum"], self)
+        self.blockAction = QAction(
+            self.mainwindow.theme["main/menus/rclickchumlist/blockchum"], self
+        )
         self.blockAction.triggered.connect(self.blockThisChum)
-        self.quirksOff = QAction(self.mainwindow.theme["main/menus/rclickchumlist/quirksoff"], self)
+        self.quirksOff = QAction(
+            self.mainwindow.theme["main/menus/rclickchumlist/quirksoff"], self
+        )
         self.quirksOff.setCheckable(True)
         self.quirksOff.toggled[bool].connect(self.toggleQuirks)
-        self.oocToggle = QAction(self.mainwindow.theme["main/menus/rclickchumlist/ooc"], self)
+        self.oocToggle = QAction(
+            self.mainwindow.theme["main/menus/rclickchumlist/ooc"], self
+        )
         self.oocToggle.setCheckable(True)
         self.oocToggle.toggled[bool].connect(self.toggleOOC)
-        self.unblockchum = QAction(self.mainwindow.theme["main/menus/rclickchumlist/unblockchum"], self)
+        self.unblockchum = QAction(
+            self.mainwindow.theme["main/menus/rclickchumlist/unblockchum"], self
+        )
         self.unblockchum.triggered.connect(self.unblockChumSlot)
-        self.reportchum = QAction(self.mainwindow.theme["main/menus/rclickchumlist/report"], self)
+        self.reportchum = QAction(
+            self.mainwindow.theme["main/menus/rclickchumlist/report"], self
+        )
         self.reportchum.triggered.connect(self.reportThisChum)
-        self.logchum = QAction(self.mainwindow.theme["main/menus/rclickchumlist/viewlog"], self)
+        self.logchum = QAction(
+            self.mainwindow.theme["main/menus/rclickchumlist/viewlog"], self
+        )
         self.logchum.triggered.connect(self.openChumLogs)
 
         # For this, we'll want to use setChecked to toggle these so they match
@@ -670,25 +766,32 @@ class PesterConvo(QtWidgets.QFrame):
         # TODO: Look into setting up theme support here.
 
         # Theme support :3c
-        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/beeponmessage"):
+        # if self.mainwindow.theme.has_key("main/menus/rclickchumlist/beeponmessage"):
         try:
-            self._beepToggle = QAction(self.mainwindow.theme["main/menus/rclickchumlist/beeponmessage"], self)
+            self._beepToggle = QAction(
+                self.mainwindow.theme["main/menus/rclickchumlist/beeponmessage"], self
+            )
         except:
             self._beepToggle = QAction("BEEP ON MESSAGE", self)
         self._beepToggle.setCheckable(True)
         self._beepToggle.toggled[bool].connect(self.toggleBeep)
 
-        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/flashonmessage"):
+        # if self.mainwindow.theme.has_key("main/menus/rclickchumlist/flashonmessage"):
         try:
-            self._flashToggle = QAction(self.mainwindow.theme["main/menus/rclickchumlist/flashonmessage"], self)
+            self._flashToggle = QAction(
+                self.mainwindow.theme["main/menus/rclickchumlist/flashonmessage"], self
+            )
         except:
             self._flashToggle = QAction("FLASH ON MESSAGE", self)
         self._flashToggle.setCheckable(True)
         self._flashToggle.toggled[bool].connect(self.toggleFlash)
 
-        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/mutenotifications"):
+        # if self.mainwindow.theme.has_key("main/menus/rclickchumlist/mutenotifications"):
         try:
-            self._muteToggle = QAction(self.mainwindow.theme["main/menus/rclickchumlist/mutenotifications"], self)
+            self._muteToggle = QAction(
+                self.mainwindow.theme["main/menus/rclickchumlist/mutenotifications"],
+                self,
+            )
         except:
             self._muteToggle = QAction("MUTE NOTIFICATIONS", self)
         self._muteToggle.setCheckable(True)
@@ -717,7 +820,11 @@ class PesterConvo(QtWidgets.QFrame):
         if parent:
             parent.addChat(self)
         if initiated:
-            msg = self.mainwindow.profile().pestermsg(self.chum, QtGui.QColor(self.mainwindow.theme["convo/systemMsgColor"]), self.mainwindow.theme["convo/text/beganpester"])
+            msg = self.mainwindow.profile().pestermsg(
+                self.chum,
+                QtGui.QColor(self.mainwindow.theme["convo/systemMsgColor"]),
+                self.mainwindow.theme["convo/text/beganpester"],
+            )
             self.setChumOpen(True)
             self.textArea.append(convertTags(msg))
             self.mainwindow.chatlog.log(self.title(), msg)
@@ -726,8 +833,10 @@ class PesterConvo(QtWidgets.QFrame):
 
     def title(self):
         return self.chum.handle
+
     def icon(self):
         return self.chum.mood.icon(self.mainwindow.theme)
+
     def myUpdateMood(self, mood):
         chum = self.mainwindow.profile()
         syscolor = QtGui.QColor(self.mainwindow.theme["convo/systemMsgColor"])
@@ -740,12 +849,12 @@ class PesterConvo(QtWidgets.QFrame):
 
     def updateMood(self, mood, unblocked=False, old=None):
         syscolor = QtGui.QColor(self.mainwindow.theme["convo/systemMsgColor"])
-        #~ if mood.name() == "offline" and self.chumopen == True and not unblocked:
-            #~ self.mainwindow.ceasesound.play()
-            #~ msg = self.chum.pestermsg(self.mainwindow.profile(), syscolor, self.mainwindow.theme["convo/text/ceasepester"])
-            #~ self.textArea.append(convertTags(msg))
-            #~ self.mainwindow.chatlog.log(self.title(), msg)
-            #~ self.chumopen = False
+        # ~ if mood.name() == "offline" and self.chumopen == True and not unblocked:
+        # ~ self.mainwindow.ceasesound.play()
+        # ~ msg = self.chum.pestermsg(self.mainwindow.profile(), syscolor, self.mainwindow.theme["convo/text/ceasepester"])
+        # ~ self.textArea.append(convertTags(msg))
+        # ~ self.mainwindow.chatlog.log(self.title(), msg)
+        # ~ self.chumopen = False
         if old and old.name() != mood.name():
             msg = self.chum.moodmsg(mood, syscolor, self.mainwindow.theme)
             self.textArea.append(convertTags(msg))
@@ -754,7 +863,9 @@ class PesterConvo(QtWidgets.QFrame):
             self.parent().updateMood(self.title(), mood, unblocked)
         else:
             if self.chum.blocked(self.mainwindow.config) and not unblocked:
-                self.setWindowIcon(QtGui.QIcon(self.mainwindow.theme["main/chums/moods/blocked/icon"]))
+                self.setWindowIcon(
+                    QtGui.QIcon(self.mainwindow.theme["main/chums/moods/blocked/icon"])
+                )
                 self.optionsMenu.addAction(self.unblockchum)
                 self.optionsMenu.removeAction(self.blockAction)
             else:
@@ -762,17 +873,21 @@ class PesterConvo(QtWidgets.QFrame):
                 self.optionsMenu.removeAction(self.unblockchum)
                 self.optionsMenu.addAction(self.blockAction)
         # print mood update?
+
     def updateBlocked(self):
         if self.parent():
             self.parent().updateBlocked(self.title())
         else:
-            self.setWindowIcon(QtGui.QIcon(self.mainwindow.theme["main/chums/moods/blocked/icon"]))
+            self.setWindowIcon(
+                QtGui.QIcon(self.mainwindow.theme["main/chums/moods/blocked/icon"])
+            )
         self.optionsMenu.addAction(self.unblockchum)
         self.optionsMenu.removeAction(self.blockAction)
 
     def updateColor(self, color):
         PchumLog.debug("convo updateColor: " + str(color))
         self.chum.color = color
+
     def addMessage(self, msg, me=True):
         if type(msg) in [str, str]:
             lexmsg = lexMessage(msg)
@@ -796,16 +911,19 @@ class PesterConvo(QtWidgets.QFrame):
         memoblink &= self.mainwindow.config.MBLINK
         pesterblink &= self.mainwindow.config.PBLINK
         mutednots = self.notifications_muted
-        #mtsrc = self
+        # mtsrc = self
         if parent:
             try:
                 mutednots = parent.notifications_muted
-                #mtsrc = parent
+                # mtsrc = parent
             except:
                 pass
-        if not (self.hasFocus() or self.textArea.hasFocus() or
-                self.textInput.hasFocus() or
-                (parent and parent.convoHasFocus(title))):
+        if not (
+            self.hasFocus()
+            or self.textArea.hasFocus()
+            or self.textInput.hasFocus()
+            or (parent and parent.convoHasFocus(title))
+        ):
             # ok if it has a tabconvo parent, send that the notify.
             if parent:
                 # Just let the icon highlight normally.
@@ -818,11 +936,11 @@ class PesterConvo(QtWidgets.QFrame):
                     # the checks there.
                     # PesterTabWindow -> MemoTabWindow
                     if isinstance(parent, MemoTabWindow):
-                      if self.always_flash or memoblink:
-                        self.mainwindow.gainAttention.emit(parent)
+                        if self.always_flash or memoblink:
+                            self.mainwindow.gainAttention.emit(parent)
                     elif isinstance(parent, PesterTabWindow):
-                      if self.always_flash or pesterblink:
-                        self.mainwindow.gainAttention.emit(parent)
+                        if self.always_flash or pesterblink:
+                            self.mainwindow.gainAttention.emit(parent)
             # if not change the window title and update system tray
             else:
                 self.newmessage = True
@@ -831,15 +949,16 @@ class PesterConvo(QtWidgets.QFrame):
                 # entirely sure how much of this directly affects what we see.
                 def func():
                     self.showChat()
+
                 self.mainwindow.waitingMessages.addMessage(title, func)
                 if not mutednots:
                     # Once again, PesterMemo inherits from PesterConvo.
                     if isinstance(self, PesterMemo):
-                      if self.always_flash or memoblink:
-                        self.mainwindow.gainAttention.emit(self)
+                        if self.always_flash or memoblink:
+                            self.mainwindow.gainAttention.emit(self)
                     elif isinstance(self, PesterConvo):
-                      if self.always_flash or pesterblink:
-                        self.mainwindow.gainAttention.emit(self)
+                        if self.always_flash or pesterblink:
+                            self.mainwindow.gainAttention.emit(self)
 
     def clearNewMessage(self):
         if self.parent():
@@ -849,6 +968,7 @@ class PesterConvo(QtWidgets.QFrame):
             self.setWindowTitle(self.title())
             self.mainwindow.waitingMessages.messageAnswered(self.title())
             # reset system tray
+
     def focusInEvent(self, event):
         self.clearNewMessage()
         self.textInput.setFocus()
@@ -862,67 +982,100 @@ class PesterConvo(QtWidgets.QFrame):
         if self.parent():
             self.parent().showChat(self.title())
         self.raiseChat()
+
     def contextMenuEvent(self, event):
         if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
             self.optionsMenu.popup(event.globalPos())
+
     def closeEvent(self, event):
         self.mainwindow.waitingMessages.messageAnswered(self.title())
         for movie in self.textArea.urls:
-            movie.setFileName("") # Required, sometimes, for some reason. . .
+            movie.setFileName("")  # Required, sometimes, for some reason. . .
             movie.stop()
             del movie
         self.windowClosed.emit(self.title())
 
     def setChumOpen(self, o):
         self.chumopen = o
+
     def changeTheme(self, theme):
         self.resize(*theme["convo/size"])
-        self.setStyleSheet("QtWidgets.QFrame#%s { %s }" % (self.chum.handle, theme["convo/style"]))
+        self.setStyleSheet(
+            "QtWidgets.QFrame#%s { %s }" % (self.chum.handle, theme["convo/style"])
+        )
 
         margins = theme["convo/margins"]
-        self.layout.setContentsMargins(margins["left"], margins["top"],
-                                       margins["right"], margins["bottom"])
+        self.layout.setContentsMargins(
+            margins["left"], margins["top"], margins["right"], margins["bottom"]
+        )
 
         self.setWindowIcon(self.icon())
         t = Template(self.mainwindow.theme["convo/chumlabel/text"])
         self.chumLabel.setText(t.safe_substitute(handle=self.title()))
         self.chumLabel.setStyleSheet(theme["convo/chumlabel/style"])
-        self.chumLabel.setAlignment(self.aligndict["h"][self.mainwindow.theme["convo/chumlabel/align/h"]] | self.aligndict["v"][self.mainwindow.theme["convo/chumlabel/align/v"]])
-        self.chumLabel.setMaximumHeight(self.mainwindow.theme["convo/chumlabel/maxheight"])
-        self.chumLabel.setMinimumHeight(self.mainwindow.theme["convo/chumlabel/minheight"])
-        self.chumLabel.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.MinimumExpanding, QtWidgets.QSizePolicy.Policy.Expanding))
-        self.quirksOff.setText(self.mainwindow.theme["main/menus/rclickchumlist/quirksoff"])
-        self.addChumAction.setText(self.mainwindow.theme["main/menus/rclickchumlist/addchum"])
-        self.blockAction.setText(self.mainwindow.theme["main/menus/rclickchumlist/blockchum"])
-        self.unblockchum.setText(self.mainwindow.theme["main/menus/rclickchumlist/unblockchum"])
+        self.chumLabel.setAlignment(
+            self.aligndict["h"][self.mainwindow.theme["convo/chumlabel/align/h"]]
+            | self.aligndict["v"][self.mainwindow.theme["convo/chumlabel/align/v"]]
+        )
+        self.chumLabel.setMaximumHeight(
+            self.mainwindow.theme["convo/chumlabel/maxheight"]
+        )
+        self.chumLabel.setMinimumHeight(
+            self.mainwindow.theme["convo/chumlabel/minheight"]
+        )
+        self.chumLabel.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+                QtWidgets.QSizePolicy.Policy.Expanding,
+            )
+        )
+        self.quirksOff.setText(
+            self.mainwindow.theme["main/menus/rclickchumlist/quirksoff"]
+        )
+        self.addChumAction.setText(
+            self.mainwindow.theme["main/menus/rclickchumlist/addchum"]
+        )
+        self.blockAction.setText(
+            self.mainwindow.theme["main/menus/rclickchumlist/blockchum"]
+        )
+        self.unblockchum.setText(
+            self.mainwindow.theme["main/menus/rclickchumlist/unblockchum"]
+        )
         self.logchum.setText(self.mainwindow.theme["main/menus/rclickchumlist/viewlog"])
 
-        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/beeponmessage"):
+        # if self.mainwindow.theme.has_key("main/menus/rclickchumlist/beeponmessage"):
         try:
-            self._beepToggle.setText(self.mainwindow.theme["main/menus/rclickchumlist/beeponmessage"])
+            self._beepToggle.setText(
+                self.mainwindow.theme["main/menus/rclickchumlist/beeponmessage"]
+            )
         except:
             self._beepToggle.setText("BEEP ON MESSAGE")
 
-        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/flashonmessage"):
+        # if self.mainwindow.theme.has_key("main/menus/rclickchumlist/flashonmessage"):
         try:
-            self._flashToggle.setText(self.mainwindow.theme["main/menus/rclickchumlist/flashonmessage"])
+            self._flashToggle.setText(
+                self.mainwindow.theme["main/menus/rclickchumlist/flashonmessage"]
+            )
         except:
             self._flashToggle.setText("FLASH ON MESSAGE", self)
 
-        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/mutenotifications"):
+        # if self.mainwindow.theme.has_key("main/menus/rclickchumlist/mutenotifications"):
         try:
-            self._muteToggle.setText(self.mainwindow.theme["main/menus/rclickchumlist/mutenotifications"])
+            self._muteToggle.setText(
+                self.mainwindow.theme["main/menus/rclickchumlist/mutenotifications"]
+            )
         except:
             self._muteToggle.setText("MUTE NOTIFICATIONS")
 
-        #if self.mainwindow.theme.has_key("main/menus/rclickchumlist/report"):
+        # if self.mainwindow.theme.has_key("main/menus/rclickchumlist/report"):
         try:
-            self.reportchum.setText(self.mainwindow.theme["main/menus/rclickchumlist/report"])
+            self.reportchum.setText(
+                self.mainwindow.theme["main/menus/rclickchumlist/report"]
+            )
         except:
             pass
         self.textArea.changeTheme(theme)
         self.textInput.changeTheme(theme)
-
 
     @QtCore.pyqtSlot()
     def sentMessage(self):
@@ -936,29 +1089,36 @@ class PesterConvo(QtWidgets.QFrame):
     @QtCore.pyqtSlot()
     def addThisChum(self):
         self.mainwindow.addChum(self.chum)
+
     @QtCore.pyqtSlot()
     def blockThisChum(self):
         self.mainwindow.blockChum(self.chum.handle)
+
     @QtCore.pyqtSlot()
     def reportThisChum(self):
         self.mainwindow.reportChum(self.chum.handle)
+
     @QtCore.pyqtSlot()
     def unblockChumSlot(self):
         self.mainwindow.unblockChum(self.chum.handle)
+
     @QtCore.pyqtSlot(bool)
     def toggleQuirks(self, toggled):
         self.applyquirks = not toggled
+
     @QtCore.pyqtSlot(bool)
     def toggleOOC(self, toggled):
         self.ooc = toggled
+
     @QtCore.pyqtSlot()
     def openChumLogs(self):
         currentChum = self.chum.handle
-        self.mainwindow.chumList.pesterlogviewer = PesterLogViewer(currentChum,
-                                                                   self.mainwindow.config,
-                                                                   self.mainwindow.theme,
-                                                                   self.mainwindow)
-        self.mainwindow.chumList.pesterlogviewer.rejected.connect(self.mainwindow.chumList.closeActiveLog)
+        self.mainwindow.chumList.pesterlogviewer = PesterLogViewer(
+            currentChum, self.mainwindow.config, self.mainwindow.theme, self.mainwindow
+        )
+        self.mainwindow.chumList.pesterlogviewer.rejected.connect(
+            self.mainwindow.chumList.closeActiveLog
+        )
         self.mainwindow.chumList.pesterlogviewer.show()
         self.mainwindow.chumList.pesterlogviewer.raise_()
         self.mainwindow.chumList.pesterlogviewer.activateWindow()
@@ -975,15 +1135,22 @@ class PesterConvo(QtWidgets.QFrame):
     def toggleMute(self, toggled):
         self.notifications_muted = toggled
 
-    messageSent = QtCore.pyqtSignal('QString', 'QString')
-    windowClosed = QtCore.pyqtSignal('QString')
+    messageSent = QtCore.pyqtSignal("QString", "QString")
+    windowClosed = QtCore.pyqtSignal("QString")
 
-    aligndict = {"h": {"center": QtCore.Qt.AlignmentFlag.AlignHCenter,
-                       "left": QtCore.Qt.AlignmentFlag.AlignLeft,
-                       "right": QtCore.Qt.AlignmentFlag.AlignRight },
-                 "v": {"center": QtCore.Qt.AlignmentFlag.AlignVCenter,
-                       "top": QtCore.Qt.AlignmentFlag.AlignTop,
-                       "bottom": QtCore.Qt.AlignmentFlag.AlignBottom } }
+    aligndict = {
+        "h": {
+            "center": QtCore.Qt.AlignmentFlag.AlignHCenter,
+            "left": QtCore.Qt.AlignmentFlag.AlignLeft,
+            "right": QtCore.Qt.AlignmentFlag.AlignRight,
+        },
+        "v": {
+            "center": QtCore.Qt.AlignmentFlag.AlignVCenter,
+            "top": QtCore.Qt.AlignmentFlag.AlignTop,
+            "bottom": QtCore.Qt.AlignmentFlag.AlignBottom,
+        },
+    }
+
 
 # the import is way down here to avoid recursive imports
 from logviewer import PesterLogViewer

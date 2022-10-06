@@ -19,7 +19,8 @@ import logging
 
 from oyoyo.ircevents import numeric_events
 
-PchumLog = logging.getLogger('pchumLogger')
+PchumLog = logging.getLogger("pchumLogger")
+
 
 def parse_raw_irc_command(element):
     """
@@ -55,20 +56,20 @@ def parse_raw_irc_command(element):
 
 
     """
-    
+
     try:
         element = element.decode("utf-8")
     except UnicodeDecodeError as e:
         PchumLog.debug("utf-8 error %s" % str(e))
-        element = element.decode("latin-1", 'replace')
-    
+        element = element.decode("latin-1", "replace")
+
     parts = element.strip().split(" ")
-    if parts[0].startswith(':'):
+    if parts[0].startswith(":"):
         tags = None
         prefix = parts[0][1:]
         command = parts[1]
         args = parts[2:]
-    elif parts[0].startswith('@'):
+    elif parts[0].startswith("@"):
         # Message tag
         tags = parts[0]
         prefix = parts[1][1:]
@@ -84,14 +85,14 @@ def parse_raw_irc_command(element):
         try:
             command = numeric_events[command]
         except KeyError:
-            PchumLog.info('unknown numeric event %s' % command)
+            PchumLog.info("unknown numeric event %s" % command)
     command = command.lower()
 
-    if args[0].startswith(':'):
+    if args[0].startswith(":"):
         args = [" ".join(args)[1:]]
     else:
         for idx, arg in enumerate(args):
-            if arg.startswith(':'):
+            if arg.startswith(":"):
                 args = args[:idx] + [" ".join(args[idx:])[1:]]
                 break
 
@@ -99,23 +100,22 @@ def parse_raw_irc_command(element):
 
 
 def parse_nick(name):
-    """ parse a nickname and return a tuple of (nick, mode, user, host)
+    """parse a nickname and return a tuple of (nick, mode, user, host)
 
     <nick> [ '!' [<mode> = ] <user> ] [ '@' <host> ]
     """
 
     try:
-        nick, rest = name.split('!')
+        nick, rest = name.split("!")
     except ValueError:
         return (name, None, None, None)
     try:
-        mode, rest = rest.split('=')
+        mode, rest = rest.split("=")
     except ValueError:
         mode, rest = None, rest
     try:
-        user, host = rest.split('@')
+        user, host = rest.split("@")
     except ValueError:
         return (name, mode, rest, None)
 
     return (name, mode, user, host)
- 

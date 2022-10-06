@@ -20,10 +20,11 @@ import inspect
 from oyoyo import helpers
 from oyoyo.parse import parse_nick
 
-PchumLog = logging.getLogger('pchumLogger')
+PchumLog = logging.getLogger("pchumLogger")
+
 
 def protected(func):
-    """ decorator to protect functions from being called """
+    """decorator to protect functions from being called"""
     func.protected = True
     return func
 
@@ -32,17 +33,19 @@ class CommandError(Exception):
     def __init__(self, cmd):
         self.cmd = cmd
 
+
 class NoSuchCommandError(CommandError):
     def __str__(self):
         return 'No such command "%s"' % ".".join(self.cmd)
 
+
 class ProtectedCommandError(CommandError):
     def __str__(self):
         return 'Command "%s" is protected' % ".".join(self.cmd)
-        
+
 
 class CommandHandler(object):
-    """ The most basic CommandHandler """
+    """The most basic CommandHandler"""
 
     def __init__(self, client):
         self.client = client
@@ -59,13 +62,13 @@ class CommandHandler(object):
         ["command", "sub", "func"].
         """
         if isinstance(in_command_parts, (str, bytes)):
-            in_command_parts = in_command_parts.split('.')
+            in_command_parts = in_command_parts.split(".")
         command_parts = in_command_parts[:]
 
         p = self
         while command_parts:
             cmd = command_parts.pop(0)
-            if cmd.startswith('_'):
+            if cmd.startswith("_"):
                 raise ProtectedCommandError(in_command_parts)
 
             try:
@@ -73,7 +76,7 @@ class CommandHandler(object):
             except AttributeError:
                 raise NoSuchCommandError(in_command_parts)
 
-            if hasattr(f, 'protected'):
+            if hasattr(f, "protected"):
                 raise ProtectedCommandError(in_command_parts)
 
             if isinstance(f, CommandHandler) and command_parts:
@@ -84,10 +87,10 @@ class CommandHandler(object):
 
     @protected
     def run(self, command, *args):
-        """ finds and runs a command """
-        arguments_str = ''
+        """finds and runs a command"""
+        arguments_str = ""
         for x in args:
-            arguments_str += str(x) + ' '
+            arguments_str += str(x) + " "
         PchumLog.debug("processCommand %s(%s)" % (command, arguments_str.strip()))
 
         try:
@@ -97,14 +100,17 @@ class CommandHandler(object):
             self.__unhandled__(command, *args)
             return
 
-        PchumLog.debug('f %s' % f)
+        PchumLog.debug("f %s" % f)
 
         try:
             f(*args)
         except TypeError as e:
-            PchumLog.info("Failed to pass command, did the server pass an unsupported paramater? " + str(e))
+            PchumLog.info(
+                "Failed to pass command, did the server pass an unsupported paramater? "
+                + str(e)
+            )
         except Exception as e:
-            #logging.info("Failed to pass command, %s" % str(e))
+            # logging.info("Failed to pass command, %s" % str(e))
             PchumLog.exception("Failed to pass command")
 
     @protected
@@ -112,46 +118,52 @@ class CommandHandler(object):
         """The default handler for commands. Override this method to
         apply custom behavior (example, printing) unhandled commands.
         """
-        PchumLog.debug('unhandled command %s(%s)' % (cmd, args))
+        PchumLog.debug("unhandled command %s(%s)" % (cmd, args))
 
 
 class DefaultCommandHandler(CommandHandler):
-    """ CommandHandler that provides methods for the normal operation of IRC.
+    """CommandHandler that provides methods for the normal operation of IRC.
     If you want your bot to properly respond to pings, etc, you should subclass this.
     """
 
     def ping(self, prefix, server):
-        self.client.send('PONG', server)
+        self.client.send("PONG", server)
 
 
 class DefaultBotCommandHandler(CommandHandler):
-    """ default command handler for bots. methods/attributes are made 
-    available as commands """
+    """default command handler for bots. methods/attributes are made
+    available as commands"""
 
     @protected
     def getVisibleCommands(self, obj=None):
-        test = (lambda x: isinstance(x, CommandHandler) or \
-                inspect.ismethod(x) or inspect.isfunction(x))
-        members = inspect.getmembers(obj or self, test)          
-        return [m for m, _ in members 
-            if (not m.startswith('_') and 
-                not hasattr(getattr(obj, m), 'protected'))]
+        test = (
+            lambda x: isinstance(x, CommandHandler)
+            or inspect.ismethod(x)
+            or inspect.isfunction(x)
+        )
+        members = inspect.getmembers(obj or self, test)
+        return [
+            m
+            for m, _ in members
+            if (not m.startswith("_") and not hasattr(getattr(obj, m), "protected"))
+        ]
 
     def help(self, sender, dest, arg=None):
         """list all available commands or get help on a specific command"""
-        PchumLog.info('help sender=%s dest=%s arg=%s' % (sender, dest, arg))
+        PchumLog.info("help sender=%s dest=%s arg=%s" % (sender, dest, arg))
         if not arg:
             commands = self.getVisibleCommands()
             commands.sort()
-            helpers.msg(self.client, dest, 
-                "available commands: %s" % " ".join(commands))
+            helpers.msg(
+                self.client, dest, "available commands: %s" % " ".join(commands)
+            )
         else:
             try:
                 f = self.get(arg)
             except CommandError as e:
                 helpers.msg(self.client, dest, str(e))
                 return
-                
+
             doc = f.__doc__.strip() if f.__doc__ else "No help available"
 
             if not inspect.ismethod(f):
@@ -159,11 +171,11 @@ class DefaultBotCommandHandler(CommandHandler):
                 if subcommands:
                     doc += " [sub commands: %s]" % " ".join(subcommands)
 
-            helpers.msg(self.client, dest, "%s: %s" % (arg, doc)) 
+            helpers.msg(self.client, dest, "%s: %s" % (arg, doc))
 
 
 class BotCommandHandler(DefaultCommandHandler):
-    """ complete command handler for bots """
+    """complete command handler for bots"""
 
     def __init__(self, client, command_handler):
         DefaultCommandHandler.__init__(self, client)
@@ -174,22 +186,22 @@ class BotCommandHandler(DefaultCommandHandler):
 
     @protected
     def tryBotCommand(self, prefix, dest, msg):
-        """ tests a command to see if its a command for the bot, returns True
+        """tests a command to see if its a command for the bot, returns True
         and calls self.processBotCommand(cmd, sender) if its is.
         """
-    
+
         PchumLog.debug("tryBotCommand('%s' '%s' '%s')" % (prefix, dest, msg))
 
         if dest == self.client.nick:
             dest = parse_nick(prefix)[0]
         elif msg.startswith(self.client.nick):
-            msg = msg[len(self.client.nick)+1:]
-        else: 
+            msg = msg[len(self.client.nick) + 1 :]
+        else:
             return False
 
         msg = msg.strip()
 
-        parts = msg.split(' ', 1)
+        parts = msg.split(" ", 1)
         command = parts[0]
         arg = parts[1:]
 
@@ -198,13 +210,3 @@ class BotCommandHandler(DefaultCommandHandler):
         except CommandError as e:
             helpers.msg(self.client, dest, str(e))
         return True
- 
-    
-
-
-
-
-
-
-
-

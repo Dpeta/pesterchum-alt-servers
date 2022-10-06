@@ -1,5 +1,6 @@
 import re
 
+
 def rainbow(text):
     """Example implementation of a gradient function,
     distributes colors over text, accounting for links,
@@ -9,66 +10,62 @@ def rainbow(text):
         Regexp Replace
         Regexp:         ^(.*)$
         Replace With:   rainbow(\1)
-    
+
     To customize it:
      1. Copy this function.
      2. Replace the hex colors in 'gradient' below with your own colors.
      3. Replace 'rainbow' above and below with something more fitting :3
-    
+
     There's lots of implementations of this that predate mine,
     see: https://paste.0xfc.de/?e60df5a155e93583#AmcgN9cRnCcBycmVMvw6KJ1YLKPXGbaSzZLbgAhoNCQD
             ^ There's more useful info here too :3c
     """
     # Values of 'gradient' can be any amount of hex/RGB colors.
-    gradient = ["#ff0000",
-                "#ff8000",
-                "#ffff00",
-                "#80ff00",
-                "#00ff00",
-                "#00ff80",
-                "#00ffff",
-                "#0080ff",
-                "#0000ff",
-                "#8000ff",
-                "#ff00ff",
-                "#ff0080"]
-    
+    gradient = [
+        "#ff0000",
+        "#ff8000",
+        "#ffff00",
+        "#80ff00",
+        "#00ff00",
+        "#00ff80",
+        "#00ffff",
+        "#0080ff",
+        "#0000ff",
+        "#8000ff",
+        "#ff00ff",
+        "#ff0080",
+    ]
+
     # Set base distribution of colors over text,
     # stored as list of lists.
     color_and_position = []
     for color in range(0, len(gradient)):
         ratio = len(text) / len(gradient)  # To account for text length.
-        color_and_position.append(
-            [gradient[color],
-             round(color * ratio)])
+        color_and_position.append([gradient[color], round(color * ratio)])
 
     # Iterate through match object representing all links/smilies in text,
     # if a color tag is going to be placed within it,
     # move its position to after the link.
     for match in re.finditer(_urlre, text):
         for cp in color_and_position:
-            if ((cp[1] >= match.start())  # cp[1] is pos
-                and (cp[1] <= match.end())):
+            if (cp[1] >= match.start()) and (cp[1] <= match.end()):  # cp[1] is pos
                 cp[1] = match.end() + 1  # Move to 1 character after link.
     for match in re.finditer(_smilere, text):
         for cp in color_and_position:
-            if ((cp[1] >= match.start())
-                and (cp[1] <= match.end())):
+            if (cp[1] >= match.start()) and (cp[1] <= match.end()):
                 cp[1] = match.end() + 1
     for match in re.finditer(_memore, text):
         for cp in color_and_position:
-            if ((cp[1] >= match.start())
-                and (cp[1] <= match.end())):
+            if (cp[1] >= match.start()) and (cp[1] <= match.end()):
                 cp[1] = match.end() + 1
     for match in re.finditer(_handlere, text):
         for cp in color_and_position:
-            if ((cp[1] >= match.start())
-                and (cp[1] <= match.end())):
+            if (cp[1] >= match.start()) and (cp[1] <= match.end()):
                 cp[1] = match.end() + 1
-    
+
     # Iterate through characters in text and write them to the output,
     # if a color tag should be placed, add it before the character.
-    output = ''
+    output = ""
     for char in range(0, len(text)):
         # Add color if at position.
         for cp in color_and_position:
@@ -82,6 +79,8 @@ def rainbow(text):
         # Add character.
         output += text[char]
     return output
+
+
 rainbow.command = "rainbow"
 
 # These can't always be imported from their original functions,
@@ -152,10 +151,10 @@ smiledict = {
     ":scorpio:": "scorpio.gif",
     ":shades:": "shades.png",
     ":honk:": "honk.png",
-    }
+}
 # Regular expression templates for detecting links/smilies.
 _smilere = re.compile("|".join(list(smiledict.keys())))
 _urlre = re.compile(r"(?i)(?:^|(?<=\s))(?:(?:https?|ftp)://|magnet:)[^\s]+")
-#_url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
+# _url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
 _memore = re.compile(r"(\s|^)(#[A-Za-z0-9_]+)")
 _handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")

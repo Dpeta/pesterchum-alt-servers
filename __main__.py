@@ -5,6 +5,6 @@ import sys
 try:
     from .run_as_subprocess import main
 except (ImportError, ModuleNotFoundError):
-    from run_as_subprocess import main 
-    
+    from run_as_subprocess import main
+
 main(sys.argv)
