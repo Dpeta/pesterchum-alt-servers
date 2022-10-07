@@ -4,29 +4,31 @@
 class AttrDict(dict):
     """A dictionary with attribute-style access. It maps attribute access to
     the real dictionary.
-    
+
     Note that accesses to preexisting (e.g. class inherited) or reserved
     attributes are handled as they would be normally, and will not be
     overwritten.
     Overload _is_reserved if you want to change this."""
+
     def __init__(self, init={}):
         super(AttrDict, self).__init__(init)
 
     def __getstate__(self):
         return list(self.__dict__.items())
+
     def __setstate__(self, items):
-        for key, val in items: self.__dict__[key] = val
+        for key, val in items:
+            self.__dict__[key] = val
 
     def __repr__(self):
-        return "{0}({1})".format(
-            type(self).__name__,
-            super(AttrDict, self).__repr__()
-        )
+        return "{0}({1})".format(type(self).__name__, super(AttrDict, self).__repr__())
 
     def __setitem__(self, name, value):
         return super(AttrDict, self).__setitem__(name, value)
+
     def __getitem__(self, name):
         return super(AttrDict, self).__getitem__(name)
+
     def __delitem__(self, name):
         return super(AttrDict, self).__delitem__(name)
 
@@ -78,7 +80,8 @@ class AttrDict(dict):
             # See __setattr__.
             return object.__delattr__(self, name)
         else:
-            try: del self[name]
+            try:
+                del self[name]
             except KeyError as err:
                 raise AttributeError(str(err))
 
@@ -86,12 +89,17 @@ class AttrDict(dict):
     def _is_reserved(name):
         """Check if an attribute name is reserved for system use."""
         # A very simple method.
-        result = name[:2] == name[-2:] == '__'
+        result = name[:2] == name[-2:] == "__"
         return result
 
-    def copy(self): return type(self)(self)
+    def copy(self):
+        return type(self)(self)
+
     __copy__ = copy
+
+
 ## end of http://code.activestate.com/recipes/473786/ }}}
+
 
 class DefAttrDict(AttrDict):
     default_factory = None
@@ -106,8 +114,8 @@ class DefAttrDict(AttrDict):
             self.default_factory,
             # We skip normal processing here, since AttrDict provides basic
             # repr for classes in general, which we don't want.
-            dict.__repr__(self)
-            )
+            dict.__repr__(self),
+        )
 
     def __getitem__(self, name):
         try:
@@ -130,7 +138,10 @@ class DefAttrDict(AttrDict):
                 raise
         return result
 
-    def copy(self): return type(self)(self.default_factory, self)
+    def copy(self):
+        return type(self)(self.default_factory, self)
+
     __copy__ = copy
+
 
 # vim: set autoindent ts=4 sts=4 sw=4 textwidth=79 expandtab:

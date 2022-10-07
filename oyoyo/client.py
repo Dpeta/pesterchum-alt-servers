@@ -16,7 +16,8 @@
 # THE SOFTWARE.
 
 import logging
-PchumLog = logging.getLogger('pchumLogger')
+
+PchumLog = logging.getLogger("pchumLogger")
 
 import logging
 import socket
@@ -29,32 +30,33 @@ from oyoyo.parse import parse_raw_irc_command
 from oyoyo import helpers
 from oyoyo.cmdhandler import CommandError
 
+
 class IRCClientError(Exception):
     pass
 
 
 class IRCClient:
-    """ IRC Client class. This handles one connection to a server.
+    """IRC Client class. This handles one connection to a server.
     This can be used either with or without IRCApp ( see connect() docs )
     """
 
     def __init__(self, cmd_handler, **kwargs):
-        """ the first argument should be an object with attributes/methods named 
-        as the irc commands. You may subclass from one of the classes in 
-        oyoyo.cmdhandler for convenience but it is not required. The 
-        methods should have arguments (prefix, args). prefix is 
+        """the first argument should be an object with attributes/methods named
+        as the irc commands. You may subclass from one of the classes in
+        oyoyo.cmdhandler for convenience but it is not required. The
+        methods should have arguments (prefix, args). prefix is
         normally the sender of the command. args is a list of arguments.
-        Its recommened you subclass oyoyo.cmdhandler.DefaultCommandHandler, 
-        this class provides defaults for callbacks that are required for 
+        Its recommened you subclass oyoyo.cmdhandler.DefaultCommandHandler,
+        this class provides defaults for callbacks that are required for
         normal IRC operation.
 
         all other arguments should be keyword arguments. The most commonly
         used will be nick, host and port. You can also specify an "on connect"
         callback. ( check the source for others )
 
-        Warning: By default this class will not block on socket operations, this 
+        Warning: By default this class will not block on socket operations, this
         means if you use a plain while loop your app will consume 100% cpu.
-        To enable blocking pass blocking=True. 
+        To enable blocking pass blocking=True.
 
         >>> class My_Handler(DefaultCommandHandler):
         ...     def privmsg(self, prefix, command, args):
@@ -76,7 +78,7 @@ class IRCClient:
         """
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        
+
         self.nick = None
         self.realname = None
         self.username = None
@@ -93,9 +95,9 @@ class IRCClient:
         self._end = False
 
     def send(self, *args, **kwargs):
-        """ send a message to the connected server. all arguments are joined
-        with a space for convenience, for example the following are identical 
-        
+        """send a message to the connected server. all arguments are joined
+        with a space for convenience, for example the following are identical
+
         >>> cli.send("JOIN %s" % some_room)
         >>> cli.send("JOIN", some_room)
 
@@ -104,24 +106,29 @@ class IRCClient:
           the 'encoding' keyword argument (default 'utf8').
         In python 3, all args must be of type str or bytes, *BUT* if they are
           str they will be converted to bytes with the encoding specified by the
-          'encoding' keyword argument (default 'utf8'). 
+          'encoding' keyword argument (default 'utf8').
         """
         if self._end == True:
             return
         # Convert all args to bytes if not already
-        encoding = kwargs.get('encoding') or 'utf8'
+        encoding = kwargs.get("encoding") or "utf8"
         bargs = []
         for arg in args:
             if isinstance(arg, str):
                 bargs.append(bytes(arg, encoding))
             elif isinstance(arg, bytes):
                 bargs.append(arg)
-            elif type(arg).__name__ == 'unicode':
+            elif type(arg).__name__ == "unicode":
                 bargs.append(arg.encode(encoding))
             else:
-                PchumLog.warning('Refusing to send one of the args from provided: %s'% repr([(type(arg), arg) for arg in args]))
-                raise IRCClientError('Refusing to send one of the args from provided: %s'
-                                     % repr([(type(arg), arg) for arg in args]))
+                PchumLog.warning(
+                    "Refusing to send one of the args from provided: %s"
+                    % repr([(type(arg), arg) for arg in args])
+                )
+                raise IRCClientError(
+                    "Refusing to send one of the args from provided: %s"
+                    % repr([(type(arg), arg) for arg in args])
+                )
 
         msg = bytes(" ", "UTF-8").join(bargs)
         PchumLog.info('---> send "%s"' % msg)
@@ -135,7 +142,9 @@ class IRCClient:
                     self._end = True
                     break
                 try:
-                    ready_to_read, ready_to_write, in_error = select.select([], [self.socket], [])
+                    ready_to_read, ready_to_write, in_error = select.select(
+                        [], [self.socket], []
+                    )
                     for x in ready_to_write:
                         x.sendall(msg + bytes("\r\n", "UTF-8"))
                     break
@@ -157,35 +166,34 @@ class IRCClient:
                     # socket.timeout is deprecated in 3.10
                     PchumLog.warning("TimeoutError in on send, " + str(e))
                     raise socket.timeout
-                except (OSError,
-                        IndexError,
-                        ValueError,
-                        Exception) as e:
+                except (OSError, IndexError, ValueError, Exception) as e:
                     PchumLog.warning("Unkown error on send, " + str(e))
                     if tries >= 9:
                         raise e
                 tries += 1
                 PchumLog.warning("Retrying send. (attempt %s)" % str(tries))
                 time.sleep(0.1)
-                
-            PchumLog.debug("ready_to_write (len %s): " % str(len(ready_to_write)) + str(ready_to_write))
+
+            PchumLog.debug(
+                "ready_to_write (len %s): " % str(len(ready_to_write))
+                + str(ready_to_write)
+            )
         except Exception as se:
             PchumLog.warning("Send Exception %s" % str(se))
             try:
                 if not self.blocking and se.errno == 11:
                     pass
                 else:
-                    #raise se
+                    # raise se
                     self._end = True  # This ok?
             except AttributeError:
-                #raise se
+                # raise se
                 self._end = True  # This ok?
 
     def connect(self, verify_hostname=True):
-        """ initiates the connection to the server set in self.host:self.port 
-        """
-        PchumLog.info('connecting to %s:%s' % (self.host, self.port))
-        
+        """initiates the connection to the server set in self.host:self.port"""
+        PchumLog.info("connecting to %s:%s" % (self.host, self.port))
+
         if self.ssl == True:
             context = ssl.create_default_context()
             if verify_hostname == False:
@@ -193,9 +201,9 @@ class IRCClient:
                 context.verify_mode = ssl.CERT_NONE
 
             bare_sock = socket.create_connection((self.host, self.port))
-            self.socket = context.wrap_socket(bare_sock,
-                                              server_hostname=self.host,
-                                              do_handshake_on_connect=False)
+            self.socket = context.wrap_socket(
+                bare_sock, server_hostname=self.host, do_handshake_on_connect=False
+            )
             while True:
                 try:
                     self.socket.do_handshake()
@@ -208,8 +216,8 @@ class IRCClient:
                     # Disconnect for now
                     self.socket.close()
                     bare_sock.close()
-                    raise e                            
-                    
+                    raise e
+
             PchumLog.info("secure sockets version is %s" % self.socket.version())
 
         else:
@@ -224,7 +232,7 @@ class IRCClient:
         elif self.blocking:
             self.socket.setblocking(True)
 
-        #try:
+        # try:
         #    self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
         #    if hasattr(socket, "TCP_KEEPIDLE"):
         #        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)
@@ -232,16 +240,16 @@ class IRCClient:
         #        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 1)
         #    if hasattr(socket, "TCP_KEEPCNT"):
         #        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 1)
-        #except Exception as e:
+        # except Exception as e:
         #    print(e)
-        
+
         helpers.nick(self, self.nick)
         helpers.user(self, self.username, self.realname)
         if self.connect_cb:
             self.connect_cb(self)
-            
+
     def conn(self):
-        """returns a generator object. """
+        """returns a generator object."""
         try:
             buffer = bytes()
             while not self._end:
@@ -256,7 +264,9 @@ class IRCClient:
                             self._end = True
                             break
                         try:
-                            ready_to_read, ready_to_write, in_error = select.select([self.socket], [], [])
+                            ready_to_read, ready_to_write, in_error = select.select(
+                                [self.socket], [], []
+                            )
                             for x in ready_to_read:
                                 buffer += x.recv(1024)
                             break
@@ -278,17 +288,16 @@ class IRCClient:
                             # socket.timeout is deprecated in 3.10
                             PchumLog.warning("TimeoutError in on send, " + str(e))
                             raise socket.timeout
-                        except (OSError,
-                                IndexError,
-                                ValueError,
-                                Exception) as e:
+                        except (OSError, IndexError, ValueError, Exception) as e:
                             PchumLog.debug("Miscellaneous exception in conn, " + str(e))
                             if tries >= 9:
                                 raise e
                         tries += 1
-                        PchumLog.debug("Possibly retrying recv. (attempt %s)" % str(tries))
+                        PchumLog.debug(
+                            "Possibly retrying recv. (attempt %s)" % str(tries)
+                        )
                         time.sleep(0.1)
-                        
+
                 except socket.timeout as e:
                     PchumLog.warning("timeout in client.py, " + str(e))
                     if self._end:
@@ -303,7 +312,7 @@ class IRCClient:
                     try:  # a little dance of compatibility to get the errno
                         errno = e.errno
                     except AttributeError:
-                        errno = e[0]                        
+                        errno = e[0]
                     if not self.blocking and errno == 11:
                         pass
                     else:
@@ -322,7 +331,7 @@ class IRCClient:
 
                     for el in data:
                         tags, prefix, command, args = parse_raw_irc_command(el)
-                        #print(tags, prefix, command, args)
+                        # print(tags, prefix, command, args)
                         try:
                             # Only need tags with tagmsg
                             if command.upper() == "TAGMSG":
@@ -339,7 +348,7 @@ class IRCClient:
         except (OSError, ssl.SSLEOFError) as se:
             PchumLog.debug("problem: %s" % (str(se)))
             if self.socket:
-                PchumLog.info('error: closing socket')
+                PchumLog.info("error: closing socket")
                 self.socket.close()
             raise se
         except Exception as e:
@@ -347,27 +356,33 @@ class IRCClient:
             raise e
         else:
             PchumLog.debug("ending while, end is %s" % self._end)
-            if self.socket: 
-                PchumLog.info('finished: closing socket')
+            if self.socket:
+                PchumLog.info("finished: closing socket")
                 self.socket.close()
             yield False
+
     def close(self):
         # with extreme prejudice
         if self.socket:
-            PchumLog.info('shutdown socket')
-            #print("shutdown socket")
+            PchumLog.info("shutdown socket")
+            # print("shutdown socket")
             self._end = True
             try:
                 self.socket.shutdown(socket.SHUT_RDWR)
             except OSError as e:
-                PchumLog.debug("Error while shutting down socket, already broken? %s" % str(e))                
+                PchumLog.debug(
+                    "Error while shutting down socket, already broken? %s" % str(e)
+                )
             try:
                 self.socket.close()
             except OSError as e:
-                PchumLog.debug("Error while closing socket, already broken? %s" % str(e))   
-        
+                PchumLog.debug(
+                    "Error while closing socket, already broken? %s" % str(e)
+                )
+
+
 class IRCApp:
-    """ This class manages several IRCClient instances without the use of threads.
+    """This class manages several IRCClient instances without the use of threads.
     (Non-threaded) Timer functionality is also included.
     """
 
@@ -384,27 +399,27 @@ class IRCApp:
         self.sleep_time = 0.5
 
     def addClient(self, client, autoreconnect=False):
-        """ add a client object to the application. setting autoreconnect
+        """add a client object to the application. setting autoreconnect
         to true will mean the application will attempt to reconnect the client
-        after every disconnect. you can also set autoreconnect to a number 
+        after every disconnect. you can also set autoreconnect to a number
         to specify how many reconnects should happen.
 
         warning: if you add a client that has blocking set to true,
-        timers will no longer function properly """
-        PchumLog.info('added client %s (ar=%s)' % (client, autoreconnect))
+        timers will no longer function properly"""
+        PchumLog.info("added client %s (ar=%s)" % (client, autoreconnect))
         self._clients[client] = self._ClientDesc(autoreconnect=autoreconnect)
 
     def addTimer(self, seconds, cb):
-        """ add a timed callback. accuracy is not specified, you can only
+        """add a timed callback. accuracy is not specified, you can only
         garuntee the callback will be called after seconds has passed.
         ( the only advantage to these timers is they dont use threads )
         """
         assert callable(cb)
-        PchumLog.info('added timer to call %s in %ss' % (cb, seconds))
+        PchumLog.info("added timer to call %s in %ss" % (cb, seconds))
         self._timers.append((time.time() + seconds, cb))
 
     def run(self):
-        """ run the application. this will block until stop() is called """
+        """run the application. this will block until stop() is called"""
         # TODO: convert this to use generators too?
         self.running = True
         while self.running:
@@ -413,42 +428,38 @@ class IRCApp:
             for client, clientdesc in self._clients.items():
                 if clientdesc.con is None:
                     clientdesc.con = client.connect()
-                
+
                 try:
                     next(clientdesc.con)
                 except Exception as e:
-                    PchumLog.error('client error %s' % str(e))
+                    PchumLog.error("client error %s" % str(e))
                     PchumLog.error(traceback.format_exc())
                     if clientdesc.autoreconnect:
-                        clientdesc.con = None 
+                        clientdesc.con = None
                         if isinstance(clientdesc.autoreconnect, (int, float)):
                             clientdesc.autoreconnect -= 1
                         found_one_alive = True
                     else:
-                        clientdesc.con = False 
+                        clientdesc.con = False
                 else:
                     found_one_alive = True
-                
+
             if not found_one_alive:
-                PchumLog.info('nothing left alive... quiting')
-                self.stop() 
+                PchumLog.info("nothing left alive... quiting")
+                self.stop()
 
             now = time.time()
             timers = self._timers[:]
             self._timers = []
             for target_time, cb in timers:
                 if now > target_time:
-                    PchumLog.info('calling timer cb %s' % cb)
+                    PchumLog.info("calling timer cb %s" % cb)
                     cb()
-                else:   
+                else:
                     self._timers.append((target_time, cb))
 
             time.sleep(self.sleep_time)
 
     def stop(self):
-        """ stop the application """
+        """stop the application"""
         self.running = False
-
-
-
-

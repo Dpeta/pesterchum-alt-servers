@@ -5,29 +5,39 @@ except ImportError:
     from PyQt5 import QtGui, QtWidgets
 from datetime import timedelta
 
+
 class mysteryTime(timedelta):
     def __sub__(self, other):
         return self
+
     def __eq__(self, other):
-        return (type(other) is mysteryTime)
+        return type(other) is mysteryTime
+
     def __neq__(self, other):
-        return (type(other) is not mysteryTime)
+        return type(other) is not mysteryTime
+
 
 class CaseInsensitiveDict(dict):
     def __setitem__(self, key, value):
         super(CaseInsensitiveDict, self).__setitem__(key.lower(), value)
+
     def __getitem__(self, key):
         return super(CaseInsensitiveDict, self).__getitem__(key.lower())
+
     def __contains__(self, key):
         return super(CaseInsensitiveDict, self).__contains__(key.lower())
+
     def has_key(self, key):
         return key.lower() in super(CaseInsensitiveDict, self)
+
     def __delitem__(self, key):
         super(CaseInsensitiveDict, self).__delitem__(key.lower())
+
 
 class PesterList(list):
     def __init__(self, l):
         self.extend(l)
+
 
 class PesterIcon(QtGui.QIcon):
     def __init__(self, *x):
@@ -36,6 +46,7 @@ class PesterIcon(QtGui.QIcon):
             self.icon_pixmap = QtGui.QPixmap(x[0])
         else:
             self.icon_pixmap = None
+
     def realsize(self):
         if self.icon_pixmap:
             return self.icon_pixmap.size()
@@ -45,17 +56,20 @@ class PesterIcon(QtGui.QIcon):
             except IndexError:
                 return None
 
+
 class RightClickList(QtWidgets.QListWidget):
     def contextMenuEvent(self, event):
-        #fuckin Qt <--- I feel that </3
+        # fuckin Qt <--- I feel that </3
         if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
             listing = self.itemAt(event.pos())
             self.setCurrentItem(listing)
             optionsMenu = self.getOptionsMenu()
             if optionsMenu:
                 optionsMenu.popup(event.globalPos())
+
     def getOptionsMenu(self):
         return self.optionsMenu
+
 
 class RightClickTree(QtWidgets.QTreeWidget):
     def contextMenuEvent(self, event):
@@ -65,8 +79,10 @@ class RightClickTree(QtWidgets.QTreeWidget):
             optionsMenu = self.getOptionsMenu()
             if optionsMenu:
                 optionsMenu.popup(event.globalPos())
+
     def getOptionsMenu(self):
         return self.optionsMenu
+
 
 class MultiTextDialog(QtWidgets.QDialog):
     def __init__(self, title, parent, *queries):
@@ -98,6 +114,7 @@ class MultiTextDialog(QtWidgets.QDialog):
         layout_0.addLayout(layout_ok)
 
         self.setLayout(layout_0)
+
     def getText(self):
         r = self.exec()
         if r == QtWidgets.QDialog.DialogCode.Accepted:
@@ -108,6 +125,7 @@ class MultiTextDialog(QtWidgets.QDialog):
         else:
             return None
 
+
 class MovingWindow(QtWidgets.QFrame):
     # Qt supports starting a system-specific move operation since 5.15, so we shouldn't need to manually set position like this anymore.
     # https://doc.qt.io/qt-5/qwindow.html#startSystemMove
@@ -116,6 +134,7 @@ class MovingWindow(QtWidgets.QFrame):
         super(MovingWindow, self).__init__(*x, **y)
         self.moving = None
         self.moveupdate = 0
+
     def mouseMoveEvent(self, event):
         if self.moving:
             move = event.globalPos() - self.moving
@@ -124,6 +143,7 @@ class MovingWindow(QtWidgets.QFrame):
             if self.moveupdate > 5:
                 self.moveupdate = 0
                 self.update()
+
     def mousePressEvent(self, event):
         # Assuming everything is supported, we only need this function to call "self.windowHandle().startSystemMove()".
         # If not supported, startSystemMove() returns False and the legacy code runs anyway.
@@ -135,18 +155,27 @@ class MovingWindow(QtWidgets.QFrame):
             print("PyQt <= 5.14?")
             print(str(e))
             if event.button() == 1:
-                    self.moving = event.globalPos() - self.pos()
+                self.moving = event.globalPos() - self.pos()
+
     def mouseReleaseEvent(self, event):
         if event.button() == 1:
             self.update()
             self.moving = None
 
+
 class NoneSound(object):
     def __init__(self, *args, **kwargs):
         pass
-    def play(self): pass
-    def setVolume(self, v): pass
-    def set_volume(self, v): pass
+
+    def play(self):
+        pass
+
+    def setVolume(self, v):
+        pass
+
+    def set_volume(self, v):
+        pass
+
 
 class WMButton(QtWidgets.QPushButton):
     def __init__(self, icon, parent=None):

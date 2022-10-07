@@ -1,12 +1,15 @@
 import os
 import socket
 
+
 class TwmnError(Exception):
     UNWN_ERR = -1
     NO_TWMND = -2
-    NO_CONF  = -3
+    NO_CONF = -3
+
     def __init__(self, code):
         self.code = code
+
     def __str__(self):
         if self.code == TwmnError.NO_TWMND:
             return "Unable to connect to twmnd"
@@ -19,9 +22,11 @@ class TwmnError(Exception):
 def confExists():
     try:
         from xdg import BaseDirectory
-        return os.path.join(BaseDirectory.xdg_config_home,"twmn/twmn.conf")
+
+        return os.path.join(BaseDirectory.xdg_config_home, "twmn/twmn.conf")
     except:
         return False
+
 
 def init(host="127.0.0.1", port=None):
     if not port:
@@ -32,8 +37,7 @@ def init(host="127.0.0.1", port=None):
                 return False
             with open(fn) as f:
                 for line in f.readlines():
-                    if line.startswith("port=") and \
-                       line[5:-1].isdigit():
+                    if line.startswith("port=") and line[5:-1].isdigit():
                         port = int(line[5:-1])
                         break
         except IOError:
@@ -43,6 +47,7 @@ def init(host="127.0.0.1", port=None):
     global s
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect((host, port))
+
 
 class Notification(object):
     def __init__(self, title="", msg="", icon=""):
@@ -59,16 +64,21 @@ class Notification(object):
     def show(self):
         try:
             if self.time is None:
-                s.send("<root><title>" + self.title + "</title>"
+                s.send(
+                    "<root><title>" + self.title + "</title>"
                     "<content>" + self.msg + "</content>"
-                    "<icon>" + self.icon + "</icon></root>")
+                    "<icon>" + self.icon + "</icon></root>"
+                )
             else:
-                s.send("<root><title>" + self.title + "</title>"
+                s.send(
+                    "<root><title>" + self.title + "</title>"
                     "<content>" + self.msg + "</content>"
                     "<icon>" + self.icon + "</icon>"
-                    "<duration>" + str(self.time) + "</duration></root>")
+                    "<duration>" + str(self.time) + "</duration></root>"
+                )
         except:
             raise TwmnError(TwmnError.NO_TWMND)
+
 
 if __name__ == "__main__":
     init()

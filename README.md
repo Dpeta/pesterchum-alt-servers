@@ -8,6 +8,7 @@
     <br>
     <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/y/Dpeta/pesterchum-alt-servers?style=for-the-badge">
     <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/Dpeta/pesterchum-alt-servers?style=for-the-badge">
+    <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000?style=for-the-badge"></a>
 </h1>
 <img alt="PESTERCHUM" align="right" src="Pesterchum.png">
 

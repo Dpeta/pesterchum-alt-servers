@@ -1,6 +1,7 @@
 import logging
 import ostools
-PchumLog = logging.getLogger('pchumLogger')
+
+PchumLog = logging.getLogger("pchumLogger")
 try:
     from PyQt6 import QtGui
 except ImportError:
@@ -11,15 +12,17 @@ import re
 import random
 
 from mood import Mood
-from parsetools import (timeDifference,
-                        convertTags,
-                        lexMessage,
-                        parseRegexpFunctions,
-                        smiledict)
+from parsetools import (
+    timeDifference,
+    convertTags,
+    lexMessage,
+    parseRegexpFunctions,
+    smiledict,
+)
 from mispeller import mispeller
 
 _urlre = re.compile(r"(?i)(?:^|(?<=\s))(?:(?:https?|ftp)://|magnet:)[^\s]+")
-#_url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
+# _url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
 _groupre = re.compile(r"\\([0-9]+)")
 _upperre = re.compile(r"upper\(([\w<>\\]+)\)")
 _lowerre = re.compile(r"lower\(([\w<>\\]+)\)")
@@ -29,6 +32,7 @@ _ctagre = re.compile("(</?c=?.*?>)", re.I)
 _smilere = re.compile("|".join(list(smiledict.keys())))
 _memore = re.compile(r"(\s|^)(#[A-Za-z0-9_]+)")
 _handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
+
 
 class pesterQuirk(object):
     def __init__(self, quirk):
@@ -46,7 +50,7 @@ class pesterQuirk(object):
             self.checkstate = self.quirk["checkstate"]
         except KeyError:
             pass
-        
+
     def apply(self, string, first=False, last=False):
         if not self.on:
             return string
@@ -60,7 +64,7 @@ class pesterQuirk(object):
             fr = self.quirk["from"]
             if not first and len(fr) > 0 and fr[0] == "^":
                 return string
-            if not last and len(fr) > 0 and fr[len(fr)-1] == "$":
+            if not last and len(fr) > 0 and fr[len(fr) - 1] == "$":
                 return string
             to = self.quirk["to"]
             pt = parseRegexpFunctions(to)
@@ -71,15 +75,17 @@ class pesterQuirk(object):
             fr = self.quirk["from"]
             if not first and len(fr) > 0 and fr[0] == "^":
                 return string
-            if not last and len(fr) > 0 and fr[len(fr)-1] == "$":
+            if not last and len(fr) > 0 and fr[len(fr) - 1] == "$":
                 return string
+
             def randomrep(mo):
                 choice = random.choice(self.quirk["randomlist"])
                 pt = parseRegexpFunctions(choice)
                 return pt.expand(mo)
+
             return re.sub(self.quirk["from"], randomrep, string)
         elif self.type == "spelling":
-            percentage = self.quirk["percentage"]/100.0
+            percentage = self.quirk["percentage"] / 100.0
             words = string.split(" ")
             newl = []
             ctag = re.compile("(</?c=?.*?>)", re.I)
@@ -99,7 +105,7 @@ class pesterQuirk(object):
                 else:
                     newl.append(w)
             return " ".join(newl)
-        
+
     def __str__(self):
         if self.type == "prefix":
             return "BEGIN WITH: %s" % (self.quirk["value"])
@@ -108,28 +114,38 @@ class pesterQuirk(object):
         elif self.type == "replace":
             return "REPLACE %s WITH %s" % (self.quirk["from"], self.quirk["to"])
         elif self.type == "regexp":
-            return "REGEXP: %s REPLACED WITH %s" % (self.quirk["from"], self.quirk["to"])
+            return "REGEXP: %s REPLACED WITH %s" % (
+                self.quirk["from"],
+                self.quirk["to"],
+            )
         elif self.type == "random":
-            return "REGEXP: %s RANDOMLY REPLACED WITH %s" % (self.quirk["from"], [r for r in self.quirk["randomlist"]])
+            return "REGEXP: %s RANDOMLY REPLACED WITH %s" % (
+                self.quirk["from"],
+                [r for r in self.quirk["randomlist"]],
+            )
         elif self.type == "spelling":
             return "MISPELLER: %d%%" % (self.quirk["percentage"])
+
 
 class pesterQuirks(object):
     def __init__(self, quirklist):
         self.quirklist = []
         for q in quirklist:
             self.addQuirk(q)
+
     def plainList(self):
         return [q.quirk for q in self.quirklist]
+
     def addQuirk(self, q):
         if type(q) == dict:
             self.quirklist.append(pesterQuirk(q))
         elif type(q) == pesterQuirk:
             self.quirklist.append(q)
+
     def apply(self, lexed, first=False, last=False):
-        prefix = [q for q in self.quirklist if q.type=='prefix']
-        suffix = [q for q in self.quirklist if q.type=='suffix']
-        
+        prefix = [q for q in self.quirklist if q.type == "prefix"]
+        suffix = [q for q in self.quirklist if q.type == "suffix"]
+
         newlist = []
         for (i, o) in enumerate(lexed):
             if type(o) not in [str, str]:
@@ -140,7 +156,7 @@ class pesterQuirks(object):
                     newlist.append(string)
                 newlist.append(o)
                 continue
-            lastStr = (i == len(lexed)-1)
+            lastStr = i == len(lexed) - 1
             string = o
             for q in self.quirklist:
                 try:
@@ -170,17 +186,17 @@ class pesterQuirks(object):
                         excludes.sort(key=lambda exclude: exclude.start())
                         # Recursion check.
                         # Strings like http://:3: require this.
-                        for n in range(0, len(excludes)-1):
-                            if excludes[n].end() > excludes[n+1].start():
+                        for n in range(0, len(excludes) - 1):
+                            if excludes[n].end() > excludes[n + 1].start():
                                 excludes.pop(n)
                         # Seperate parts to be quirked.
                         sendparts = list()
                         # Add string until start of exclude at index 0.
                         until = excludes[0].start()
-                        sendparts.append(string[:until])  
+                        sendparts.append(string[:until])
                         # Add strings between excludes.
                         for part in range(1, len(excludes)):
-                            after = excludes[part-1].end()
+                            after = excludes[part - 1].end()
                             until = excludes[part].start()
                             sendparts.append(string[after:until])
                         # Add string after exclude at last index.
@@ -191,50 +207,46 @@ class pesterQuirks(object):
                         recvparts = list()
                         for part in sendparts:
                             # No split, apply like normal.
-                            if q.type == 'regexp' or q.type == 'random':
-                                recvparts.append(q.apply(part,
-                                                         first=(i==0),
-                                                         last=lastStr))
-                            elif q.type == 'prefix' and i == 0:
+                            if q.type == "regexp" or q.type == "random":
+                                recvparts.append(
+                                    q.apply(part, first=(i == 0), last=lastStr)
+                                )
+                            elif q.type == "prefix" and i == 0:
                                 recvparts.append(q.apply(part))
-                            elif q.type == 'suffix' and lastStr:
+                            elif q.type == "suffix" and lastStr:
                                 recvparts.append(q.apply(part))
                             else:
                                 recvparts.append(q.apply(part))
                         # Reconstruct and update string.
-                        string = ''
-                        #print("excludes: " + str(excludes))
-                        #print("sendparts: " + str(sendparts))
-                        #print("recvparts: " + str(recvparts))
+                        string = ""
+                        # print("excludes: " + str(excludes))
+                        # print("sendparts: " + str(sendparts))
+                        # print("recvparts: " + str(recvparts))
                         for part in range(0, len(excludes)):
                             string += recvparts[part]
                             string += excludes[part].group()
                         string += recvparts[-1]
                     else:
                         # No split, apply like normal.
-                        if q.type != 'prefix' and q.type != 'suffix':
-                            if q.type == 'regexp' or q.type == 'random':
-                                string = q.apply(string,
-                                                 first=(i==0),
-                                                 last=lastStr)
+                        if q.type != "prefix" and q.type != "suffix":
+                            if q.type == "regexp" or q.type == "random":
+                                string = q.apply(string, first=(i == 0), last=lastStr)
                             else:
                                 string = q.apply(string)
-                        elif q.type == 'prefix' and i == 0:
+                        elif q.type == "prefix" and i == 0:
                             string = q.apply(string)
-                        elif q.type == 'suffix' and lastStr:
+                        elif q.type == "suffix" and lastStr:
                             string = q.apply(string)
                 else:
                     # No split, apply like normal.
-                    if q.type != 'prefix' and q.type != 'suffix':
-                        if q.type == 'regexp' or q.type == 'random':
-                            string = q.apply(string,
-                                             first=(i==0),
-                                             last=lastStr)
+                    if q.type != "prefix" and q.type != "suffix":
+                        if q.type == "regexp" or q.type == "random":
+                            string = q.apply(string, first=(i == 0), last=lastStr)
                         else:
                             string = q.apply(string)
-                    elif q.type == 'prefix' and i == 0:
+                    elif q.type == "prefix" and i == 0:
                         string = q.apply(string)
-                    elif q.type == 'suffix' and lastStr:
+                    elif q.type == "suffix" and lastStr:
                         string = q.apply(string)
             newlist.append(string)
         final = []
@@ -249,8 +261,17 @@ class pesterQuirks(object):
         for q in self.quirklist:
             yield q
 
+
 class PesterProfile(object):
-    def __init__(self, handle, color=None, mood=Mood("offline"), group=None, notes="", chumdb=None):
+    def __init__(
+        self,
+        handle,
+        color=None,
+        mood=Mood("offline"),
+        group=None,
+        notes="",
+        chumdb=None,
+    ):
         self.handle = handle
         if color is None:
             if chumdb:
@@ -266,6 +287,7 @@ class PesterProfile(object):
                 group = "Chums"
         self.group = group
         self.notes = notes
+
     def initials(self, time=None):
         handle = self.handle
         caps = [l for l in handle if l.isupper()]
@@ -275,37 +297,46 @@ class PesterProfile(object):
         PchumLog.debug("caps = " + str(caps))
         # Fallback for invalid string
         try:
-            initials = (handle[0]+caps[0]).upper()
+            initials = (handle[0] + caps[0]).upper()
         except:
-            PchumLog.exception('')
+            PchumLog.exception("")
             initials = "XX"
         PchumLog.debug("initials = " + str(initials))
-        if hasattr(self, 'time') and time:
+        if hasattr(self, "time") and time:
             if self.time > time:
-                return "F"+initials
+                return "F" + initials
             elif self.time < time:
-                return "P"+initials
+                return "P" + initials
             else:
-                return "C"+initials
+                return "C" + initials
         else:
             return initials
+
     def colorhtml(self):
         if self.color:
             return self.color.name()
         else:
             return "#000000"
+
     def colorcmd(self):
         if self.color:
             (r, g, b, a) = self.color.getRgb()
-            return "%d,%d,%d" % (r,g,b)
+            return "%d,%d,%d" % (r, g, b)
         else:
             return "0,0,0"
+
     def plaindict(self):
-        return (self.handle, {"handle": self.handle,
-                              "mood": self.mood.name(),
-                              "color": str(self.color.name()),
-                              "group": str(self.group),
-                              "notes": str(self.notes)})
+        return (
+            self.handle,
+            {
+                "handle": self.handle,
+                "mood": self.mood.name(),
+                "color": str(self.color.name()),
+                "group": str(self.group),
+                "notes": str(self.notes),
+            },
+        )
+
     def blocked(self, config):
         return self.handle in config.getBlocklist()
 
@@ -315,112 +346,248 @@ class PesterProfile(object):
         uppersuffix = suffix.upper()
         if time is not None:
             handle = "%s %s" % (time.temporal, self.handle)
-            initials = time.pcf+self.initials()+time.number+uppersuffix
+            initials = time.pcf + self.initials() + time.number + uppersuffix
         else:
             handle = self.handle
-            initials = self.initials()+uppersuffix
-        return "<c=%s>-- %s%s <c=%s>[%s]</c> %s --</c>" % (syscolor.name(), handle, suffix, self.colorhtml(), initials, msg)
+            initials = self.initials() + uppersuffix
+        return "<c=%s>-- %s%s <c=%s>[%s]</c> %s --</c>" % (
+            syscolor.name(),
+            handle,
+            suffix,
+            self.colorhtml(),
+            initials,
+            msg,
+        )
+
     def pestermsg(self, otherchum, syscolor, verb):
-        return "<c=%s>-- %s <c=%s>[%s]</c> %s %s <c=%s>[%s]</c> at %s --</c>" % (syscolor.name(), self.handle, self.colorhtml(), self.initials(), verb, otherchum.handle, otherchum.colorhtml(), otherchum.initials(), datetime.now().strftime("%H:%M"))
+        return "<c=%s>-- %s <c=%s>[%s]</c> %s %s <c=%s>[%s]</c> at %s --</c>" % (
+            syscolor.name(),
+            self.handle,
+            self.colorhtml(),
+            self.initials(),
+            verb,
+            otherchum.handle,
+            otherchum.colorhtml(),
+            otherchum.initials(),
+            datetime.now().strftime("%H:%M"),
+        )
+
     def moodmsg(self, mood, syscolor, theme):
-        return "<c=%s>-- %s <c=%s>[%s]</c> changed their mood to %s <img src='%s' /> --</c>" % (syscolor.name(), self.handle, self.colorhtml(), self.initials(), mood.name().upper(), theme["main/chums/moods"][mood.name()]["icon"])
+        return (
+            "<c=%s>-- %s <c=%s>[%s]</c> changed their mood to %s <img src='%s' /> --</c>"
+            % (
+                syscolor.name(),
+                self.handle,
+                self.colorhtml(),
+                self.initials(),
+                mood.name().upper(),
+                theme["main/chums/moods"][mood.name()]["icon"],
+            )
+        )
+
     def idlemsg(self, syscolor, verb):
-        return "<c=%s>-- %s <c=%s>[%s]</c> %s --</c>" % (syscolor.name(), self.handle, self.colorhtml(), self.initials(), verb)
+        return "<c=%s>-- %s <c=%s>[%s]</c> %s --</c>" % (
+            syscolor.name(),
+            self.handle,
+            self.colorhtml(),
+            self.initials(),
+            verb,
+        )
+
     def memoclosemsg(self, syscolor, initials, verb):
         if type(initials) == type(list()):
-            return "<c=%s><c=%s>%s</c> %s.</c>" % (syscolor.name(), self.colorhtml(), ", ".join(initials), verb)
+            return "<c=%s><c=%s>%s</c> %s.</c>" % (
+                syscolor.name(),
+                self.colorhtml(),
+                ", ".join(initials),
+                verb,
+            )
         else:
-            return "<c=%s><c=%s>%s%s%s</c> %s.</c>" % (syscolor.name(), self.colorhtml(), initials.pcf, self.initials(), initials.number, verb)
+            return "<c=%s><c=%s>%s%s%s</c> %s.</c>" % (
+                syscolor.name(),
+                self.colorhtml(),
+                initials.pcf,
+                self.initials(),
+                initials.number,
+                verb,
+            )
+
     def memonetsplitmsg(self, syscolor, initials):
         if len(initials) <= 0:
             return "<c=%s>Netsplit quits: <c=black>None</c></c>" % (syscolor.name())
         else:
-            return "<c=%s>Netsplit quits: <c=black>%s</c></c>" % (syscolor.name(), ", ".join(initials))
+            return "<c=%s>Netsplit quits: <c=black>%s</c></c>" % (
+                syscolor.name(),
+                ", ".join(initials),
+            )
+
     def memoopenmsg(self, syscolor, td, timeGrammar, verb, channel):
-        (temporal, pcf, when) = (timeGrammar.temporal, timeGrammar.pcf, timeGrammar.when)
+        (temporal, pcf, when) = (
+            timeGrammar.temporal,
+            timeGrammar.pcf,
+            timeGrammar.when,
+        )
         timetext = timeDifference(td)
         PchumLog.debug("pre pcf+self.initials()")
-        initials = pcf+self.initials()
+        initials = pcf + self.initials()
         PchumLog.debug("post pcf+self.initials()")
-        return "<c=%s><c=%s>%s</c> %s %s %s.</c>" % \
-            (syscolor.name(), self.colorhtml(), initials, timetext, verb, channel[1:].upper().replace("_", " "))
+        return "<c=%s><c=%s>%s</c> %s %s %s.</c>" % (
+            syscolor.name(),
+            self.colorhtml(),
+            initials,
+            timetext,
+            verb,
+            channel[1:].upper().replace("_", " "),
+        )
+
     def memobanmsg(self, opchum, opgrammar, syscolor, initials, reason):
-        opinit = opgrammar.pcf+opchum.initials()+opgrammar.number
+        opinit = opgrammar.pcf + opchum.initials() + opgrammar.number
         if type(initials) == type(list()):
             if opchum.handle == reason:
-                return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo." % \
-                    (opchum.colorhtml(), opinit, self.colorhtml(), ", ".join(initials))
+                return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo." % (
+                    opchum.colorhtml(),
+                    opinit,
+                    self.colorhtml(),
+                    ", ".join(initials),
+                )
             else:
-                return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>." % \
-                    (opchum.colorhtml(), opinit, self.colorhtml(), ", ".join(initials), str(reason))
+                return (
+                    "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>."
+                    % (
+                        opchum.colorhtml(),
+                        opinit,
+                        self.colorhtml(),
+                        ", ".join(initials),
+                        str(reason),
+                    )
+                )
         else:
             # Is timeGrammar defined? Not sure if this works as intented, added try except block to be safe.
             try:
-                initials = timeGrammar.pcf+self.initials()+timeGrammar.number
+                initials = timeGrammar.pcf + self.initials() + timeGrammar.number
                 if opchum.handle == reason:
-                    return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo." % \
-                        (opchum.colorhtml(), opinit, self.colorhtml(), initials)
+                    return (
+                        "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo."
+                        % (opchum.colorhtml(), opinit, self.colorhtml(), initials)
+                    )
                 else:
-                    return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>." % \
-                        (opchum.colorhtml(), opinit, self.colorhtml(), initials, str(reason))
+                    return (
+                        "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>."
+                        % (
+                            opchum.colorhtml(),
+                            opinit,
+                            self.colorhtml(),
+                            initials,
+                            str(reason),
+                        )
+                    )
             except:
-                PchumLog.exception('')
+                PchumLog.exception("")
                 initials = self.initials()
                 if opchum.handle == reason:
-                    return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo." % \
-                        (opchum.colorhtml(), opinit, self.colorhtml(), initials)
+                    return (
+                        "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo."
+                        % (opchum.colorhtml(), opinit, self.colorhtml(), initials)
+                    )
                 else:
-                    return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>." % \
-                        (opchum.colorhtml(), opinit, self.colorhtml(), initials, str(reason))
+                    return (
+                        "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>."
+                        % (
+                            opchum.colorhtml(),
+                            opinit,
+                            self.colorhtml(),
+                            initials,
+                            str(reason),
+                        )
+                    )
 
     # As far as I'm aware, there's no IRC reply for this, this seems impossible to check for in practice.
     def memopermabanmsg(self, opchum, opgrammar, syscolor, timeGrammar):
-        initials = (timeGrammar.pcf
-                    + self.initials()
-                    + timeGrammar.number)
-        opinit = (opgrammar.pcf
-                  + opchum.initials()
-                  + opgrammar.number)
-        return "<c=%s>%s</c> permabanned <c=%s>%s</c> from the memo." % \
-            (opchum.colorhtml(), opinit, self.colorhtml(), initials)
-    
+        initials = timeGrammar.pcf + self.initials() + timeGrammar.number
+        opinit = opgrammar.pcf + opchum.initials() + opgrammar.number
+        return "<c=%s>%s</c> permabanned <c=%s>%s</c> from the memo." % (
+            opchum.colorhtml(),
+            opinit,
+            self.colorhtml(),
+            initials,
+        )
+
     def memojoinmsg(self, syscolor, td, timeGrammar, verb):
-        #(temporal, pcf, when) = (timeGrammar.temporal, timeGrammar.pcf, timeGrammar.when)
+        # (temporal, pcf, when) = (timeGrammar.temporal, timeGrammar.pcf, timeGrammar.when)
         timetext = timeDifference(td)
-        initials = timeGrammar.pcf+self.initials()+timeGrammar.number
-        return "<c=%s><c=%s>%s %s [%s]</c> %s %s.</c>" % \
-            (syscolor.name(), self.colorhtml(), timeGrammar.temporal, self.handle,
-             initials, timetext, verb)
+        initials = timeGrammar.pcf + self.initials() + timeGrammar.number
+        return "<c=%s><c=%s>%s %s [%s]</c> %s %s.</c>" % (
+            syscolor.name(),
+            self.colorhtml(),
+            timeGrammar.temporal,
+            self.handle,
+            initials,
+            timetext,
+            verb,
+        )
+
     def memoopmsg(self, opchum, opgrammar, syscolor):
-        opinit = opgrammar.pcf+opchum.initials()+opgrammar.number
-        return "<c=%s>%s</c> made <c=%s>%s</c> an OP." % \
-            (opchum.colorhtml(), opinit, self.colorhtml(), self.initials())
+        opinit = opgrammar.pcf + opchum.initials() + opgrammar.number
+        return "<c=%s>%s</c> made <c=%s>%s</c> an OP." % (
+            opchum.colorhtml(),
+            opinit,
+            self.colorhtml(),
+            self.initials(),
+        )
+
     def memodeopmsg(self, opchum, opgrammar, syscolor):
-        opinit = opgrammar.pcf+opchum.initials()+opgrammar.number
-        return "<c=%s>%s</c> took away <c=%s>%s</c>'s OP powers." % \
-            (opchum.colorhtml(), opinit, self.colorhtml(), self.initials())
+        opinit = opgrammar.pcf + opchum.initials() + opgrammar.number
+        return "<c=%s>%s</c> took away <c=%s>%s</c>'s OP powers." % (
+            opchum.colorhtml(),
+            opinit,
+            self.colorhtml(),
+            self.initials(),
+        )
+
     def memovoicemsg(self, opchum, opgrammar, syscolor):
-        opinit = opgrammar.pcf+opchum.initials()+opgrammar.number
-        return "<c=%s>%s</c> gave <c=%s>%s</c> voice." % \
-            (opchum.colorhtml(), opinit, self.colorhtml(), self.initials())
+        opinit = opgrammar.pcf + opchum.initials() + opgrammar.number
+        return "<c=%s>%s</c> gave <c=%s>%s</c> voice." % (
+            opchum.colorhtml(),
+            opinit,
+            self.colorhtml(),
+            self.initials(),
+        )
+
     def memodevoicemsg(self, opchum, opgrammar, syscolor):
-        opinit = opgrammar.pcf+opchum.initials()+opgrammar.number
-        return "<c=%s>%s</c> took away <c=%s>%s</c>'s voice." % \
-            (opchum.colorhtml(), opinit, self.colorhtml(), self.initials())
+        opinit = opgrammar.pcf + opchum.initials() + opgrammar.number
+        return "<c=%s>%s</c> took away <c=%s>%s</c>'s voice." % (
+            opchum.colorhtml(),
+            opinit,
+            self.colorhtml(),
+            self.initials(),
+        )
+
     def memomodemsg(self, opchum, opgrammar, syscolor, modeverb, modeon):
-        opinit = opgrammar.pcf+opchum.initials()+opgrammar.number
-        if modeon: modeon = "now"
-        else:      modeon = "no longer"
-        return "<c=%s>Memo is %s <c=black>%s</c> by <c=%s>%s</c></c>" % \
-            (syscolor.name(), modeon, modeverb, opchum.colorhtml(), opinit)
+        opinit = opgrammar.pcf + opchum.initials() + opgrammar.number
+        if modeon:
+            modeon = "now"
+        else:
+            modeon = "no longer"
+        return "<c=%s>Memo is %s <c=black>%s</c> by <c=%s>%s</c></c>" % (
+            syscolor.name(),
+            modeon,
+            modeverb,
+            opchum.colorhtml(),
+            opinit,
+        )
+
     def memoquirkkillmsg(self, opchum, opgrammar, syscolor):
-        opinit = opgrammar.pcf+opchum.initials()+opgrammar.number
-        return "<c=%s><c=%s>%s</c> turned off your quirk.</c>" % \
-            (syscolor.name(), opchum.colorhtml(), opinit)
+        opinit = opgrammar.pcf + opchum.initials() + opgrammar.number
+        return "<c=%s><c=%s>%s</c> turned off your quirk.</c>" % (
+            syscolor.name(),
+            opchum.colorhtml(),
+            opinit,
+        )
 
     @staticmethod
     def checkLength(handle):
         return len(handle) <= 256
+
     @staticmethod
     def checkValid(handle):
         caps = [l for l in handle if l.isupper()]
@@ -432,11 +599,13 @@ class PesterProfile(object):
             return (False, "Only alphanumeric characters allowed")
         return (True,)
 
+
 class PesterHistory(object):
     def __init__(self):
         self.history = []
         self.current = 0
         self.saved = None
+
     def next(self, text):
         if self.current == 0:
             return None
@@ -445,20 +614,25 @@ class PesterHistory(object):
         self.current -= 1
         text = self.history[self.current]
         return text
+
     def prev(self):
         self.current += 1
         if self.current >= len(self.history):
             self.current = len(self.history)
             return self.retrieve()
         return self.history[self.current]
+
     def reset(self):
         self.current = len(self.history)
         self.saved = None
+
     def save(self, text):
         self.saved = text
+
     def retrieve(self):
         return self.saved
+
     def add(self, text):
-        if len(self.history) == 0 or text != self.history[len(self.history)-1]:
+        if len(self.history) == 0 or text != self.history[len(self.history) - 1]:
             self.history.append(text)
         self.reset()

@@ -116,7 +116,7 @@ numeric_events = {
     "374": "endofinfo",
     "375": "motdstart",
     "376": "endofmotd",
-    "377": "motd2",        # 1997-10-16 -- tkil
+    "377": "motd2",  # 1997-10-16 -- tkil
     "381": "youreoper",
     "382": "rehashing",
     "384": "myportis",
@@ -143,7 +143,7 @@ numeric_events = {
     "423": "noadmininfo",
     "424": "fileerror",
     "431": "nonicknamegiven",
-    "432": "erroneusnickname", # Thiss iz how its speld in thee RFC.
+    "432": "erroneusnickname",  # Thiss iz how its speld in thee RFC.
     "433": "nicknameinuse",
     "436": "nickcollision",
     "437": "unavailresource",  # "Nick temporally unavailable"
@@ -158,7 +158,7 @@ numeric_events = {
     "462": "alreadyregistered",
     "463": "nopermforhost",
     "464": "passwdmismatch",
-    "465": "yourebannedcreep", # I love this one...
+    "465": "yourebannedcreep",  # I love this one...
     "466": "youwillbebanned",
     "467": "keyset",
     "471": "channelisfull",
@@ -172,7 +172,7 @@ numeric_events = {
     "481": "noprivileges",
     "482": "chanoprivsneeded",
     "483": "cantkillserver",
-    "484": "restricted",   # Connection is restricted
+    "484": "restricted",  # Connection is restricted
     "485": "uniqopprivsneeded",
     "491": "nooperhost",
     "492": "noservicehost",
@@ -195,7 +195,7 @@ metadata_numeric_events = {
     "768": "keynotset",
     "769": "keynopermission",
     "770": "metadatasubok",
-    }
+}
 numeric_events.update(metadata_numeric_events)
 
 generated_events = [
@@ -226,10 +226,7 @@ protocol_events = [
     "nick",  # We can get svsnicked
     "metadata",  # Metadata specification
     "tagmsg",  # IRCv3 message tags extension
-    "cap"  # IRCv3 Client Capability Negotiation
+    "cap",  # IRCv3 Client Capability Negotiation
 ]
 
-all_events = (generated_events
-              + protocol_events
-              + list(numeric_events.values()))
-
+all_events = generated_events + protocol_events + list(numeric_events.values())
