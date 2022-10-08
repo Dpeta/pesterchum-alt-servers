@@ -1,12 +1,15 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
-## [v2.4.4] - 2022-10-03
+## [v2.5] - 2022-10-08
 
 ### Added
  - Desync check, verify connection is alive when system time changes by multiple minutes.
+ - Support using [certifi](https://pypi.org/project/certifi/) for root certificates when available (https://github.com/Dpeta/pesterchum-alt-servers/issues/96 mitigation)
+ - Command-line options to skip prompts when building with pyinstaller.py
 
 ### Changed
+ - Reformatted code with black (https://github.com/Dpeta/pesterchum-alt-servers/pull/97)
  - Made outgoing irc.py functions do an extra check if connection/cli exists.
  - Slightly less spammy logging.
  - Qt6.4 introduced a platform-independent FFmpeg backend for QtMultimedia, which is a useful alternative so GStreamer on Linux. As such, the audio backend/module preference and import attempt order is now:
@@ -15,6 +18,7 @@
  
 ### Fixed
  - The string for the distraughtfirman smilie being ":distraughtfirman" instead of ":distraughtfirman:".
+ - Incorrect binary arguments and UPX exclude options in build files.
  
 ## [v2.4.3] - 2022-09-06
 
