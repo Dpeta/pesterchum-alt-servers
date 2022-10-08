@@ -15,20 +15,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import logging
-
-PchumLog = logging.getLogger("pchumLogger")
-
-import logging
-import socket
+import sys
 import time
-import traceback
 import ssl
+import socket
 import select
+import logging
+import traceback
 
 from oyoyo.parse import parse_raw_irc_command
 from oyoyo import helpers
 from oyoyo.cmdhandler import CommandError
+
+PchumLog = logging.getLogger("pchumLogger")
+
+try:
+    import certifi
+except ImportError:
+    if sys.platform == "darwin":
+        # Certifi is required to validate certificates on MacOS with pyinstaller builds.
+        PchumLog.warning(
+            "Failed to import certifi, which is recommended on MacOS. "
+            "Pesterchum might not be able to validate certificates unless "
+            "Python's root certs are installed."
+        )
 
 
 class IRCClientError(Exception):
@@ -199,6 +209,13 @@ class IRCClient:
             if verify_hostname == False:
                 context.check_hostname = False
                 context.verify_mode = ssl.CERT_NONE
+            else:
+                # Also load certifi provided root certs if present. (Mainly useful for MacOS)
+                if "certifi" in sys.modules:
+                    try:
+                        context.load_verify_locations(cafile=certifi.where())
+                    except:
+                        PchumLog.exception("")
 
             bare_sock = socket.create_connection((self.host, self.port))
             self.socket = context.wrap_socket(

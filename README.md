@@ -82,13 +82,16 @@ The old READMEs are also preserved in the [docs](docs) folder:
 ## RUNNING FROM SOURCE <img src="smilies/tab.gif">
 Pesterchum is a Python script. This means that as long as you have Python installed you can run it without requiring a build/executable, this is useful if there's no compatible build for your system.
 
-### REQUIREMENTS
+### DEPENDENCIES
  - [Python 3]
      - Ideally 3.8 or later, though older versions may still work, I don't test them.
  - [PyQt6] (prefered) or [PyQt5] (legacy)
      - Qt6 only supports maintained 64 bit operating systems, like Windows 10 or later for Windows. ([Qt 6.3 Supported Platforms](https://doc.qt.io/qt-6/supported-platforms.html))
      - Qt5 supports Windows 7 or later, but is past its EOL for non-commercial use. ([Qt 5.15 Supported Platforms](https://doc.qt.io/qt-6/supported-platforms.html))
- - (Linux-specific) [pygame] or [GStreamer] for audio.
+ - (Optional) [pygame] can provide an alternative audio backend for certain systems.
+     - Useful for Linux systems that don't meet the Qt6 requirements, as Qt5 Multimedia has a GStreamer dependency.
+ - (Optional) [certifi] can provide alternative root certificates for TLS certificate validation.
+     - Useful for MacOS, as Python doesn't use the system-provided certificates because of MacOS' outdated SSL library. Also miscellaneous systems without usable root certificates.
  
 ### WALKTHROUGH
 
@@ -114,6 +117,7 @@ Pesterchum is a Python script. This means that as long as you have Python instal
 [PyQt5]: https://pypi.org/project/PyQt5/
 [PyQt6]: https://pypi.org/project/PyQt6/
 [pygame]: https://pypi.org/project/pygame/
+[certifi]: https://pypi.org/project/certifi/
 [GStreamer]: https://gstreamer.freedesktop.org/
  
 ## FREEZE / BUILD <img src="themes/win95chum/admin.png">
