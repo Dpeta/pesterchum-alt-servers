@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
 import os
 import sys
 import shutil
+import argparse
 
 import PyInstaller.__main__
 
@@ -49,7 +51,7 @@ upx_exclude = [
     "Qt6Gui.dll",
     "vcruntime140.dll",
     "MSVCP140.dll",
-    "MSVCP140_1.dll" "api-ms-win-core-console-l1-1-0.dll",
+    "MSVCP140_1.dll",
     "api-ms-win-core-console-l1-1-0.dll",
     "api-ms-win-core-console-l1-2-0.dll",
     "api-ms-win-core-datetime-l1-1-0.dll",
@@ -100,90 +102,168 @@ upx_enabled = ""
 package_universal_crt = ""
 onefile = ""
 windowed = ""
+upx_dir = ""
 
-try:
-    print("This is a script to make building with Pyinstaller a bit more conventient.")
+# Command line options
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--prompts",
+    help="Prompt for the options below on run",
+    action=argparse.BooleanOptionalAction,
+)
+parser.add_argument(
+    "--onefile",
+    help="Create a one-file bundled executable.",
+    action=argparse.BooleanOptionalAction,
+)
+parser.add_argument(
+    "--upx",
+    help="Try to compress binaries with UPX.",
+    action=argparse.BooleanOptionalAction,
+)
+parser.add_argument(
+    "--crt",
+    help="Try to bundle Universal CRT with the build",
+    action=argparse.BooleanOptionalAction,
+)
+parser.add_argument(
+    "--clean",
+    help="Remove build+dist directories with shutil before building.",
+    action=argparse.BooleanOptionalAction,
+)
+parser.add_argument(
+    "--windowed",
+    help="Build without console.",
+    action=argparse.BooleanOptionalAction,
+)
+_ARGUMENTS = parser.parse_args()
 
-    while (delete_builddist != "y") and (delete_builddist != "n"):
-        delete_builddist = input("Delete build & dist folders? (Y/N): ").lower()
-    if delete_builddist == "y":
-        try:
-            shutil.rmtree("dist")
-        except FileNotFoundError as e:
-            print(e)
-        try:
-            shutil.rmtree("build")
-        except FileNotFoundError as e:
-            print(e)
+if _ARGUMENTS.clean == True:
+    delete_builddist = "y"
+elif _ARGUMENTS.clean == False:
+    delete_builddist = "n"
 
-    while (upx_enabled != "y") and (upx_enabled != "n"):
-        upx_enabled = input("Enable UPX? (Y/N): ").lower()
-    if upx_enabled == "y":
-        print("If upx is on your path you don't need to include anything here.")
-        if is_64bit == True:
-            upx_dir = input("UPX directory [D:\\upx-3.96-win64]: ")
-            if upx_dir == "":
-                upx_dir = "D:\\upx-3.96-win64"  # Default dir for me :)
-        else:
-            upx_dir = input("UPX directory [D:\\upx-3.96-win32]: ")
-            if upx_dir == "":
-                upx_dir = "D:\\upx-3.96-win32"  # Default dir for me :)
-        print("upx_dir = " + upx_dir)
-    elif upx_enabled == "n":
-        upx_dir = ""
+if _ARGUMENTS.upx == True:
+    upx_enabled = "y"
+elif _ARGUMENTS.upx == False:
+    upx_enabled = "n"
 
-    while (windowed != "y") and (windowed != "n"):
-        windowed = input("Build with '--windowed'? (Y/N): ").lower()
+if _ARGUMENTS.crt == True:
+    package_universal_crt = "y"
+elif _ARGUMENTS.crt == False:
+    package_universal_crt = "n"
 
-    if sys.platform == "win32":
+if _ARGUMENTS.onefile == True:
+    onefile = "y"
+elif _ARGUMENTS.onefile == False:
+    onefile = "n"
+
+if _ARGUMENTS.windowed == True:
+    windowed = "y"
+elif _ARGUMENTS.windowed == False:
+    windowed = "n"
+
+parser.print_usage()
+
+if _ARGUMENTS.prompts != False:
+    try:
         print(
-            "(https://pyinstaller.readthedocs.io/en/stable/usage.html?highlight=sdk#windows)"
+            "This is a script to make building with Pyinstaller a bit more conventient."
         )
-        while (package_universal_crt != "y") and (package_universal_crt != "n"):
-            package_universal_crt = input(
-                "Try to include universal CRT? (Y/N): "
-            ).lower()
-        if package_universal_crt == "y":
+
+        while (delete_builddist != "y") and (delete_builddist != "n"):
+            delete_builddist = input("Delete build & dist folders? (Y/N): ").lower()
+
+        while (upx_enabled != "y") and (upx_enabled != "n"):
+            upx_enabled = input("Enable UPX? (Y/N): ").lower()
+        if upx_enabled == "y":
+            print("If upx is on your path you don't need to include anything here.")
             if is_64bit == True:
-                crt_path = input(
-                    "Universal CRT: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64]: "
-                )
-                if crt_path == "":
-                    # crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64" # Default directory.
-                    crt_path = os.path.join(
-                        "C:%s" % os.sep,
-                        "Program Files (x86)",
-                        "Windows Kits",
-                        "10",
-                        "10.0.19041.0",
-                        "ucrt",
-                        "DLLs",
-                        "x64",
-                    )
+                upx_dir = input("UPX directory [D:\\upx-3.96-win64]: ")
+                if upx_dir == "":
+                    upx_dir = "D:\\upx-3.96-win64"  # Default dir for me :)
             else:
-                crt_path = input(
-                    "Extra path: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86]: "
-                )
-                if crt_path == "":
-                    # crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86" # Default directory.
-                    crt_path = os.path.join(
-                        "C:%s" % os.sep,
-                        "Program Files (x86)",
-                        "Windows Kits",
-                        "10",
-                        "10.0.19041.0",
-                        "ucrt",
-                        "DLLs",
-                        "x86",
+                upx_dir = input("UPX directory [D:\\upx-3.96-win32]: ")
+                if upx_dir == "":
+                    upx_dir = "D:\\upx-3.96-win32"  # Default dir for me :)
+            print("upx_dir = " + upx_dir)
+        elif upx_enabled == "n":
+            upx_dir = ""
+
+        while (windowed != "y") and (windowed != "n"):
+            windowed = input("Build with '--windowed'? (Y/N): ").lower()
+
+        if sys.platform == "win32":
+            print(
+                "(https://pyinstaller.readthedocs.io/en/stable/usage.html?highlight=sdk#windows)"
+            )
+            while (package_universal_crt != "y") and (package_universal_crt != "n"):
+                package_universal_crt = input(
+                    "Try to include universal CRT? (Y/N): "
+                ).lower()
+            if package_universal_crt == "y":
+                if is_64bit == True:
+                    crt_path = input(
+                        "Universal CRT: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64]: "
                     )
-            print("crt_path = " + crt_path)
+                    if crt_path == "":
+                        # crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64" # Default directory.
+                        crt_path = os.path.join(
+                            "C:%s" % os.sep,
+                            "Program Files (x86)",
+                            "Windows Kits",
+                            "10",
+                            "10.0.19041.0",
+                            "ucrt",
+                            "DLLs",
+                            "x64",
+                        )
+                else:
+                    crt_path = input(
+                        "Extra path: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86]: "
+                    )
+                    if crt_path == "":
+                        # crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86" # Default directory.
+                        crt_path = os.path.join(
+                            "C:%s" % os.sep,
+                            "Program Files (x86)",
+                            "Windows Kits",
+                            "10",
+                            "10.0.19041.0",
+                            "ucrt",
+                            "DLLs",
+                            "x86",
+                        )
+                print("crt_path = " + crt_path)
 
-    if (sys.platform == "win32") or (sys.platform == "linux"):
-        while (onefile != "y") and (onefile != "n"):
-            onefile = input("Build with '--onefile'? (Y/N): ").lower()
+        if (sys.platform == "win32") or (sys.platform == "linux"):
+            while (onefile != "y") and (onefile != "n"):
+                onefile = input("Build with '--onefile'? (Y/N): ").lower()
 
-except KeyboardInterrupt:
-    sys.exit("KeyboardInterrupt")
+    except KeyboardInterrupt:
+        sys.exit("KeyboardInterrupt")
+else:
+    # no-prompt was given
+    if _ARGUMENTS.clean == None:
+        delete_builddist = "n"
+    if _ARGUMENTS.upx == None:
+        upx_enabled = "n"
+    if _ARGUMENTS.crt == None:
+        package_universal_crt = "y"
+    if _ARGUMENTS.onefile == None:
+        onefile = "y"
+    if _ARGUMENTS.windowed == None:
+        windowed = "y"
+
+if delete_builddist == "y":
+    try:
+        shutil.rmtree("dist")
+    except FileNotFoundError as e:
+        print(e)
+    try:
+        shutil.rmtree("build")
+    except FileNotFoundError as e:
+        print(e)
 
 # Windows
 if sys.platform == "win32":
@@ -221,9 +301,6 @@ if sys.platform == "win32":
         run_win32.append('--paths="%s"' % crt_path)
         if os.path.exists(crt_path):
             if is_64bit == False:
-                run_win32.append(
-                    "--add-binary=%s\\api-ms-win-core-console-l1-1-0.dll;." % crt_path
-                )
                 run_win32.append(
                     "--add-binary=%s\\api-ms-win-core-console-l1-1-0.dll;." % crt_path
                 )
@@ -627,7 +704,8 @@ else:
 
     run_generic = [
         "pesterchum.py",
-        "--name=Pesterchum" "--clean",  # Clear cache
+        "--name=Pesterchum",
+        "--clean",  # Clear cache
     ]
 
     if upx_enabled == "y":

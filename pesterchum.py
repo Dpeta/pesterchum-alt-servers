@@ -2321,7 +2321,9 @@ class PesterWindow(MovingWindow):
                     self.namesound = soundclass("themes/namealarm.wav")
                     self.ceasesound = soundclass(self.theme["main/sounds/ceasesound"])
                     self.honksound = soundclass("themes/honk.wav")
-            elif "PyQt6.QtMultimedia" in sys.modules:
+            if ("PyQt6.QtMultimedia" in sys.modules) or (
+                "PyQt5.QtMultimedia" in sys.modules
+            ):
                 if soundclass == QtMultimedia.QSoundEffect:
                     self.alarm = soundclass()
                     self.memosound = soundclass()
@@ -2367,7 +2369,9 @@ class PesterWindow(MovingWindow):
                 if "pygame" in sys.modules:
                     if self.sound_type == pygame.mixer.Sound:
                         sound.set_volume(vol)
-                if "PyQt6.QtMultimedia" in sys.modules:
+                if ("PyQt6.QtMultimedia" in sys.modules) or (
+                    "PyQt5.QtMultimedia" in sys.modules
+                ):
                     if self.sound_type == QtMultimedia.QSoundEffect:
                         sound.setVolume(vol)
             except Exception as err:

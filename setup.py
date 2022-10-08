@@ -69,9 +69,6 @@ build_exe_options = {
         "PyQt6.QtAssistant",
         "PyQt6.QtDesigner",
         "PyQt6.QAxContainer",
-        "pygame.docs"  # Hopefully we can just not have pygame at all at some point =3
-        # (when QtMultimedia stops relying on local codecs </3)
-        "pygame.examples",
         "pygame.tests",
         "pydoc_data",
     ],

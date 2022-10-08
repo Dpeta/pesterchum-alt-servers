@@ -478,4 +478,4 @@ class PesterToastMachine(ToastMachine, QtCore.QObject):
         # ~ self.connect(self.timer, QtCore.SIGNAL('timeout()'),
         # ~ self, QtCore.SLOT('showNext()'))
         # ~ if self.on:
-        # ~ self.timer.start()
+        # ~     self.timer.start()
