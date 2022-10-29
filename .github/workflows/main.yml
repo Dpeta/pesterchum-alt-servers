@@ -3,15 +3,15 @@ name: PyInstaller test builds
 on: [push]
 
 jobs:
-  build_ubuntu:
+  build_ubuntu64_20:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Python 3.11 x64
+      - name: Setup Python 3.10 x64
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.10'
           architecture: 'x64'
       - name: Update pip
         run: python -m pip install --upgrade pip
@@ -35,10 +35,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Python 3.11 x64
+      - name: Setup Python 3.10 x64
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.10'
           architecture: 'x64'
       - name: Update pip
         run: python -m pip install --upgrade pip
@@ -62,10 +62,10 @@ jobs:
     runs-on: macos-11
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Python 3.11 x64
+      - name: Setup Python 3.10 x64
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.10'
           architecture: 'x64'
       - name: Update pip
         run: python -m pip install --upgrade pip
@@ -78,10 +78,7 @@ jobs:
       - name: Run pyinst.py
         run: python3 pyinst.py --no-prompts --onefile --no-upx --no-crt --no-clean --windowed
       - name: Create archive (.tar.xz)
-        run: |
-          rm -r dist/Pesterchum
-          mv dist Pesterchum
-          tar -cavf Pesterchum_macOS64.tar.xz Pesterchum
+        run: tar -cavf Pesterchum_macOS64.tar.xz -C dist Pesterchum.app
       - uses: actions/upload-artifact@v3
         with:
           name: Pesterchum_macOS64.tar.xz
