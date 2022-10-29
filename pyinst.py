@@ -49,6 +49,8 @@ upx_exclude = [
     "qwindows.dll",
     "Qt6Core.dll",
     "Qt6Gui.dll",
+    "Qt5Core.dll",
+    "Qt5Gui.dll",
     "vcruntime140.dll",
     "MSVCP140.dll",
     "MSVCP140_1.dll",
@@ -103,69 +105,134 @@ package_universal_crt = ""
 onefile = ""
 windowed = ""
 upx_dir = ""
+crt_path = ""
 
 # Command line options
 parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--prompts",
-    help="Prompt for the options below on run",
-    action=argparse.BooleanOptionalAction,
-)
-parser.add_argument(
-    "--onefile",
-    help="Create a one-file bundled executable.",
-    action=argparse.BooleanOptionalAction,
-)
-parser.add_argument(
-    "--upx",
-    help="Try to compress binaries with UPX.",
-    action=argparse.BooleanOptionalAction,
-)
-parser.add_argument(
-    "--crt",
-    help="Try to bundle Universal CRT with the build",
-    action=argparse.BooleanOptionalAction,
-)
-parser.add_argument(
-    "--clean",
-    help="Remove build+dist directories with shutil before building.",
-    action=argparse.BooleanOptionalAction,
-)
-parser.add_argument(
-    "--windowed",
-    help="Build without console.",
-    action=argparse.BooleanOptionalAction,
-)
-_ARGUMENTS = parser.parse_args()
 
-if _ARGUMENTS.clean == True:
-    delete_builddist = "y"
-elif _ARGUMENTS.clean == False:
-    delete_builddist = "n"
+# Python 3.8 doesn't support optional boolean actions
+# py3.8 usage is --upx True, py3.9+ usage is --upx/--no-upx
+# The values for py3.8 are str, for 3.9+ they're booleans
+# This is very cringe </3
+if (sys.version_info[0] > 2) and (sys.version_info[1] > 8):
+    # Python 3.9 and up
+    parser.add_argument(
+        "--prompts",
+        help="Prompt for the options below on run",
+        action=argparse.BooleanOptionalAction,
+    )
+    parser.add_argument(
+        "--onefile",
+        help="Create a one-file bundled executable.",
+        action=argparse.BooleanOptionalAction,
+    )
+    parser.add_argument(
+        "--upx",
+        help="Try to compress binaries with UPX.",
+        action=argparse.BooleanOptionalAction,
+    )
+    parser.add_argument(
+        "--crt",
+        help="Try to bundle Universal CRT with the build",
+        action=argparse.BooleanOptionalAction,
+    )
+    parser.add_argument(
+        "--clean",
+        help="Remove build+dist directories with shutil before building.",
+        action=argparse.BooleanOptionalAction,
+    )
+    parser.add_argument(
+        "--windowed",
+        help="Build without console.",
+        action=argparse.BooleanOptionalAction,
+    )
+    _ARGUMENTS = parser.parse_args()
+    if _ARGUMENTS.clean == True:
+        delete_builddist = "y"
+    elif _ARGUMENTS.clean == False:
+        delete_builddist = "n"
 
-if _ARGUMENTS.upx == True:
-    upx_enabled = "y"
-elif _ARGUMENTS.upx == False:
-    upx_enabled = "n"
+    if _ARGUMENTS.upx == True:
+        upx_enabled = "y"
+    elif _ARGUMENTS.upx == False:
+        upx_enabled = "n"
 
-if _ARGUMENTS.crt == True:
-    package_universal_crt = "y"
-elif _ARGUMENTS.crt == False:
-    package_universal_crt = "n"
+    if _ARGUMENTS.crt == True:
+        package_universal_crt = "y"
+    elif _ARGUMENTS.crt == False:
+        package_universal_crt = "n"
 
-if _ARGUMENTS.onefile == True:
-    onefile = "y"
-elif _ARGUMENTS.onefile == False:
-    onefile = "n"
+    if _ARGUMENTS.onefile == True:
+        onefile = "y"
+    elif _ARGUMENTS.onefile == False:
+        onefile = "n"
 
-if _ARGUMENTS.windowed == True:
-    windowed = "y"
-elif _ARGUMENTS.windowed == False:
-    windowed = "n"
+    if _ARGUMENTS.windowed == True:
+        windowed = "y"
+    elif _ARGUMENTS.windowed == False:
+        windowed = "n"
+else:
+    # Python 3.8 and below
+    parser.add_argument(
+        "--prompts",
+        help="Prompt for the options below on run",
+        action="store",
+        choices=["True", "False"],
+    )
+    parser.add_argument(
+        "--onefile",
+        help="Create a one-file bundled executable.",
+        action="store",
+        choices=["True", "False"],
+    )
+    parser.add_argument(
+        "--upx",
+        help="Try to compress binaries with UPX.",
+        action="store",
+        choices=["True", "False"],
+    )
+    parser.add_argument(
+        "--crt",
+        help="Try to bundle Universal CRT with the build",
+        action="store",
+        choices=["True", "False"],
+    )
+    parser.add_argument(
+        "--clean",
+        help="Remove build+dist directories with shutil before building.",
+        action="store",
+        choices=["True", "False"],
+    )
+    parser.add_argument(
+        "--windowed",
+        help="Build without console.",
+        action="store",
+        choices=["True", "False"],
+    )
+    _ARGUMENTS = parser.parse_args()
+    if _ARGUMENTS.clean == "True":
+        delete_builddist = "y"
+    elif _ARGUMENTS.clean == "False":
+        delete_builddist = "n"
+    if _ARGUMENTS.upx == "True":
+        upx_enabled = "y"
+    elif _ARGUMENTS.upx == "False":
+        upx_enabled = "n"
+    if _ARGUMENTS.crt == "True":
+        package_universal_crt = "y"
+    elif _ARGUMENTS.crt == "False":
+        package_universal_crt = "n"
+    if _ARGUMENTS.onefile == "True":
+        onefile = "y"
+    elif _ARGUMENTS.onefile == "False":
+        onefile = "n"
+    if _ARGUMENTS.windowed == "True":
+        windowed = "y"
+    elif _ARGUMENTS.windowed == "False":
+        windowed = "n"
 
 parser.print_usage()
-
-if _ARGUMENTS.prompts != False:
+if (_ARGUMENTS.prompts != False) and (_ARGUMENTS.prompts != "False"):
     try:
         print(
             "This is a script to make building with Pyinstaller a bit more conventient."
@@ -204,7 +271,7 @@ if _ARGUMENTS.prompts != False:
             if package_universal_crt == "y":
                 if is_64bit == True:
                     crt_path = input(
-                        "Universal CRT: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64]: "
+                        "Path to universal CRT: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64]: "
                     )
                     if crt_path == "":
                         # crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64" # Default directory.
@@ -220,7 +287,7 @@ if _ARGUMENTS.prompts != False:
                         )
                 else:
                     crt_path = input(
-                        "Extra path: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86]: "
+                        "Path to universal CRT: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86]: "
                     )
                     if crt_path == "":
                         # crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86" # Default directory.
@@ -249,6 +316,29 @@ else:
     if _ARGUMENTS.upx == None:
         upx_enabled = "n"
     if _ARGUMENTS.crt == None:
+        if is_64bit == True:
+            crt_path = os.path.join(
+                "C:%s" % os.sep,
+                "Program Files (x86)",
+                "Windows Kits",
+                "10",
+                "10.0.19041.0",
+                "ucrt",
+                "DLLs",
+                "x64",
+            )
+        else:
+            crt_path = os.path.join(
+                "C:%s" % os.sep,
+                "Program Files (x86)",
+                "Windows Kits",
+                "10",
+                "10.0.19041.0",
+                "ucrt",
+                "DLLs",
+                "x86",
+            )
+        print("crt_path = " + crt_path)
         package_universal_crt = "y"
     if _ARGUMENTS.onefile == None:
         onefile = "y"
@@ -298,7 +388,7 @@ if sys.platform == "win32":
             run_win32.append("--add-data=%s" % x)
 
     if package_universal_crt == "y":
-        run_win32.append('--paths="%s"' % crt_path)
+        run_win32.append("--paths=%s" % crt_path)
         if os.path.exists(crt_path):
             if is_64bit == False:
                 run_win32.append(

@@ -126,12 +126,12 @@ Here's a quick guide on how to freeze Pesterchum, (that is, packaging it with py
 Ideally, you'll want to create and activate a [virtual environment](https://docs.python.org/3/library/venv.html) before anything else, this is not 100% required though.
 
 ### [CX_FREEZE](https://cx-freeze.readthedocs.io/en/latest/index.html)
-1. ``pip install cx_freeze``
+1. ``python3 -m pip install cx_freeze``
 2. ``python3 setup.py build``
 
 ### [PYINSTALLER](https://pyinstaller.readthedocs.io/en/stable/)
-1. ``pip install pyinstaller``
-2. ``python3 pyinstaller.py``
+1. ``python3 -m pip install pyinstaller``
+2. ``python3 pyinst.py``
 
 ## SMILIES <img height="32" alt="pesterchum what did you do smilie" src="smilies/whatdidyoudo.gif">
 |Text|Smilie|
