@@ -1510,13 +1510,17 @@ class PesterMemo(PesterConvo):
 
     def iconCrap(self, c, down=True):
         for m in self.umodes if down else reversed(self.umodes):
-            if eval("c." + m):
-                if m == "box":
-                    icon = PesterIcon("smilies/box.png")
-                else:
-                    icon = PesterIcon(self.mainwindow.theme["memos/" + m + "/icon"])
-                c.setIcon(icon)
-                return
+            # These if attr used to be an if eval("c." + m),
+            # better not to use eval() unnecessarily for security reasons though.
+            # Hopefully this works fine too.
+            if hasattr(c, str(m)):
+                if getattr(c, str(m)):
+                    if m == "box":
+                        icon = PesterIcon("smilies/box.png")
+                    else:
+                        icon = PesterIcon(self.mainwindow.theme[f"memos/{m}/icon"])
+                    c.setIcon(icon)
+                    return
         icon = QtGui.QIcon()
         c.setIcon(icon)
 
