@@ -1710,6 +1710,11 @@ class PesterWindow(MovingWindow):
             self.sincerecv = 0
             return
 
+        # We have IRC but we're missing a variable?
+        # gweh.jpg
+        if None in [self.lastCheckPing, self.sincerecv]:
+            return
+
         # Desync check, happens if pc comes out of sleep.
         currentTime = time.time()
         timeDif = abs(currentTime - self.lastCheckPing)
@@ -1722,7 +1727,7 @@ class PesterWindow(MovingWindow):
                 )
                 % (timeDif, currentTime, self.lastCheckPing)
             )
-            self.sincerecv = 85  # Allows one more ping attempt before disconnect.
+            self.sincerecv = 80  # Allows 2 more ping attempts before disconnect.
         self.lastCheckPing = time.time()
 
         # Presume connection is dead after 90 seconds of silence.
