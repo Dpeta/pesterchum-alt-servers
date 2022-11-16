@@ -1304,7 +1304,6 @@ class PesterWindow(MovingWindow):
                 | QtCore.Qt.WindowType.FramelessWindowHint
             ),
         )
-
         # For debugging
         _CONSOLE_ENV.PAPP = self
         # TODO: karxi: SO! At the end of this function it seems like that
@@ -1369,6 +1368,10 @@ class PesterWindow(MovingWindow):
                 )
             )
             self.theme = self.userprofile.getTheme()
+
+        # Silly guy prevention pt. 2
+        # We really shouldn't run as root.
+        self.root_check()
 
         # karxi: For the record, these are set via commandline arguments. By
         # default, they aren't usable any other way - you can't set them via
@@ -1699,6 +1702,36 @@ class PesterWindow(MovingWindow):
     def noUpdatePC(self):
         self.updatemenu = None
     """
+
+    def root_check(self):
+        """Raise a warning message box if Pesterchum has admin/root privileges."""
+        if ostools.isRoot():
+            msgbox = QtWidgets.QMessageBox()
+            msg = (
+                "Running with elevated privileges, "
+                "this is potentially a security risk."
+                "\nThere is no valid reason to run Pesterchum as an administrator or as root."
+                "\n\nQuit?"
+            )
+            msgbox.setWindowTitle("Unnecessary permissions warning")
+            msgbox.setStyleSheet(
+                "QMessageBox{ %s }" % self.theme["main/defaultwindow/style"]
+            )
+            msgbox.setInformativeText(msg)
+            msgbox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+            msgbox.setStandardButtons(
+                QtWidgets.QMessageBox.StandardButton.Yes
+                | QtWidgets.QMessageBox.StandardButton.No
+            )
+            continue_anyway = msgbox.button(QtWidgets.QMessageBox.StandardButton.No)
+            continue_anyway.setText(
+                "I'm a silly little guy and want to continue anyway"
+            )
+            msgbox.setDefaultButton(QtWidgets.QMessageBox.StandardButton.Yes)
+            ret = msgbox.exec()
+            if ret == QtWidgets.QMessageBox.StandardButton.Yes:
+                self.app.quit()  # Optional
+                sys.exit()
 
     @QtCore.pyqtSlot()
     def checkPing(self):
