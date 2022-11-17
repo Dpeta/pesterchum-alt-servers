@@ -22,6 +22,15 @@ from oyoyo.cmdhandler import DefaultCommandHandler
 from oyoyo import helpers, services
 
 PchumLog = logging.getLogger("pchumLogger")
+SERVICES = [
+    "nickserv",
+    "chanserv",
+    "memoserv",
+    "operserv",
+    "helpserv",
+    "hostserv",
+    "botserv",
+]
 
 # Python 3
 QString = str
@@ -692,12 +701,13 @@ class PesterHandler(DefaultCommandHandler):
     def nomatchingkey(self, target, our_handle, failed_handle, key, *error):
         # Try to get moods the old way if metadata fails.
         PchumLog.info("nomatchingkey: " + failed_handle)
-        chumglub = "GETMOOD "
-        try:
-            helpers.msg(self.client, "#pesterchum", chumglub + failed_handle)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.parent.setConnectionBroken()
+        # No point in GETMOOD-ing services
+        if failed_handle.casefold() not in SERVICES:
+            try:
+                helpers.msg(self.client, "#pesterchum", f"GETMOOD {failed_handle}")
+            except OSError as e:
+                PchumLog.warning(e)
+                self.parent.setConnectionBroken()
 
     def keynotset(self, target, our_handle, failed_handle, key, *error):
         # Try to get moods the old way if metadata fails.
@@ -1028,12 +1038,11 @@ class PesterHandler(DefaultCommandHandler):
         """Get mood via metadata if supported"""
 
         # Get via metadata or via legacy method
-        if self.parent.metadata_supported == True:
+        if self.parent.metadata_supported:
             # Metadata
-            for c in chums:
-                chandle = c.handle
+            for chum in chums:
                 try:
-                    helpers.metadata(self.client, chandle, "get", "mood")
+                    helpers.metadata(self.client, chum.handle, "get", "mood")
                 except OSError as e:
                     PchumLog.warning(e)
                     self.parent.setConnectionBroken()
@@ -1043,16 +1052,17 @@ class PesterHandler(DefaultCommandHandler):
                 "Server doesn't seem to support metadata, using legacy GETMOOD."
             )
             chumglub = "GETMOOD "
-            for c in chums:
-                chandle = c.handle
-                if len(chumglub + chandle) >= 350:
+            for chum in chums:
+                if len(chumglub + chum.handle) >= 350:
                     try:
                         helpers.msg(self.client, "#pesterchum", chumglub)
                     except OSError as e:
                         PchumLog.warning(e)
                         self.parent.setConnectionBroken()
                     chumglub = "GETMOOD "
-                chumglub += chandle
+                # No point in GETMOOD-ing services
+                if chum.handle.casefold() not in SERVICES:
+                    chumglub += chum.handle
             if chumglub != "GETMOOD ":
                 try:
                     helpers.msg(self.client, "#pesterchum", chumglub)
