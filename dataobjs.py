@@ -593,6 +593,8 @@ class PesterProfile(object):
             return (False, "Cannot start with uppercase letter")
         if re.search("[^A-Za-z0-9]", handle) is not None:
             return (False, "Only alphanumeric characters allowed")
+        if handle[0].isnumeric():  # IRC doesn't allow this
+            return (False, "Handles may not start with a number")
         return (True,)
 
 

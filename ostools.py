@@ -1,5 +1,6 @@
 import os
 import sys
+import ctypes
 import platform
 
 try:
@@ -37,6 +38,21 @@ def osVer():
         return " ".join((ver[0], " (", ver[2], ")"))
     elif isLinux():
         return " ".join(platform.linux_distribution())
+
+
+def isRoot():
+    """Return True if running with elevated privileges."""
+    # Windows
+    try:
+        if isWin32():
+            return ctypes.windll.shell32.IsUserAnAdmin() == 1
+    except OSError as win_issue:
+        print(win_issue)
+    # Unix
+    if hasattr(os, "getuid"):
+        return not os.getuid()  # 0 if root
+    # Just assume it's fine otherwise ig
+    return False
 
 
 def validateDataDir():
