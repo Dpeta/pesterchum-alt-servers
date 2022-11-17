@@ -160,10 +160,10 @@ class TimeTracker(list):
 
     def addRecord(self, timed):
         try:
-            #(temporal, pcf, when) = pcfGrammar(timed - timedelta(0))
+            # (temporal, pcf, when) = pcfGrammar(timed - timedelta(0))
             pcf = pcfGrammar(timed - timedelta(0))[1]
         except TypeError:
-            #(temporal, pcf, when) = pcfGrammar(mysteryTime())
+            # (temporal, pcf, when) = pcfGrammar(mysteryTime())
             pcf = pcfGrammar(mysteryTime())[1]
         if pcf == "C" or pcf == "?":
             return
@@ -173,7 +173,7 @@ class TimeTracker(list):
 
     def getRecord(self, timed):
         try:
-            #(temporal, pcf, when) = pcfGrammar(timed - timedelta(0))
+            # (temporal, pcf, when) = pcfGrammar(timed - timedelta(0))
             pcf = pcfGrammar(timed - timedelta(0))[1]
         except TypeError:
             pcf = pcfGrammar(mysteryTime())[1]

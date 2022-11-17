@@ -144,7 +144,7 @@ class pesterQuirks(object):
 
     def apply(self, lexed, first=False, last=False):
         prefix = [q for q in self.quirklist if q.type == "prefix"]
-        #suffix = [q for q in self.quirklist if q.type == "suffix"]
+        # suffix = [q for q in self.quirklist if q.type == "suffix"]
 
         newlist = []
         for (i, o) in enumerate(lexed):
