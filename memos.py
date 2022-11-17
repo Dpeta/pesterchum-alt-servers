@@ -1732,8 +1732,12 @@ class PesterMemo(PesterConvo):
         elif update == "join":
             self.addUser(h)
             time = self.time.getTime()
-            serverText = "PESTERCHUM:TIME>" + delta2txt(time, "server")
-            self.messageSent.emit(serverText, self.title())
+            txt_time = delta2txt(time, "server")
+            # Only send if time isn't CURRENT, it's very spammy otherwise.
+            # CURRENT should be the default already.
+            if txt_time != "i":
+                serverText = "PESTERCHUM:TIME>" + txt_time
+                self.messageSent.emit(serverText, self.title())
         elif update == "+q":
             for c in chums:
                 c.founder = True

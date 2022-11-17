@@ -2106,7 +2106,7 @@ class PesterWindow(MovingWindow):
             self.setChannelMode.emit(channel, "+s", "")
         if invite:
             self.setChannelMode.emit(channel, "+i", "")
-        memoWindow.sendTimeInfo()
+        # memoWindow.sendTimeInfo()
         memoWindow.show()
 
     def addChum(self, chum):
