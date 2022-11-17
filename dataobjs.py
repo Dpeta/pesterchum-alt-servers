@@ -144,7 +144,7 @@ class pesterQuirks(object):
 
     def apply(self, lexed, first=False, last=False):
         prefix = [q for q in self.quirklist if q.type == "prefix"]
-        suffix = [q for q in self.quirklist if q.type == "suffix"]
+        #suffix = [q for q in self.quirklist if q.type == "suffix"]
 
         newlist = []
         for (i, o) in enumerate(lexed):
@@ -320,7 +320,7 @@ class PesterProfile(object):
 
     def colorcmd(self):
         if self.color:
-            (r, g, b, a) = self.color.getRgb()
+            (r, g, b, _) = self.color.getRgb()
             return "%d,%d,%d" % (r, g, b)
         else:
             return "0,0,0"
@@ -422,14 +422,10 @@ class PesterProfile(object):
             )
 
     def memoopenmsg(self, syscolor, td, timeGrammar, verb, channel):
-        (temporal, pcf, when) = (
-            timeGrammar.temporal,
-            timeGrammar.pcf,
-            timeGrammar.when,
-        )
+        """timeGrammar.temporal and timeGrammar.when are unused"""
         timetext = timeDifference(td)
         PchumLog.debug("pre pcf+self.initials()")
-        initials = pcf + self.initials()
+        initials = timeGrammar.pcf + self.initials()
         PchumLog.debug("post pcf+self.initials()")
         return "<c=%s><c=%s>%s</c> %s %s %s.</c>" % (
             syscolor.name(),

@@ -160,9 +160,11 @@ class TimeTracker(list):
 
     def addRecord(self, timed):
         try:
-            (temporal, pcf, when) = pcfGrammar(timed - timedelta(0))
+            #(temporal, pcf, when) = pcfGrammar(timed - timedelta(0))
+            pcf = pcfGrammar(timed - timedelta(0))[1]
         except TypeError:
-            (temporal, pcf, when) = pcfGrammar(mysteryTime())
+            #(temporal, pcf, when) = pcfGrammar(mysteryTime())
+            pcf = pcfGrammar(mysteryTime())[1]
         if pcf == "C" or pcf == "?":
             return
         if timed in self.timerecord[pcf]:
@@ -171,9 +173,10 @@ class TimeTracker(list):
 
     def getRecord(self, timed):
         try:
-            (temporal, pcf, when) = pcfGrammar(timed - timedelta(0))
+            #(temporal, pcf, when) = pcfGrammar(timed - timedelta(0))
+            pcf = pcfGrammar(timed - timedelta(0))[1]
         except TypeError:
-            (temporal, pcf, when) = pcfGrammar(mysteryTime())
+            pcf = pcfGrammar(mysteryTime())[1]
         if pcf == "C" or pcf == "?":
             return 0
         if len(self.timerecord[pcf]) > 1:
@@ -418,7 +421,7 @@ class MemoText(PesterText):
 
         def makeSafe(msg):
             if msg.count("<c") > msg.count("</c>"):
-                for i in range(msg.count("<c") - msg.count("</c>")):
+                for _ in range(msg.count("<c") - msg.count("</c>")):
                     msg = msg + "</c>"
             return '<span style="color:#000000">' + msg + "</span>"
 
@@ -1362,7 +1365,7 @@ class PesterMemo(PesterConvo):
                 timed = timedelta.min
             else:
                 timed = timedelta.max
-        except (OSError, ValueError) as e:
+        except (OSError, ValueError):
             try:
                 if cmd == "i":
                     timed = timedelta(0)

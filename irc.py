@@ -179,7 +179,7 @@ class PesterIRC(QtCore.QThread):
                             c = a.rfind("<c", 0, c)
 
                         # end all ctags in first part
-                        for i in range(a.count("<c") - a.count("</c>")):
+                        for _ in range(a.count("<c") - a.count("</c>")):
                             a = a + "</c>"
                         # start them up again in the second part
                         for c in hanging:

@@ -79,7 +79,7 @@ class PesterLogUserSelect(QtWidgets.QDialog):
         self.chumsBox.setStyleSheet(self.theme["main/chums/style"])
         self.chumsBox.optionsMenu = QtWidgets.QMenu(self)
 
-        for (i, t) in enumerate(chumMemoList):
+        for (_, t) in enumerate(chumMemoList):
             item = QtWidgets.QListWidgetItem(t)
             item.setForeground(
                 QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"]))

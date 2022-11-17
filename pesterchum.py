@@ -178,7 +178,8 @@ except ImportError:
                     "All possible audio modules failed to import."
                     "\nPossible audio modules in order of preference (Windows/MacOS): PyQt6 QtMultimedia > PyQt5 QtMultimedia > pygame"
                 )
-    elif ostools.isLinux() or True:
+    # Linux or misc.
+    else:
         # PyQt5 QtMultimedia needs gstreamer on linux, so pygame is prefered.
         try:
             try:
@@ -1398,7 +1399,7 @@ class PesterWindow(MovingWindow):
         try:
             themeChecker(self.theme)
         except ThemeException as inst:
-            PchumLog.error("Caught: " + inst.parameter)
+            PchumLog.error("Caught: %s", inst.parameter)
             themeWarning = QtWidgets.QMessageBox(self)
             themeWarning.setText("Theme Error: %s" % inst)
             themeWarning.exec()
@@ -1705,14 +1706,14 @@ class PesterWindow(MovingWindow):
         """Check if server is alive on app level,
         this function is called every 15sec"""
         # Return without irc
-        if hasattr(self.parent, "irc") == False:
+        if not hasattr(self.parent, "irc"):
             self.lastCheckPing = None
             self.sincerecv = 0
             return
 
         # We have IRC but we're missing a variable?
         # gweh.jpg
-        if None in [self.lastCheckPing, self.sincerecv]:
+        if self.lastCheckPing is None or self.sincerecv is None:
             return
 
         # Desync check, happens if pc comes out of sleep.
@@ -1736,7 +1737,7 @@ class PesterWindow(MovingWindow):
 
         # Show unresponsive if timing out
         if self.sincerecv >= 45:
-            if self.parent.irc.unresponsive == False:
+            if not self.parent.irc.unresponsive:
                 self.parent.irc.unresponsive = True
                 self.parent.showLoading(self.parent.widget, "S3RV3R NOT R3SPOND1NG >:?")
                 self.show()
@@ -1744,7 +1745,7 @@ class PesterWindow(MovingWindow):
         else:
             self.parent.irc.unresponsive = False
             if hasattr(self, "loadingscreen"):
-                if self.loadingscreen != None:
+                if self.loadingscreen is not None:
                     PchumLog.info("Server alive !! :O")
                     self.loadingscreen.done(QtWidgets.QDialog.DialogCode.Accepted)
                     self.loadingscreen = None
@@ -1779,7 +1780,8 @@ class PesterWindow(MovingWindow):
                 else:
                     m.sendtime()
 
-    def paintEvent(self, event):
+    def paintEvent(self, _):
+        """Argument 'event'"""
         try:
             self.backgroundImage
         except:
@@ -3459,7 +3461,7 @@ class PesterWindow(MovingWindow):
                         "If you got this message at launch you may want to "
                         "change your default profile."
                         "<br><br>%s<\h3><\html>"
-                        % (self.profiledir, self.profiledir, user, e)
+                        % (self.profiledir, self.profiledir, handle, e)
                     )
 
                 except:
@@ -3617,7 +3619,7 @@ class PesterWindow(MovingWindow):
     @QtCore.pyqtSlot(QString, QString)
     def nickCollision(self, handle, tmphandle):
         if hasattr(self, "loadingscreen"):
-            if self.loadingscreen != None:
+            if self.loadingscreen is not None:
                 self.loadingscreen.done(QtWidgets.QDialog.DialogCode.Accepted)
                 self.loadingscreen = None
 
@@ -3640,7 +3642,7 @@ class PesterWindow(MovingWindow):
     @QtCore.pyqtSlot(QString, QString)
     def getSvsnickedOn(self, oldhandle, newhandle):
         if hasattr(self, "loadingscreen"):
-            if self.loadingscreen != None:
+            if self.loadingscreen is not None:
                 self.loadingscreen.done(QtWidgets.QDialog.DialogCode.Accepted)
                 self.loadingscreen = None
 
@@ -3764,7 +3766,7 @@ class PesterWindow(MovingWindow):
             msgbox.addButton(
                 QtWidgets.QPushButton("No"), QtWidgets.QMessageBox.ButtonRole.NoRole
             )
-            msgbox.exec()
+            reply = msgbox.exec()
 
             if reply == QtWidgets.QMessageBox.ButtonRole.YesRole:
                 with open(_datadir + "serverlist.json", "w") as server_file:
@@ -3791,7 +3793,7 @@ class PesterWindow(MovingWindow):
             for i in range(len(server_list_obj)):
                 server_list_items.append(server_list_obj[i]["server"])
         except:
-            if self.chooseServerAskedToReset == False:
+            if not self.chooseServerAskedToReset:
                 self.chooseServerAskedToReset = True
                 self.resetServerlist()
                 return 1
@@ -3801,7 +3803,7 @@ class PesterWindow(MovingWindow):
         for i in range(len(server_list_obj)):
             if server_list_obj[i]["server"] == self.removeServerBox.currentText():
                 selected_entry = i
-        if selected_entry != None:
+        if selected_entry is not None:
             server_list_obj.pop(selected_entry)
 
             try:
@@ -3884,7 +3886,7 @@ class PesterWindow(MovingWindow):
                 for i in range(len(server_obj)):
                     server_list_items.append(server_obj[i]["server"])
             except:
-                if self.chooseServerAskedToReset == False:
+                if not self.chooseServerAskedToReset:
                     self.chooseServerAskedToReset = True
                     self.resetServerlist()
                     return 1
@@ -3979,7 +3981,7 @@ class PesterWindow(MovingWindow):
             for i in range(len(server_obj)):
                 server_list_items.append(server_obj[i]["server"])
         except:
-            if self.chooseServerAskedToReset == False:
+            if not self.chooseServerAskedToReset:
                 self.chooseServerAskedToReset = True
                 self.resetServerlist()
                 return 1
@@ -4423,7 +4425,7 @@ class MainProgram(QtCore.QObject):
             if (
                 hasattr(self, "irc")
                 and self.irc.registeredIRC
-                and self.irc.unresponsive == False
+                and not self.irc.unresponsive
             ):
                 return
             if self.reconnectok:
@@ -4481,9 +4483,9 @@ class MainProgram(QtCore.QObject):
         # since --help causes Qt to raise an exception otherwise.
         args = _ARGUMENTS
         try:
-            if args.server != None:
+            if args.server is not None:
                 options["server"] = args.server
-            if args.port != None:
+            if args.port is not None:
                 options["port"] = args.port
             # Set log level
             PchumLog.setLevel(args.logging.upper())
@@ -4492,7 +4494,7 @@ class MainProgram(QtCore.QObject):
             # Enable advanced
             options["advanced"] = args.advanced
             # Disable honks
-            if args.nohonk == True:
+            if args.nohonk:
                 options["honk"] = False
         except Exception as e:
             print(e)
