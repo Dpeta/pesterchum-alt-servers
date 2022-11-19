@@ -73,7 +73,7 @@ jobs:
       - name: Install PyInstaller
         run: python -m pip install --upgrade PyInstaller
       - name: Run PyInstaller
-        run: python3 pyinst.py --no-prompts --onefile --no-upx --crt --no-clean --windowed
+        run: python3 pyinst.py --prompts False --onefile True --upx False --crt True --clean False --windowed True
       - name: Create archive (.zip)
         run: tar.exe -a -c -f Pesterchum_win32_py38.zip -C dist Pesterchum
       - uses: actions/upload-artifact@v3
