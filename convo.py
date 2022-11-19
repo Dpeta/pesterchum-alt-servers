@@ -348,18 +348,24 @@ class PesterMovie(QtGui.QMovie):
             url = text.urls[movie].toString()
             html = str(text.toHtml())
             if html.find(url) != -1:
+                try:
+                    # PyQt6
+                    resource_type = QtGui.QTextDocument.ResourceType.ImageResource.value
+                except AttributeError:
+                    # PyQt5
+                    resource_type = QtGui.QTextDocument.ResourceType.ImageResource
                 if text.hasTabs:
                     i = text.tabobject.tabIndices[text.parent().title()]
                     if text.tabobject.tabs.currentIndex() == i:
                         text.document().addResource(
-                            QtGui.QTextDocument.ResourceType.ImageResource.value,
+                            resource_type,
                             text.urls[movie],
                             movie.currentPixmap(),
                         )
                         text.setLineWrapColumnOrWidth(text.lineWrapColumnOrWidth())
                 else:
                     text.document().addResource(
-                        QtGui.QTextDocument.ResourceType.ImageResource.value,
+                        resource_type,
                         text.urls[movie],
                         movie.currentPixmap(),
                     )
