@@ -1,6 +1,11 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.5.2] - 2022-12-10
+
+### Fix
+ - Audio on Windows not working because of a Qt6 regression, dependencies are now pinned to last working versions. [QTBUG-108383](https://bugreports.qt.io/browse/QTBUG-108383)
+
 ## [v2.5.1] - 2022-12-06
 
 ### Added
@@ -11,8 +16,8 @@
  - Client no longer tries to get the mood of services bots via GETMOOD, as this would leak the fact that a user was messaging one of the bots. (nickserv/chanserv and the rest of the Anope suite)
 
 ### Fixed
- - Error when loading an animated emote with Qt5, which is used for the win7 version. (#105)
- - Handles being allowed to start with a number, this is an invalid nick in the IRC protocol and would prevent the client from connecting to compliant servers. (#103)
+ - Error when loading an animated emote with Qt5, which is used for the win7 version. (https://github.com/Dpeta/pesterchum-alt-servers/issues/105)
+ - Handles being allowed to start with a number, this is an invalid nick in the IRC protocol and would prevent the client from connecting to compliant servers. (https://github.com/Dpeta/pesterchum-alt-servers/issues/103)
  - Possible error when client-side ping function got called despite the client being disconnected.
  - Unnecessary call to eval() to set memo userlist icon, which is a minor security risk if crafted input is fed to it. (don't think this was possible to actually abuse though)
 
