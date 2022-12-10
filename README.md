@@ -100,7 +100,7 @@ Pesterchum is a Python script. This means that as long as you have Python instal
     - Some platforms, mostly Linux and macOS, might require you to run ``python3`` instead of ``python``. Some old installations still have Python 2 available under ``python``.
     - On Linux it's better to install Python & pip via your package manager.
     - On macOS it's also possible to install (a more recent version of) Python via [Brew](https://brew.sh/).
-2. Install Pesterchum's dependencies with pip, run: ``python -m pip install PyQt6 pygame``
+2. Install Pesterchum's dependencies with pip, run: ``python -m pip install -r requirements.txt``
     - If this fails, try running ``python -m pip install -U pip setuptools wheel`` to update pip, setuptools & wheel and then trying again.
     - Alternatively, many linux distros also have packages for pyqt and pygame.
         - Debian: [python3-pyqt6](https://packages.debian.org/testing/python/python3-pyqt6), [python3-pygame](https://packages.debian.org/testing/python/python3-pygame)
