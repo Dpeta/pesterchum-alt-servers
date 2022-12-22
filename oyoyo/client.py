@@ -231,13 +231,11 @@ class IRCClient:
         )
         # 31557600 seconds is approximately 1 year
         if empty_cert_store or certifi_age.total_seconds() <= 31557600:
-            PchumLog.warning(
+            PchumLog.info(
                 "Using SSL/TLS context with certifi-provided root certificates."
             )
             return ssl.create_default_context(cafile=certifi.where())
-        PchumLog.warning(
-            "Using SSL/TLS context with system-provided root certificates."
-        )
+        PchumLog.info("Using SSL/TLS context with system-provided root certificates.")
         return default_context
 
     def connect(self, verify_hostname=True):
