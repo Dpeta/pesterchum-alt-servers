@@ -3836,9 +3836,18 @@ class PesterWindow(MovingWindow):
 
         selected_entry = None
 
-        for i in range(len(server_list_obj)):
-            if server_list_obj[i]["server"] == self.removeServerBox.currentText():
-                selected_entry = i
+        try:
+            assert (
+                server_list_obj[self.removeServerBox.currentIndex()]["server"]
+                == self.removeServerBox.currentText()
+            )
+            selected_entry = self.removeServerBox.currentIndex()
+        except (IndexError, AssertionError) as e:
+            PchumLog.warning(e)
+            for i in range(len(server_list_obj)):
+                if server_list_obj[i]["server"] == self.removeServerBox.currentText():
+                    selected_entry = i
+
         if selected_entry is not None:
             server_list_obj.pop(selected_entry)
 
@@ -3927,7 +3936,7 @@ class PesterWindow(MovingWindow):
                     self.resetServerlist()
                     return 1
 
-            PchumLog.info("server_list_items:    " + str(server_list_items))
+            PchumLog.info(f"server_list_items: {server_list_items}")
 
             # Widget 1
             self.chooseRemoveServerWidged = QtWidgets.QDialog()
@@ -3982,9 +3991,17 @@ class PesterWindow(MovingWindow):
 
             selected_entry = None
 
-            for i in range(len(server_obj)):
-                if server_obj[i]["server"] == self.serverBox.currentText():
-                    selected_entry = i
+            try:
+                selected_entry = self.serverBox.currentIndex()
+                assert (
+                    server_obj[selected_entry]["server"] == self.serverBox.currentText()
+                )
+            except (IndexError, AssertionError) as e:
+                # fallback using 'server' as primary key
+                PchumLog.warning(e)
+                for i in range(len(server_obj)):
+                    if server_obj[i]["server"] == self.serverBox.currentText():
+                        selected_entry = i
 
             try:
                 with open(_datadir + "server.json", "w") as server_file:
