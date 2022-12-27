@@ -1,6 +1,15 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.5.3] - 2022-12-27
+
+### Changed
+ - The certifi certificate bundle is now generally prefered over the system-provided bundle if it's a recent version. The main rationale for this is that the Windows cert store is sometimes outdated. (https://github.com/Dpeta/pesterchum-alt-servers/pull/108)
+
+### Fix
+ - Certain menu options not saving on mac. (https://github.com/Dpeta/pesterchum-alt-servers/pull/107)
+ - The wrong server list item sometimes being selected/removed if they shared the same 'server'.
+
 ## [v2.5.2] - 2022-12-10
 
 ### Fix
