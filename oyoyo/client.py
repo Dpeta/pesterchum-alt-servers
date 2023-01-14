@@ -100,7 +100,7 @@ class IRCClient:
         self.username = None
         self.host = None
         self.port = None
-        #self.connect_cb = None
+        # self.connect_cb = None
         self.timeout = None
         self.blocking = None
         self.ssl = None
@@ -273,7 +273,7 @@ class IRCClient:
 
         helpers.nick(self, self.nick)
         helpers.user(self, self.username, self.realname)
-        #if self.connect_cb:
+        # if self.connect_cb:
         #    self.connect_cb(self)
 
     def conn(self):

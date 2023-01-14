@@ -1500,7 +1500,7 @@ class PesterWindow(MovingWindow):
         # ~        QtCore.SIGNAL('activate()'), self.console.
         self.console.is_open = False
         """
-        
+
         filemenu = self.menu.addMenu(self.theme["main/menus/client/_name"])
         self.filemenu = filemenu
         filemenu.addAction(opts)
@@ -2219,9 +2219,9 @@ class PesterWindow(MovingWindow):
         ##        else:
         ##            self.console.action.setText("Console")
         # has_key doesn't work out here for some reason, possibly because of inherits?
-        #try:
+        # try:
         #    self.console.action.setText(self.theme["main/menus/client/console"])
-        #except:
+        # except:
         #    self.console.action.setText("Console")
 
         try:

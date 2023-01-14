@@ -115,21 +115,27 @@ def identify(cli, passwd, authuser="NickServ"):
 def quit(cli, msg):
     cli.send("QUIT %s" % (msg))
 
+
 def nick(cli, nick):
     cli.send(f"NICK", nick)
 
+
 def user(cli, username, realname):
     cli.send("USER", username, "0", "*", ":" + realname)
+
 
 def join(cli, channel):
     """Protocol potentially allows multiple channels or keys."""
     cli.send("JOIN", channel)
 
+
 def part(cli, channel):
     cli.send("PART", channel)
 
+
 def notice(cli, target, text):
     cli.send("NOTICE", target, text)
+
 
 def invite(cli, nick, channel):
     cli.send("INVITE", nick, channel)

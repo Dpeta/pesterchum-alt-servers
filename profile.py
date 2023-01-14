@@ -850,7 +850,7 @@ class PesterProfileDB(dict):
                         handle,
                         color=QtGui.QColor(c["color"]),
                         mood=Mood(c["mood"]),
-                        **options
+                        **options,
                     ),
                 )
             )
