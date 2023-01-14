@@ -1461,6 +1461,7 @@ class PesterWindow(MovingWindow):
         self.menu.setNativeMenuBar(False)
         self.menu.setObjectName("mainmenu")
 
+        """
         if self.theme.has_key("main/menus/client/console"):
             self.console = AttrDict(
                 dict(
@@ -1498,7 +1499,8 @@ class PesterWindow(MovingWindow):
         # ~self.connect(self.console.shortcuts.curwgt,
         # ~        QtCore.SIGNAL('activate()'), self.console.
         self.console.is_open = False
-
+        """
+        
         filemenu = self.menu.addMenu(self.theme["main/menus/client/_name"])
         self.filemenu = filemenu
         filemenu.addAction(opts)
@@ -2003,6 +2005,7 @@ class PesterWindow(MovingWindow):
         self.tabmemo = MemoTabWindow(self)
         self.tabmemo.windowClosed.connect(self.memoTabsClosed)
 
+    """
     @QtCore.pyqtSlot()
     def toggleConsole(self):
         if not _CONSOLE:
@@ -2070,6 +2073,7 @@ class PesterWindow(MovingWindow):
         self.console.is_open = False
         self.console.window = None
         PchumLog.info("Console closed.")
+    """
 
     def newMemo(self, channel, timestr, secret=False, invite=False):
         if channel == "#pesterchum":
@@ -2215,10 +2219,10 @@ class PesterWindow(MovingWindow):
         ##        else:
         ##            self.console.action.setText("Console")
         # has_key doesn't work out here for some reason, possibly because of inherits?
-        try:
-            self.console.action.setText(self.theme["main/menus/client/console"])
-        except:
-            self.console.action.setText("Console")
+        #try:
+        #    self.console.action.setText(self.theme["main/menus/client/console"])
+        #except:
+        #    self.console.action.setText("Console")
 
         try:
             self.reportBugAction.setText(self.theme["main/menus/help/reportbug"])

@@ -390,6 +390,7 @@ class PesterText(QtWidgets.QTextEdit):
         self.textSelected = False
         self.copyAvailable[bool].connect(self.textReady)
         self.urls = {}
+        self.lastmsg = None
         for k in smiledict:
             self.addAnimation(
                 QtCore.QUrl("smilies/%s" % (smiledict[k])),
@@ -549,9 +550,13 @@ class PesterText(QtWidgets.QTextEdit):
                     and not parent.isBot(chum.handle)
                 ):
                     idlethreshhold = 60
-                    if (
-                        not hasattr(self, "lastmsg")
-                    ) or datetime.now() - self.lastmsg > timedelta(0, idlethreshhold):
+                    do_idle_send = False
+                    if self.lastmsg is None:
+                        do_idle_send = True
+                    else:
+                        if datetime.now() - self.lastmsg > timedelta(0, idlethreshhold):
+                            do_idle_send = True
+                    if do_idle_send:
                         verb = window.theme["convo/text/idle"]
                         idlemsg = me.idlemsg(systemColor, verb)
                         parent.textArea.append(convertTags(idlemsg))
@@ -995,7 +1000,7 @@ class PesterConvo(QtWidgets.QFrame):
 
     def closeEvent(self, event):
         self.mainwindow.waitingMessages.messageAnswered(self.title())
-        for movie in self.textArea.urls:
+        for movie in self.textArea.urls.copy():
             movie.setFileName("")  # Required, sometimes, for some reason. . .
             movie.stop()
             del movie

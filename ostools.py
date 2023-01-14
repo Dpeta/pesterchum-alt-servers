@@ -1,7 +1,6 @@
 import os
 import sys
 import ctypes
-import platform
 
 try:
     from PyQt6.QtCore import QStandardPaths
@@ -24,20 +23,6 @@ def isLinux():
 
 def isOSXBundle():
     return isOSX() and (os.path.abspath(".").find(".app") != -1)
-
-
-def isOSXLeopard():
-    return isOSX() and platform.mac_ver()[0].startswith("10.5")
-
-
-def osVer():
-    if isWin32():
-        return " ".join(platform.win32_ver())
-    elif isOSX():
-        ver = platform.mac_ver()
-        return " ".join((ver[0], " (", ver[2], ")"))
-    elif isLinux():
-        return " ".join(platform.linux_distribution())
 
 
 def isRoot():

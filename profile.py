@@ -225,15 +225,12 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
                             pzip.writestr(x, f.read())
 
             PchumLog.info("Updated backups-%s." % current_backup)
-        except OSError as e:
-            PchumLog.warning("Failed to make backup, no permission?")
-            PchumLog.warning(e)
         except shutil.Error as e:
-            PchumLog.warning("Failed to make backup, shutil error?")
-            PchumLog.warning(e)
+            PchumLog.warning(f"Failed to make backup, shutil error?\n{e}")
         except zipfile.BadZipFile as e:
-            PchumLog.warning("Failed to make backup, BadZipFile?")
-            PchumLog.warning(e)
+            PchumLog.warning(f"Failed to make backup, BadZipFile?\n{e}")
+        except OSError as e:
+            PchumLog.warning(f"Failed to make backup, no permission?\n{e}")
 
     def chums(self):
         if "chums" not in self.config:
@@ -736,6 +733,7 @@ class userProfile(object):
         return self.mentions
 
     def setMentions(self, mentions):
+        i = None
         try:
             for (i, m) in enumerate(mentions):
                 re.compile(m)

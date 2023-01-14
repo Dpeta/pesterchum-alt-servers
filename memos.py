@@ -398,12 +398,7 @@ class MemoText(PesterText):
                 # new chum! time current
                 newtime = timedelta(0)
                 time = TimeTracker(newtime)
-
-                # 'handle' undefined?
-                try:
-                    parent.times[handle] = time
-                except:
-                    parent.times[chum.handle] = time
+                parent.times[chum.handle] = time
         else:
             time = parent.time
 

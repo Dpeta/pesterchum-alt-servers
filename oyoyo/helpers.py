@@ -115,35 +115,24 @@ def identify(cli, passwd, authuser="NickServ"):
 def quit(cli, msg):
     cli.send("QUIT %s" % (msg))
 
+def nick(cli, nick):
+    cli.send(f"NICK", nick)
 
 def user(cli, username, realname):
     cli.send("USER", username, "0", "*", ":" + realname)
 
+def join(cli, channel):
+    """Protocol potentially allows multiple channels or keys."""
+    cli.send("JOIN", channel)
 
-_simple = (
-    "join",
-    "part",
-    "nick",
-    "notice",
-    "invite",
-)
+def part(cli, channel):
+    cli.send("PART", channel)
 
+def notice(cli, target, text):
+    cli.send("NOTICE", target, text)
 
-def _addsimple():
-    import sys
-
-    def simplecmd(cmd_name):
-        def f(cli, *args):
-            cli.send(cmd_name, *args)
-
-        return f
-
-    m = sys.modules[__name__]
-    for t in _simple:
-        setattr(m, t, simplecmd(t.upper()))
-
-
-_addsimple()
+def invite(cli, nick, channel):
+    cli.send("INVITE", nick, channel)
 
 
 def _addNumerics():
