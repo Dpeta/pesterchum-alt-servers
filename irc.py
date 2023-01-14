@@ -2,7 +2,6 @@ import logging
 import socket
 import random
 import time
-import json
 import ssl
 
 try:
@@ -873,7 +872,6 @@ class PesterHandler(DefaultCommandHandler):
                             PchumLog.warning(
                                 "Can't remove channel mode that isn't set."
                             )
-                            pass
                     self.parent.userPresentUpdate.emit(
                         "", channel, channel_mode + ":%s" % (op)
                     )

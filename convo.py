@@ -1,4 +1,3 @@
-import sys
 import logging
 from string import Template
 from time import strftime
