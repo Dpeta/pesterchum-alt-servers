@@ -246,7 +246,7 @@ class IRCClient:
         passing the 'verify_hostname' parameter. The user is asked if they
         want to disable it if this functions raises a certificate validation error,
         in which case the function may be called again with 'verify_hostname'."""
-        PchumLog.info("connecting to %s:%s" % (self.host, self.port))
+        PchumLog.info("connecting to {}:{}".format(self.host, self.port))
 
         # Open connection
         plaintext_socket = socket.create_connection((self.host, self.port))
@@ -279,7 +279,7 @@ class IRCClient:
     def conn(self):
         """returns a generator object."""
         try:
-            buffer = bytes()
+            buffer = b""
             while not self._end:
                 # Block for connection-killing exceptions
                 try:
@@ -334,7 +334,7 @@ class IRCClient:
                 except ssl.SSLEOFError as e:
                     raise e
                 except OSError as e:
-                    PchumLog.warning("conn exception %s in %s" % (e, self))
+                    PchumLog.warning("conn exception {} in {}".format(e, self))
                     if self._end:
                         break
                     if not self.blocking and e.errno == 11:
@@ -430,7 +430,7 @@ class IRCApp:
 
         warning: if you add a client that has blocking set to true,
         timers will no longer function properly"""
-        PchumLog.info("added client %s (ar=%s)" % (client, autoreconnect))
+        PchumLog.info("added client {} (ar={})".format(client, autoreconnect))
         self._clients[client] = self._ClientDesc(autoreconnect=autoreconnect)
 
     def addTimer(self, seconds, cb):
@@ -439,7 +439,7 @@ class IRCApp:
         ( the only advantage to these timers is they dont use threads )
         """
         assert callable(cb)
-        PchumLog.info("added timer to call %s in %ss" % (cb, seconds))
+        PchumLog.info("added timer to call {} in {}s".format(cb, seconds))
         self._timers.append((time.time() + seconds, cb))
 
     def run(self):

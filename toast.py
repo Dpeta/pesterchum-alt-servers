@@ -24,7 +24,7 @@ PchumLog = logging.getLogger("pchumLogger")
 pynotify = None
 
 
-class DefaultToast(object):
+class DefaultToast:
     def __init__(self, machine, title, msg, icon):
         self.machine = machine
         self.title = title
@@ -43,8 +43,8 @@ class DefaultToast(object):
             PchumLog.info("Done")
 
 
-class ToastMachine(object):
-    class __Toast__(object):
+class ToastMachine:
+    class __Toast__:
         def __init__(self, machine, title, msg, time=3000, icon="", importance=0):
             self.machine = machine
             self.title = title

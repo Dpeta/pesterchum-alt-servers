@@ -23,7 +23,7 @@ PchumLog = logging.getLogger("pchumLogger")
 
 class PesterTabWindow(QtWidgets.QFrame):
     def __init__(self, mainwindow, parent=None, convo="convo"):
-        super(PesterTabWindow, self).__init__(parent)
+        super().__init__(parent)
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_QuitOnClose, False)
         self.setFocusPolicy(QtCore.Qt.FocusPolicy.ClickFocus)
         self.mainwindow = mainwindow
@@ -337,7 +337,7 @@ class PesterTabWindow(QtWidgets.QFrame):
 
 class PesterMovie(QtGui.QMovie):
     def __init__(self, parent):
-        super(PesterMovie, self).__init__(parent)
+        super().__init__(parent)
         self.textwindow = parent
 
     @QtCore.pyqtSlot(int)
@@ -374,7 +374,7 @@ class PesterMovie(QtGui.QMovie):
 
 class PesterText(QtWidgets.QTextEdit):
     def __init__(self, theme, parent=None):
-        super(PesterText, self).__init__(parent)
+        super().__init__(parent)
         if hasattr(self.parent(), "mainwindow"):
             self.mainwindow = self.parent().mainwindow
         else:
@@ -594,7 +594,7 @@ class PesterText(QtWidgets.QTextEdit):
             parent.textInput.keyPressEvent(event)
 
         # Pass to the normal handler.
-        super(PesterText, self).keyPressEvent(event)
+        super().keyPressEvent(event)
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
@@ -647,7 +647,7 @@ class PesterInput(QtWidgets.QLineEdit):
     stylesheet_path = "convo/input/style"
 
     def __init__(self, theme, parent=None):
-        super(PesterInput, self).__init__(parent)
+        super().__init__(parent)
         self.changeTheme(theme)
 
     def changeTheme(self, theme):
@@ -662,7 +662,7 @@ class PesterInput(QtWidgets.QLineEdit):
     def focusInEvent(self, event):
         self.parent().clearNewMessage()
         self.parent().textArea.textCursor().clearSelection()
-        super(PesterInput, self).focusInEvent(event)
+        super().focusInEvent(event)
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key.Key_Up:
@@ -677,12 +677,12 @@ class PesterInput(QtWidgets.QLineEdit):
         elif event.key() in [QtCore.Qt.Key.Key_PageUp, QtCore.Qt.Key.Key_PageDown]:
             self.parent().textArea.keyPressEvent(event)
         self.parent().mainwindow.idler.time = 0
-        super(PesterInput, self).keyPressEvent(event)
+        super().keyPressEvent(event)
 
 
 class PesterConvo(QtWidgets.QFrame):
     def __init__(self, chum, initiated, mainwindow, parent=None):
-        super(PesterConvo, self).__init__(parent)
+        super().__init__(parent)
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_QuitOnClose, False)
         self.setObjectName(chum.handle)
         self.setFocusPolicy(QtCore.Qt.FocusPolicy.ClickFocus)
@@ -691,7 +691,7 @@ class PesterConvo(QtWidgets.QFrame):
         theme = self.mainwindow.theme
         self.resize(*theme["convo/size"])
         self.setStyleSheet(
-            "QtWidgets.QFrame#%s { %s }" % (chum.handle, theme["convo/style"])
+            "QtWidgets.QFrame#{} {{ {} }}".format(chum.handle, theme["convo/style"])
         )
         self.setWindowIcon(self.icon())
         self.setWindowTitle(self.title())
@@ -1012,7 +1012,9 @@ class PesterConvo(QtWidgets.QFrame):
     def changeTheme(self, theme):
         self.resize(*theme["convo/size"])
         self.setStyleSheet(
-            "QtWidgets.QFrame#%s { %s }" % (self.chum.handle, theme["convo/style"])
+            "QtWidgets.QFrame#{} {{ {} }}".format(
+                self.chum.handle, theme["convo/style"]
+            )
         )
 
         margins = theme["convo/margins"]

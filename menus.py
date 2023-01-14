@@ -237,7 +237,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
             )
             if ok:
                 gname = str(gname)
-                if re.search("[^A-Za-z0-9_\s]", gname) is not None:
+                if re.search(r"[^A-Za-z0-9_\s]", gname) is not None:
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
                     msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
@@ -1304,9 +1304,7 @@ class PesterOptions(QtWidgets.QDialog):
         self.volume.valueChanged[int].connect(self.printValue)
         # Disable the volume slider if we can't actually use it.
         if parent.canSetVolume():
-            self.currentVol = QtWidgets.QLabel(
-                "{0!s}%".format(self.config.volume()), self
-            )
+            self.currentVol = QtWidgets.QLabel(f"{self.config.volume()!s}%", self)
             # We don't need to explicitly set this, but it helps drive the
             # point home
             self.volume.setEnabled(True)

@@ -7,7 +7,7 @@ except ImportError:
 from generic import PesterIcon
 
 
-class Mood(object):
+class Mood:
     moods = [
         "chummy",
         "rancorous",

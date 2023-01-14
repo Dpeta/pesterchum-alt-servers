@@ -19,19 +19,19 @@ class mysteryTime(timedelta):
 
 class CaseInsensitiveDict(dict):
     def __setitem__(self, key, value):
-        super(CaseInsensitiveDict, self).__setitem__(key.lower(), value)
+        super().__setitem__(key.lower(), value)
 
     def __getitem__(self, key):
-        return super(CaseInsensitiveDict, self).__getitem__(key.lower())
+        return super().__getitem__(key.lower())
 
     def __contains__(self, key):
-        return super(CaseInsensitiveDict, self).__contains__(key.lower())
+        return super().__contains__(key.lower())
 
     def has_key(self, key):
-        return key.lower() in super(CaseInsensitiveDict, self)
+        return key.lower() in super()
 
     def __delitem__(self, key):
-        super(CaseInsensitiveDict, self).__delitem__(key.lower())
+        super().__delitem__(key.lower())
 
 
 class PesterList(list):
@@ -41,7 +41,7 @@ class PesterList(list):
 
 class PesterIcon(QtGui.QIcon):
     def __init__(self, *x):
-        super(PesterIcon, self).__init__(x[0])
+        super().__init__(x[0])
         if type(x[0]) in [str, str]:
             self.icon_pixmap = QtGui.QPixmap(x[0])
         else:
@@ -86,7 +86,7 @@ class RightClickTree(QtWidgets.QTreeWidget):
 
 class MultiTextDialog(QtWidgets.QDialog):
     def __init__(self, title, parent, *queries):
-        super(MultiTextDialog, self).__init__(parent)
+        super().__init__(parent)
         self.setWindowTitle(title)
         if len(queries) == 0:
             return
@@ -131,7 +131,7 @@ class MovingWindow(QtWidgets.QFrame):
     # https://doc.qt.io/qt-5/qwindow.html#startSystemMove
     # This is also the only method that works on Wayland, which doesn't support setting position.
     def __init__(self, *x, **y):
-        super(MovingWindow, self).__init__(*x, **y)
+        super().__init__(*x, **y)
         self.moving = None
         self.moveupdate = 0
 
@@ -163,7 +163,7 @@ class MovingWindow(QtWidgets.QFrame):
             self.moving = None
 
 
-class NoneSound(object):
+class NoneSound:
     def __init__(self, *args, **kwargs):
         pass
 
@@ -179,7 +179,7 @@ class NoneSound(object):
 
 class WMButton(QtWidgets.QPushButton):
     def __init__(self, icon, parent=None):
-        super(WMButton, self).__init__(icon, "", parent)
+        super().__init__(icon, "", parent)
         self.setIconSize(icon.realsize())
         self.resize(icon.realsize())
         self.setFlat(True)

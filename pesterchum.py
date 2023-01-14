@@ -210,7 +210,7 @@ except ImportError:
                 )
 
 
-class waitingMessageHolder(object):
+class waitingMessageHolder:
     def __init__(self, mainwindow, **msgfuncs):
         self.mainwindow = mainwindow
         self.funcs = msgfuncs
@@ -246,14 +246,14 @@ class waitingMessageHolder(object):
 
 class chumListing(QtWidgets.QTreeWidgetItem):
     def __init__(self, chum, window):
-        super(chumListing, self).__init__([chum.handle])
+        super().__init__([chum.handle])
         self.mainwindow = window
         self.chum = chum
         self.handle = chum.handle
         self.setMood(Mood("offline"))
         self.status = None
         self.setToolTip(
-            0, "%s: %s" % (chum.handle, window.chumdb.getNotes(chum.handle))
+            0, "{}: {}".format(chum.handle, window.chumdb.getNotes(chum.handle))
         )
 
     def setMood(self, mood):
@@ -330,11 +330,9 @@ class chumListing(QtWidgets.QTreeWidgetItem):
                 0,
                 QtGui.QBrush(
                     QtGui.QColor(
-                        (
-                            self.mainwindow.theme["main/chums/moods"][self.mood.name()][
-                                "color"
-                            ]
-                        )
+                        self.mainwindow.theme["main/chums/moods"][self.mood.name()][
+                            "color"
+                        ]
                     )
                 ),
             )
@@ -342,9 +340,7 @@ class chumListing(QtWidgets.QTreeWidgetItem):
             self.setForeground(
                 0,
                 QtGui.QBrush(
-                    QtGui.QColor(
-                        (self.mainwindow.theme["main/chums/moods/chummy/color"])
-                    )
+                    QtGui.QColor(self.mainwindow.theme["main/chums/moods/chummy/color"])
                 ),
             )
 
@@ -379,7 +375,7 @@ class chumArea(RightClickTree):
     # This is the class that controls the actual main chumlist, I think.
     # Looking into how the groups work might be wise.
     def __init__(self, chums, parent=None):
-        super(chumArea, self).__init__(parent)
+        super().__init__(parent)
         self.notify = False
         QtCore.QTimer.singleShot(30000, self.beginNotify)
         self.mainwindow = parent
@@ -1061,7 +1057,7 @@ class chumArea(RightClickTree):
         if ok:
             notes = str(notes)
             self.mainwindow.chumdb.setNotes(currentChum.handle, notes)
-            currentChum.setToolTip(0, "%s: %s" % (currentChum.handle, notes))
+            currentChum.setToolTip(0, "{}: {}".format(currentChum.handle, notes))
 
     @QtCore.pyqtSlot()
     def renameGroup(self):
@@ -1073,7 +1069,7 @@ class chumArea(RightClickTree):
             )
             if ok:
                 gname = str(gname)
-                if re.search("[^A-Za-z0-9_\s]", gname) is not None:
+                if re.search(r"[^A-Za-z0-9_\s]", gname) is not None:
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setStyleSheet(
                         "QMessageBox{ %s }"
@@ -1210,7 +1206,7 @@ class trollSlum(chumArea):
 
 class TrollSlumWindow(QtWidgets.QFrame):
     def __init__(self, trolls, mainwindow, parent=None):
-        super(TrollSlumWindow, self).__init__(parent)
+        super().__init__(parent)
         self.mainwindow = mainwindow
         theme = self.mainwindow.theme
         self.slumlabel = QtWidgets.QLabel(self)
@@ -1298,7 +1294,7 @@ class PesterWindow(MovingWindow):
     sendMessage = QtCore.pyqtSignal("QString", "QString")
 
     def __init__(self, options, parent=None, app=None):
-        super(PesterWindow, self).__init__(
+        super().__init__(
             None,
             (
                 QtCore.Qt.WindowType.CustomizeWindowHint
@@ -1357,7 +1353,7 @@ class PesterWindow(MovingWindow):
             msgBox.setText(
                 "<html><h3>A profile error occured, "
                 "trying to switch to default pesterClient profile."
-                "<br><br>%s<\h3><\html>" % e
+                r"<br><br>%s<\h3><\html>" % e
             )
             PchumLog.critical(e)
             msgBox.exec()
@@ -1917,7 +1913,7 @@ class PesterWindow(MovingWindow):
             msg = addTimeInitial(msg, memo.times[handle].getGrammar())
         if handle == "ChanServ":
             systemColor = QtGui.QColor(self.theme["memos/systemMsgColor"])
-            msg = "<c=%s>%s</c>" % (systemColor.name(), msg)
+            msg = "<c={}>{}</c>".format(systemColor.name(), msg)
         memo.addMessage(msg, handle)
         mentioned = False
         m = convertTags(msg, "text")
@@ -2242,7 +2238,7 @@ class PesterWindow(MovingWindow):
         if hasattr(self, "moods"):
             self.moods.removeButtons()
         mood_list = theme["main/moods"]
-        mood_list = [dict([(str(k), v) for (k, v) in d.items()]) for d in mood_list]
+        mood_list = [{str(k): v for (k, v) in d.items()} for d in mood_list]
         self.moods = PesterMoodHandler(
             self, *[PesterMoodButton(self, **d) for d in mood_list]
         )
@@ -2391,7 +2387,7 @@ class PesterWindow(MovingWindow):
                         QtCore.QUrl.fromLocalFile("themes/honk.wav")
                     )
         except Exception as err:
-            PchumLog.error("Warning: Error loading sounds! ({0!r})".format(err))
+            PchumLog.error(f"Warning: Error loading sounds! ({err!r})")
             self.alarm = NoneSound()
             self.memosound = NoneSound()
             self.namesound = NoneSound()
@@ -2419,7 +2415,7 @@ class PesterWindow(MovingWindow):
                     if self.sound_type == QtMultimedia.QSoundEffect:
                         sound.setVolume(vol)
             except Exception as err:
-                PchumLog.warning("Couldn't set volume: {}".format(err))
+                PchumLog.warning(f"Couldn't set volume: {err}")
 
     def canSetVolume(self):
         """Returns the state of volume setting capabilities."""
@@ -2793,7 +2789,7 @@ class PesterWindow(MovingWindow):
                     errormsg.showMessage("THIS IS NOT A VALID CHUMTAG!")
                     self.addchumdialog = None
                     return
-                if re.search("[^A-Za-z0-9_\s]", group) is not None:
+                if re.search(r"[^A-Za-z0-9_\s]", group) is not None:
                     errormsg = QtWidgets.QErrorMessage(self)
                     errormsg.showMessage("THIS IS NOT A VALID GROUP NAME")
                     self.addchumdialog = None
@@ -2817,7 +2813,7 @@ class PesterWindow(MovingWindow):
             "Enter the reason you are reporting this user (optional):",
         )
         if ok:
-            self.sendMessage.emit("REPORT %s %s" % (handle, reason), "calSprite")
+            self.sendMessage.emit("REPORT {} {}".format(handle, reason), "calSprite")
 
     @QtCore.pyqtSlot(QString)
     def blockChum(self, handle):
@@ -2946,7 +2942,7 @@ class PesterWindow(MovingWindow):
         f = QtWidgets.QFileDialog.getOpenFileName(self)[0]
         if f == "":
             return
-        fp = open(f, "r")
+        fp = open(f)
         regexp_state = None
         for l in fp:
             # import chumlist
@@ -3139,7 +3135,7 @@ class PesterWindow(MovingWindow):
             )
             if ok:
                 gname = str(gname)
-                if re.search("[^A-Za-z0-9_\s]", gname) is not None:
+                if re.search(r"[^A-Za-z0-9_\s]", gname) is not None:
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
                     msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
@@ -3500,7 +3496,7 @@ class PesterWindow(MovingWindow):
                         "<br><br>"
                         "If you got this message at launch you may want to "
                         "change your default profile."
-                        "<br><br>%s<\h3><\html>"
+                        r"<br><br>%s<\h3><\html>"
                         % (self.profiledir, self.profiledir, handle, e)
                     )
 
@@ -3512,7 +3508,7 @@ class PesterWindow(MovingWindow):
                         "file exists."
                         "<br><br>If you got this message at launch you may "
                         "want to change your default profile."
-                        "<br><br>%s<\h3><\html>" % e
+                        r"<br><br>%s<\h3><\html>" % e
                     )
                 PchumLog.critical(e)
                 msgBox.setText(msg)
@@ -3769,7 +3765,7 @@ class PesterWindow(MovingWindow):
             self.chooseServer()
             return 1
 
-        with open(_datadir + "serverlist.json", "r") as server_file:
+        with open(_datadir + "serverlist.json") as server_file:
             read_file = server_file.read()
             server_file.close()
             server_list_obj = json.loads(read_file)
@@ -3826,7 +3822,7 @@ class PesterWindow(MovingWindow):
     def removeServer(self):
         server_list_items = []
         try:
-            with open(_datadir + "serverlist.json", "r") as server_file:
+            with open(_datadir + "serverlist.json") as server_file:
                 read_file = server_file.read()
                 server_file.close()
                 server_list_obj = json.loads(read_file)
@@ -3928,7 +3924,7 @@ class PesterWindow(MovingWindow):
             # Read servers.
             server_list_items = []
             try:
-                with open(_datadir + "serverlist.json", "r") as server_file:
+                with open(_datadir + "serverlist.json") as server_file:
                     read_file = server_file.read()
                     server_file.close()
                     server_obj = json.loads(read_file)
@@ -3988,7 +3984,7 @@ class PesterWindow(MovingWindow):
         else:
             PchumLog.info(self.serverBox.currentText() + " chosen.")
 
-            with open(_datadir + "serverlist.json", "r") as server_file:
+            with open(_datadir + "serverlist.json") as server_file:
                 read_file = server_file.read()
                 server_file.close()
                 server_obj = json.loads(read_file)
@@ -4031,7 +4027,7 @@ class PesterWindow(MovingWindow):
         # Read servers.
         server_list_items = []
         try:
-            with open(_datadir + "serverlist.json", "r") as server_file:
+            with open(_datadir + "serverlist.json") as server_file:
                 read_file = server_file.read()
                 server_file.close()
                 server_obj = json.loads(read_file)
@@ -4103,7 +4099,7 @@ class PesterWindow(MovingWindow):
         msgbox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
         msgbox.setText("Server certificate validation failed")
         msgbox.setInformativeText(
-            'Reason: "%s (%s)"' % (e.verify_message, e.verify_code)
+            'Reason: "{} ({})"'.format(e.verify_message, e.verify_code)
             + "\n\nConnect anyway?"
         )
         msgbox.setStandardButtons(
@@ -4154,7 +4150,7 @@ class PesterWindow(MovingWindow):
 
 class PesterTray(QtWidgets.QSystemTrayIcon):
     def __init__(self, icon, mainwindow, parent):
-        super(PesterTray, self).__init__(icon, parent)
+        super().__init__(icon, parent)
         self.mainwindow = mainwindow
 
     @QtCore.pyqtSlot(int)
@@ -4171,7 +4167,7 @@ class PesterTray(QtWidgets.QSystemTrayIcon):
 
 class MainProgram(QtCore.QObject):
     def __init__(self):
-        super(MainProgram, self).__init__()
+        super().__init__()
 
         _oldhook = sys.excepthook
         sys.excepthook = self.uncaughtException
@@ -4195,8 +4191,8 @@ class MainProgram(QtCore.QObject):
                 windll.shell32.SetCurrentProcessExplicitAppUserModelID(wid)
             except Exception as err:
                 # Log, but otherwise ignore any exceptions.
-                PchumLog.error("Failed to set AppUserModel ID: {0}".format(err))
-                PchumLog.error("Attempted to set as {0!r}.".format(wid))
+                PchumLog.error(f"Failed to set AppUserModel ID: {err}")
+                PchumLog.error(f"Attempted to set as {wid!r}.")
             # Back to our scheduled program.
 
         self.app = QtWidgets.QApplication(sys.argv)
@@ -4563,7 +4559,7 @@ class MainProgram(QtCore.QObject):
         # Show error to end user and log.
         try:
             # Log to log file
-            PchumLog.error("%s, %s" % (exc, value))
+            PchumLog.error("{}, {}".format(exc, value))
 
             # Try to write to separate logfile
             try:

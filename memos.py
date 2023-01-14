@@ -103,7 +103,7 @@ def pcfGrammar(td):
     return (temporal, pcf, when)
 
 
-class TimeGrammar(object):
+class TimeGrammar:
     def __init__(self, temporal, pcf, when, number="0"):
         self.temporal = temporal
         self.pcf = pcf
@@ -228,7 +228,7 @@ class TimeTracker(list):
 
 class TimeInput(QtWidgets.QLineEdit):
     def __init__(self, timeslider, parent):
-        super(TimeInput, self).__init__(parent)
+        super().__init__(parent)
         self.timeslider = timeslider
         self.setText("+0:00")
         self.timeslider.valueChanged[int].connect(self.setTime)
@@ -260,7 +260,7 @@ class TimeInput(QtWidgets.QLineEdit):
 
 class TimeSlider(QtWidgets.QSlider):
     def __init__(self, orientation, parent):
-        super(TimeSlider, self).__init__(orientation, parent)
+        super().__init__(orientation, parent)
         self.setTracking(True)
         self.setMinimum(-50)
         self.setMaximum(50)
@@ -278,7 +278,7 @@ class TimeSlider(QtWidgets.QSlider):
 
 class MemoTabWindow(PesterTabWindow):
     def __init__(self, mainwindow, parent=None):
-        super(MemoTabWindow, self).__init__(mainwindow, parent, "memos")
+        super().__init__(mainwindow, parent, "memos")
 
     def addChat(self, convo):
         self.convos[convo.channel] = convo
@@ -302,7 +302,7 @@ _ctag_begin = re.compile(r"<c=(.*?)>")
 
 class MemoText(PesterText):
     def __init__(self, theme, parent=None):
-        super(MemoText, self).__init__(theme, parent)
+        super().__init__(theme, parent)
         if hasattr(self.parent(), "mainwindow"):
             self.mainwindow = self.parent().mainwindow
         else:
@@ -1590,7 +1590,7 @@ class PesterMemo(PesterConvo):
                     t = self.times[h]
                     grammar = t.getGrammar()
                     allinitials.append(
-                        "%s%s%s" % (grammar.pcf, chum.initials(), grammar.number)
+                        "{}{}{}".format(grammar.pcf, chum.initials(), grammar.number)
                     )
                     self.times[h].removeTime(t.getTime())
                 if update == "netsplit":
@@ -1640,7 +1640,7 @@ class PesterMemo(PesterConvo):
             while ttracker.getTime() is not None:
                 grammar = ttracker.getGrammar()
                 allinitials.append(
-                    "%s%s%s" % (grammar.pcf, chum.initials(), grammar.number)
+                    "{}{}{}".format(grammar.pcf, chum.initials(), grammar.number)
                 )
                 ttracker.removeTime(ttracker.getTime())
             msg = chum.memobanmsg(opchum, opgrammar, systemColor, allinitials, reason)
@@ -1873,7 +1873,7 @@ class PesterMemo(PesterConvo):
         )
         if ok:
             self.mainwindow.kickUser.emit(
-                "%s:%s" % (currentHandle, reason), self.channel
+                "{}:{}".format(currentHandle, reason), self.channel
             )
 
     @QtCore.pyqtSlot()

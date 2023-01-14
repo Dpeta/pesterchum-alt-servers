@@ -25,7 +25,7 @@ _datadir = ostools.getDataDir()
 PchumLog = logging.getLogger("pchumLogger")
 
 
-class PesterLog(object):
+class PesterLog:
     def __init__(self, handle, parent=None):
         global _datadir
         self.parent = parent
@@ -66,10 +66,12 @@ class PesterLog(object):
                 self.convos[handle] = {}
                 for (format, t) in modes.items():
                     if not os.path.exists(
-                        "%s/%s/%s/%s" % (self.logpath, self.handle, handle, format)
+                        "{}/{}/{}/{}".format(self.logpath, self.handle, handle, format)
                     ):
                         os.makedirs(
-                            "%s/%s/%s/%s" % (self.logpath, self.handle, handle, format)
+                            "{}/{}/{}/{}".format(
+                                self.logpath, self.handle, handle, format
+                            )
                         )
                     fp = codecs.open(
                         "%s/%s/%s/%s/%s.%s.txt"
@@ -94,7 +96,7 @@ class PesterLog(object):
             #    for (format, t) in modes.items():
             #        self.finish(handle)
 
-        except (IOError, OSError, KeyError, IndexError, ValueError) as e:
+        except (OSError, KeyError, IndexError, ValueError) as e:
             # Catching this exception does not stop pchum from dying if we run out of file handles </3
             PchumLog.critical(e)
             errmsg = QtWidgets.QMessageBox()
@@ -125,7 +127,7 @@ class PesterLog(object):
                 f.close()
 
 
-class userConfig(object):
+class userConfig:
     def __init__(self, parent):
         self.parent = parent
         # Use for bit flag log setting
@@ -184,9 +186,9 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         if not os.path.exists(self.logpath):
             os.makedirs(self.logpath)
         try:
-            with open("%s/groups.js" % (self.logpath), "r") as fp:
+            with open("%s/groups.js" % (self.logpath)) as fp:
                 self.groups = json.load(fp)
-        except (IOError, ValueError):
+        except (OSError, ValueError):
             self.groups = {}
             with open("%s/groups.js" % (self.logpath), "w") as fp:
                 json.dump(self.groups, fp)
@@ -442,7 +444,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         if hasattr(self.parent, "serverOverride"):
             return self.parent.serverOverride
         try:
-            with open(_datadir + "server.json", "r") as server_file:
+            with open(_datadir + "server.json") as server_file:
                 read_file = server_file.read()
                 server_file.close()
                 server_obj = json.loads(read_file)
@@ -465,7 +467,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         if hasattr(self.parent, "portOverride"):
             return self.parent.portOverride
         try:
-            with open(_datadir + "server.json", "r") as server_file:
+            with open(_datadir + "server.json") as server_file:
                 read_file = server_file.read()
                 server_file.close()
                 server_obj = json.loads(read_file)
@@ -478,7 +480,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         # if hasattr(self.parent, 'tlsOverride'):
         #    return self.parent.tlsOverride
         try:
-            with open(_datadir + "server.json", "r") as server_file:
+            with open(_datadir + "server.json") as server_file:
                 read_file = server_file.read()
                 server_file.close()
                 server_obj = json.loads(read_file)
@@ -575,7 +577,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
                     + "</a>"
                     + "<br><br>"
                     + str(e)
-                    + "<\h3><\html>"
+                    + r"<\h3><\html>"
                 )
                 # "\" if pesterchum acts oddly you might want to try backing up and then deleting \"" + \
                 # _datadir+"pesterchum.js" + \
@@ -586,7 +588,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         return [userProfile(p) for p in profs]
 
 
-class userProfile(object):
+class userProfile:
     def __init__(self, user):
         self.profiledir = _datadir + "profiles"
 
@@ -607,8 +609,8 @@ class userProfile(object):
             if len(initials) >= 2:
                 initials = (
                     initials,
-                    "%s%s" % (initials[0].lower(), initials[1]),
-                    "%s%s" % (initials[0], initials[1].lower()),
+                    "{}{}".format(initials[0].lower(), initials[1]),
+                    "{}{}".format(initials[0], initials[1].lower()),
                 )
                 self.mentions = [r"\b(%s)\b" % ("|".join(initials))]
             else:
@@ -621,7 +623,7 @@ class userProfile(object):
             #     u'XXX\\AppData\\Local\\pesterchum/profiles/XXX.js'
             # Part 3 :(
             try:
-                with open("%s/%s.js" % (self.profiledir, user)) as fp:
+                with open("{}/{}.js".format(self.profiledir, user)) as fp:
                     self.userprofile = json.load(fp)
             except (json.JSONDecodeError, FileNotFoundError) as e:
                 msgBox = QtWidgets.QMessageBox()
@@ -641,7 +643,7 @@ class userProfile(object):
                     + "<br><br>If you got this message at launch you may want to change your default profile."
                     + "<br><br>"
                     + str(e)
-                    + "<\h3><\html>"
+                    + r"<\h3><\html>"
                 )
                 # "\" if pesterchum acts oddly you might want to try backing up and then deleting \"" + \
                 # _datadir+"pesterchum.js" + \
@@ -671,8 +673,8 @@ class userProfile(object):
                 if len(initials) >= 2:
                     initials = (
                         initials,
-                        "%s%s" % (initials[0].lower(), initials[1]),
-                        "%s%s" % (initials[0], initials[1].lower()),
+                        "{}{}".format(initials[0].lower(), initials[1]),
+                        "{}{}".format(initials[0], initials[1].lower()),
                     )
                     self.userprofile["mentions"] = [r"\b(%s)\b" % ("|".join(initials))]
                 else:
@@ -738,7 +740,7 @@ class userProfile(object):
             for (i, m) in enumerate(mentions):
                 re.compile(m)
         except re.error as e:
-            PchumLog.error("#%s Not a valid regular expression: %s" % (i, e))
+            PchumLog.error("#{} Not a valid regular expression: {}".format(i, e))
         else:
             self.mentions = mentions
             self.userprofile["mentions"] = mentions
@@ -792,7 +794,7 @@ class userProfile(object):
             jsonoutput = json.dumps(self.userprofile)
         except ValueError as e:
             raise e
-        with open("%s/%s.js" % (self.profiledir, handle), "w") as fp:
+        with open("{}/{}.js".format(self.profiledir, handle), "w") as fp:
             fp.write(jsonoutput)
 
     def saveNickServPass(self):
@@ -809,7 +811,7 @@ class userProfile(object):
 
     @staticmethod
     def newUserProfile(chatprofile):
-        if os.path.exists("%s/%s.js" % (_datadir + "profiles", chatprofile.handle)):
+        if os.path.exists("{}/{}.js".format(_datadir + "profiles", chatprofile.handle)):
             newprofile = userProfile(chatprofile.handle)
         else:
             newprofile = userProfile(chatprofile)
@@ -824,9 +826,9 @@ class PesterProfileDB(dict):
         if not os.path.exists(self.logpath):
             os.makedirs(self.logpath)
         try:
-            with open("%s/chums.js" % (self.logpath), "r") as fp:
+            with open("%s/chums.js" % (self.logpath)) as fp:
                 chumdict = json.load(fp)
-        except (IOError, ValueError):
+        except (OSError, ValueError):
             # karxi: This code feels awfully familiar....
             chumdict = {}
             with open("%s/chums.js" % (self.logpath), "w") as fp:
@@ -926,7 +928,7 @@ class pesterTheme(dict):
         try:
             with open(self.path + "/style.js") as fp:
                 theme = json.load(fp, object_hook=self.pathHook)
-        except IOError:
+        except OSError:
             theme = json.loads("{}")
         self.update(theme)
         if "inherits" in self:
@@ -937,7 +939,7 @@ class pesterTheme(dict):
     def __getitem__(self, key):
         keys = key.split("/")
         try:
-            v = super(pesterTheme, self).__getitem__(keys.pop(0))
+            v = super().__getitem__(keys.pop(0))
         except KeyError as e:
             if hasattr(self, "inheritedTheme"):
                 return self.inheritedTheme[key]
@@ -967,7 +969,7 @@ class pesterTheme(dict):
     def get(self, key, default):
         keys = key.split("/")
         try:
-            v = super(pesterTheme, self).__getitem__(keys.pop(0))
+            v = super().__getitem__(keys.pop(0))
             for k in keys:
                 v = v[k]
             return default if v is None else v
@@ -980,7 +982,7 @@ class pesterTheme(dict):
     def has_key(self, key):
         keys = key.split("/")
         try:
-            v = super(pesterTheme, self).__getitem__(keys.pop(0))
+            v = super().__getitem__(keys.pop(0))
             for k in keys:
                 v = v[k]
             return v is not None
