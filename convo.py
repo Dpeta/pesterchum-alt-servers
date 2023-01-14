@@ -11,7 +11,6 @@ except ImportError:
     from PyQt5 import QtCore, QtGui, QtWidgets
     from PyQt5.QtWidgets import QAction, QShortcut
 
-import ostools
 from dataobjs import PesterHistory
 from parsetools import convertTags, lexMessage, mecmd, colorBegin, colorEnd, smiledict
 import parsetools

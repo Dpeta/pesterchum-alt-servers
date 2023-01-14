@@ -10,7 +10,6 @@ except ImportError:
     print("PyQt5 fallback (irc.py)")
     from PyQt5 import QtCore, QtGui
 
-import ostools
 from mood import Mood
 from dataobjs import PesterProfile
 from generic import PesterList

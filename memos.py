@@ -11,7 +11,6 @@ except ImportError:
     from PyQt5 import QtCore, QtGui, QtWidgets
     from PyQt5.QtWidgets import QAction
 
-import ostools
 import parsetools
 from dataobjs import PesterProfile, PesterHistory
 from generic import PesterIcon, RightClickList, mysteryTime

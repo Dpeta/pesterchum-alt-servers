@@ -1,5 +1,4 @@
 import logging
-import ostools
 
 PchumLog = logging.getLogger("pchumLogger")
 try:

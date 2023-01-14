@@ -11,7 +11,6 @@ except ImportError:
     from PyQt5 import QtGui, QtWidgets
 
 import dataobjs
-import ostools
 
 # karxi: My own contribution to this - a proper lexer.
 import pnc.lexercon as lexercon

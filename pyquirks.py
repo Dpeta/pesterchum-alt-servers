@@ -7,7 +7,6 @@ except ImportError:
     print("PyQt5 fallback (pyquirks.py)")
     from PyQt5 import QtWidgets
 
-import ostools
 from quirks import ScriptQuirks
 
 PchumLog = logging.getLogger("pchumLogger")

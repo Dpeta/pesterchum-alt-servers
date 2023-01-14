@@ -60,11 +60,11 @@ from toast import PesterToastMachine, PesterToast
 
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets
-    from PyQt6.QtGui import QShortcut, QAction, QActionGroup
+    from PyQt6.QtGui import QAction, QActionGroup
 except ImportError:
     print("PyQt5 fallback (pesterchum.py)")
     from PyQt5 import QtCore, QtGui, QtWidgets
-    from PyQt5.QtWidgets import QAction, QShortcut, QActionGroup
+    from PyQt5.QtWidgets import QAction, QActionGroup
 
 # Data directory
 ostools.validateDataDir()

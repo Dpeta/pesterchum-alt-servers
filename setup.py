@@ -2,7 +2,6 @@
 import sys
 
 from cx_Freeze import setup, Executable
-import pygame
 
 from version import buildVersion
 
