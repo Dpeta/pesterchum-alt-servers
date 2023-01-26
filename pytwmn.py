@@ -40,16 +40,16 @@ def init(host="127.0.0.1", port=None):
                     if line.startswith("port=") and line[5:-1].isdigit():
                         port = int(line[5:-1])
                         break
-        except IOError:
+        except OSError:
             raise TwmnError(TwmnError.NO_CONF)
-    if type(port) == type(str()):
+    if type(port) == type(""):
         port = int(port)
     global s
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect((host, port))
 
 
-class Notification(object):
+class Notification:
     def __init__(self, title="", msg="", icon=""):
         self.title = str(title)
         self.msg = str(msg)

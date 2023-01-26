@@ -1,13 +1,13 @@
 try:
-    from PyQt6 import QtCore, QtGui, QtWidgets
+    from PyQt6 import QtCore, QtWidgets
 except ImportError:
     print("PyQt5 fallback (mood.py)")
-    from PyQt5 import QtCore, QtGui, QtWidgets
+    from PyQt5 import QtCore, QtWidgets
 
 from generic import PesterIcon
 
 
-class Mood(object):
+class Mood:
     moods = [
         "chummy",
         "rancorous",

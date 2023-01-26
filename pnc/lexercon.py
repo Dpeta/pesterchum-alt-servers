@@ -1,6 +1,3 @@
-# -*- coding=UTF-8; tab-width: 4 -*-
-
-
 from .unicolor import Color
 
 import re
@@ -20,7 +17,7 @@ except NameError:
 # function appropriate to the given format - e.g. CTag.convert_pchum.
 
 
-class Lexeme(object):
+class Lexeme:
     def __init__(self, string, origin):
         # The 'string' property is just what it came from; the original
         # representation. It doesn't have to be used, and honestly probably
@@ -104,7 +101,7 @@ class CTag(Specifier):
     sets_color = True
 
     def __init__(self, string, origin, color):
-        super(CTag, self).__init__(string, origin)
+        super().__init__(string, origin)
         # So we can also have None
         if isinstance(color, tuple):
             if len(color) < 2:
@@ -256,7 +253,7 @@ class SpecifierEnd(CTagEnd, FTagEnd):
 # .sets_color to False
 
 
-class Lexer(object):
+class Lexer:
     # Subclasses need to supply a ref themselves
     ref = None
     compress_tags = False

@@ -1,5 +1,4 @@
 import os
-import sys
 import codecs
 import re
 import ostools
@@ -65,8 +64,8 @@ class PesterLogUserSelect(QtWidgets.QDialog):
 
         instructions = QtWidgets.QLabel("Pick a memo or chumhandle:")
 
-        if os.path.exists("%s/%s" % (self.logpath, self.handle)):
-            chumMemoList = os.listdir("%s/%s/" % (self.logpath, self.handle))
+        if os.path.exists("{}/{}".format(self.logpath, self.handle)):
+            chumMemoList = os.listdir("{}/{}/".format(self.logpath, self.handle))
         else:
             chumMemoList = []
         chumslist = config.chums()
@@ -166,17 +165,17 @@ class PesterLogViewer(QtWidgets.QDialog):
 
         self.format = "bbcode"
         if os.path.exists(
-            "%s/%s/%s/%s" % (self.logpath, self.handle, chum, self.format)
+            "{}/{}/{}/{}".format(self.logpath, self.handle, chum, self.format)
         ):
             self.logList = os.listdir(
-                "%s/%s/%s/%s/" % (self.logpath, self.handle, self.chum, self.format)
+                "{}/{}/{}/{}/".format(self.logpath, self.handle, self.chum, self.format)
             )
         else:
             self.logList = []
 
         if (
             not os.path.exists(
-                "%s/%s/%s/%s" % (self.logpath, self.handle, chum, self.format)
+                "{}/{}/{}/{}".format(self.logpath, self.handle, chum, self.format)
             )
             or len(self.logList) == 0
         ):
@@ -248,7 +247,7 @@ class PesterLogViewer(QtWidgets.QDialog):
             for (i, l) in enumerate(self.logList):
                 my = self.fileToMonthYear(l)
                 if my[0] != last[0]:
-                    child_1 = QtWidgets.QTreeWidgetItem(["%s %s" % (my[0], my[1])])
+                    child_1 = QtWidgets.QTreeWidgetItem(["{} {}".format(my[0], my[1])])
                     # child_1.setForeground(0, blackbrush)
                     self.tree.addTopLevelItem(child_1)
                     if i == 0:
@@ -313,7 +312,7 @@ class PesterLogViewer(QtWidgets.QDialog):
                 .replace("[url]", "")
                 .replace("[/url]", "")
             )
-            cline = re.sub("\[color=(#.{6})]", r"<c=\1>", cline)
+            cline = re.sub(r"\[color=(#.{6})]", r"<c=\1>", cline)
             self.textArea.append(convertTags(cline))
         textCur = self.textArea.textCursor()
         # textCur.movePosition(1)

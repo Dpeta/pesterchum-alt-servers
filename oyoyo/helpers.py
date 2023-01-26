@@ -46,13 +46,13 @@ def channel_list(cli):
 
 
 def kick(cli, handle, channel, reason=""):
-    cli.send("KICK %s %s %s" % (channel, handle, reason))
+    cli.send("KICK {} {} {}".format(channel, handle, reason))
 
 
 def mode(cli, channel, mode, options=None):
     PchumLog.debug("mode = " + str(mode))
     PchumLog.debug("options = " + str(options))
-    cmd = "MODE %s %s" % (channel, mode)
+    cmd = "MODE {} {}".format(channel, mode)
     if options:
         cmd += " %s" % (options)
     cli.send(cmd)
@@ -63,11 +63,11 @@ def ctcp(cli, handle, cmd, msg=""):
     if msg == "":
         cli.send("PRIVMSG", handle, "\x01%s\x01" % (cmd))
     else:
-        cli.send("PRIVMSG", handle, "\x01%s %s\x01" % (cmd, msg))
+        cli.send("PRIVMSG", handle, "\x01{} {}\x01".format(cmd, msg))
 
 
 def ctcp_reply(cli, handle, cmd, msg=""):
-    notice(cli, str(handle), "\x01%s %s\x01" % (cmd.upper(), msg))
+    notice(cli, str(handle), "\x01{} {}\x01".format(cmd.upper(), msg))
 
 
 def metadata(cli, target, subcommand, *params):
@@ -116,34 +116,29 @@ def quit(cli, msg):
     cli.send("QUIT %s" % (msg))
 
 
+def nick(cli, nick):
+    cli.send("NICK", nick)
+
+
 def user(cli, username, realname):
     cli.send("USER", username, "0", "*", ":" + realname)
 
 
-_simple = (
-    "join",
-    "part",
-    "nick",
-    "notice",
-    "invite",
-)
+def join(cli, channel):
+    """Protocol potentially allows multiple channels or keys."""
+    cli.send("JOIN", channel)
 
 
-def _addsimple():
-    import sys
-
-    def simplecmd(cmd_name):
-        def f(cli, *args):
-            cli.send(cmd_name, *args)
-
-        return f
-
-    m = sys.modules[__name__]
-    for t in _simple:
-        setattr(m, t, simplecmd(t.upper()))
+def part(cli, channel):
+    cli.send("PART", channel)
 
 
-_addsimple()
+def notice(cli, target, text):
+    cli.send("NOTICE", target, text)
+
+
+def invite(cli, nick, channel):
+    cli.send("INVITE", nick, channel)
 
 
 def _addNumerics():

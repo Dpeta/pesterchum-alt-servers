@@ -2,7 +2,6 @@ import logging
 import socket
 import random
 import time
-import json
 import ssl
 
 try:
@@ -11,7 +10,6 @@ except ImportError:
     print("PyQt5 fallback (irc.py)")
     from PyQt5 import QtCore, QtGui
 
-import ostools
 from mood import Mood
 from dataobjs import PesterProfile
 from generic import PesterList
@@ -96,10 +94,10 @@ class PesterIRC(QtCore.QThread):
             except socket.timeout as se:
                 PchumLog.debug("timeout in thread %s" % (self))
                 self.cli.close()
-                self.stopIRC = "%s, %s" % (type(se), se)
+                self.stopIRC = "{}, {}".format(type(se), se)
                 return
             except (OSError, IndexError, ValueError) as se:
-                self.stopIRC = "%s, %s" % (type(se), se)
+                self.stopIRC = "{}, {}".format(type(se), se)
                 PchumLog.debug("socket error, exiting thread")
                 return
             else:
@@ -372,7 +370,7 @@ class PesterIRC(QtCore.QThread):
                 reason = str(l[1])
                 if len(l) > 2:
                     for x in l[2:]:
-                        reason += str(":") + str(x)
+                        reason += ":" + str(x)
             else:
                 reason = ""
             try:
@@ -387,7 +385,7 @@ class PesterIRC(QtCore.QThread):
             c = str(channel)
             m = str(mode)
             cmd = str(command)
-            PchumLog.debug("c=%s\nm=%s\ncmd=%s" % (c, m, cmd))
+            PchumLog.debug("c={}\nm={}\ncmd={}".format(c, m, cmd))
             if cmd == "":
                 cmd = None
             try:
@@ -483,7 +481,7 @@ class PesterIRC(QtCore.QThread):
 class PesterHandler(DefaultCommandHandler):
     def notice(self, nick, chan, msg):
         handle = nick[0 : nick.find("!")]
-        PchumLog.info('---> recv "NOTICE %s :%s"' % (handle, msg))
+        PchumLog.info('---> recv "NOTICE {} :{}"'.format(handle, msg))
         if (
             handle == "ChanServ"
             and chan == self.parent.mainwindow.profile().handle
@@ -501,13 +499,13 @@ class PesterHandler(DefaultCommandHandler):
                 mood = Mood(int(value))
                 self.parent.moodUpdated.emit(nick, mood)
             except ValueError:
-                PchumLog.warning("Invalid mood value, %s, %s" % (nick, mood))
+                PchumLog.warning("Invalid mood value, {}, {}".format(nick, mood))
         elif key.lower() == "color":
             color = QtGui.QColor(value)  # Invalid color becomes rgb 0,0,0
             self.parent.colorUpdated.emit(nick, color)
 
     def tagmsg(self, prefix, tags, *args):
-        PchumLog.info("TAGMSG: %s %s %s" % (prefix, tags, str(args)))
+        PchumLog.info("TAGMSG: {} {} {}".format(prefix, tags, str(args)))
         message_tags = tags[1:].split(";")
         for m in message_tags:
             if m.startswith("+pesterchum"):
@@ -516,7 +514,7 @@ class PesterHandler(DefaultCommandHandler):
                     key, value = m.split("=")
                 except ValueError:
                     return
-                PchumLog.info("Pesterchum tag: %s=%s" % (key, value))
+                PchumLog.info("Pesterchum tag: {}={}".format(key, value))
                 # PESTERCHUM: syntax check
                 if (
                     (value == "BEGIN")
@@ -563,7 +561,7 @@ class PesterHandler(DefaultCommandHandler):
             msg = "/me" + msg[7:-1]
         # CTCPs that don't need to be shown
         elif msg[0] == "\x01":
-            PchumLog.info('---> recv "CTCP %s :%s"' % (handle, msg[1:-1]))
+            PchumLog.info('---> recv "CTCP {} :{}"'.format(handle, msg[1:-1]))
             # VERSION, return version
             if msg[1:-1].startswith("VERSION"):
                 helpers.ctcp_reply(
@@ -609,7 +607,7 @@ class PesterHandler(DefaultCommandHandler):
 
         if chan != "#pesterchum":
             # We don't need anywhere near that much spam.
-            PchumLog.info('---> recv "PRIVMSG %s :%s"' % (handle, msg))
+            PchumLog.info('---> recv "PRIVMSG {} :{}"'.format(handle, msg))
 
         if chan == "#pesterchum":
             # follow instructions
@@ -740,7 +738,7 @@ class PesterHandler(DefaultCommandHandler):
                 self.parent.metadata_supported = True
 
     def cap(self, server, nick, subcommand, tag):
-        PchumLog.info("CAP %s %s %s %s" % (server, nick, subcommand, tag))
+        PchumLog.info("CAP {} {} {} {}".format(server, nick, subcommand, tag))
         # if tag == "message-tags":
         #    if subcommand == "ACK":
 
@@ -756,7 +754,7 @@ class PesterHandler(DefaultCommandHandler):
 
     def quit(self, nick, reason):
         handle = nick[0 : nick.find("!")]
-        PchumLog.info('---> recv "QUIT %s: %s"' % (handle, reason))
+        PchumLog.info('---> recv "QUIT {}: {}"'.format(handle, reason))
         if handle == self.parent.mainwindow.randhandler.randNick:
             self.parent.mainwindow.randhandler.setRunning(False)
         server = self.parent.mainwindow.config.server()
@@ -769,19 +767,21 @@ class PesterHandler(DefaultCommandHandler):
 
     def kick(self, opnick, channel, handle, reason):
         op = opnick[0 : opnick.find("!")]
-        self.parent.userPresentUpdate.emit(handle, channel, "kick:%s:%s" % (op, reason))
+        self.parent.userPresentUpdate.emit(
+            handle, channel, "kick:{}:{}".format(op, reason)
+        )
         # ok i shouldnt be overloading that but am lazy
 
     def part(self, nick, channel, reason="nanchos"):
         handle = nick[0 : nick.find("!")]
-        PchumLog.info('---> recv "PART %s: %s"' % (handle, channel))
+        PchumLog.info('---> recv "PART {}: {}"'.format(handle, channel))
         self.parent.userPresentUpdate.emit(handle, channel, "left")
         if channel == "#pesterchum":
             self.parent.moodUpdated.emit(handle, Mood("offline"))
 
     def join(self, nick, channel):
         handle = nick[0 : nick.find("!")]
-        PchumLog.info('---> recv "JOIN %s: %s"' % (handle, channel))
+        PchumLog.info('---> recv "JOIN {}: {}"'.format(handle, channel))
         self.parent.userPresentUpdate.emit(handle, channel, "join")
         if channel == "#pesterchum":
             if handle == self.parent.mainwindow.randhandler.randNick:
@@ -871,7 +871,6 @@ class PesterHandler(DefaultCommandHandler):
                             PchumLog.warning(
                                 "Can't remove channel mode that isn't set."
                             )
-                            pass
                     self.parent.userPresentUpdate.emit(
                         "", channel, channel_mode + ":%s" % (op)
                     )
@@ -887,7 +886,7 @@ class PesterHandler(DefaultCommandHandler):
             if l in ["+", "-"]:
                 cur = l
             else:
-                modes.append("%s%s" % (cur, l))
+                modes.append("{}{}".format(cur, l))
         PchumLog.debug("handles=" + str(handles))
         PchumLog.debug("enumerate(modes) = " + str(list(enumerate(modes))))
         for (i, m) in enumerate(modes):
@@ -911,7 +910,7 @@ class PesterHandler(DefaultCommandHandler):
             # self.parent.userPresentUpdate.emit("", channel, m+":%s" % (op))
 
     def nick(self, oldnick, newnick, hopcount=0):
-        PchumLog.info("%s, %s" % (oldnick, newnick))
+        PchumLog.info("{}, {}".format(oldnick, newnick))
         # svsnick
         if oldnick == self.mainwindow.profile().handle:
             # Server changed our handle, svsnick?
@@ -926,7 +925,9 @@ class PesterHandler(DefaultCommandHandler):
             self.parent.myHandleChanged.emit(newnick)
         newchum = PesterProfile(newnick, chumdb=self.mainwindow.chumdb)
         self.parent.moodUpdated.emit(oldhandle, Mood("offline"))
-        self.parent.userPresentUpdate.emit("%s:%s" % (oldhandle, newnick), "", "nick")
+        self.parent.userPresentUpdate.emit(
+            "{}:{}".format(oldhandle, newnick), "", "nick"
+        )
         if newnick in self.mainwindow.chumList.chums:
             self.getMood(newchum)
         if oldhandle == self.parent.mainwindow.randhandler.randNick:

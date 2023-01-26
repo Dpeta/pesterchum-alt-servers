@@ -1,4 +1,3 @@
-# -*- coding=UTF-8; tab-width: 4 -*-
 # Heavily modified version of the code featured at the given link
 ## {{{ http://code.activestate.com/recipes/473786/ (r1)
 class AttrDict(dict):
@@ -11,7 +10,7 @@ class AttrDict(dict):
     Overload _is_reserved if you want to change this."""
 
     def __init__(self, init={}):
-        super(AttrDict, self).__init__(init)
+        super().__init__(init)
 
     def __getstate__(self):
         return list(self.__dict__.items())
@@ -21,16 +20,16 @@ class AttrDict(dict):
             self.__dict__[key] = val
 
     def __repr__(self):
-        return "{0}({1})".format(type(self).__name__, super(AttrDict, self).__repr__())
+        return f"{type(self).__name__}({super().__repr__()})"
 
     def __setitem__(self, name, value):
-        return super(AttrDict, self).__setitem__(name, value)
+        return super().__setitem__(name, value)
 
     def __getitem__(self, name):
-        return super(AttrDict, self).__getitem__(name)
+        return super().__getitem__(name)
 
     def __delitem__(self, name):
-        return super(AttrDict, self).__delitem__(name)
+        return super().__delitem__(name)
 
     def __getattr__(self, name):
         # NOTE: __getattr__ is called if the code has already failed to access
@@ -50,7 +49,7 @@ class AttrDict(dict):
             # Raising KeyError here will confuse __deepcopy__, so don't do
             # that.
             # Throw a custom error.
-            raise AttributeError("No key/attr {0!r}".format(name))
+            raise AttributeError(f"No key/attr {name!r}")
         return result
 
     def __setattr__(self, name, value):
@@ -68,7 +67,7 @@ class AttrDict(dict):
             # in this particular function?...
             return object.__setattr__(self, name, value)
         else:
-            return super(AttrDict, self).__setitem__(name, value)
+            return super().__setitem__(name, value)
 
     def __delattr__(self, name):
         # We very *specifically* use self.__dict__ here, because we couldn't
@@ -106,10 +105,10 @@ class DefAttrDict(AttrDict):
 
     def __init__(self, default_factory=None, *args, **kwargs):
         self.default_factory = default_factory
-        super(DefAttrDict, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __repr__(self):
-        return "{0}({1!r}, {2})".format(
+        return "{}({!r}, {})".format(
             type(self).__name__,
             self.default_factory,
             # We skip normal processing here, since AttrDict provides basic
@@ -119,7 +118,7 @@ class DefAttrDict(AttrDict):
 
     def __getitem__(self, name):
         try:
-            result = super(DefAttrDict, self).__getitem__(name)
+            result = super().__getitem__(name)
         except KeyError:
             result = None
             if self.default_factory is not None:
@@ -129,7 +128,7 @@ class DefAttrDict(AttrDict):
 
     def __getattr__(self, name):
         try:
-            result = super(DefAttrDict, self).__getattr__(name)
+            result = super().__getattr__(name)
         except AttributeError:
             # Detect special/reserved names.
             if self._is_reserved(name):

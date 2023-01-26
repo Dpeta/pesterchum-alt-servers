@@ -44,7 +44,7 @@ class ProtectedCommandError(CommandError):
         return 'Command "%s" is protected' % ".".join(self.cmd)
 
 
-class CommandHandler(object):
+class CommandHandler:
     """The most basic CommandHandler"""
 
     def __init__(self, client):
@@ -91,7 +91,7 @@ class CommandHandler(object):
         arguments_str = ""
         for x in args:
             arguments_str += str(x) + " "
-        PchumLog.debug("processCommand %s(%s)" % (command, arguments_str.strip()))
+        PchumLog.debug("processCommand {}({})".format(command, arguments_str.strip()))
 
         try:
             f = self.get(command)
@@ -118,7 +118,7 @@ class CommandHandler(object):
         """The default handler for commands. Override this method to
         apply custom behavior (example, printing) unhandled commands.
         """
-        PchumLog.debug("unhandled command %s(%s)" % (cmd, args))
+        PchumLog.debug("unhandled command {}({})".format(cmd, args))
 
 
 class DefaultCommandHandler(CommandHandler):
@@ -150,7 +150,7 @@ class DefaultBotCommandHandler(CommandHandler):
 
     def help(self, sender, dest, arg=None):
         """list all available commands or get help on a specific command"""
-        PchumLog.info("help sender=%s dest=%s arg=%s" % (sender, dest, arg))
+        PchumLog.info("help sender={} dest={} arg={}".format(sender, dest, arg))
         if not arg:
             commands = self.getVisibleCommands()
             commands.sort()
@@ -171,7 +171,7 @@ class DefaultBotCommandHandler(CommandHandler):
                 if subcommands:
                     doc += " [sub commands: %s]" % " ".join(subcommands)
 
-            helpers.msg(self.client, dest, "%s: %s" % (arg, doc))
+            helpers.msg(self.client, dest, "{}: {}".format(arg, doc))
 
 
 class BotCommandHandler(DefaultCommandHandler):
@@ -190,7 +190,7 @@ class BotCommandHandler(DefaultCommandHandler):
         and calls self.processBotCommand(cmd, sender) if its is.
         """
 
-        PchumLog.debug("tryBotCommand('%s' '%s' '%s')" % (prefix, dest, msg))
+        PchumLog.debug("tryBotCommand('{}' '{}' '{}')".format(prefix, dest, msg))
 
         if dest == self.client.nick:
             dest = parse_nick(prefix)[0]

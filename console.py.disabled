@@ -1,3 +1,4 @@
+"""
 # vim: set autoindent ts=4 sts=4 sw=4 textwidth=79 expandtab:
 # -*- coding=UTF-8; tab-width: 4 -*-
 # import os
@@ -550,3 +551,4 @@ class ConsoleInput(QtWidgets.QLineEdit):
             parent.text.area.keyPressEvent(event)
         else:
             super(ConsoleInput, self).keyPressEvent(event)
+"""

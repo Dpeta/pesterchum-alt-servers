@@ -6,7 +6,6 @@ except ImportError:
     print("PyQt5 fallback (randomer.py)")
     from PyQt5 import QtCore, QtWidgets
 
-import ostools
 
 PchumLog = logging.getLogger("pchumLogger")
 

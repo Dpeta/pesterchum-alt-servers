@@ -1,6 +1,3 @@
-# -*- coding=UTF-8; tab-width: 4 -*-
-
-
 __all__ = ["Color"]
 
 # karxi: Copied from my old Textsub script. Please forgive the mess, and keep
@@ -26,7 +23,7 @@ else:
 LabTuple = collections.namedtuple("LabTuple", ["L", "a", "b"])
 
 
-class Color(object):
+class Color:
     # The threshold at which to consider two colors noticeably different, even
     # if only barely
     jnd = 2.3
@@ -145,7 +142,7 @@ class Color(object):
 
     def __repr__(self):
         ##return "%s(%r)" % (type(self).__name__, str(self))
-        return "%s(%r)" % (type(self).__name__, self.reduce_hexstr(self.hexstr))
+        return "{}({!r})".format(type(self).__name__, self.reduce_hexstr(self.hexstr))
 
     def __str__(self):
         ##return self.reduce_hexstr(self.hexstr)
@@ -158,8 +155,7 @@ class Color(object):
 
     def __iter__(self):
         targs = (self.red, self.green, self.blue)
-        for t in targs:
-            yield t
+        yield from targs
         # If we got here, we're out of attributes to provide
         raise StopIteration
 

@@ -7,7 +7,7 @@ _datadir = ostools.getDataDir()
 PchumLog = logging.getLogger("pchumLogger")
 
 
-class ScriptQuirks(object):
+class ScriptQuirks:
     def __init__(self):
         self._datadir = ostools.getDataDir()
         self.home = os.getcwd()
@@ -73,7 +73,9 @@ class ScriptQuirks(object):
                     continue
             except Exception as e:
                 PchumLog.warning(
-                    "Error loading %s: %s (in quirks.py)" % (os.path.basename(name), e)
+                    "Error loading {}: {} (in quirks.py)".format(
+                        os.path.basename(name), e
+                    )
                 )
             else:
                 if self.modHas(module, "setup"):
