@@ -17,6 +17,8 @@ if os.path.dirname(sys.argv[0]):
 import ostools
 import nickservmsgs
 import pytwmn
+if ostools.isLinux():
+    import libseccomp
 
 # import console
 from pnc.dep.attrdict import AttrDict
@@ -105,6 +107,17 @@ parser.add_argument(
 parser.add_argument(
     "--nohonk", action="store_true", help="Disables the honk soundeffect 🤡📣"
 )
+if ostools.isLinux():
+    parser.add_argument(
+        "--seccomp",
+        action="store_true",
+        help=(
+            "Restrict the system calls Pesterchum is allowed to make via seccomp."
+            " May have some security benefits, but since Python and Qt use many calls"
+            " and are pretty high-level, things are very prone to breaking."
+            " (Requires Linux and libseccomp's Python bindings, not available in frozen builds.)"
+        ),
+    )
 
 # Set logging config section, log level is in oppts.
 # Logger
@@ -1388,6 +1401,10 @@ class PesterWindow(MovingWindow):
             self.honk = options["honk"]
         else:
             self.honk = True
+        # Activate seccomp if enabled
+        if "seccomp" in options:
+            if options["seccomp"]:
+                libseccomp.activate_seccomp()
         self.modes = ""
 
         self.sound_type = None
@@ -4548,6 +4565,10 @@ class MainProgram(QtCore.QObject):
             # Disable honks
             if args.nohonk:
                 options["honk"] = False
+            if ostools.isLinux():
+                if args.seccomp:
+                    options["seccomp"] = True
+                    
         except Exception as e:
             print(e)
             return options
