@@ -17,6 +17,7 @@ if os.path.dirname(sys.argv[0]):
 import ostools
 import nickservmsgs
 import pytwmn
+
 if ostools.isLinux():
     import libseccomp
 
@@ -113,8 +114,9 @@ if ostools.isLinux():
         action="store_true",
         help=(
             "Restrict the system calls Pesterchum is allowed to make via seccomp."
-            " May have some security benefits, but since Python and Qt use many calls"
-            " and are pretty high-level, things are very prone to breaking."
+            " Has some security benefits, but since Python and Qt use many calls"
+            " and are pretty high-level, things are prone to breaking."
+            " Certain features like opening links always break."
             " (Requires Linux and libseccomp's Python bindings, not available in frozen builds.)"
         ),
     )
@@ -1401,10 +1403,6 @@ class PesterWindow(MovingWindow):
             self.honk = options["honk"]
         else:
             self.honk = True
-        # Activate seccomp if enabled
-        if "seccomp" in options:
-            if options["seccomp"]:
-                libseccomp.activate_seccomp()
         self.modes = ""
 
         self.sound_type = None
@@ -1693,6 +1691,11 @@ class PesterWindow(MovingWindow):
         self.pingtimer.timeout.connect(self.checkPing)
         self.sincerecv = 0  # Time since last recv
         self.lastCheckPing = None
+
+        # Activate seccomp on Linux if enabled
+        if "seccomp" in options:
+            if options["seccomp"]:
+                libseccomp.activate_seccomp()
 
     @QtCore.pyqtSlot(QString, QString)
     def updateMsg(self, ver, url):
@@ -4568,7 +4571,7 @@ class MainProgram(QtCore.QObject):
             if ostools.isLinux():
                 if args.seccomp:
                     options["seccomp"] = True
-                    
+
         except Exception as e:
             print(e)
             return options
