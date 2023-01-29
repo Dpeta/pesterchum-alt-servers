@@ -9,6 +9,7 @@ import random
 import re
 import time
 import json
+import ctypes
 
 # Set working directory
 if os.path.dirname(sys.argv[0]):
@@ -110,7 +111,7 @@ parser.add_argument(
 )
 if ostools.isLinux():
     parser.add_argument(
-        "--seccomp",
+        "--strict-seccomp",
         action="store_true",
         help=(
             "Restrict the system calls Pesterchum is allowed to make via seccomp."
@@ -1383,6 +1384,9 @@ class PesterWindow(MovingWindow):
         # Silly guy prevention pt. 2
         # We really shouldn't run as root.
         self.root_check()
+        # Set no_new_privs bit on Linux.
+        if ostools.isLinux():
+            self.set_no_new_privs()
 
         # karxi: For the record, these are set via commandline arguments. By
         # default, they aren't usable any other way - you can't set them via
@@ -1693,9 +1697,15 @@ class PesterWindow(MovingWindow):
         self.lastCheckPing = None
 
         # Activate seccomp on Linux if enabled
-        if "seccomp" in options:
-            if options["seccomp"]:
-                libseccomp.activate_seccomp()
+        if ostools.isLinux():
+            try:
+                libseccomp.load_seccomp_blacklist()  # Load blacklist always
+                if "strict-seccomp" in options:
+                    if options["strict-seccomp"]:
+                        libseccomp.load_seccomp_whitelist()  # Load whitelist if enabled
+            except RuntimeError:
+                # We probably tried to interact with a call not available on this kernel.
+                PchumLog.exception("")
 
     @QtCore.pyqtSlot(QString, QString)
     def updateMsg(self, ver, url):
@@ -1723,11 +1733,11 @@ class PesterWindow(MovingWindow):
 
     def root_check(self):
         """Raise a warning message box if Pesterchum has admin/root privileges."""
-        if ostools.isRoot():
+        if ostools.isRoot() or ostools.isAdmin():
             msgbox = QtWidgets.QMessageBox()
             msg = (
                 "Running with elevated privileges, "
-                "this is potentially a security risk."
+                "this is a security risk and may break certain features."
                 "\nThere is no valid reason to run Pesterchum as an administrator or as root."
                 "\n\nQuit?"
             )
@@ -1751,10 +1761,27 @@ class PesterWindow(MovingWindow):
                 self.app.quit()  # Optional
                 sys.exit()
 
+    def set_no_new_privs(self):
+        """Set no_new_privs bit on Linux, disallows gaining more privileges.
+
+        For info see: https://www.kernel.org/doc/html/latest/userspace-api/no_new_privs.html
+        """
+        try:
+            libc = ctypes.CDLL(None)
+            # 38 is PR_SET_NO_NEW_PRIVS, see prctl.h in Linux kernel.
+            # To test, use PR_GET_NO_NEW_PRIVS: libc.prctl(39, 0, 0, 0, 0)
+            libc.prctl(38, 1, 0, 0, 0)
+            # Seems to work; strace output with PR_GET_NO_NEW_PRIVS calls:
+            # prctl(PR_GET_NO_NEW_PRIVS, 0, 0, 0, 0)  = 0
+            # prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)  = 0
+            # prctl(PR_GET_NO_NEW_PRIVS, 0, 0, 0, 0)  = 1
+        except (ctypes.ArgumentError, OSError):
+            # Exception is usually not raised even when the call fails.
+            PchumLog.exception("Failed to set no_new_privs bit.")
+
     @QtCore.pyqtSlot()
     def checkPing(self):
-        """Check if server is alive on app level,
-        this function is called every 15sec"""
+        """Check if server is alive on app level, this function is called every 15sec"""
         # Return without irc
         if not hasattr(self.parent, "irc"):
             self.lastCheckPing = None
@@ -4569,8 +4596,8 @@ class MainProgram(QtCore.QObject):
             if args.nohonk:
                 options["honk"] = False
             if ostools.isLinux():
-                if args.seccomp:
-                    options["seccomp"] = True
+                if args.strict_seccomp:
+                    options["strict-seccomp"] = True
 
         except Exception as e:
             print(e)

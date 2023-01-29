@@ -26,17 +26,19 @@ def isOSXBundle():
 
 
 def isRoot():
-    """Return True if running with elevated privileges."""
-    # Windows
+    """Return True if running as root on Linux/Mac/Misc"""
+    if hasattr(os, "getuid"):
+        return not os.getuid()  # 0 if root
+    return False
+
+
+def isAdmin():
+    """Return True if running as Admin on Windows."""
     try:
         if isWin32():
             return ctypes.windll.shell32.IsUserAnAdmin() == 1
     except OSError as win_issue:
         print(win_issue)
-    # Unix
-    if hasattr(os, "getuid"):
-        return not os.getuid()  # 0 if root
-    # Just assume it's fine otherwise ig
     return False
 
 
