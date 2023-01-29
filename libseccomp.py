@@ -1,12 +1,14 @@
-"""
-Applies a seccomp filter on Linux via libseccomp's Python bindings.
-Has some security benefits, but since Python and Qt use many calls
-and are pretty high-level, things are prone to breaking.
+"""Functions for Applying a seccomp filter on Linux.
 
+This prevents the process from using certain system calls, which has some security benefits.
+Since Python and Qt use many calls and are pretty high-level, things are prone to breaking though.
 Certain features like opening links almost always break.
 
-Libseccomp's Python bindings aren't available on the pypi, check your distro's
-package manager for python-libseccomp (Arch) or python3-seccomp (Debian).
+Uses libseccomp's Python bindings, which aren't available on the pypi.
+Check your distro's package manager for python-libseccomp (Arch) or python3-seccomp (Debian).
+
+For info on system calls referencing software that uses seccomp like firejail/flatpak is useful.
+Bindings documentation: https://github.com/seccomp/libseccomp/blob/main/src/python/seccomp.pyx
 """
 import os
 import logging
@@ -20,8 +22,36 @@ except ImportError:
 pesterchum_log = logging.getLogger("pchumLogger")
 
 
-def activate_seccomp():
-    """Sets the process into seccomp filter mode."""
+def load_seccomp_blacklist():
+    """Applies a selective seccomp filter only disallows certain risky calls.
+
+    Should be less likely to cause issues than a full-on whitelist."""
+    if seccomp is None:
+        pesterchum_log.warning(
+            "Failed to import seccomp, verify you have"
+            " python-libseccomp (Arch) or python3-seccomp (Debian) installed"
+            " and aren't running a pyinstaller build."
+        )
+        return
+    # Allows all calls by default.
+    sec_filter = seccomp.SyscallFilter(defaction=seccomp.ALLOW)
+
+    # Deny all socket domains other than AF_UNIX and and AF_INET.
+    sec_filter.add_rule(seccomp.ERRNO(1), "socket", seccomp.Arg(0, seccomp.LT, 1))
+    sec_filter.add_rule(seccomp.ERRNO(1), "socket", seccomp.Arg(0, seccomp.GT, 2))
+
+    # Fully deny these calls.
+    for call in CALL_BLACKLIST:
+        try:
+            sec_filter.add_rule(seccomp.ERRNO(1), call)
+        except RuntimeError:
+            pesterchum_log.warning("Failed to load deny '%s' call seccomp rule.", call)
+
+    sec_filter.load()
+
+
+def load_seccomp_whitelist():
+    """Applies a restrictive seccomp filter that disallows most calls by default."""
     if seccomp is None:
         pesterchum_log.error(
             "Failed to import seccomp, verify you have"
@@ -32,8 +62,11 @@ def activate_seccomp():
     # Violation gives "Operation not permitted".
     sec_filter = seccomp.SyscallFilter(defaction=seccomp.ERRNO(1))
     # Full access calls
-    for call in PCHUM_SYSTEM_CALLS:
-        sec_filter.add_rule(seccomp.ALLOW, call)
+    for call in CALL_WHITELIST:
+        try:
+            sec_filter.add_rule(seccomp.ALLOW, call)
+        except RuntimeError:
+            pesterchum_log.warning("Failed to load allow '%s' call seccomp rule.", call)
 
     # Allow only UNIX and INET sockets, see the linux manual and source on socket for reference.
     # Arg(0, seccomp.EQ, 1) means argument 0 must be equal to 1, 1 being the value of AF_UNIX.
@@ -48,7 +81,7 @@ def activate_seccomp():
         seccomp.ALLOW, "tgkill", seccomp.Arg(1, seccomp.EQ, threading.get_native_id())
     )
 
-    # Allow openat as along as it's not in R+W mode.
+    # Allow openat as long as it's not in R+W mode.
     # We can't really lock down open/openat further without breaking everything,
     # even though it's one of the most important calls to lock down.
     # Could probably allow breaking out of the sandbox in the case of full-on RCE/ACE.
@@ -58,8 +91,8 @@ def activate_seccomp():
 
 
 # Required for Pesterchum to function normally.
-# Pesterchum doesn't call most of these directly, there's a lot of abstraction with Python and Qt.
-PCHUM_SYSTEM_CALLS = [
+# We don't call most of these directly, there's a lot of abstraction with Python and Qt.
+CALL_WHITELIST = [
     "access",  # Files
     "brk",  # Required
     "clone3",  # Required
@@ -73,7 +106,7 @@ PCHUM_SYSTEM_CALLS = [
     "ftruncate",  # Required
     "futex",  # Required
     "getcwd",  # Get working directory
-    "getdents64",  # Files? Required.
+    "getdents",  # Files? Required.
     "getgid",  # Audio
     "getpeername",  # Connect
     "getpid",  # Audio
@@ -108,6 +141,60 @@ PCHUM_SYSTEM_CALLS = [
     "uname",  # Required
     "write",  # Required
 ]
+
+# Blacklists of calls we should be able to safely deny.
+# Setuid might be useful to drop privileges.
+SETUID = [
+    "setgid",
+    "setgroups",
+    "setregid",
+    "setresgid",
+    "setresuid",
+    "setreuid",
+    "setuid",
+]
+SYSTEM = [
+    "acct",
+    "bpf",
+    "capset",
+    "chown",
+    "chroot",
+    "fanotify_init",
+    "fsconfig",
+    "fsmount",
+    "fsopen",
+    "fspick",
+    "kexec_file_load",
+    "kexec_load",
+    "lookup_dcookie",
+    "mount",
+    "move_mount",
+    "nfsservctl",
+    "open_by_handle_at",
+    "open_tree",
+    "perf_event_open",
+    "personality",
+    "pidfd_getfd",
+    "pivot_root",
+    "pivot_root",
+    "process_vm_readv",
+    "process_vm_writev",
+    "ptrace",  # <-- Important
+    "quotactl",
+    "reboot",
+    "rtas",
+    "s390_runtime_instr",
+    "setdomainname",
+    "setfsuid",
+    "sethostname",
+    "swapoff",
+    "swapon",
+    "sys_debug_setcontext",
+    "umount",
+    "umount2",
+    "vhangup",
+]
+CALL_BLACKLIST = SETUID + SYSTEM
 
 """
 # Optional
