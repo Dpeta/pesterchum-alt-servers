@@ -1387,9 +1387,6 @@ class PesterWindow(MovingWindow):
         # Silly guy prevention pt. 2
         # We really shouldn't run as root.
         self.root_check()
-        # Set no_new_privs bit on Linux.
-        if ostools.isLinux():
-            self.set_no_new_privs()
 
         # karxi: For the record, these are set via commandline arguments. By
         # default, they aren't usable any other way - you can't set them via
@@ -1699,8 +1696,11 @@ class PesterWindow(MovingWindow):
         self.sincerecv = 0  # Time since last recv
         self.lastCheckPing = None
 
-        # Activate seccomp on Linux if enabled
+        # Linux user-space API
         if ostools.isLinux():
+            # Set no_new_privs bit.
+            self.set_no_new_privs()
+            # Activate seccomp.
             self.seccomp(options)
 
     def seccomp(self, options):
