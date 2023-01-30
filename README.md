@@ -92,6 +92,9 @@ Pesterchum is a Python script. This means that as long as you have Python instal
      - Useful for Linux systems that don't meet the Qt6 requirements, as Qt5 Multimedia has a GStreamer dependency.
  - (Optional) [certifi] can provide alternative root certificates for TLS certificate validation.
      - Useful for MacOS, as Python doesn't use the system-provided certificates because of MacOS' outdated SSL library. Also miscellaneous systems without usable root certificates.
+ - (Optional) [libseccomp] and its Python bindings on Linux let Pesterchum apply seccomp-bpf restrictions on itself.
+    - Packages on Arch: ``libseccomp python-libseccomp``
+    - Packages on Debian: ``libseccomp2 python-seccomp``
  
 ### WALKTHROUGH
 

@@ -4,7 +4,7 @@ This prevents the process from using certain system calls, which has some securi
 Since Python and Qt use many calls and are pretty high-level, things are prone to breaking though.
 Certain features like opening links almost always break.
 
-Uses libseccomp's Python bindings, which aren't available on the pypi.
+Uses libseccomp's Python bindings, which sadly aren't available on PyPi (yet).
 Check your distro's package manager for python-libseccomp (Arch) or python3-seccomp (Debian).
 
 For info on system calls referencing software that uses seccomp like firejail/flatpak is useful.
@@ -29,8 +29,8 @@ def load_seccomp_blacklist():
     if seccomp is None:
         pesterchum_log.warning(
             "Failed to import seccomp, verify you have"
-            " python-libseccomp (Arch) or python3-seccomp (Debian) installed"
-            " and aren't running a pyinstaller build."
+            " python-libseccomp (Arch) or python3-seccomp (Debian) installed."
+            " If this is a pyinstaller/cx_freeze build, it may also be a linking issue."
         )
         return
     # Allows all calls by default.
@@ -55,8 +55,8 @@ def load_seccomp_whitelist():
     if seccomp is None:
         pesterchum_log.error(
             "Failed to import seccomp, verify you have"
-            " python-libseccomp (Arch) or python3-seccomp (Debian) installed"
-            " and aren't running a pyinstaller build."
+            " python-libseccomp (Arch) or python3-seccomp (Debian) installed."
+            " If this is a pyinstaller/cx_freeze build, it may also be a linking issue."
         )
         return
     # Violation gives "Operation not permitted".
