@@ -122,6 +122,7 @@ Pesterchum is a Python script. This means that as long as you have Python instal
 [pygame]: https://pypi.org/project/pygame/
 [certifi]: https://pypi.org/project/certifi/
 [GStreamer]: https://gstreamer.freedesktop.org/
+[libseccomp]: https://github.com/seccomp/libseccomp/
  
 ## FREEZE / BUILD <img src="themes/win95chum/admin.png">
 Here's a quick guide on how to freeze Pesterchum, (that is, packaging it with python as an executable). :3
