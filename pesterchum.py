@@ -111,14 +111,17 @@ parser.add_argument(
 )
 if ostools.isLinux():
     parser.add_argument(
+        "--no-seccomp",
+        action="store_true",
+        help=("Disable seccomp completely. (do this if it causes issues)"),
+    )
+    parser.add_argument(
         "--strict-seccomp",
         action="store_true",
         help=(
-            "Restrict the system calls Pesterchum is allowed to make via seccomp."
-            " Has some security benefits, but since Python and Qt use many calls"
-            " and are pretty high-level, things are prone to breaking."
-            " Certain features like opening links always break."
-            " (Requires Linux and libseccomp's Python bindings, not available in frozen builds.)"
+            "Apply a stricter seccomp-bpf filter that only allows required system calls."
+            " This breaks certain features like opening links."
+            " (Requires Linux and libseccomp's Python bindings.)"
         ),
     )
 
@@ -1698,14 +1701,21 @@ class PesterWindow(MovingWindow):
 
         # Activate seccomp on Linux if enabled
         if ostools.isLinux():
-            try:
-                libseccomp.load_seccomp_blacklist()  # Load blacklist always
-                if "strict-seccomp" in options:
-                    if options["strict-seccomp"]:
-                        libseccomp.load_seccomp_whitelist()  # Load whitelist if enabled
-            except RuntimeError:
-                # We probably tried to interact with a call not available on this kernel.
-                PchumLog.exception("")
+            self.seccomp(options)
+
+    def seccomp(self, options):
+        """Load seccomp-bpf filter depending on arguments passed."""
+        if "no-seccomp" in options:
+            if options["no-seccomp"]:
+                return
+        try:
+            libseccomp.load_seccomp_blacklist()  # Load blacklist filter by default
+            if "strict-seccomp" in options:
+                if options["strict-seccomp"]:
+                    libseccomp.load_seccomp_whitelist()  # Load whitelist filter if enabled
+        except RuntimeError:
+            # We probably tried to interact with a call not available on this kernel.
+            PchumLog.exception("")
 
     @QtCore.pyqtSlot(QString, QString)
     def updateMsg(self, ver, url):
@@ -4598,7 +4608,8 @@ class MainProgram(QtCore.QObject):
             if ostools.isLinux():
                 if args.strict_seccomp:
                     options["strict-seccomp"] = True
-
+                if args.no_seccomp:
+                    options["no-seccomp"] = True
         except Exception as e:
             print(e)
             return options
