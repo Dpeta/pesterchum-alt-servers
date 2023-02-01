@@ -44,6 +44,9 @@ def names(cli, *channels):
 def channel_list(cli):
     cli.send("LIST")
 
+def ping(cli, token):
+    """Why is this called ping when it pongs.."""
+    cli.send("PONG", token)
 
 def kick(cli, handle, channel, reason=""):
     cli.send("KICK {} {} {}".format(channel, handle, reason))
@@ -93,12 +96,6 @@ def _makeMsgRandomFunc(choices):
         msgrandom(cli, choices, dest, user)
 
     return func
-
-
-msgYes = _makeMsgRandomFunc(["yes", "alright", "ok"])
-msgOK = _makeMsgRandomFunc(["ok", "done"])
-msgNo = _makeMsgRandomFunc(["no", "no-way"])
-
 
 def ns(cli, *args):
     msg(cli, "NickServ", " ".join(args))
@@ -156,4 +153,4 @@ def _addNumerics():
         setattr(m, name, numericcmd(num, name))
 
 
-_addNumerics()
+#_addNumerics()

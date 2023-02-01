@@ -194,7 +194,7 @@ SYSTEM = [
     "umount2",
     "vhangup",
 ]
-CALL_BLACKLIST = SETUID + SYSTEM
+CALL_BLACKLIST = SYSTEM  # + SETUID
 
 """
 # Optional
