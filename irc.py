@@ -52,17 +52,6 @@ class ProtectedCommandError(CommandError):
 # Python 3
 QString = str
 
-# Copied from pesterchum.py
-# CUSTOMBOTS = ["CALSPRITE", "RANDOMENCOUNTER"]
-# BOTNAMES = ["NICKSERV", "CHANSERV", "MEMOSERV", "OPERSERV", "HELPSERV", "HOSTSERV", "BOTSERV"]
-# BOTNAMES.extend(CUSTOMBOTS)
-
-# if ostools.isOSXBundle():
-#    logging.basicConfig(level=logging.WARNING)
-# else:
-#    # karxi; We do NOT need this set to INFO; it's very, very spammy.
-#    logging.basicConfig(level=logging.WARNING)
-
 try:
     import certifi
 except ImportError:
@@ -185,6 +174,7 @@ class PesterIRC(QtCore.QThread):
         try:
             buffer = b""
             while not self._end:
+                data = []
                 try:
                     buffer += self.socket.recv(1024)
                 except OSError as e:
@@ -200,6 +190,7 @@ class PesterIRC(QtCore.QThread):
                         raise OSError("Connection closed")
                     
                     data, buffer = self.parse_buffer(buffer)
+                    print(f"data: {data}")
                     for line in data:
                         tags, prefix, command, args = self.parse_irc_line(line)
                         # print(tags, prefix, command, args)
@@ -247,14 +238,13 @@ class PesterIRC(QtCore.QThread):
         data = decoded_buffer.split("\r\n")
         if data[-1]:
             # Last entry has incomplete data, add back to buffer
-            buffer = data[-1].encode("utf-8") + buffer
+            buffer = data[-1].encode(encoding="utf-8")
         return data[:-1], buffer
 
     def parse_irc_line(self, line: str):
         parts = line.split(" ")
         tags = None
         prefix = None
-        print(line)
         if parts[0].startswith(":"):
             prefix = parts[0][1:]
             command = parts[1]
@@ -272,7 +262,7 @@ class PesterIRC(QtCore.QThread):
             try:
                 command = numeric_events[command]
             except KeyError:
-                PchumLog.info("Server send unknown numeric event {command}.")
+                PchumLog.info("Server send unknown numeric event %s.", command)
         command = command.lower()
 
         # If ':' is present the subsequent args are one parameter.

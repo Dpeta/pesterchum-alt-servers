@@ -430,7 +430,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
     # Maximum number of characters *to* use.
     if not maxlen:
         maxlen = _max_msg_len(
-            None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.realname
+            None, None, ctx.mainwindow.profile().handle, "pcc31"
         )
     elif maxlen < 0:
         # Subtract the (negative) length, giving us less leeway in this
@@ -440,7 +440,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
                 None,
                 None,
                 ctx.mainwindow.profile().handle,
-                ctx.mainwindow.irc.cli.realname,
+                "pcc31",
             )
             + maxlen
         )
@@ -806,10 +806,10 @@ def kxhandleInput(ctx, text=None, flavor=None):
 
     # Split the messages so we don't go over the buffer and lose text.
     maxlen = _max_msg_len(
-        None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.realname
+        None, None, ctx.mainwindow.profile().handle, "pcc31"
     )
     # ctx.mainwindow.profile().handle ==> Get handle
-    # ctx.mainwindow.irc.cli.realname  ==> Get ident (Same as realname in this case.)
+    # "pcc31"  ==> Get ident (Same as realname in this case.)
     # Since we have to do some post-processing, we need to adjust the maximum
     # length we can use.
     if flavor == "convo":
