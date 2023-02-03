@@ -20,7 +20,7 @@ from generic import PesterList
 from version import _pcVersion
 
 from oyoyo import services
-from oyoyo.parse import parse_raw_irc_command
+from oyoyo.ircevents import numeric_events
 
 import scripts.irc.outgoing
 
@@ -99,7 +99,6 @@ class PesterIRC(QtCore.QThread):
         self.host = self.config.server()
         self.port = self.config.port()
         self.ssl = self.config.ssl()
-        self.nick = self.mainwindow.profile().handle
         self.timeout = 120
         self.blocking = True
         self._end = False
@@ -107,7 +106,7 @@ class PesterIRC(QtCore.QThread):
         self.command_handler = self
         self.parent = self
 
-        self.send_irc = scripts.irc.outgoing.send_irc()
+        self.send_irc = scripts.irc.outgoing.SendIRC()
 
     def get_ssl_context(self):
         """Returns an SSL context for connecting over SSL/TLS.
@@ -176,99 +175,42 @@ class PesterIRC(QtCore.QThread):
         elif self.blocking:
             self.socket.setblocking(True)
 
-        self.send_irc.nick(self.nick)
+        self.send_irc.nick(self.mainwindow.profile().handle)
         self.send_irc.user("pcc31", "pcc31")
         # if self.connect_cb:
         #    self.connect_cb(self)
 
-    def conn(self):
+    def conn_generator(self):
         """returns a generator object."""
         try:
             buffer = b""
             while not self._end:
-                # Block for connection-killing exceptions
                 try:
-                    tries = 1
-                    while tries < 10:
-                        # Check if alive
-                        if self._end == True:
-                            break
-                        if self.socket.fileno() == -1:
-                            self._end = True
-                            break
-                        try:
-                            ready_to_read, ready_to_write, in_error = select.select(
-                                [self.socket], [], []
-                            )
-                            for x in ready_to_read:
-                                buffer += x.recv(1024)
-                            break
-                        except ssl.SSLWantReadError as e:
-                            PchumLog.warning("ssl.SSLWantReadError on send, " + str(e))
-                            select.select([self.socket], [], [])
-                            if tries >= 9:
-                                raise e
-                        except ssl.SSLWantWriteError as e:
-                            PchumLog.warning("ssl.SSLWantWriteError on send, " + str(e))
-                            select.select([], [self.socket], [])
-                            if tries >= 9:
-                                raise e
-                        except ssl.SSLEOFError as e:
-                            # ssl.SSLEOFError guarantees a broken connection.
-                            PchumLog.warning("ssl.SSLEOFError in on send, " + str(e))
-                            raise e
-                        except (socket.timeout, TimeoutError) as e:
-                            # socket.timeout is deprecated in 3.10
-                            PchumLog.warning("TimeoutError in on send, " + str(e))
-                            raise socket.timeout
-                        except (OSError, IndexError, ValueError, Exception) as e:
-                            PchumLog.debug("Miscellaneous exception in conn, " + str(e))
-                            if tries >= 9:
-                                raise e
-                        tries += 1
-                        PchumLog.debug(
-                            "Possibly retrying recv. (attempt %s)" % str(tries)
-                        )
-                        time.sleep(0.1)
-
-                except socket.timeout as e:
-                    PchumLog.warning("timeout in client.py, " + str(e))
-                    if self._end:
-                        break
-                    raise e
-                except ssl.SSLEOFError as e:
-                    raise e
+                    buffer += self.socket.recv(1024)
                 except OSError as e:
                     PchumLog.warning("conn exception {} in {}".format(e, self))
                     if self._end:
                         break
-                    if not self.blocking and e.errno == 11:
-                        pass
-                    else:
-                        raise e
+                    raise e
                 else:
                     if self._end:
                         break
-                    if len(buffer) == 0 and self.blocking:
+                    if not buffer and self.blocking:
                         PchumLog.debug("len(buffer) = 0")
                         raise OSError("Connection closed")
-
-                    data = buffer.split(bytes("\n", "UTF-8"))
-                    buffer = data.pop()
-
-                    PchumLog.debug("data = " + str(data))
-
-                    for el in data:
-                        tags, prefix, command, args = parse_raw_irc_command(el)
+                    
+                    data, buffer = self.parse_buffer(buffer)
+                    for line in data:
+                        tags, prefix, command, args = self.parse_irc_line(line)
                         # print(tags, prefix, command, args)
                         try:
                             # Only need tags with tagmsg
-                            if command.upper() == "TAGMSG":
+                            if command.casefold() == "tagmsg":
                                 self.run_command(command, prefix, tags, *args)
                             else:
                                 self.run_command(command, prefix, *args)
                         except CommandError as e:
-                            PchumLog.warning("CommandError %s" % str(e))
+                            PchumLog.warning(f"CommandError: {e}")
 
                 yield True
         except socket.timeout as se:
@@ -281,7 +223,7 @@ class PesterIRC(QtCore.QThread):
                 self.socket.close()
             raise se
         except Exception as e:
-            PchumLog.debug("other exception: %s" % str(e))
+            PchumLog.exception("Non-socket related exception in conn_generator().")
             raise e
         else:
             PchumLog.debug("ending while, end is %s" % self._end)
@@ -290,6 +232,61 @@ class PesterIRC(QtCore.QThread):
                 self.socket.close()
             yield False
 
+    def parse_buffer(self, buffer):
+        """Parse lines from bytes buffer, returns lines and emptied buffer."""
+        try:
+            decoded_buffer = buffer.decode(encoding="utf-8")
+        except UnicodeDecodeError as exception:
+            PchumLog.warning(f"Failed to decode with utf-8, falling back to latin-1.")
+            try:
+                decoded_buffer = buffer.decode(encoding="latin-1")
+            except ValueError as exception:
+                PchumLog.warning("latin-1 failed too xd")
+                return "", buffer  # throw it back in the cooker
+            
+        data = decoded_buffer.split("\r\n")
+        if data[-1]:
+            # Last entry has incomplete data, add back to buffer
+            buffer = data[-1].encode("utf-8") + buffer
+        return data[:-1], buffer
+
+    def parse_irc_line(self, line: str):
+        parts = line.split(" ")
+        tags = None
+        prefix = None
+        print(line)
+        if parts[0].startswith(":"):
+            prefix = parts[0][1:]
+            command = parts[1]
+            args = parts[2:]
+        elif parts[0].startswith("@"):
+            tags = parts[0]  # IRCv3 message tag
+            prefix = parts[1][1:]
+            command = parts[2]
+            args = parts[3:]
+        else:
+            command = parts[0]
+            args = parts[1:]
+
+        if command.isdigit():
+            try:
+                command = numeric_events[command]
+            except KeyError:
+                PchumLog.info("Server send unknown numeric event {command}.")
+        command = command.lower()
+
+        # If ':' is present the subsequent args are one parameter.
+        fused_args = []
+        for idx, arg in enumerate(args):
+            if arg.startswith(":"):
+                final_param = ' '.join(args[idx:])
+                fused_args.append(final_param[1:])
+                break
+            else:
+                fused_args.append(arg)
+
+        return (tags, prefix, command, fused_args)
+    
     def close(self):
         # with extreme prejudice
         if self.socket:
@@ -316,7 +313,7 @@ class PesterIRC(QtCore.QThread):
             # Ask if users wants to connect anyway
             self.askToConnect.emit(e)
             raise e
-        self.conn = self.conn()
+        self.conn = self.conn_generator()
 
     def run(self):
         try:
@@ -367,15 +364,47 @@ class PesterIRC(QtCore.QThread):
         except (OSError, ValueError, IndexError) as se:
             raise se
         except StopIteration:
-            self.conn = self.conn()
+            self.conn = self.conn_generator()
             return True
         else:
             return res
 
     @QtCore.pyqtSlot(PesterProfile)
     def getMood(self, *chums):
-        if hasattr(self, "cli"):
-            self.command_handler.getMood(*chums)
+        """Get mood via metadata if supported"""
+
+        # Get via metadata or via legacy method
+        if self.parent.metadata_supported:
+            # Metadata
+            for chum in chums:
+                try:
+                    self.send_irc.metadata(chum.handle, "get", "mood")
+                except OSError as e:
+                    PchumLog.warning(e)
+                    self.parent.setConnectionBroken()
+        else:
+            # Legacy
+            PchumLog.warning(
+                "Server doesn't seem to support metadata, using legacy GETMOOD."
+            )
+            chumglub = "GETMOOD "
+            for chum in chums:
+                if len(chumglub + chum.handle) >= 350:
+                    try:
+                        self.send_irc.msg("#pesterchum", chumglub)
+                    except OSError as e:
+                        PchumLog.warning(e)
+                        self.parent.setConnectionBroken()
+                    chumglub = "GETMOOD "
+                # No point in GETMOOD-ing services
+                if chum.handle.casefold() not in SERVICES:
+                    chumglub += chum.handle
+            if chumglub != "GETMOOD ":
+                try:
+                    self.send_irc.msg("#pesterchum", chumglub)
+                except OSError as e:
+                    PchumLog.warning(e)
+                    self.parent.setConnectionBroken()
 
     @QtCore.pyqtSlot(PesterList)
     def getMoods(self, chums):
@@ -462,8 +491,7 @@ class PesterIRC(QtCore.QThread):
         if hasattr(self, "cli"):
             h = str(handle)
             try:
-                self.send_irc.msg(
-                    self, h, "COLOR >%s" % (self.mainwindow.profile().colorcmd())
+                self.send_irc.msg(h, "COLOR >%s" % (self.mainwindow.profile().colorcmd())
                 )
                 if initiated:
                     self.send_irc.msg(h, "PESTERCHUM:BEGIN")
@@ -530,7 +558,6 @@ class PesterIRC(QtCore.QThread):
             for h in list(self.mainwindow.convos.keys()):
                 try:
                     self.send_irc.msg(
-                        self,
                         h,
                         "COLOR >%s" % (self.mainwindow.profile().colorcmd()),
                     )
@@ -766,13 +793,11 @@ class PesterIRC(QtCore.QThread):
             PchumLog.info('---> recv "CTCP {} :{}"'.format(handle, msg[1:-1]))
             # VERSION, return version
             if msg[1:-1].startswith("VERSION"):
-                self.send_irc.ctcp_reply(
-                    self.parent.cli, handle, "VERSION", "Pesterchum %s" % (_pcVersion)
+                self.send_irc.ctcp(handle, "VERSION", "Pesterchum %s" % (_pcVersion)
                 )
             # CLIENTINFO, return supported CTCP commands.
             elif msg[1:-1].startswith("CLIENTINFO"):
-                self.send_irc.ctcp_reply(
-                    self.parent.cli,
+                self.send_irc.ctcp(
                     handle,
                     "CLIENTINFO",
                     "ACTION VERSION CLIENTINFO PING SOURCE NOQUIRKS GETMOOD",
@@ -780,15 +805,13 @@ class PesterIRC(QtCore.QThread):
             # PING, return pong
             elif msg[1:-1].startswith("PING"):
                 if len(msg[1:-1].split("PING ")) > 1:
-                    self.send_irc.ctcp_reply(
-                        self.parent.cli, handle, "PING", msg[1:-1].split("PING ")[1]
+                    self.send_irc.ctcp(handle, "PING", msg[1:-1].split("PING ")[1]
                     )
                 else:
-                    self.send_irc.ctcp_reply(self.parent.cli, handle, "PING")
+                    self.send_irc.ctcp(handle, "PING")
             # SOURCE, return source
             elif msg[1:-1].startswith("SOURCE"):
-                self.send_irc.ctcp_reply(
-                    self.parent.cli,
+                self.send_irc.ctcp(
                     handle,
                     "SOURCE",
                     "https://github.com/Dpeta/pesterchum-alt-servers",
@@ -802,7 +825,7 @@ class PesterIRC(QtCore.QThread):
                 # GETMOOD via CTCP
                 # Maybe we can do moods like this in the future...
                 mymood = self.mainwindow.profile().mood.value()
-                self.send_irc.ctcp_reply(self.parent.cli, handle, "MOOD >%d" % (mymood))
+                self.send_irc.ctcp(handle, "MOOD >%d" % (mymood))
                 # Backwards compatibility
                 self.send_irc.msg("#pesterchum", "MOOD >%d" % (mymood))
             return
@@ -1237,42 +1260,6 @@ class PesterIRC(QtCore.QThread):
         """Respond to server PING with PONG."""
         self.send_irc.pong(token)
 
-    def getMood(self, *chums):
-        """Get mood via metadata if supported"""
-
-        # Get via metadata or via legacy method
-        if self.parent.metadata_supported:
-            # Metadata
-            for chum in chums:
-                try:
-                    self.send_irc.metadata(chum.handle, "get", "mood")
-                except OSError as e:
-                    PchumLog.warning(e)
-                    self.parent.setConnectionBroken()
-        else:
-            # Legacy
-            PchumLog.warning(
-                "Server doesn't seem to support metadata, using legacy GETMOOD."
-            )
-            chumglub = "GETMOOD "
-            for chum in chums:
-                if len(chumglub + chum.handle) >= 350:
-                    try:
-                        self.send_irc.msg("#pesterchum", chumglub)
-                    except OSError as e:
-                        PchumLog.warning(e)
-                        self.parent.setConnectionBroken()
-                    chumglub = "GETMOOD "
-                # No point in GETMOOD-ing services
-                if chum.handle.casefold() not in SERVICES:
-                    chumglub += chum.handle
-            if chumglub != "GETMOOD ":
-                try:
-                    self.send_irc.msg("#pesterchum", chumglub)
-                except OSError as e:
-                    PchumLog.warning(e)
-                    self.parent.setConnectionBroken()
-
     def get(self, in_command_parts):
         PchumLog.debug("in_command_parts: %s" % in_command_parts)
         """ finds a command 
@@ -1310,10 +1297,7 @@ class PesterIRC(QtCore.QThread):
 
     def run_command(self, command, *args):
         """finds and runs a command"""
-        arguments_str = ""
-        for x in args:
-            arguments_str += str(x) + " "
-        PchumLog.debug("processCommand {}({})".format(command, arguments_str.strip()))
+        PchumLog.debug("processCommand {}({})".format(command, args))
 
         try:
             f = self.get(command)
