@@ -4188,7 +4188,7 @@ class PesterWindow(MovingWindow):
     trayIconSignal = QtCore.pyqtSignal(int)
     blockedChum = QtCore.pyqtSignal("QString")
     unblockedChum = QtCore.pyqtSignal("QString")
-    kickUser = QtCore.pyqtSignal("QString", "QString")
+    kickUser = QtCore.pyqtSignal("QString", "QString", "QString")
     joinChannel = QtCore.pyqtSignal("QString")
     leftChannel = QtCore.pyqtSignal("QString")
     setChannelMode = QtCore.pyqtSignal("QString", "QString", "QString")
@@ -4381,7 +4381,7 @@ class MainProgram(QtCore.QObject):
         ("requestChannelList()", "requestChannelList()"),
         ("joinChannel(QString)", "joinChannel(QString)"),
         ("leftChannel(QString)", "leftChannel(QString)"),
-        ("kickUser(QString, QString)", "kickUser(QString, QString)"),
+        ("kickUser(QString, QString, QString)", "kickUser(QString, QString, QString)"),
         (
             "setChannelMode(QString, QString, QString)",
             "setChannelMode(QString, QString, QString)",

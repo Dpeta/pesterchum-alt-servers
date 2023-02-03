@@ -1871,9 +1871,7 @@ class PesterMemo(PesterConvo):
             self, "Ban User", "Enter the reason you are banning this user (optional):"
         )
         if ok:
-            self.mainwindow.kickUser.emit(
-                "{}:{}".format(currentHandle, reason), self.channel
-            )
+            self.mainwindow.kickUser.emit(currentHandle, reason, self.channel)
 
     @QtCore.pyqtSlot()
     def opSelectedUser(self):

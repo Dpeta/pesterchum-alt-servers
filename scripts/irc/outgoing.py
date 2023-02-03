@@ -57,7 +57,7 @@ class SendIRC:
         """Send USER command to communicate username and realname to server."""
         self.send("USER", username, "0", "*", text=realname)
 
-    def msg(self, target, text):
+    def privmsg(self, target, text):
         """Send PRIVMSG command to send a message."""
         for line in text.split("\n"):
             self.send("PRIVMSG", target, text=line)
@@ -73,7 +73,7 @@ class SendIRC:
         else:
             self.send(f"KICK {channel} {user}")
 
-    def mode(self, target, modestring, mode_arguments=""):
+    def mode(self, target, modestring="", mode_arguments=""):
         """Set or remove modes from target."""
         outgoing_mode = " ".join([target, modestring, mode_arguments]).strip()
         self.send("MODE", outgoing_mode)
@@ -83,7 +83,7 @@ class SendIRC:
         outgoing_ctcp = " ".join(
             [command, msg]
         ).strip()  # Extra spaces break protocol, so strip.
-        self.msg(target, f"\x01{outgoing_ctcp}\x01")
+        self.privmsg(target, f"\x01{outgoing_ctcp}\x01")
 
     def metadata(self, target, subcommand, *params):
         """Send Metadata command to get or set metadata.
@@ -128,3 +128,12 @@ class SendIRC:
             self.send("AWAY", text=text)
         else:
             self.send("AWAY")
+
+    def list(self):
+        """Send LIST command to get list of channels."""
+        self.send("LIST")
+
+    def quit(self, reason=""):
+        """Send QUIT to terminate connection."""
+        self.send("QUIT", text=reason)
+        
