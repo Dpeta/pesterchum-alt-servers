@@ -100,18 +100,18 @@ class PesterIRC(QtCore.QThread):
         self.commands = {
             "001": self.welcome,
             "005": self.featurelist,
-            "301": self.away,
             "321": self.liststart,
             "322": self.list,
             "323": self.listend,
             "324": self.channelmodeis,
+            "353": self.namreply,
+            "366": self.endofnames,
             "432": self.erroneusnickname,
             "433": self.nicknameinuse,
             "436": self.nickcollision,
             "448": self.forbiddenchannel,  # non-standard
             "473": self.inviteonlychan,
             "761": self.keyvalue,  # 7XX is ircv3 deprecated metadata spec
-            "762": self.metadataend,
             "766": self.nomatchingkey,
             "768": self.keynotset,
             "769": self.keynopermission,
@@ -123,6 +123,7 @@ class PesterIRC(QtCore.QThread):
             "part": self.part,
             "ping": self.ping,
             "privmsg": self.privmsg,
+            "notice": self.notice,
             "quit": self.quit,
             "invite": self.invite,
             "nick": self.nick,  # We can get svsnicked
@@ -211,9 +212,7 @@ class PesterIRC(QtCore.QThread):
                     if self._end:
                         break
 
-                    print(repr(buffer.decode()))
                     split_buffer = buffer.split(b"\r\n")
-                    print(split_buffer)
                     buffer = b""
                     if split_buffer[-1]:
                         # Incomplete line, add it back to the buffer.
@@ -221,7 +220,6 @@ class PesterIRC(QtCore.QThread):
 
                     for line in split_buffer:
                         line = line.decode(encoding="utf-8", errors="replace")
-                        print(line)
                         tags, prefix, command, args = self.parse_irc_line(line)
                         try:
                             # Only need tags with tagmsg
@@ -287,13 +285,7 @@ class PesterIRC(QtCore.QThread):
         else:
             command = parts[0]
             args = parts[1:]
-
-        if command.isdigit():
-            try:
-                command = numeric_events[command]
-            except KeyError:
-                PchumLog.info("Server send unknown numeric event %s.", command)
-        command = command.lower()
+        command = command.casefold()
 
         # If ':' is present the subsequent args are one parameter.
         fused_args = []
@@ -879,71 +871,17 @@ class PesterIRC(QtCore.QThread):
             self.moodUpdated.emit(handle, Mood("chummy"))
 
     def mode(self, op, channel, mode, *handles):
-        PchumLog.debug("op=" + str(op))
-        PchumLog.debug("channel=" + str(channel))
-        PchumLog.debug("mode=" + str(mode))
-        PchumLog.debug("*handles=" + str(handles))
+        PchumLog.debug("op=%s, channel=%s, mode=%s, handles=%s", op, channel, mode, handles)
 
-        if len(handles) <= 0:
+        if not handles:
             handles = [""]
         opnick = op[0 : op.find("!")]
-        PchumLog.debug("opnick=" + opnick)
+        PchumLog.debug("opnick=%s", opnick)
 
         # Channel section
-        # Okay so, as I understand it channel modes will always be applied to a channel even if the commands also sets a mode to a user.
-        # So "MODE #channel +ro handleHandle" will set +r to channel #channel as well as set +o to handleHandle
-        # Therefore the bellow method causes a crash if both user and channel mode are being set in one command.
-
-        # if op == channel or channel == self.mainwindow.profile().handle:
-        #    modes = list(self.mainwindow.modes)
-        #    if modes and modes[0] == "+": modes = modes[1:]
-        #    if mode[0] == "+":
-        #        for m in mode[1:]:
-        #            if m not in modes:
-        #                modes.extend(m)
-        #    elif mode[0] == "-":
-        #        for i in mode[1:]:
-        #            try:
-        #                modes.remove(i)
-        #            except ValueError:
-        #                pass
-        #    modes.sort()
-        #    self.mainwindow.modes = "+" + "".join(modes)
-
-        # EXPIRIMENTAL FIX
-        # No clue how stable this is but since it doesn't seem to cause a crash it's probably an improvement.
         # This might be clunky with non-unrealircd IRC servers
         channel_mode = ""
-        unrealircd_channel_modes = [
-            "c",
-            "C",
-            "d",
-            "f",
-            "G",
-            "H",
-            "i",
-            "k",
-            "K",
-            "L",
-            "l",
-            "m",
-            "M",
-            "N",
-            "n",
-            "O",
-            "P",
-            "p",
-            "Q",
-            "R",
-            "r",
-            "s",
-            "S",
-            "T",
-            "t",
-            "V",
-            "z",
-            "Z",
-        ]
+        unrealircd_channel_modes = "cCdfGHikKLlmMNnOPpQRrsSTtVzZ"
         if any(md in mode for md in unrealircd_channel_modes):
             PchumLog.debug("Channel mode in string.")
             modes = list(self.mainwindow.modes)
@@ -964,9 +902,9 @@ class PesterIRC(QtCore.QThread):
                     self.userPresentUpdate.emit(
                         "", channel, channel_mode + ":%s" % (op)
                     )
-                    PchumLog.debug("pre-mode=" + str(mode))
+                    PchumLog.debug("pre-mode=%s", mode)
                     mode = mode.replace(md, "")
-                    PchumLog.debug("post-mode=" + str(mode))
+                    PchumLog.debug("post-mode=%s", mode)
             modes.sort()
             self.mainwindow.modes = "+" + "".join(modes)
 
@@ -977,7 +915,7 @@ class PesterIRC(QtCore.QThread):
                 cur = l
             else:
                 modes.append("{}{}".format(cur, l))
-        PchumLog.debug("handles=" + str(handles))
+        PchumLog.debug("handles=%s", handles)
         PchumLog.debug("enumerate(modes) = " + str(list(enumerate(modes))))
         for (i, m) in enumerate(modes):
 
@@ -1110,6 +1048,7 @@ class PesterIRC(QtCore.QThread):
     #    # Channel name is not valid.
     #    msg = ' '.join(args)
     #    self.forbiddenchannel.emit(channel, msg)
+    
     def forbiddenchannel(self, server, handle, channel, msg):
         # Channel is forbidden.
         self.signal_forbiddenchannel.emit(channel, msg)
@@ -1119,48 +1058,14 @@ class PesterIRC(QtCore.QThread):
         """Respond to server PING with PONG."""
         self.send_irc.pong(token)
 
-    def get(self, in_command_parts):
-        PchumLog.debug("in_command_parts: %s" % in_command_parts)
-        """ finds a command 
-        commands may be dotted. each command part is checked that it does
-        not start with and underscore and does not have an attribute 
-        "protected". if either of these is true, ProtectedCommandError
-        is raised.
-        its possible to pass both "command.sub.func" and 
-        ["command", "sub", "func"].
-        """
-        if isinstance(in_command_parts, (str, bytes)):
-            in_command_parts = in_command_parts.split(".")
-        command_parts = in_command_parts[:]
-
-        p = self
-        while command_parts:
-            cmd = command_parts.pop(0)
-            if cmd.startswith("_"):
-                raise ProtectedCommandError(in_command_parts)
-
-            try:
-                f = getattr(p, cmd)
-            except AttributeError:
-                raise NoSuchCommandError(in_command_parts)
-
-            if hasattr(f, "protected"):
-                raise ProtectedCommandError(in_command_parts)
-
-            # if isinstance(f, self) and command_parts:
-            if command_parts:
-                return f.get(command_parts)
-            p = f
-
-        return f
-
     def run_command(self, command, *args):
         """finds and runs a command"""
         PchumLog.debug("processCommand {}({})".format(command, args))
-
         try:
-            f = self.get(command)
-        except NoSuchCommandError as e:
+            print(f"command is {command}")
+            f = self.commands[command]
+            print(f" we r running {command}")
+        except KeyError as e:
             PchumLog.info(e)
             self.__unhandled__(command, *args)
             return
