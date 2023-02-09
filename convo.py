@@ -235,6 +235,7 @@ class PesterTabWindow(QtWidgets.QFrame):
             i, QtGui.QColor(self.mainwindow.theme["%s/tabs/newmsgcolor" % (self.type)])
         )
         convo = self.convos[handle]
+
         # Create a function for the icon to use
         # TODO: Let us disable this.
         def func():
@@ -286,7 +287,7 @@ class PesterTabWindow(QtWidgets.QFrame):
         del self.convos[handle]
         del self.tabIndices[handle]
         self.tabs.removeTab(i)
-        for (h, j) in self.tabIndices.items():
+        for h, j in self.tabIndices.items():
             if j > i:
                 self.tabIndices[h] = j - 1
         self.layout.removeWidget(convo)
@@ -954,6 +955,7 @@ class PesterConvo(QtWidgets.QFrame):
             else:
                 self.newmessage = True
                 self.setWindowTitle(title + "*")
+
                 # karxi: The order of execution here is a bit unclear...I'm not
                 # entirely sure how much of this directly affects what we see.
                 def func():

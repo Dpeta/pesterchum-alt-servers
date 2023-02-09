@@ -119,7 +119,7 @@ class MultiTextDialog(QtWidgets.QDialog):
         r = self.exec()
         if r == QtWidgets.QDialog.DialogCode.Accepted:
             retval = {}
-            for (name, widget) in self.inputs.items():
+            for name, widget in self.inputs.items():
                 retval[name] = str(widget.text())
             return retval
         else:

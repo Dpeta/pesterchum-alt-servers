@@ -2971,7 +2971,7 @@ class PesterWindow(MovingWindow):
         # Tell everyone we're in a chat with that we just went idle.
         sysColor = QtGui.QColor(self.theme["convo/systemMsgColor"])
         verb = self.theme["convo/text/idle"]
-        for (h, convo) in self.convos.items():
+        for h, convo in self.convos.items():
             # karxi: There's an irritating issue here involving a lack of
             # consideration for case-sensitivity.
             # This fix is a little sloppy, and I need to look into what it
@@ -3051,7 +3051,6 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot()
     def joinSelectedMemo(self):
-
         time = str(self.memochooser.timeinput.text())
         secret = self.memochooser.secretChannel.isChecked()
         invite = self.memochooser.inviteChannel.isChecked()
@@ -3246,7 +3245,7 @@ class PesterWindow(MovingWindow):
                 # combine
                 self.createTabWindow()
                 newconvos = {}
-                for (h, c) in self.convos.items():
+                for h, c in self.convos.items():
                     c.setParent(self.tabconvo)
                     self.tabconvo.addChat(c)
                     self.tabconvo.show()
@@ -3276,7 +3275,7 @@ class PesterWindow(MovingWindow):
                 # combine
                 newmemos = {}
                 self.createMemoTabWindow()
-                for (h, m) in self.memos.items():
+                for h, m in self.memos.items():
                     m.setParent(self.tabmemo)
                     self.tabmemo.addChat(m)
                     self.tabmemo.show()
@@ -4293,7 +4292,7 @@ class MainProgram(QtCore.QObject):
         for k in Mood.moodcats:
             moodCategories[k] = moodMenu.addMenu(k.upper())
         self.moodactions = {}
-        for (i, m) in enumerate(Mood.moods):
+        for i, m in enumerate(Mood.moods):
             maction = QAction(m.upper(), self)
             mobj = PesterMoodAction(i, self.widget.moods.updateMood)
             maction.triggered.connect(mobj.updateMood)

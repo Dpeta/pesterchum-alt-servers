@@ -78,7 +78,7 @@ class PesterLogUserSelect(QtWidgets.QDialog):
         self.chumsBox.setStyleSheet(self.theme["main/chums/style"])
         self.chumsBox.optionsMenu = QtWidgets.QMenu(self)
 
-        for (_, t) in enumerate(chumMemoList):
+        for _, t in enumerate(chumMemoList):
             item = QtWidgets.QListWidgetItem(t)
             item.setForeground(
                 QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"]))
@@ -244,7 +244,7 @@ class PesterLogViewer(QtWidgets.QDialog):
             child_1 = None
             last = ["", ""]
             # blackbrush = QtGui.QBrush(QtCore.Qt.GlobalColor.black)
-            for (i, l) in enumerate(self.logList):
+            for i, l in enumerate(self.logList):
                 my = self.fileToMonthYear(l)
                 if my[0] != last[0]:
                     child_1 = QtWidgets.QTreeWidgetItem(["{} {}".format(my[0], my[1])])

@@ -27,6 +27,7 @@ class Color:
     # The threshold at which to consider two colors noticeably different, even
     # if only barely
     jnd = 2.3
+
     # TODO: Either subclass (this is probably best) or add a .native_type; in
     # the case of the former, just make sure each type is geared towards using
     # a certain kind of color space as a starting point, e.g. RGB, XYZ, HSV,

@@ -102,14 +102,16 @@ class SendIRC:
     def join(self, channel, key=""):
         """Send JOIN command to join a channel/memo.
 
-        Keys or joining multiple channels is possible in the specification, but unused."""
+        Keys or joining multiple channels is possible in the specification, but unused.
+        """
         channel_and_key = " ".join([channel, key]).strip()
         self.send("JOIN", channel_and_key)
 
     def part(self, channel):
         """Send PART command to leave a channel/memo.
 
-        Providing a reason or leaving multiple channels is possible in the specification."""
+        Providing a reason or leaving multiple channels is possible in the specification.
+        """
         self.send("PART", channel)
 
     def notice(self, target, text):

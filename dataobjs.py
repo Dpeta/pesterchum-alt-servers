@@ -146,7 +146,7 @@ class pesterQuirks:
         # suffix = [q for q in self.quirklist if q.type == "suffix"]
 
         newlist = []
-        for (i, o) in enumerate(lexed):
+        for i, o in enumerate(lexed):
             if type(o) not in [str, str]:
                 if i == 0:
                     string = " "

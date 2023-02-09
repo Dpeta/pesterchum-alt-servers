@@ -64,7 +64,7 @@ class PesterLog:
             if handle not in self.convos:
                 log_time = datetime.now().strftime("%Y-%m-%d.%H.%M")
                 self.convos[handle] = {}
-                for (format, t) in modes.items():
+                for format, t in modes.items():
                     if not os.path.exists(
                         "{}/{}/{}/{}".format(self.logpath, self.handle, handle, format)
                     ):
@@ -81,7 +81,7 @@ class PesterLog:
                     )
                     self.convos[handle][format] = fp
 
-            for (format, t) in modes.items():
+            for format, t in modes.items():
                 f = self.convos[handle][format]
                 f.write(t + "\r\n")
                 # flush + fsync force a write,
@@ -737,7 +737,7 @@ class userProfile:
     def setMentions(self, mentions):
         i = None
         try:
-            for (i, m) in enumerate(mentions):
+            for i, m in enumerate(mentions):
                 re.compile(m)
         except re.error as e:
             PchumLog.error("#{} Not a valid regular expression: {}".format(i, e))
@@ -835,7 +835,7 @@ class PesterProfileDB(dict):
                 json.dump(chumdict, fp)
 
         u = []
-        for (handle, c) in chumdict.items():
+        for handle, c in chumdict.items():
             options = dict()
             if "group" in c:
                 options["group"] = c["group"]
@@ -960,7 +960,7 @@ class pesterTheme(dict):
         return v
 
     def pathHook(self, d):
-        for (k, v) in d.items():
+        for k, v in d.items():
             if isinstance(v, str):
                 s = Template(v)
                 d[k] = s.safe_substitute(path=self.path)

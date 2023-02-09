@@ -916,8 +916,7 @@ class PesterIRC(QtCore.QThread):
                 modes.append("{}{}".format(cur, l))
         PchumLog.debug("handles=%s", handles)
         PchumLog.debug("enumerate(modes) = " + str(list(enumerate(modes))))
-        for (i, m) in enumerate(modes):
-
+        for i, m in enumerate(modes):
             # Server-set usermodes don't need to be passed.
             if (handles == [""]) & (
                 ("x" in m) | ("z" in m) | ("o" in m) | ("x" in m)

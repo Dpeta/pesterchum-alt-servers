@@ -64,9 +64,9 @@ def reloadQuirkFunctions():
 def lexer(string, objlist):
     """objlist is a list: [(objecttype, re),...] list is in order of preference"""
     stringlist = [string]
-    for (oType, regexp) in objlist:
+    for oType, regexp in objlist:
         newstringlist = []
-        for (stri, s) in enumerate(stringlist):
+        for stri, s in enumerate(stringlist):
             if type(s) not in [str, str]:
                 newstringlist.append(s)
                 continue
@@ -339,7 +339,7 @@ def convertTags(lexed, format="html"):
         lexed = lexMessage(lexed)
     escaped = ""
     # firststr = True
-    for (i, o) in enumerate(lexed):
+    for i, o in enumerate(lexed):
         if type(o) in [str, str]:
             if format == "html":
                 escaped += (

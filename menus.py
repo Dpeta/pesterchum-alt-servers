@@ -576,7 +576,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
 
         if quirk:
             types = ["prefix", "suffix", "replace", "regexp", "random", "spelling"]
-            for (i, r) in enumerate(self.radios):
+            for i, r in enumerate(self.radios):
                 if i == types.index(quirk.quirk.type):
                     r.setChecked(True)
             self.changePage(types.index(quirk.quirk.type) + 1)
@@ -648,7 +648,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
             return
         cur = self.pages.currentIndex()
         if cur == 0:
-            for (i, r) in enumerate(self.radios):
+            for i, r in enumerate(self.radios):
                 if r.isChecked():
                     self.changePage(i + 1)
         else:
@@ -933,7 +933,7 @@ class PesterChooseTheme(QtWidgets.QDialog):
 
         avail_themes = config.availableThemes()
         self.themeBox = QtWidgets.QComboBox(self)
-        for (i, t) in enumerate(avail_themes):
+        for i, t in enumerate(avail_themes):
             self.themeBox.addItem(t)
             if t == theme.name:
                 self.themeBox.setCurrentIndex(i)
@@ -1416,7 +1416,7 @@ class PesterOptions(QtWidgets.QDialog):
         avail_themes = self.config.availableThemes()
         self.themeBox = QtWidgets.QComboBox(self)
         notheme = theme.name not in avail_themes
-        for (i, t) in enumerate(avail_themes):
+        for i, t in enumerate(avail_themes):
             self.themeBox.addItem(t)
             if (not notheme and t == theme.name) or (notheme and t == "pesterchum"):
                 self.themeBox.setCurrentIndex(i)
@@ -1454,7 +1454,7 @@ class PesterOptions(QtWidgets.QDialog):
         types = self.parent().tm.availableTypes()
         cur = self.parent().tm.currentType()
         self.notifyOptions.addItems(types)
-        for (i, t) in enumerate(types):
+        for i, t in enumerate(types):
             if t == cur:
                 self.notifyOptions.setCurrentIndex(i)
                 break
