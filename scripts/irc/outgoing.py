@@ -136,4 +136,3 @@ class SendIRC:
     def quit(self, reason=""):
         """Send QUIT to terminate connection."""
         self.send("QUIT", text=reason)
-        

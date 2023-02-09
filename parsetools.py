@@ -429,9 +429,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
     curlen = 0
     # Maximum number of characters *to* use.
     if not maxlen:
-        maxlen = _max_msg_len(
-            None, None, ctx.mainwindow.profile().handle, "pcc31"
-        )
+        maxlen = _max_msg_len(None, None, ctx.mainwindow.profile().handle, "pcc31")
     elif maxlen < 0:
         # Subtract the (negative) length, giving us less leeway in this
         # function.
@@ -805,9 +803,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
         # We'll use those later.
 
     # Split the messages so we don't go over the buffer and lose text.
-    maxlen = _max_msg_len(
-        None, None, ctx.mainwindow.profile().handle, "pcc31"
-    )
+    maxlen = _max_msg_len(None, None, ctx.mainwindow.profile().handle, "pcc31")
     # ctx.mainwindow.profile().handle ==> Get handle
     # "pcc31"  ==> Get ident (Same as realname in this case.)
     # Since we have to do some post-processing, we need to adjust the maximum

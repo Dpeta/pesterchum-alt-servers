@@ -19,9 +19,6 @@ from dataobjs import PesterProfile
 from generic import PesterList
 from version import _pcVersion
 
-from oyoyo import services
-from oyoyo.ircevents import numeric_events
-
 import scripts.irc.outgoing
 
 PchumLog = logging.getLogger("pchumLogger")
@@ -871,7 +868,9 @@ class PesterIRC(QtCore.QThread):
             self.moodUpdated.emit(handle, Mood("chummy"))
 
     def mode(self, op, channel, mode, *handles):
-        PchumLog.debug("op=%s, channel=%s, mode=%s, handles=%s", op, channel, mode, handles)
+        PchumLog.debug(
+            "op=%s, channel=%s, mode=%s, handles=%s", op, channel, mode, handles
+        )
 
         if not handles:
             handles = [""]
@@ -1048,7 +1047,7 @@ class PesterIRC(QtCore.QThread):
     #    # Channel name is not valid.
     #    msg = ' '.join(args)
     #    self.forbiddenchannel.emit(channel, msg)
-    
+
     def forbiddenchannel(self, server, handle, channel, msg):
         # Channel is forbidden.
         self.signal_forbiddenchannel.emit(channel, msg)
@@ -1062,9 +1061,7 @@ class PesterIRC(QtCore.QThread):
         """finds and runs a command"""
         PchumLog.debug("processCommand {}({})".format(command, args))
         try:
-            print(f"command is {command}")
             f = self.commands[command]
-            print(f" we r running {command}")
         except KeyError as e:
             PchumLog.info(e)
             self.__unhandled__(command, *args)
