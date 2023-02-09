@@ -4,9 +4,7 @@ import random
 import time
 import ssl
 import sys
-import select
 import datetime
-import traceback
 
 try:
     from PyQt6 import QtCore, QtGui
@@ -1055,7 +1053,7 @@ class PesterIRC(QtCore.QThread):
                 "Failed to pass command, did the server pass an unsupported paramater? "
                 + str(e)
             )
-        except Exception as e:
+        except Exception:
             # logging.info("Failed to pass command, %s" % str(e))
             PchumLog.exception("Failed to pass command")
 
