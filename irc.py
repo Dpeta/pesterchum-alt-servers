@@ -88,8 +88,6 @@ class PesterIRC(QtCore.QThread):
         self.host = self.config.server()
         self.port = self.config.port()
         self.ssl = self.config.ssl()
-        self.timeout = 120
-        self.blocking = True
         self._end = False
         
         self.send_irc = scripts.irc.outgoing.SendIRC()
@@ -150,16 +148,8 @@ class PesterIRC(QtCore.QThread):
             # SSL/TLS is disabled, connection is plaintext
             self.socket = plaintext_socket
 
+        self.socket.settimeout(90)
         self.send_irc.socket = self.socket
-
-        # setblocking is a shorthand for timeout,
-        # we shouldn't use both.
-        if self.timeout:
-            self.socket.settimeout(self.timeout)
-        elif not self.blocking:
-            self.socket.setblocking(False)
-        elif self.blocking:
-            self.socket.setblocking(True)
 
         self.send_irc.nick(self.mainwindow.profile().handle)
         self.send_irc.user("pcc31", "pcc31")
@@ -171,7 +161,6 @@ class PesterIRC(QtCore.QThread):
         try:
             buffer = b""
             while not self._end:
-                data = []
                 try:
                     buffer += self.socket.recv(1024)
                 except OSError as e:
@@ -182,15 +171,19 @@ class PesterIRC(QtCore.QThread):
                 else:
                     if self._end:
                         break
-                    if not buffer and self.blocking:
-                        PchumLog.debug("len(buffer) = 0")
-                        raise OSError("Connection closed")
-                    
-                    data, buffer = self.parse_buffer(buffer)
-                    print(f"data: {data}")
-                    for line in data:
+
+                    print(repr(buffer.decode()))
+                    split_buffer = buffer.split(b"\r\n")
+                    print(split_buffer)
+                    buffer = b""
+                    if split_buffer[-1]:
+                        # Incomplete line, add it back to the buffer.
+                        buffer = split_buffer.pop()
+                        
+                    for line in split_buffer:
+                        line = line.decode(encoding="utf-8", errors="replace")
+                        print(line)
                         tags, prefix, command, args = self.parse_irc_line(line)
-                        # print(tags, prefix, command, args)
                         try:
                             # Only need tags with tagmsg
                             if command.casefold() == "tagmsg":
@@ -211,7 +204,7 @@ class PesterIRC(QtCore.QThread):
                 self.socket.close()
             raise se
         except Exception as e:
-            PchumLog.exception("Non-socket related exception in conn_generator().")
+            PchumLog.exception("Non-socket exception in conn_generator().")
             raise e
         else:
             PchumLog.debug("ending while, end is %s" % self._end)
@@ -235,6 +228,7 @@ class PesterIRC(QtCore.QThread):
         data = decoded_buffer.split("\r\n")
         if data[-1]:
             # Last entry has incomplete data, add back to buffer
+            print(f"data[-1]: {data[-1]}")
             buffer = data[-1].encode(encoding="utf-8")
         return data[:-1], buffer
 
@@ -754,7 +748,7 @@ class PesterIRC(QtCore.QThread):
         # Server is not allowing us to connect.
         reason = "Handle is not allowed on this server.\n"
         for x in args:
-            if (x != None) and (x != ""):
+            if x:
                 reason += x + " "
         self.stopIRC = reason.strip()
         self.disconnectIRC()
@@ -774,31 +768,17 @@ class PesterIRC(QtCore.QThread):
         PchumLog.info("nomatchingkey: " + failed_handle)
         # No point in GETMOOD-ing services
         if failed_handle.casefold() not in SERVICES:
-            try:
-                self.send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
-            except OSError as e:
-                PchumLog.warning(e)
-                self.setConnectionBroken()
+            self.send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
 
     def keynotset(self, target, our_handle, failed_handle, key, *error):
         # Try to get moods the old way if metadata fails.
-        PchumLog.info("nomatchingkey: " + failed_handle)
-        chumglub = "GETMOOD "
-        try:
-            self.send_irc.privmsg("#pesterchum", chumglub + failed_handle)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        PchumLog.info("nomatchingkey: %s", failed_handle)
+        self.send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
 
     def keynopermission(self, target, our_handle, failed_handle, key, *error):
         # Try to get moods the old way if metadata fails.
-        PchumLog.info("nomatchingkey: " + failed_handle)
-        chumglub = "GETMOOD "
-        try:
-            self.send_irc.privmsg("#pesterchum", chumglub + failed_handle)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        PchumLog.info("nomatchingkey: %s", failed_handle)
+        self.send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
 
     def featurelist(self, target, handle, *params):
         # Better to do this via CAP ACK/CAP NEK
@@ -1101,7 +1081,7 @@ class PesterIRC(QtCore.QThread):
     #    self.forbiddenchannel.emit(channel, msg)
     def forbiddenchannel(self, server, handle, channel, msg):
         # Channel is forbidden.
-        self.forbiddenchannel.emit(channel, msg)
+        self.signal_forbiddenchannel.emit(channel, msg)
         self.userPresentUpdate.emit(handle, channel, "left")
 
     def ping(self, prefix, token):
@@ -1193,4 +1173,4 @@ class PesterIRC(QtCore.QThread):
     cannotSendToChan = QtCore.pyqtSignal("QString", "QString")
     tooManyPeeps = QtCore.pyqtSignal()
     quirkDisable = QtCore.pyqtSignal("QString", "QString", "QString")
-    forbiddenchannel = QtCore.pyqtSignal("QString", "QString")
+    signal_forbiddenchannel = QtCore.pyqtSignal("QString", "QString")

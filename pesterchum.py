@@ -4435,7 +4435,7 @@ class MainProgram(QtCore.QObject):
             "quirkDisable(QString, QString, QString)",
             "quirkDisable(QString, QString, QString)",
         ),
-        ("forbiddenchannel(QString)", "forbiddenchannel(QString)"),
+        ("signal_forbiddenchannel(QString)", "forbiddenchannel(QString)"),
     ]
 
     def ircQtConnections(self, irc, widget):
@@ -4484,7 +4484,7 @@ class MainProgram(QtCore.QObject):
             (irc.chanInviteOnly, widget.chanInviteOnly),
             (irc.modesUpdated, widget.modesUpdated),
             (irc.cannotSendToChan, widget.cannotSendToChan),
-            (irc.forbiddenchannel, widget.forbiddenchannel),
+            (irc.signal_forbiddenchannel, widget.forbiddenchannel),
             (irc.tooManyPeeps, widget.tooManyPeeps),
             (irc.quirkDisable, widget.quirkDisable),
         )
