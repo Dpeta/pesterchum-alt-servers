@@ -4,7 +4,9 @@ import random
 import time
 import ssl
 import sys
+import select
 import datetime
+import traceback
 
 try:
     from PyQt6 import QtCore, QtGui
@@ -995,6 +997,7 @@ class PesterIRC(QtCore.QThread):
         PchumLog.info('---> recv "CHANNELS: %s ' % (channel))
 
     def listend(self, server, handle, msg):
+        """End of a LIST response, assume channel list is complete."""
         pl = PesterList(self.channel_list)
         PchumLog.info('---> recv "CHANNELS END"')
         self.channelListReceived.emit(pl)
@@ -1053,7 +1056,7 @@ class PesterIRC(QtCore.QThread):
                 "Failed to pass command, did the server pass an unsupported paramater? "
                 + str(e)
             )
-        except Exception:
+        except Exception as e:
             # logging.info("Failed to pass command, %s" % str(e))
             PchumLog.exception("Failed to pass command")
 
