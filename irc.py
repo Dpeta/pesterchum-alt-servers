@@ -35,6 +35,7 @@ SERVICES = [
     "botserv",
 ]
 
+
 class CommandError(Exception):
     def __init__(self, cmd):
         self.cmd = cmd
@@ -48,6 +49,7 @@ class NoSuchCommandError(CommandError):
 class ProtectedCommandError(CommandError):
     def __str__(self):
         return 'Command "%s" is protected' % ".".join(self.cmd)
+
 
 # Python 3
 QString = str
@@ -68,8 +70,10 @@ except ImportError:
             "certificates if the system-provided root certificates are invalid."
         )
 
+
 class IRCClientError(Exception):
     pass
+
 
 class PesterIRC(QtCore.QThread):
     def __init__(self, config, window, verify_hostname=True):
@@ -81,16 +85,51 @@ class PesterIRC(QtCore.QThread):
         self.verify_hostname = verify_hostname
         self.metadata_supported = False
         self.stopIRC = None
-        self.NickServ = services.NickServ()
-        self.ChanServ = services.ChanServ()
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = self.config.server()
         self.port = self.config.port()
         self.ssl = self.config.ssl()
         self._end = False
-        
+
         self.send_irc = scripts.irc.outgoing.SendIRC()
+
+        self.conn = None
+        self.joined = False
+
+        self.commands = {
+            "001": self.welcome,
+            "005": self.featurelist,
+            "301": self.away,
+            "321": self.liststart,
+            "322": self.list,
+            "323": self.listend,
+            "324": self.channelmodeis,
+            "432": self.erroneusnickname,
+            "433": self.nicknameinuse,
+            "436": self.nickcollision,
+            "448": self.forbiddenchannel,  # non-standard
+            "473": self.inviteonlychan,
+            "761": self.keyvalue,  # 7XX is ircv3 deprecated metadata spec
+            "762": self.metadataend,
+            "766": self.nomatchingkey,
+            "768": self.keynotset,
+            "769": self.keynopermission,
+            "770": self.metadatasubok,
+            "error": self.error,
+            "join": self.join,
+            "kick": self.kick,
+            "mode": self.mode,
+            "part": self.part,
+            "ping": self.ping,
+            "privmsg": self.privmsg,
+            "quit": self.quit,
+            "invite": self.invite,
+            "nick": self.nick,  # We can get svsnicked
+            "metadata": self.metadata,  # Metadata specification
+            "tagmsg": self.tagmsg,  # IRCv3 message tags extension
+            "cap": self.cap,  # IRCv3 Client Capability Negotiation
+        }
 
     def get_ssl_context(self):
         """Returns an SSL context for connecting over SSL/TLS.
@@ -179,7 +218,7 @@ class PesterIRC(QtCore.QThread):
                     if split_buffer[-1]:
                         # Incomplete line, add it back to the buffer.
                         buffer = split_buffer.pop()
-                        
+
                     for line in split_buffer:
                         line = line.decode(encoding="utf-8", errors="replace")
                         print(line)
@@ -224,7 +263,7 @@ class PesterIRC(QtCore.QThread):
             except ValueError as exception:
                 PchumLog.warning("latin-1 failed too xd")
                 return "", buffer  # throw it back in the cooker
-            
+
         data = decoded_buffer.split("\r\n")
         if data[-1]:
             # Last entry has incomplete data, add back to buffer
@@ -260,14 +299,14 @@ class PesterIRC(QtCore.QThread):
         fused_args = []
         for idx, arg in enumerate(args):
             if arg.startswith(":"):
-                final_param = ' '.join(args[idx:])
+                final_param = " ".join(args[idx:])
                 fused_args.append(final_param[1:])
                 break
             else:
                 fused_args.append(arg)
 
         return (tags, prefix, command, fused_args)
-    
+
     def close(self):
         # with extreme prejudice
         if self.socket:
@@ -455,7 +494,9 @@ class PesterIRC(QtCore.QThread):
 
     @QtCore.pyqtSlot(QString, bool)
     def startConvo(self, handle, initiated):
-        self.send_irc.privmsg(handle, "COLOR >%s" % (self.mainwindow.profile().colorcmd()))
+        self.send_irc.privmsg(
+            handle, "COLOR >%s" % (self.mainwindow.profile().colorcmd())
+        )
         if initiated:
             self.send_irc.privmsg(handle, "PESTERCHUM:BEGIN")
 
@@ -490,9 +531,9 @@ class PesterIRC(QtCore.QThread):
         # Send color messages
         for h in list(self.mainwindow.convos.keys()):
             self.send_irc.privmsg(
-                    h,
-                    "COLOR >%s" % (self.mainwindow.profile().colorcmd()),
-                )
+                h,
+                "COLOR >%s" % (self.mainwindow.profile().colorcmd()),
+            )
 
     @QtCore.pyqtSlot(QString)
     def blockedChum(self, handle):
@@ -518,7 +559,6 @@ class PesterIRC(QtCore.QThread):
     @QtCore.pyqtSlot(QString)
     def leftChannel(self, channel):
         self.send_irc.part(channel)
-        self.joined = False
 
     @QtCore.pyqtSlot(QString, QString, QString)
     def kickUser(self, channel, user, reason=""):
@@ -556,7 +596,7 @@ class PesterIRC(QtCore.QThread):
         self.send_irc.quit(f"{_pcVersion} <3")
         self._end = True
         self.close()
-            
+
     def notice(self, nick, chan, msg):
         handle = nick[0 : nick.find("!")]
         PchumLog.info('---> recv "NOTICE {} :{}"'.format(handle, msg))
@@ -642,8 +682,7 @@ class PesterIRC(QtCore.QThread):
             PchumLog.info('---> recv "CTCP {} :{}"'.format(handle, msg[1:-1]))
             # VERSION, return version
             if msg[1:-1].startswith("VERSION"):
-                self.send_irc.ctcp(handle, "VERSION", "Pesterchum %s" % (_pcVersion)
-                )
+                self.send_irc.ctcp(handle, "VERSION", "Pesterchum %s" % (_pcVersion))
             # CLIENTINFO, return supported CTCP commands.
             elif msg[1:-1].startswith("CLIENTINFO"):
                 self.send_irc.ctcp(
@@ -654,8 +693,7 @@ class PesterIRC(QtCore.QThread):
             # PING, return pong
             elif msg[1:-1].startswith("PING"):
                 if len(msg[1:-1].split("PING ")) > 1:
-                    self.send_irc.ctcp(handle, "PING", msg[1:-1].split("PING ")[1]
-                    )
+                    self.send_irc.ctcp(handle, "PING", msg[1:-1].split("PING ")[1])
                 else:
                     self.send_irc.ctcp(handle, "PING")
             # SOURCE, return source
@@ -745,6 +783,7 @@ class PesterIRC(QtCore.QThread):
             self.send_irc.privmsg("#pesterchum", "MOOD >%d" % (mymood))
 
     def erroneusnickname(self, *args):
+        """RFC 432"""
         # Server is not allowing us to connect.
         reason = "Handle is not allowed on this server.\n"
         for x in args:
@@ -820,9 +859,7 @@ class PesterIRC(QtCore.QThread):
 
     def kick(self, opnick, channel, handle, reason):
         op = opnick[0 : opnick.find("!")]
-        self.userPresentUpdate.emit(
-            handle, channel, "kick:{}:{}".format(op, reason)
-        )
+        self.userPresentUpdate.emit(handle, channel, "kick:{}:{}".format(op, reason))
         # ok i shouldnt be overloading that but am lazy
 
     def part(self, nick, channel, reason="nanchos"):
@@ -949,9 +986,7 @@ class PesterIRC(QtCore.QThread):
                 ("x" in m) | ("z" in m) | ("o" in m) | ("x" in m)
             ) != True:
                 try:
-                    self.userPresentUpdate.emit(
-                        handles[i], channel, m + ":%s" % (op)
-                    )
+                    self.userPresentUpdate.emit(handles[i], channel, m + ":%s" % (op))
                 except IndexError as e:
                     PchumLog.exception("modeSetIndexError: %s" % e)
             # print("i = " + i)
@@ -978,9 +1013,7 @@ class PesterIRC(QtCore.QThread):
             self.myHandleChanged.emit(newnick)
         newchum = PesterProfile(newnick, chumdb=self.mainwindow.chumdb)
         self.moodUpdated.emit(oldhandle, Mood("offline"))
-        self.userPresentUpdate.emit(
-            "{}:{}".format(oldhandle, newnick), "", "nick"
-        )
+        self.userPresentUpdate.emit("{}:{}".format(oldhandle, newnick), "", "nick")
         if newnick in self.mainwindow.chumList.chums:
             self.getMood(newchum)
         if oldhandle == self.mainwindow.randhandler.randNick:
@@ -1020,9 +1053,7 @@ class PesterIRC(QtCore.QThread):
         pl = PesterList(namelist)
         del self.channelnames[channel]
         self.namesReceived.emit(channel, pl)
-        if channel == "#pesterchum" and (
-            not hasattr(self, "joined") or not self.joined
-        ):
+        if channel == "#pesterchum" and not self.joined:
             self.joined = True
             self.mainwindow.randhandler.setRunning(
                 self.mainwindow.randhandler.randNick in namelist
@@ -1116,7 +1147,7 @@ class PesterIRC(QtCore.QThread):
             if hasattr(f, "protected"):
                 raise ProtectedCommandError(in_command_parts)
 
-            #if isinstance(f, self) and command_parts:
+            # if isinstance(f, self) and command_parts:
             if command_parts:
                 return f.get(command_parts)
             p = f
