@@ -36,25 +36,6 @@ SERVICES = [
     "botserv",
 ]
 
-
-class CommandError(Exception):
-    def __init__(self, cmd):
-        self.cmd = cmd
-
-
-class NoSuchCommandError(CommandError):
-    def __str__(self):
-        return 'No such command "%s"' % ".".join(self.cmd)
-
-
-class ProtectedCommandError(CommandError):
-    def __str__(self):
-        return 'Command "%s" is protected' % ".".join(self.cmd)
-
-
-# Python 3
-QString = str
-
 try:
     import certifi
 except ImportError:
@@ -70,10 +51,6 @@ except ImportError:
             "Failed to import certifi, Pesterchum will not be able to validate "
             "certificates if the system-provided root certificates are invalid."
         )
-
-
-class IRCClientError(Exception):
-    pass
 
 
 class PesterIRC(QtCore.QThread):
@@ -96,7 +73,7 @@ class PesterIRC(QtCore.QThread):
         self.send_irc = SendIRC()
 
         self.conn = None
-        
+
         self.joined = False
         self.channelnames = {}
         self.channel_list = []
@@ -293,15 +270,11 @@ class PesterIRC(QtCore.QThread):
             try:
                 self.socket.shutdown(socket.SHUT_RDWR)
             except OSError as e:
-                PchumLog.debug(
-                    "Error while shutting down socket, already broken? %s" % str(e)
-                )
+                PchumLog.info("Error while shutting down socket, already broken? %s", e)
             try:
                 self.socket.close()
             except OSError as e:
-                PchumLog.debug(
-                    "Error while closing socket, already broken? %s" % str(e)
-                )
+                PchumLog.info("Error while closing socket, already broken? %s", e)
 
     def IRCConnect(self):
         try:
@@ -325,7 +298,7 @@ class PesterIRC(QtCore.QThread):
                 self.mainwindow.sincerecv = 0
                 res = self.updateIRC()
             except socket.timeout as se:
-                PchumLog.debug("timeout in thread %s" % (self))
+                PchumLog.debug("timeout in thread %s", self)
                 self.close()
                 self.stopIRC = "{}, {}".format(type(se), se)
                 return
@@ -339,13 +312,17 @@ class PesterIRC(QtCore.QThread):
                     return
 
     def setConnected(self):
+        """Called when connected and registered to server.
+
+        Meaning the server has accepted our nick and user and has replied with 001/welcome.
+        """
         self.registeredIRC = True
         self.connected.emit()
 
     def setConnectionBroken(self):
-        PchumLog.critical("setconnection broken")
+        """Called when the connection is broken."""
+        PchumLog.critical("setConnectionBroken() got called, disconnecting.")
         self.disconnectIRC()
-        # self.brokenConnection = True  # Unused
 
     @QtCore.pyqtSlot()
     def updateIRC(self):
@@ -407,14 +384,14 @@ class PesterIRC(QtCore.QThread):
     def getMoods(self, chums):
         self.getMood(*chums)
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def sendNotice(self, text, handle):
         self.send_irc.notice(handle, text)
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def sendMessage(self, text, handle):
-        h = str(handle)
-        textl = [str(text)]
+        """......sends a message? this is a tad silly;;;"""
+        textl = [text]
 
         def splittext(l):
             if len(l[0]) > 450:
@@ -447,7 +424,7 @@ class PesterIRC(QtCore.QThread):
                     # start them up again in the second part
                     for c in hanging:
                         b = c + b
-                if len(b) > 0:
+                if b:  # len > 0
                     return [a] + splittext([b])
                 else:
                     return [a]
@@ -455,28 +432,20 @@ class PesterIRC(QtCore.QThread):
                 return l
 
         textl = splittext(textl)
-        try:
-            for t in textl:
-                self.send_irc.privmsg(h, t)
-        except OSError as e:
-            PchumLog.warning(e)
-            self.setConnectionBroken()
+        for t in textl:
+            self.send_irc.privmsg(handle, t)
 
-    @QtCore.pyqtSlot(
-        QString,
-        QString,
-    )
-    
+    @QtCore.pyqtSlot(str, str)
     def sendCTCP(self, handle, text):
         self.send_irc.ctcp(handle, text)
 
-    @QtCore.pyqtSlot(QString, bool)
+    @QtCore.pyqtSlot(str, bool)
     def startConvo(self, handle, initiated):
         self.send_irc.privmsg(handle, f"COLOR >{self.mainwindow.profile().colorcmd()}")
         if initiated:
             self.send_irc.privmsg(handle, "PESTERCHUM:BEGIN")
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def endConvo(self, handle):
         self.send_irc.privmsg(handle, "PESTERCHUM:CEASE")
 
@@ -493,11 +462,11 @@ class PesterIRC(QtCore.QThread):
 
     @QtCore.pyqtSlot()
     def updateMood(self):
-        me = self.mainwindow.profile()
+        mood = str(self.mainwindow.profile().mood.value())
         # Moods via metadata
-        self.send_irc.metadata("*", "set", "mood", str(me.mood.value()))
+        self.send_irc.metadata("*", "set", "mood", mood)
         # Backwards compatibility
-        self.send_irc.privmsg("#pesterchum", f"MOOD >{me.mood.value()}")
+        self.send_irc.privmsg("#pesterchum", f"MOOD >{mood}")
 
     @QtCore.pyqtSlot()
     def updateColor(self):
@@ -505,21 +474,21 @@ class PesterIRC(QtCore.QThread):
         color = self.mainwindow.profile().color
         self.send_irc.metadata("*", "set", "color", str(color.name()))
         # Send color messages
-        for h in list(self.mainwindow.convos.keys()):
+        for convo in list(self.mainwindow.convos.keys()):
             self.send_irc.privmsg(
-                h,
+                convo,
                 "COLOR >%s" % (self.mainwindow.profile().colorcmd()),
             )
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def blockedChum(self, handle):
         self.send_irc.privmsg(handle, "PESTERCHUM:BLOCK")
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def unblockedChum(self, handle):
         self.send_irc.privmsg(handle, "PESTERCHUM:UNBLOCK")
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def requestNames(self, channel):
         self.send_irc.names(channel)
 
@@ -527,28 +496,28 @@ class PesterIRC(QtCore.QThread):
     def requestChannelList(self):
         self.send_irc.list()
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def joinChannel(self, channel):
         self.send_irc.join(channel)
         self.send_irc.mode(channel)
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def leftChannel(self, channel):
         self.send_irc.part(channel)
 
-    @QtCore.pyqtSlot(QString, QString, QString)
+    @QtCore.pyqtSlot(str, str, str)
     def kickUser(self, channel, user, reason=""):
         self.send_irc.kick(channel, user, reason)
 
-    @QtCore.pyqtSlot(QString, QString, QString)
+    @QtCore.pyqtSlot(str, str, str)
     def setChannelMode(self, channel, mode, command):
         self.send_irc.mode(channel, mode, command)
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def channelNames(self, channel):
         self.send_irc.names(channel)
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def inviteChum(self, handle, channel):
         self.send_irc.invite(handle, channel)
 
@@ -563,7 +532,7 @@ class PesterIRC(QtCore.QThread):
         else:
             self.away()
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def killSomeQuirks(self, channel, handle):
         self.send_irc.ctcp(channel, "NOQUIRKS", handle)
 
@@ -619,7 +588,16 @@ class PesterIRC(QtCore.QThread):
                     return
                 PchumLog.info("Pesterchum tag: %s=%s", key, value)
                 # PESTERCHUM: syntax check
-                if value in ["BEGIN", "BLOCK", "CEASE", "BLOCK", "BLOCKED", "UNBLOCK", "IDLE", "ME"]:
+                if value in [
+                    "BEGIN",
+                    "BLOCK",
+                    "CEASE",
+                    "BLOCK",
+                    "BLOCKED",
+                    "UNBLOCK",
+                    "IDLE",
+                    "ME",
+                ]:
                     # Process like it's a PESTERCHUM: PRIVMSG
                     msg = "PESTERCHUM:" + value
                     self.privmsg(prefix, args[0], msg)
@@ -799,9 +777,7 @@ class PesterIRC(QtCore.QThread):
                             PchumLog.warning(
                                 "Can't remove channel mode that isn't set."
                             )
-                    self.userPresentUpdate.emit(
-                        "", channel, f"{channel_mode}:{op}"
-                    )
+                    self.userPresentUpdate.emit("", channel, f"{channel_mode}:{op}")
                     PchumLog.debug("pre-mode=%s", mode)
                     mode = mode.replace(md, "")
                     PchumLog.debug("post-mode=%s", mode)
@@ -869,7 +845,7 @@ class PesterIRC(QtCore.QThread):
             self.send_irc.cap(
                 self, "REQ", "pesterchum-tag"
             )  # <--- Currently not using this
-            #time.sleep(0.413 + 0.097)  # <--- somehow, this actually helps.
+            # time.sleep(0.413 + 0.097)  # <--- somehow, this actually helps.
             self.send_irc.join("#pesterchum")
             # Moods via metadata
             self.send_irc.metadata("*", "sub", "mood")
@@ -885,7 +861,7 @@ class PesterIRC(QtCore.QThread):
 
         Not in the original specification.
         Metadata support could be confirmed via CAP ACK/CAP NEK.
-        """ 
+        """
         features = params[:-1]
         PchumLog.info("Server featurelist: %s", features)
         for x in features:
@@ -1032,7 +1008,7 @@ class PesterIRC(QtCore.QThread):
             self.send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
 
     def metadatasubok(self, *params):
-        """"METADATA DRAFT numeric reply 770 RPL_METADATASUBOK, we subbed to a key."""
+        """ "METADATA DRAFT numeric reply 770 RPL_METADATASUBOK, we subbed to a key."""
         PchumLog.info("metadatasubok: %s", params)
 
     def run_command(self, command, *args):
@@ -1043,11 +1019,13 @@ class PesterIRC(QtCore.QThread):
         except KeyError:
             PchumLog.warning("No matching function for command: %s(%s)", command, args)
             return
-        
+
         try:
             command_function(*args)
         except TypeError:
-            PchumLog.exception("Failed to pass command, did the server pass an unsupported paramater?")
+            PchumLog.exception(
+                "Failed to pass command, did the server pass an unsupported paramater?"
+            )
         except Exception:
             PchumLog.exception("Exception while parsing command.")
 
@@ -1072,8 +1050,10 @@ class PesterIRC(QtCore.QThread):
     quirkDisable = QtCore.pyqtSignal("QString", "QString", "QString")
     signal_forbiddenchannel = QtCore.pyqtSignal("QString", "QString")
 
+
 class SendIRC:
     """Provides functions for outgoing IRC commands."""
+
     def __init__(self):
         self.socket = None  # INET socket connected with server.
 
