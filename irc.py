@@ -1,12 +1,18 @@
-import logging
-import socket
-import random
-import time
-import ssl
+"""Provides classes and functions for communicating with an IRC server.
+
+References for the IRC protocol:
+ - Original IRC protocol specification: https://www.rfc-editor.org/rfc/rfc1459
+ - Updated IRC Client specification: https://www.rfc-editor.org/rfc/rfc2812
+ - Modern IRC client protocol writeup: https://modern.ircdocs.horse
+ - IRCv3 protocol additions: https://ircv3.net/irc/
+ - Draft of metadata specification: https://gist.github.com/k4bek4be/92c2937cefd49990fbebd001faf2b237
+"""
 import sys
-import select
+import socket
+import ssl
+import random
 import datetime
-import traceback
+import logging
 
 try:
     from PyQt6 import QtCore, QtGui
@@ -90,11 +96,16 @@ class PesterIRC(QtCore.QThread):
         self.send_irc = SendIRC()
 
         self.conn = None
+        
         self.joined = False
+        self.channelnames = {}
+        self.channel_list = []
+        self.channel_field = None
 
         self.commands = {
             "001": self.welcome,
             "005": self.featurelist,
+            "221": self.umodeis,
             "321": self.liststart,
             "322": self.list,
             "323": self.listend,
@@ -216,14 +227,12 @@ class PesterIRC(QtCore.QThread):
                     for line in split_buffer:
                         line = line.decode(encoding="utf-8", errors="replace")
                         tags, prefix, command, args = self.parse_irc_line(line)
-                        try:
+                        if command:
                             # Only need tags with tagmsg
                             if command.casefold() == "tagmsg":
                                 self.run_command(command, prefix, tags, *args)
                             else:
                                 self.run_command(command, prefix, *args)
-                        except CommandError as e:
-                            PchumLog.warning(f"CommandError: {e}")
 
                 yield True
         except socket.timeout as se:
@@ -463,9 +472,7 @@ class PesterIRC(QtCore.QThread):
 
     @QtCore.pyqtSlot(QString, bool)
     def startConvo(self, handle, initiated):
-        self.send_irc.privmsg(
-            handle, "COLOR >%s" % (self.mainwindow.profile().colorcmd())
-        )
+        self.send_irc.privmsg(handle, f"COLOR >{self.mainwindow.profile().colorcmd()}")
         if initiated:
             self.send_irc.privmsg(handle, "PESTERCHUM:BEGIN")
 
@@ -490,7 +497,7 @@ class PesterIRC(QtCore.QThread):
         # Moods via metadata
         self.send_irc.metadata("*", "set", "mood", str(me.mood.value()))
         # Backwards compatibility
-        self.send_irc.privmsg("#pesterchum", "MOOD >%d" % (me.mood.value()))
+        self.send_irc.privmsg("#pesterchum", f"MOOD >{me.mood.value()}")
 
     @QtCore.pyqtSlot()
     def updateColor(self):
@@ -567,6 +574,7 @@ class PesterIRC(QtCore.QThread):
         self.close()
 
     def notice(self, nick, chan, msg):
+        """Standard IRC 'NOTICE' message, primarily used for automated replies from services."""
         handle = nick[0 : nick.find("!")]
         PchumLog.info('---> recv "NOTICE {} :{}"'.format(handle, msg))
         if (
@@ -579,40 +587,39 @@ class PesterIRC(QtCore.QThread):
             self.noticeReceived.emit(handle, msg)
 
     def metadata(self, target, nick, key, visibility, value):
-        # The format of the METADATA server notication is:
-        # METADATA <Target> <Key> <Visibility> <Value>
+        """METADATA DRAFT metadata message from server.
+
+        The format of the METADATA server notication is:
+        METADATA <Target> <Key> <Visibility> <Value>
+        """
         if key.lower() == "mood":
             try:
                 mood = Mood(int(value))
                 self.moodUpdated.emit(nick, mood)
             except ValueError:
-                PchumLog.warning("Invalid mood value, {}, {}".format(nick, mood))
+                PchumLog.warning("Invalid mood value, %s, %s", nick, mood)
         elif key.lower() == "color":
             color = QtGui.QColor(value)  # Invalid color becomes rgb 0,0,0
             self.colorUpdated.emit(nick, color)
 
     def tagmsg(self, prefix, tags, *args):
-        PchumLog.info("TAGMSG: {} {} {}".format(prefix, tags, str(args)))
+        """IRCv3 'TAGMSG' message/command, contains a tag without a command.
+
+        For reference see:
+        https://ircv3.net/specs/extensions/message-tags.html#the-tagmsg-tag-only-message
+        """
+        PchumLog.info("TAGMSG: %s %s %s", prefix, tags, args)
         message_tags = tags[1:].split(";")
-        for m in message_tags:
-            if m.startswith("+pesterchum"):
+        for tag in message_tags:
+            if tag.startswith("+pesterchum"):
                 # Pesterchum tag
                 try:
-                    key, value = m.split("=")
+                    key, value = tag.split("=")
                 except ValueError:
                     return
-                PchumLog.info("Pesterchum tag: {}={}".format(key, value))
+                PchumLog.info("Pesterchum tag: %s=%s", key, value)
                 # PESTERCHUM: syntax check
-                if (
-                    (value == "BEGIN")
-                    or (value == "BLOCK")
-                    or (value == "CEASE")
-                    or (value == "BLOCK")
-                    or (value == "BLOCKED")
-                    or (value == "UNBLOCK")
-                    or (value == "IDLE")
-                    or (value == "ME")
-                ):
+                if value in ["BEGIN", "BLOCK", "CEASE", "BLOCK", "BLOCKED", "UNBLOCK", "IDLE", "ME"]:
                     # Process like it's a PESTERCHUM: PRIVMSG
                     msg = "PESTERCHUM:" + value
                     self.privmsg(prefix, args[0], msg)
@@ -628,20 +635,20 @@ class PesterIRC(QtCore.QThread):
                     # Invalid syntax
                     PchumLog.warning("TAGMSG with invalid syntax.")
 
+    def ping(self, _prefix, token):
+        """'PING' command from server, we respond with PONG and a matching token."""
+        self.send_irc.pong(token)
+
     def error(self, *params):
-        # Server is ending connection.
-        reason = ""
-        for x in params:
-            if x:
-                reason += x + " "
-        self.stopIRC = reason.strip()
+        """'ERROR' message from server, the server is terminating our connection."""
+        self.stopIRC = " ".join(params).strip()
         self.disconnectIRC()
 
     def privmsg(self, nick, chan, msg):
+        """'PRIVMSG' message from server, the standard message."""
         handle = nick[0 : nick.find("!")]
         if not msg:  # Length 0
             return
-
         # CTCP
         # ACTION, IRC /me (The CTCP kind)
         if msg[0:8] == "\x01ACTION ":
@@ -726,96 +733,10 @@ class PesterIRC(QtCore.QThread):
             else:
                 self.messageReceived.emit(handle, msg)
 
-    def welcome(self, server, nick, msg):
-        self.setConnected()
-        # mychumhandle = self.mainwindow.profile().handle
-        mymood = self.mainwindow.profile().mood.value()
-        color = self.mainwindow.profile().color
-        if not self.mainwindow.config.lowBandwidth():
-            # Negotiate capabilities
-            self.send_irc.cap("REQ", "message-tags")
-            self.send_irc.cap(
-                self, "REQ", "draft/metadata-notify-2"
-            )  # <--- Not required in the unreal5 module implementation
-            self.send_irc.cap(
-                self, "REQ", "pesterchum-tag"
-            )  # <--- Currently not using this
-            time.sleep(0.413 + 0.097)  # <--- somehow, this actually helps.
-            self.send_irc.join("#pesterchum")
-            # Moods via metadata
-            self.send_irc.metadata("*", "sub", "mood")
-            self.send_irc.metadata("*", "set", "mood", str(mymood))
-            # Color via metadata
-            self.send_irc.metadata("*", "sub", "color")
-            self.send_irc.metadata("*", "set", "color", str(color.name()))
-            # Backwards compatible moods
-            self.send_irc.privmsg("#pesterchum", "MOOD >%d" % (mymood))
-
-    def erroneusnickname(self, *args):
-        """RFC 432"""
-        # Server is not allowing us to connect.
-        reason = "Handle is not allowed on this server.\n"
-        for x in args:
-            if x:
-                reason += x + " "
-        self.stopIRC = reason.strip()
-        self.disconnectIRC()
-
-    def keyvalue(self, target, handle_us, handle_owner, key, visibility, *value):
-        # The format of the METADATA server notication is:
-        # METADATA <Target> <Key> <Visibility> <Value>
-        if key == "mood":
-            mood = Mood(int(value[0]))
-            self.moodUpdated.emit(handle_owner, mood)
-
-    def metadatasubok(self, *params):
-        PchumLog.info("metadatasubok: %s", params)
-
-    def nomatchingkey(self, target, our_handle, failed_handle, key, *error):
-        # Try to get moods the old way if metadata fails.
-        PchumLog.info("nomatchingkey: " + failed_handle)
-        # No point in GETMOOD-ing services
-        if failed_handle.casefold() not in SERVICES:
-            self.send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
-
-    def keynotset(self, target, our_handle, failed_handle, key, *error):
-        # Try to get moods the old way if metadata fails.
-        PchumLog.info("nomatchingkey: %s", failed_handle)
-        self.send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
-
-    def keynopermission(self, target, our_handle, failed_handle, key, *error):
-        # Try to get moods the old way if metadata fails.
-        PchumLog.info("nomatchingkey: %s", failed_handle)
-        self.send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
-
-    def featurelist(self, target, handle, *params):
-        # Better to do this via CAP ACK/CAP NEK
-        # RPL_ISUPPORT
-        features = params[:-1]
-        PchumLog.info("Server featurelist: " + str(features))
-        for x in features:
-            if x.upper().startswith("METADATA"):
-                PchumLog.info("Server supports metadata.")
-                self.metadata_supported = True
-
-    def cap(self, server, nick, subcommand, tag):
-        PchumLog.info("CAP {} {} {} {}".format(server, nick, subcommand, tag))
-        # if tag == "message-tags":
-        #    if subcommand == "ACK":
-
-    def nicknameinuse(self, server, cmd, nick, msg):
-        newnick = "pesterClient%d" % (random.randint(100, 999))
-        self.send_irc.nick(newnick)
-        self.nickCollision.emit(nick, newnick)
-
-    def nickcollision(self, server, cmd, nick, msg):
-        newnick = "pesterClient%d" % (random.randint(100, 999))
-        self.send_irc.nick(newnick)
-        self.nickCollision.emit(nick, newnick)
-
     def quit(self, nick, reason):
+        """QUIT message from server, a client has quit the server."""
         handle = nick[0 : nick.find("!")]
-        PchumLog.info('---> recv "QUIT {}: {}"'.format(handle, reason))
+        PchumLog.info('---> recv "QUIT %s: %s"', handle, reason)
         if handle == self.mainwindow.randhandler.randNick:
             self.mainwindow.randhandler.setRunning(False)
         server = self.mainwindow.config.server()
@@ -827,11 +748,13 @@ class PesterIRC(QtCore.QThread):
         self.moodUpdated.emit(handle, Mood("offline"))
 
     def kick(self, opnick, channel, handle, reason):
+        """'KICK' message from server, someone got kicked from a channel."""
         op = opnick[0 : opnick.find("!")]
-        self.userPresentUpdate.emit(handle, channel, "kick:{}:{}".format(op, reason))
+        self.userPresentUpdate.emit(handle, channel, f"kick:{op}:{reason}")
         # ok i shouldnt be overloading that but am lazy
 
-    def part(self, nick, channel, reason="nanchos"):
+    def part(self, nick, channel, _reason="nanchos"):
+        """'PART' message from server, someone left a channel."""
         handle = nick[0 : nick.find("!")]
         PchumLog.info('---> recv "PART {}: {}"'.format(handle, channel))
         self.userPresentUpdate.emit(handle, channel, "left")
@@ -839,6 +762,7 @@ class PesterIRC(QtCore.QThread):
             self.moodUpdated.emit(handle, Mood("offline"))
 
     def join(self, nick, channel):
+        """'JOIN' message from server, someone joined a channel."""
         handle = nick[0 : nick.find("!")]
         PchumLog.info('---> recv "JOIN {}: {}"'.format(handle, channel))
         self.userPresentUpdate.emit(handle, channel, "join")
@@ -848,15 +772,13 @@ class PesterIRC(QtCore.QThread):
             self.moodUpdated.emit(handle, Mood("chummy"))
 
     def mode(self, op, channel, mode, *handles):
+        """'MODE' message from server, a user or a channel's mode changed."""
         PchumLog.debug(
-            "op=%s, channel=%s, mode=%s, handles=%s", op, channel, mode, handles
+            "mode(op=%s, channel=%s, mode=%s, handles=%s)", op, channel, mode, handles
         )
-
         if not handles:
             handles = [""]
-        opnick = op[0 : op.find("!")]
-        PchumLog.debug("opnick=%s", opnick)
-
+        # opnick = op[0 : op.find("!")]
         # Channel section
         # This might be clunky with non-unrealircd IRC servers
         channel_mode = ""
@@ -866,7 +788,6 @@ class PesterIRC(QtCore.QThread):
             modes = list(self.mainwindow.modes)
             for md in unrealircd_channel_modes:
                 if mode.find(md) != -1:  # -1 means not found
-                    PchumLog.debug("md=" + md)
                     if mode[0] == "+":
                         modes.extend(md)
                         channel_mode = "+" + md
@@ -879,7 +800,7 @@ class PesterIRC(QtCore.QThread):
                                 "Can't remove channel mode that isn't set."
                             )
                     self.userPresentUpdate.emit(
-                        "", channel, channel_mode + ":%s" % (op)
+                        "", channel, f"{channel_mode}:{op}"
                     )
                     PchumLog.debug("pre-mode=%s", mode)
                     mode = mode.replace(md, "")
@@ -893,28 +814,27 @@ class PesterIRC(QtCore.QThread):
             if l in ["+", "-"]:
                 cur = l
             else:
-                modes.append("{}{}".format(cur, l))
-        PchumLog.debug("handles=%s", handles)
-        PchumLog.debug("enumerate(modes) = " + str(list(enumerate(modes))))
+                modes.append(f"{cur}{l}")
         for i, m in enumerate(modes):
             # Server-set usermodes don't need to be passed.
-            if (handles == [""]) & (
-                ("x" in m) | ("z" in m) | ("o" in m) | ("x" in m)
-            ) != True:
+            if handles == [""] and not ("x" in m or "z" in m or "o" in m or "x" in m):
                 try:
-                    self.userPresentUpdate.emit(handles[i], channel, m + ":%s" % (op))
+                    self.userPresentUpdate.emit(handles[i], channel, m + f":{op}")
                 except IndexError as e:
-                    PchumLog.exception("modeSetIndexError: %s" % e)
-            # print("i = " + i)
-            # print("m = " + m)
-            # self.userPresentUpdate.emit(handles[i], channel, m+":%s" % (op))
-            # self.userPresentUpdate.emit(handles[i], channel, m+":%s" % (op))
-            # Passing an empty handle here might cause a crash.
-            # except IndexError:
-            # self.userPresentUpdate.emit("", channel, m+":%s" % (op))
+                    PchumLog.exception("modeSetIndexError: %s", e)
 
-    def nick(self, oldnick, newnick, hopcount=0):
-        PchumLog.info("{}, {}".format(oldnick, newnick))
+    def invite(self, sender, _you, channel):
+        """'INVITE' message from server, someone invited us to a channel.
+
+        Pizza party everyone invited!!!"""
+        handle = sender.split("!")[0]
+        self.inviteReceived.emit(handle, channel)
+
+    def nick(self, oldnick, newnick, _hopcount=0):
+        """'NICK' message from server, signifies a nick change.
+
+        Is send when our or someone else's nick got changed willingly or unwillingly."""
+        PchumLog.info(oldnick, newnick)
         # svsnick
         if oldnick == self.mainwindow.profile().handle:
             # Server changed our handle, svsnick?
@@ -922,14 +842,11 @@ class PesterIRC(QtCore.QThread):
 
         # etc.
         oldhandle = oldnick[0 : oldnick.find("!")]
-        if (oldhandle == self.mainwindow.profile().handle) or (
-            newnick == self.mainwindow.profile().handle
-        ):
-            # print('hewwo')
+        if self.mainwindow.profile().handle in [newnick, oldhandle]:
             self.myHandleChanged.emit(newnick)
         newchum = PesterProfile(newnick, chumdb=self.mainwindow.chumdb)
         self.moodUpdated.emit(oldhandle, Mood("offline"))
-        self.userPresentUpdate.emit("{}:{}".format(oldhandle, newnick), "", "nick")
+        self.userPresentUpdate.emit(f"{oldhandle}:{newnick}", "", "nick")
         if newnick in self.mainwindow.chumList.chums:
             self.getMood(newchum)
         if oldhandle == self.mainwindow.randhandler.randNick:
@@ -937,134 +854,202 @@ class PesterIRC(QtCore.QThread):
         elif newnick == self.mainwindow.randhandler.randNick:
             self.mainwindow.randhandler.setRunning(True)
 
-    def namreply(self, server, nick, op, channel, names):
+    def welcome(self, server, nick, msg):
+        """Numeric reply 001 RPL_WELCOME, send when we've connected to the server."""
+        self.setConnected()
+        # mychumhandle = self.mainwindow.profile().handle
+        mymood = self.mainwindow.profile().mood.value()
+        color = self.mainwindow.profile().color
+        if not self.mainwindow.config.lowBandwidth():
+            # Negotiate capabilities
+            self.send_irc.cap("REQ", "message-tags")
+            self.send_irc.cap(
+                self, "REQ", "draft/metadata-notify-2"
+            )  # <--- Not required in the unreal5 module implementation
+            self.send_irc.cap(
+                self, "REQ", "pesterchum-tag"
+            )  # <--- Currently not using this
+            #time.sleep(0.413 + 0.097)  # <--- somehow, this actually helps.
+            self.send_irc.join("#pesterchum")
+            # Moods via metadata
+            self.send_irc.metadata("*", "sub", "mood")
+            self.send_irc.metadata("*", "set", "mood", str(mymood))
+            # Color via metadata
+            self.send_irc.metadata("*", "sub", "color")
+            self.send_irc.metadata("*", "set", "color", str(color.name()))
+            # Backwards compatible moods
+            self.send_irc.privmsg("#pesterchum", "MOOD >%d" % (mymood))
+
+    def featurelist(self, _target, _handle, *params):
+        """Numerical reply 005 RPL_ISUPPORT to communicate supported server features.
+
+        Not in the original specification.
+        Metadata support could be confirmed via CAP ACK/CAP NEK.
+        """ 
+        features = params[:-1]
+        PchumLog.info("Server featurelist: %s", features)
+        for x in features:
+            if x.upper().startswith("METADATA"):
+                PchumLog.info("Server supports metadata.")
+                self.metadata_supported = True
+
+    def cap(self, server, nick, subcommand, tag):
+        """IRCv3 capabilities command from server.
+
+        See: https://ircv3.net/specs/extensions/capability-negotiation
+        """
+        PchumLog.info("CAP %s %s %s %s", server, nick, subcommand, tag)
+        # if tag == "message-tags":
+        #    if subcommand == "ACK":
+
+    def umodeis(self, _server, _handle, modes):
+        """Numeric reply 221 RPL_UMODEIS, shows us our user modes."""
+        self.mainwindow.modes = modes
+
+    def liststart(self, _server, _handle, *info):
+        """Numeric reply 321 RPL_LISTSTART, start of list of channels."""
+        self.channel_list = []
+        info = list(info)
+        self.channel_field = info.index("Channel")  # dunno if this is protocol
+        PchumLog.info('---> recv "CHANNELS: %s ', self.channel_field)
+
+    def list(self, _server, _handle, *info):
+        """Numeric reply 322 RPL_LIST, returns part of the list of channels."""
+        channel = info[self.channel_field]
+        usercount = info[1]
+        if channel not in self.channel_list and channel != "#pesterchum":
+            self.channel_list.append((channel, usercount))
+        PchumLog.info('---> recv "CHANNELS: %s ', channel)
+
+    def listend(self, _server, _handle, _msg):
+        """Numeric reply 323 RPL_LISTEND, end of a series of LIST replies."""
+        PchumLog.info('---> recv "CHANNELS END"')
+        self.channelListReceived.emit(PesterList(self.channel_list))
+        self.channel_list = []
+
+    def channelmodeis(self, _server, _handle, channel, modes, _mode_params=""):
+        """Numeric reply 324 RPL_CHANNELMODEIS, gives channel modes."""
+        self.modesUpdated.emit(channel, modes)
+
+    def namreply(self, _server, _nick, _op, channel, names):
+        """Numeric reply 353 RPL_NAMREPLY, part of a NAMES list of members, usually of a channel."""
         namelist = names.split(" ")
-        PchumLog.info('---> recv "NAMES %s: %d names"' % (channel, len(namelist)))
+        PchumLog.info('---> recv "NAMES %s: %s names"', channel, len(namelist))
         if not hasattr(self, "channelnames"):
             self.channelnames = {}
         if channel not in self.channelnames:
             self.channelnames[channel] = []
         self.channelnames[channel].extend(namelist)
 
-    # def ison(self, server, nick, nicks):
-    #    nicklist = nicks.split(" ")
-    #    getglub = "GETMOOD "
-    #    PchumLog.info("---> recv \"ISON :%s\"" % nicks)
-    #    for nick_it in nicklist:
-    #        self.moodUpdated.emit(nick_it, Mood(0))
-    #        if nick_it in self.mainwindow.namesdb["#pesterchum"]:
-    #           getglub += nick_it
-    #    if getglub != "GETMOOD ":
-    #        self.send_irc.privmsg("#pesterchum", getglub)
-
-    def endofnames(self, server, nick, channel, msg):
+    def endofnames(self, _server, _nick, channel, _msg):
+        """Numeric reply 366 RPL_ENDOFNAMES, end of NAMES list of members, usually of a channel."""
         try:
             namelist = self.channelnames[channel]
         except KeyError:
             # EON seems to return with wrong capitalization sometimes?
-            for cn in self.channelnames.keys():
-                if channel.lower() == cn.lower():
-                    channel = cn
+            for channel_name in self.channelnames:
+                if channel.casefold() == channel_name.casefold():
+                    channel = channel_name
                     namelist = self.channelnames[channel]
-        pl = PesterList(namelist)
         del self.channelnames[channel]
-        self.namesReceived.emit(channel, pl)
+        self.namesReceived.emit(channel, PesterList(namelist))
         if channel == "#pesterchum" and not self.joined:
             self.joined = True
             self.mainwindow.randhandler.setRunning(
                 self.mainwindow.randhandler.randNick in namelist
             )
             chums = self.mainwindow.chumList.chums
-            # self.isOn(*chums)
             lesschums = []
-            for c in chums:
-                chandle = c.handle
-                if chandle in namelist:
-                    lesschums.append(c)
+            for chum in chums:
+                if chum.handle in namelist:
+                    lesschums.append(chum)
             self.getMood(*lesschums)
 
-    def liststart(self, server, handle, *info):
-        self.channel_list = []
-        info = list(info)
-        self.channel_field = info.index("Channel")  # dunno if this is protocol
-        PchumLog.info('---> recv "CHANNELS: %s ' % (self.channel_field))
-
-    def list(self, server, handle, *info):
-        channel = info[self.channel_field]
-        usercount = info[1]
-        if channel not in self.channel_list and channel != "#pesterchum":
-            self.channel_list.append((channel, usercount))
-        PchumLog.info('---> recv "CHANNELS: %s ' % (channel))
-
-    def listend(self, server, handle, msg):
-        """End of a LIST response, assume channel list is complete."""
-        pl = PesterList(self.channel_list)
-        PchumLog.info('---> recv "CHANNELS END"')
-        self.channelListReceived.emit(pl)
-        self.channel_list = []
-
-    def umodeis(self, server, handle, modes):
-        self.mainwindow.modes = modes
-
-    def invite(self, sender, you, channel):
-        handle = sender.split("!")[0]
-        self.inviteReceived.emit(handle, channel)
-
-    def inviteonlychan(self, server, handle, channel, msg):
-        self.chanInviteOnly.emit(channel)
-
-    # channelmodeis can have six arguments.
-    def channelmodeis(self, server, handle, channel, modes, mode_params=""):
-        self.modesUpdated.emit(channel, modes)
-
-    def cannotsendtochan(self, server, handle, channel, msg):
+    def cannotsendtochan(self, _server, _handle, channel, msg):
+        """Numeric reply 404 ERR_CANNOTSENDTOCHAN, we aren't in the channel or don't have voice."""
         self.cannotSendToChan.emit(channel, msg)
 
-    def toomanypeeps(self, *stuff):
-        self.tooManyPeeps.emit()
+    def erroneusnickname(self, *args):
+        """Numeric reply 432 ERR_ERRONEUSNICKNAME, we have a forbidden or protocol-breaking nick."""
+        # Server is not allowing us to connect.
+        reason = "Handle is not allowed on this server.\n" + " ".join(args)
+        self.stopIRC = reason.strip()
+        self.disconnectIRC()
 
-    # def badchanmask(channel, *args):
-    #    # Channel name is not valid.
-    #    msg = ' '.join(args)
-    #    self.forbiddenchannel.emit(channel, msg)
+    def nicknameinuse(self, _server, _cmd, nick, _msg):
+        """Numerical reply 433 ERR_NICKNAMEINUSE, raised when changing nick to nick in use."""
+        newnick = "pesterClient%d" % (random.randint(100, 999))
+        self.send_irc.nick(newnick)
+        self.nickCollision.emit(nick, newnick)
 
-    def forbiddenchannel(self, server, handle, channel, msg):
-        # Channel is forbidden.
+    def nickcollision(self, _server, _cmd, nick, _msg):
+        """Numerical reply 436 ERR_NICKCOLLISION, raised during connect when nick is in use."""
+        newnick = "pesterClient%d" % (random.randint(100, 999))
+        self.send_irc.nick(newnick)
+        self.nickCollision.emit(nick, newnick)
+
+    def forbiddenchannel(self, _server, handle, channel, msg):
+        """Numeric reply 448 'forbiddenchannel' reply, channel is forbidden.
+
+        Not in the specification but used by UnrealIRCd."""
         self.signal_forbiddenchannel.emit(channel, msg)
         self.userPresentUpdate.emit(handle, channel, "left")
 
-    def ping(self, prefix, token):
-        """Respond to server PING with PONG."""
-        self.send_irc.pong(token)
+    def inviteonlychan(self, _server, _handle, channel, _msg):
+        """Numeric reply 473 ERR_INVITEONLYCHAN, can't join channel (+i)."""
+        self.chanInviteOnly.emit(channel)
+
+    def keyvalue(self, target, handle_us, handle_owner, key, visibility, *value):
+        """METADATA DRAFT numeric reply 761 RPL_KEYVALUE, we received the value of a key.
+
+        The format of the METADATA server notication is:
+        METADATA <Target> <Key> <Visibility> <Value>
+        """
+        if key == "mood":
+            mood = Mood(int(value[0]))
+            self.moodUpdated.emit(handle_owner, mood)
+
+    def nomatchingkey(self, _target, _our_handle, failed_handle, _key, *_error):
+        """METADATA DRAFT numeric reply 766 ERR_NOMATCHINGKEY, no matching key."""
+        PchumLog.info("nomatchingkey: %s", failed_handle)
+        # No point in GETMOOD-ing services
+        # Fallback to the normal GETMOOD method if getting mood via metadata fails.
+        if failed_handle.casefold() not in SERVICES:
+            self.send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
+
+    def keynotset(self, _target, _our_handle, failed_handle, _key, *_error):
+        """METADATA DRAFT numeric reply 768 ERR_KEYNOTSET, key isn't set."""
+        PchumLog.info("nomatchingkey: %s", failed_handle)
+        # Fallback to the normal GETMOOD method if getting mood via metadata fails.
+        if failed_handle.casefold() not in SERVICES:
+            self.send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
+
+    def keynopermission(self, _target, _our_handle, failed_handle, _key, *_error):
+        """METADATA DRAFT numeric reply 769 ERR_KEYNOPERMISSION, no permission for key."""
+        PchumLog.info("nomatchingkey: %s", failed_handle)
+        # Fallback to the normal GETMOOD method if getting mood via metadata fails.
+        if failed_handle.casefold() not in SERVICES:
+            self.send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
+
+    def metadatasubok(self, *params):
+        """"METADATA DRAFT numeric reply 770 RPL_METADATASUBOK, we subbed to a key."""
+        PchumLog.info("metadatasubok: %s", params)
 
     def run_command(self, command, *args):
-        """finds and runs a command"""
-        PchumLog.debug("processCommand {}({})".format(command, args))
+        """Finds and runs a command."""
+        PchumLog.debug("run_command %s(%s)", command, args)
         try:
-            f = self.commands[command]
-        except KeyError as e:
-            PchumLog.info(e)
-            self.__unhandled__(command, *args)
+            command_function = self.commands[command]
+        except KeyError:
+            PchumLog.warning("No matching function for command: %s(%s)", command, args)
             return
-
-        PchumLog.debug("f %s" % f)
-
+        
         try:
-            f(*args)
-        except TypeError as e:
-            PchumLog.info(
-                "Failed to pass command, did the server pass an unsupported paramater? "
-                + str(e)
-            )
-        except Exception as e:
-            # logging.info("Failed to pass command, %s" % str(e))
-            PchumLog.exception("Failed to pass command")
-
-    def __unhandled__(self, cmd, *args):
-        """The default handler for commands. Override this method to
-        apply custom behavior (example, printing) unhandled commands.
-        """
-        PchumLog.debug("unhandled command {}({})".format(cmd, args))
+            command_function(*args)
+        except TypeError:
+            PchumLog.exception("Failed to pass command, did the server pass an unsupported paramater?")
+        except Exception:
+            PchumLog.exception("Exception while parsing command.")
 
     moodUpdated = QtCore.pyqtSignal("QString", Mood)
     colorUpdated = QtCore.pyqtSignal("QString", QtGui.QColor)
@@ -1084,13 +1069,11 @@ class PesterIRC(QtCore.QThread):
     askToConnect = QtCore.pyqtSignal(Exception)
     userPresentUpdate = QtCore.pyqtSignal("QString", "QString", "QString")
     cannotSendToChan = QtCore.pyqtSignal("QString", "QString")
-    tooManyPeeps = QtCore.pyqtSignal()
     quirkDisable = QtCore.pyqtSignal("QString", "QString", "QString")
     signal_forbiddenchannel = QtCore.pyqtSignal("QString", "QString")
 
 class SendIRC:
     """Provides functions for outgoing IRC commands."""
-
     def __init__(self):
         self.socket = None  # INET socket connected with server.
 

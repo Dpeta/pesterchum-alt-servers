@@ -4363,80 +4363,6 @@ class MainProgram(QtCore.QObject):
     def trayMessageClick(self):
         self.widget.config.set("traymsg", False)
 
-    widget2irc = [
-        ("sendMessage(QString, QString)", "sendMessage(QString, QString)"),
-        ("sendNotice(QString, QString)", "sendNotice(QString, QString)"),
-        ("sendCTCP(QString, QString)", "sendCTCP(QString, QString)"),
-        ("newConvoStarted(QString, bool)", "startConvo(QString, bool)"),
-        ("convoClosed(QString)", "endConvo(QString)"),
-        ("profileChanged()", "updateProfile()"),
-        ("moodRequest(PyQt_PyObject)", "getMood(PyQt_PyObject)"),
-        ("moodsRequest(PyQt_PyObject)", "getMoods(PyQt_PyObject)"),
-        ("moodUpdated()", "updateMood()"),
-        ("mycolorUpdated()", "updateColor()"),
-        ("blockedChum(QString)", "blockedChum(QString)"),
-        ("unblockedChum(QString)", "unblockedChum(QString)"),
-        ("requestNames(QString)", "requestNames(QString)"),
-        ("requestChannelList()", "requestChannelList()"),
-        ("joinChannel(QString)", "joinChannel(QString)"),
-        ("leftChannel(QString)", "leftChannel(QString)"),
-        ("kickUser(QString, QString, QString)", "kickUser(QString, QString, QString)"),
-        (
-            "setChannelMode(QString, QString, QString)",
-            "setChannelMode(QString, QString, QString)",
-        ),
-        ("channelNames(QString)", "channelNames(QString)"),
-        ("inviteChum(QString, QString)", "inviteChum(QString, QString)"),
-        ("pingServer()", "pingServer()"),
-        ("setAway(bool)", "setAway(bool)"),
-        ("killSomeQuirks(QString, QString)", "killSomeQuirks(QString, QString)"),
-        ("disconnectIRC()", "disconnectIRC()"),
-    ]
-    # IRC --> Main window
-    irc2widget = [
-        ("connected()", "connected()"),
-        (
-            "moodUpdated(QString, PyQt_PyObject)",
-            "updateMoodSlot(QString, PyQt_PyObject)",
-        ),
-        (
-            "colorUpdated(QString, QtGui.QColor)",
-            "updateColorSlot(QString, QtGui.QColor)",
-        ),
-        ("messageReceived(QString, QString)", "deliverMessage(QString, QString)"),
-        (
-            "memoReceived(QString, QString, QString)",
-            "deliverMemo(QString, QString, QString)",
-        ),
-        ("noticeReceived(QString, QString)", "deliverNotice(QString, QString)"),
-        ("inviteReceived(QString, QString)", "deliverInvite(QString, QString)"),
-        ("nickCollision(QString, QString)", "nickCollision(QString, QString)"),
-        ("getSvsnickedOn(QString, QString)", "getSvsnickedOn(QString, QString)"),
-        ("myHandleChanged(QString)", "myHandleChanged(QString)"),
-        (
-            "namesReceived(QString, PyQt_PyObject)",
-            "updateNames(QString, PyQt_PyObject)",
-        ),
-        (
-            "userPresentUpdate(QString, QString, QString)",
-            "userPresentUpdate(QString, QString, QString)",
-        ),
-        ("channelListReceived(PyQt_PyObject)", "updateChannelList(PyQt_PyObject)"),
-        (
-            "timeCommand(QString, QString, QString)",
-            "timeCommand(QString, QString, QString)",
-        ),
-        ("chanInviteOnly(QString)", "chanInviteOnly(QString)"),
-        ("modesUpdated(QString, QString)", "modesUpdated(QString, QString)"),
-        ("cannotSendToChan(QString, QString)", "cannotSendToChan(QString, QString)"),
-        ("tooManyPeeps()", "tooManyPeeps()"),
-        (
-            "quirkDisable(QString, QString, QString)",
-            "quirkDisable(QString, QString, QString)",
-        ),
-        ("signal_forbiddenchannel(QString)", "forbiddenchannel(QString)"),
-    ]
-
     def ircQtConnections(self, irc, widget):
         # IRC --> Main window
         return (
@@ -4484,7 +4410,6 @@ class MainProgram(QtCore.QObject):
             (irc.modesUpdated, widget.modesUpdated),
             (irc.cannotSendToChan, widget.cannotSendToChan),
             (irc.signal_forbiddenchannel, widget.forbiddenchannel),
-            (irc.tooManyPeeps, widget.tooManyPeeps),
             (irc.quirkDisable, widget.quirkDisable),
         )
 
