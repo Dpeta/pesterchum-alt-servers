@@ -1071,18 +1071,19 @@ class PesterIRC(QtCore.QThread):
     quirkDisable = QtCore.pyqtSignal("QString", "QString", "QString")
     signal_forbiddenchannel = QtCore.pyqtSignal("QString", "QString")
 
-
 class SendIRC:
     """Provides functions for outgoing IRC commands."""
 
     def __init__(self):
         self.socket = None  # INET socket connected with server.
 
-    def send(self, *args: str, text=None):
+    def _send(self, *args: str, text=None):
         """Send a command to the IRC server.
 
         Takes either a string or a list of strings.
-        The 'text' argument is for the final parameter, which can have spaces."""
+        The 'text' argument is for the final parameter, which can have spaces.
+
+        Since this checks if the socket is alive, it's best to send via this method."""
         # Return if disconnected
         if not self.socket or self.socket.fileno() == -1:
             PchumLog.error(
@@ -1104,47 +1105,47 @@ class SendIRC:
 
         try:
             PchumLog.debug("Sending: %s", command)
-            self.socket.send(outgoing_bytes)
+            self.socket.sendall(outgoing_bytes)
         except OSError:
             PchumLog.exception("Error while sending: '%s'", command.strip())
             self.socket.close()
 
     def ping(self, token):
         """Send PING command to server to check for connectivity."""
-        self.send("PING", text=token)
+        self._send("PING", text=token)
 
     def pong(self, token):
         """Send PONG command to reply to server PING."""
-        self.send("PONG", token)
+        self._send("PONG", token)
 
     def nick(self, nick):
         """Send USER command to communicate nick to server."""
-        self.send("NICK", nick)
+        self._send("NICK", nick)
 
     def user(self, username, realname):
         """Send USER command to communicate username and realname to server."""
-        self.send("USER", username, "0", "*", text=realname)
+        self._send("USER", username, "0", "*", text=realname)
 
     def privmsg(self, target, text):
         """Send PRIVMSG command to send a message."""
         for line in text.split("\n"):
-            self.send("PRIVMSG", target, text=line)
+            self._send("PRIVMSG", target, text=line)
 
     def names(self, channel):
         """Send NAMES command to view channel members."""
-        self.send("NAMES", channel)
+        self._send("NAMES", channel)
 
     def kick(self, channel, user, reason=""):
         """Send KICK command to force user from channel."""
         if reason:
-            self.send(f"KICK {channel} {user}", text=reason)
+            self._send(f"KICK {channel} {user}", text=reason)
         else:
-            self.send(f"KICK {channel} {user}")
+            self._send(f"KICK {channel} {user}")
 
     def mode(self, target, modestring="", mode_arguments=""):
         """Set or remove modes from target."""
         outgoing_mode = " ".join([target, modestring, mode_arguments]).strip()
-        self.send("MODE", outgoing_mode)
+        self._send("MODE", outgoing_mode)
 
     def ctcp(self, target, command, msg=""):
         """Send Client-to-Client Protocol message."""
@@ -1159,13 +1160,13 @@ class SendIRC:
         See IRC metadata draft specification:
         https://gist.github.com/k4bek4be/92c2937cefd49990fbebd001faf2b237
         """
-        self.send("METADATA", target, subcommand, *params)
+        self._send("METADATA", target, subcommand, *params)
 
     def cap(self, subcommand, *params):
         """Send IRCv3 CAP command for capability negotiation.
 
         See: https://ircv3.net/specs/extensions/capability-negotiation.html"""
-        self.send("CAP", subcommand, *params)
+        self._send("CAP", subcommand, *params)
 
     def join(self, channel, key=""):
         """Send JOIN command to join a channel/memo.
@@ -1173,36 +1174,36 @@ class SendIRC:
         Keys or joining multiple channels is possible in the specification, but unused.
         """
         channel_and_key = " ".join([channel, key]).strip()
-        self.send("JOIN", channel_and_key)
+        self._send("JOIN", channel_and_key)
 
     def part(self, channel):
         """Send PART command to leave a channel/memo.
 
         Providing a reason or leaving multiple channels is possible in the specification.
         """
-        self.send("PART", channel)
+        self._send("PART", channel)
 
     def notice(self, target, text):
         """Send a NOTICE to a user or channel."""
-        self.send("NOTICE", target, text=text)
+        self._send("NOTICE", target, text=text)
 
     def invite(self, nick, channel):
         """Send INVITE command to invite a user to a channel."""
-        self.send("INVITE", nick, channel)
+        self._send("INVITE", nick, channel)
 
     def away(self, text=None):
         """AWAY command to mark client as away or no longer away.
 
         No 'text' parameter means the client is no longer away."""
         if text:
-            self.send("AWAY", text=text)
+            self._send("AWAY", text=text)
         else:
-            self.send("AWAY")
+            self._send("AWAY")
 
     def list(self):
         """Send LIST command to get list of channels."""
-        self.send("LIST")
+        self._send("LIST")
 
     def quit(self, reason=""):
         """Send QUIT to terminate connection."""
-        self.send("QUIT", text=reason)
+        self._send("QUIT", text=reason)
