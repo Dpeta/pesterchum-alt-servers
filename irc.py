@@ -6,6 +6,27 @@ References for the IRC protocol:
  - Modern IRC client protocol writeup: https://modern.ircdocs.horse
  - IRCv3 protocol additions: https://ircv3.net/irc/
  - Draft of metadata specification: https://gist.github.com/k4bek4be/92c2937cefd49990fbebd001faf2b237
+
+Some code in this file may be based on the oyoyo IRC library,
+the license notice included with oyoyo source files is indented here:
+    
+    # Copyright (c) 2008 Duncan Fordyce
+    # Permission is hereby granted, free of charge, to any person obtaining a copy
+    # of this software and associated documentation files (the "Software"), to deal
+    # in the Software without restriction, including without limitation the rights
+    # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    # copies of the Software, and to permit persons to whom the Software is
+    # furnished to do so, subject to the following conditions:
+    # The above copyright notice and this permission notice shall be included in
+    #  all copies or substantial portions of the Software.
+    # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    # THE SOFTWARE.
+
 """
 import sys
 import socket
@@ -54,6 +75,7 @@ except ImportError:
 
 
 class PesterIRC(QtCore.QThread):
+    """Class for making a thread that manages the connection to server."""
     def __init__(self, config, window, verify_hostname=True):
         QtCore.QThread.__init__(self)
         self.mainwindow = window
@@ -148,14 +170,14 @@ class PesterIRC(QtCore.QThread):
         return default_context
 
     def connect(self, verify_hostname=True):
-        """initiates the connection to the server set in self.host:self.port
+        """Initiates the connection to the server set in self.host:self.port
         self.ssl decides whether the connection uses ssl.
 
         Certificate validation when using SSL/TLS may be disabled by
         passing the 'verify_hostname' parameter. The user is asked if they
         want to disable it if this functions raises a certificate validation error,
         in which case the function may be called again with 'verify_hostname'."""
-        PchumLog.info("connecting to {}:{}".format(self.host, self.port))
+        PchumLog.info("Connecting to %s:%s", self.host, self.port)
 
         # Open connection
         plaintext_socket = socket.create_connection((self.host, self.port))
@@ -180,14 +202,14 @@ class PesterIRC(QtCore.QThread):
         #    self.connect_cb(self)
 
     def conn_generator(self):
-        """returns a generator object."""
+        """Returns a generator object."""
         try:
             buffer = b""
             while not self._end:
                 try:
                     buffer += self.socket.recv(1024)
                 except OSError as e:
-                    PchumLog.warning("conn exception {} in {}".format(e, self))
+                    PchumLog.warning("conn_generator exception %s in %s", e, self)
                     if self._end:
                         break
                     raise e
@@ -216,22 +238,23 @@ class PesterIRC(QtCore.QThread):
             PchumLog.debug("passing timeout")
             raise se
         except (OSError, ssl.SSLEOFError) as se:
-            PchumLog.debug("problem: %s" % (str(se)))
+            PchumLog.warning("Problem: %s", se)
             if self.socket:
-                PchumLog.info("error: closing socket")
+                PchumLog.info("Error: closing socket.")
                 self.socket.close()
             raise se
         except Exception as e:
             PchumLog.exception("Non-socket exception in conn_generator().")
             raise e
         else:
-            PchumLog.debug("ending while, end is %s" % self._end)
+            PchumLog.debug("Ending conn() while loop, end is %s.", self._end)
             if self.socket:
-                PchumLog.info("finished: closing socket")
+                PchumLog.info("Finished: closing socket.")
                 self.socket.close()
             yield False
 
     def parse_irc_line(self, line: str):
+        """Retrieves tags, prefix, command, and arguments from an unparsed IRC line."""
         parts = line.split(" ")
         tags = None
         prefix = None
@@ -262,10 +285,9 @@ class PesterIRC(QtCore.QThread):
         return (tags, prefix, command, fused_args)
 
     def close(self):
-        # with extreme prejudice
+        """Kill the socket 'with extreme prejudice'."""
         if self.socket:
-            PchumLog.info("shutdown socket")
-            # print("shutdown socket")
+            PchumLog.info("close() was called, shutting down socket.")
             self._end = True
             try:
                 self.socket.shutdown(socket.SHUT_RDWR)
@@ -286,6 +308,7 @@ class PesterIRC(QtCore.QThread):
         self.conn = self.conn_generator()
 
     def run(self):
+        """Connect and run update loop."""
         try:
             self.IRCConnect()
         except OSError as se:
@@ -304,11 +327,11 @@ class PesterIRC(QtCore.QThread):
                 return
             except (OSError, IndexError, ValueError) as se:
                 self.stopIRC = "{}, {}".format(type(se), se)
-                PchumLog.debug("socket error, exiting thread")
+                PchumLog.debug("Socket error, exiting thread.")
                 return
             else:
                 if not res:
-                    PchumLog.debug("false Yield: %s, returning" % res)
+                    PchumLog.debug("False Yield: %s, returning", res)
                     return
 
     def setConnected(self):
@@ -326,6 +349,7 @@ class PesterIRC(QtCore.QThread):
 
     @QtCore.pyqtSlot()
     def updateIRC(self):
+        """Get a silly scrunkler from the generator!!"""
         try:
             res = next(self.conn)
         except socket.timeout as se:
@@ -451,9 +475,7 @@ class PesterIRC(QtCore.QThread):
 
     @QtCore.pyqtSlot()
     def updateProfile(self):
-        me = self.mainwindow.profile()
-        handle = me.handle
-        self.send_irc.nick(handle)
+        self.send_irc.nick(self.mainwindow.profile().handle)
         self.mainwindow.closeConversations(True)
         self.mainwindow.doAutoIdentify()
         self.mainwindow.autoJoinDone = False
@@ -477,7 +499,7 @@ class PesterIRC(QtCore.QThread):
         for convo in list(self.mainwindow.convos.keys()):
             self.send_irc.privmsg(
                 convo,
-                "COLOR >%s" % (self.mainwindow.profile().colorcmd()),
+                f"COLOR >{self.mainwindow.profile().colorcmd()}",
             )
 
     @QtCore.pyqtSlot(str)
@@ -555,19 +577,19 @@ class PesterIRC(QtCore.QThread):
         else:
             self.noticeReceived.emit(handle, msg)
 
-    def metadata(self, target, nick, key, visibility, value):
+    def metadata(self, _target, nick, key, _visibility, value):
         """METADATA DRAFT metadata message from server.
 
         The format of the METADATA server notication is:
         METADATA <Target> <Key> <Visibility> <Value>
         """
-        if key.lower() == "mood":
+        if key.casefold() == "mood":
             try:
                 mood = Mood(int(value))
                 self.moodUpdated.emit(nick, mood)
             except ValueError:
                 PchumLog.warning("Invalid mood value, %s, %s", nick, mood)
-        elif key.lower() == "color":
+        elif key.casefold() == "color":
             color = QtGui.QColor(value)  # Invalid color becomes rgb 0,0,0
             self.colorUpdated.emit(nick, color)
 
@@ -633,10 +655,10 @@ class PesterIRC(QtCore.QThread):
             msg = "/me" + msg[7:-1]
         # CTCPs that don't need to be shown
         elif msg[0] == "\x01":
-            PchumLog.info('---> recv "CTCP {} :{}"'.format(handle, msg[1:-1]))
+            PchumLog.info('---> recv "CTCP %s :%s"', handle, msg[1:-1])
             # VERSION, return version
             if msg[1:-1].startswith("VERSION"):
-                self.send_irc.ctcp(handle, "VERSION", "Pesterchum %s" % (_pcVersion))
+                self.send_irc.ctcp(handle, "VERSION", "Pesterchum {_pcVersion}")
             # CLIENTINFO, return supported CTCP commands.
             elif msg[1:-1].startswith("CLIENTINFO"):
                 self.send_irc.ctcp(
@@ -666,14 +688,14 @@ class PesterIRC(QtCore.QThread):
                 # GETMOOD via CTCP
                 # Maybe we can do moods like this in the future...
                 mymood = self.mainwindow.profile().mood.value()
-                self.send_irc.ctcp(handle, "MOOD >%d" % (mymood))
+                self.send_irc.ctcp(handle, f"MOOD >{mymood}")
                 # Backwards compatibility
-                self.send_irc.privmsg("#pesterchum", "MOOD >%d" % (mymood))
+                self.send_irc.privmsg(f"#pesterchum", f"MOOD >{mymood}")
             return
 
         if chan != "#pesterchum":
             # We don't need anywhere near that much spam.
-            PchumLog.info('---> recv "PRIVMSG {} :{}"'.format(handle, msg))
+            PchumLog.info('---> recv "PRIVMSG %s :%s"', handle, msg)
 
         if chan == "#pesterchum":
             # follow instructions
@@ -694,10 +716,7 @@ class PesterIRC(QtCore.QThread):
             else:
                 self.memoReceived.emit(chan, handle, msg)
         else:
-            # private message
-            # silently ignore messages to yourself.
-            if handle == self.mainwindow.profile().handle:
-                return
+            # Normal PRIVMSG messages (the normal kind!!)
             if msg[0:7] == "COLOR >":
                 colors = msg[7:].split(",")
                 try:
@@ -705,7 +724,7 @@ class PesterIRC(QtCore.QThread):
                 except ValueError as e:
                     PchumLog.warning(e)
                     colors = [0, 0, 0]
-                PchumLog.debug("colors: " + str(colors))
+                PchumLog.debug("colors: %s", colors)
                 color = QtGui.QColor(*colors)
                 self.colorUpdated.emit(handle, color)
             else:
@@ -734,7 +753,7 @@ class PesterIRC(QtCore.QThread):
     def part(self, nick, channel, _reason="nanchos"):
         """'PART' message from server, someone left a channel."""
         handle = nick[0 : nick.find("!")]
-        PchumLog.info('---> recv "PART {}: {}"'.format(handle, channel))
+        PchumLog.info('---> recv "PART %s: %s"', handle, channel)
         self.userPresentUpdate.emit(handle, channel, "left")
         if channel == "#pesterchum":
             self.moodUpdated.emit(handle, Mood("offline"))
@@ -742,7 +761,7 @@ class PesterIRC(QtCore.QThread):
     def join(self, nick, channel):
         """'JOIN' message from server, someone joined a channel."""
         handle = nick[0 : nick.find("!")]
-        PchumLog.info('---> recv "JOIN {}: {}"'.format(handle, channel))
+        PchumLog.info('---> recv "JOIN %s: %s"', handle, channel)
         self.userPresentUpdate.emit(handle, channel, "join")
         if channel == "#pesterchum":
             if handle == self.mainwindow.randhandler.randNick:
@@ -830,7 +849,7 @@ class PesterIRC(QtCore.QThread):
         elif newnick == self.mainwindow.randhandler.randNick:
             self.mainwindow.randhandler.setRunning(True)
 
-    def welcome(self, server, nick, msg):
+    def welcome(self, _server, _nick, _msg):
         """Numeric reply 001 RPL_WELCOME, send when we've connected to the server."""
         self.setConnected()
         # mychumhandle = self.mainwindow.profile().handle
@@ -845,7 +864,6 @@ class PesterIRC(QtCore.QThread):
             self.send_irc.cap(
                 self, "REQ", "pesterchum-tag"
             )  # <--- Currently not using this
-            # time.sleep(0.413 + 0.097)  # <--- somehow, this actually helps.
             self.send_irc.join("#pesterchum")
             # Moods via metadata
             self.send_irc.metadata("*", "sub", "mood")
@@ -854,7 +872,7 @@ class PesterIRC(QtCore.QThread):
             self.send_irc.metadata("*", "sub", "color")
             self.send_irc.metadata("*", "set", "color", str(color.name()))
             # Backwards compatible moods
-            self.send_irc.privmsg("#pesterchum", "MOOD >%d" % (mymood))
+            self.send_irc.privmsg("#pesterchum", f"MOOD >{mymood}")
 
     def featurelist(self, _target, _handle, *params):
         """Numerical reply 005 RPL_ISUPPORT to communicate supported server features.
@@ -864,8 +882,8 @@ class PesterIRC(QtCore.QThread):
         """
         features = params[:-1]
         PchumLog.info("Server featurelist: %s", features)
-        for x in features:
-            if x.upper().startswith("METADATA"):
+        for feature in features:
+            if feature.casefold().startswith("metadata"):
                 PchumLog.info("Server supports metadata.")
                 self.metadata_supported = True
 
@@ -954,15 +972,18 @@ class PesterIRC(QtCore.QThread):
 
     def nicknameinuse(self, _server, _cmd, nick, _msg):
         """Numerical reply 433 ERR_NICKNAMEINUSE, raised when changing nick to nick in use."""
-        newnick = "pesterClient%d" % (random.randint(100, 999))
-        self.send_irc.nick(newnick)
-        self.nickCollision.emit(nick, newnick)
+        self._reset_nick(nick)
 
     def nickcollision(self, _server, _cmd, nick, _msg):
         """Numerical reply 436 ERR_NICKCOLLISION, raised during connect when nick is in use."""
-        newnick = "pesterClient%d" % (random.randint(100, 999))
+        self._reset_nick(nick)
+
+    def _reset_nick(self, oldnick):
+        """Set our nick to a random pesterClient."""
+        random_number = int(random.random() * 9999)  # Random int in range 1000 <---> 9999
+        newnick = f"pesterClient{random_number}"
         self.send_irc.nick(newnick)
-        self.nickCollision.emit(nick, newnick)
+        self.nickCollision.emit(oldnick, newnick)
 
     def forbiddenchannel(self, _server, handle, channel, msg):
         """Numeric reply 448 'forbiddenchannel' reply, channel is forbidden.
@@ -975,7 +996,7 @@ class PesterIRC(QtCore.QThread):
         """Numeric reply 473 ERR_INVITEONLYCHAN, can't join channel (+i)."""
         self.chanInviteOnly.emit(channel)
 
-    def keyvalue(self, target, handle_us, handle_owner, key, visibility, *value):
+    def keyvalue(self, _target, _handle_us, handle_owner, key, _visibility, *value):
         """METADATA DRAFT numeric reply 761 RPL_KEYVALUE, we received the value of a key.
 
         The format of the METADATA server notication is:
@@ -1014,9 +1035,9 @@ class PesterIRC(QtCore.QThread):
     def run_command(self, command, *args):
         """Finds and runs a command."""
         PchumLog.debug("run_command %s(%s)", command, args)
-        try:
+        if command in self.commands:
             command_function = self.commands[command]
-        except KeyError:
+        else:
             PchumLog.warning("No matching function for command: %s(%s)", command, args)
             return
 
