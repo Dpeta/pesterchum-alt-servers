@@ -331,10 +331,12 @@ class PesterIRC(QtCore.QThread):
 
     @QtCore.pyqtSlot(PesterList)
     def getMoods(self, chums):
+        """Get mood, slot is called from main thread."""
         self.getMood(*chums)
 
     @QtCore.pyqtSlot(str, str)
     def sendNotice(self, text, handle):
+        """Send notice, slot is called from main thread."""
         self._send_irc.notice(handle, text)
 
     @QtCore.pyqtSlot(str, str)
@@ -375,8 +377,7 @@ class PesterIRC(QtCore.QThread):
                         b = c + b
                 if b:  # len > 0
                     return [a] + splittext([b])
-                else:
-                    return [a]
+                return [a]
             else:
                 return l
 
@@ -386,20 +387,24 @@ class PesterIRC(QtCore.QThread):
 
     @QtCore.pyqtSlot(str, str)
     def sendCTCP(self, handle, text):
+        """Send CTCP message, slot is called from main thread."""
         self._send_irc.ctcp(handle, text)
 
     @QtCore.pyqtSlot(str, bool)
     def startConvo(self, handle, initiated):
+        """Send convo begin message and color, slot is called from main thread."""
         self._send_irc.privmsg(handle, f"COLOR >{self.mainwindow.profile().colorcmd()}")
         if initiated:
             self._send_irc.privmsg(handle, "PESTERCHUM:BEGIN")
 
     @QtCore.pyqtSlot(str)
     def endConvo(self, handle):
+        """Send convo cease message, slot is called from main thread."""
         self._send_irc.privmsg(handle, "PESTERCHUM:CEASE")
 
     @QtCore.pyqtSlot()
     def updateProfile(self):
+        """....update profile? this shouldn't be a thing."""
         self._send_irc.nick(self.mainwindow.profile().handle)
         self.mainwindow.closeConversations(True)
         self.mainwindow.doAutoIdentify()
@@ -409,6 +414,7 @@ class PesterIRC(QtCore.QThread):
 
     @QtCore.pyqtSlot()
     def updateMood(self):
+        """Update and send mood, slot is called from main thread."""
         mood = self.mainwindow.profile().mood.value_str()
         # Moods via metadata
         self._send_irc.metadata("*", "set", "mood", mood)
@@ -417,6 +423,7 @@ class PesterIRC(QtCore.QThread):
 
     @QtCore.pyqtSlot()
     def updateColor(self):
+        """Update and send color, slot is called from main thread."""
         # Update color metadata field
         color = self.mainwindow.profile().color
         self._send_irc.metadata("*", "set", "color", str(color.name()))
@@ -429,51 +436,63 @@ class PesterIRC(QtCore.QThread):
 
     @QtCore.pyqtSlot(str)
     def blockedChum(self, handle):
+        """Send block message, slot is called from main thread."""
         self._send_irc.privmsg(handle, "PESTERCHUM:BLOCK")
 
     @QtCore.pyqtSlot(str)
     def unblockedChum(self, handle):
+        """Send unblock message, slot is called from main thread."""
         self._send_irc.privmsg(handle, "PESTERCHUM:UNBLOCK")
 
     @QtCore.pyqtSlot(str)
     def requestNames(self, channel):
+        """Send NAMES to request channel members, slot is called from main thread."""
         self._send_irc.names(channel)
 
     @QtCore.pyqtSlot()
     def requestChannelList(self):
+        """Send LIST to request list of channels, slot is called from main thread."""
         self._send_irc.list()
 
     @QtCore.pyqtSlot(str)
     def joinChannel(self, channel):
+        """Send JOIN and MODE to join channel and get modes, slot is called from main thread."""
         self._send_irc.join(channel)
         self._send_irc.mode(channel)
 
     @QtCore.pyqtSlot(str)
     def leftChannel(self, channel):
+        """Send PART to leave channel, slot is called from main thread."""
         self._send_irc.part(channel)
 
     @QtCore.pyqtSlot(str, str, str)
     def kickUser(self, channel, user, reason=""):
+        """Send KICK message to kick user from channel, slot is called from main thread."""
         self._send_irc.kick(channel, user, reason)
 
     @QtCore.pyqtSlot(str, str, str)
     def setChannelMode(self, channel, mode, command):
+        """Send MODE to set channel mode, slot is called from main thread."""
         self._send_irc.mode(channel, mode, command)
 
     @QtCore.pyqtSlot(str)
     def channelNames(self, channel):
+        """Send block message, slot is called from main thread."""
         self._send_irc.names(channel)
 
     @QtCore.pyqtSlot(str, str)
     def inviteChum(self, handle, channel):
+        """Send INVITE message to invite someone to a channel, slot is called from main thread."""
         self._send_irc.invite(handle, channel)
 
     @QtCore.pyqtSlot()
     def pingServer(self):
+        """Send PING to server to verify connectivity, slot is called from main thread."""
         self._send_irc.ping("B33")
 
     @QtCore.pyqtSlot(bool)
     def setAway(self, away=True):
+        """Send AWAY to update away status, slot is called from main thread."""
         if away:
             self.away("Idle")
         else:
@@ -481,10 +500,12 @@ class PesterIRC(QtCore.QThread):
 
     @QtCore.pyqtSlot(str, str)
     def killSomeQuirks(self, channel, handle):
+        """Send NOQUIRKS ctcp message, disables quirks. Slot is called from main thread."""
         self._send_irc.ctcp(channel, "NOQUIRKS", handle)
 
     @QtCore.pyqtSlot()
     def disconnectIRC(self):
+        """Send QUIT and close connection, slot is called from main thread."""
         self._send_irc.quit(f"{_pcVersion} <3")
         self._end = True
         self._close()
