@@ -90,6 +90,13 @@ class SendIRC:
         ).strip()  # Extra spaces break protocol, so strip.
         self.privmsg(target, f"\x01{outgoing_ctcp}\x01")
 
+    def ctcp_reply(self, target, command, msg=""):
+        """Send Client-to-Client Protocol reply message, responding to a CTCP message."""
+        outgoing_ctcp = " ".join(
+            [command, msg]
+        ).strip()  # Extra spaces break protocol, so strip.
+        self.notice(target, f"\x01{outgoing_ctcp}\x01")
+
     def metadata(self, target, subcommand, *params):
         """Send Metadata command to get or set metadata.
 

@@ -61,10 +61,14 @@ class Mood:
     }
 
     def __init__(self, mood):
-        if type(mood) is int:
+        if isinstance(mood, int):
             self.mood = mood
         else:
             self.mood = self.moods.index(mood)
+
+    def value_str(self):
+        """Return mood index as str."""
+        return str(self.mood)
 
     def value(self):
         return self.mood

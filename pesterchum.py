@@ -4320,7 +4320,12 @@ class MainProgram(QtCore.QObject):
         self.attempts = 0
 
         # but it's at least better than the way it was before.
-        self.irc = PesterIRC(self.widget.config, self.widget)
+        self.irc = PesterIRC(
+            self.widget,
+            self.widget.config.server(),
+            self.widget.config.port(),
+            self.widget.config.ssl(),
+        )
         self.connectWidgets(self.irc, self.widget)
 
         self.widget.passIRC(
