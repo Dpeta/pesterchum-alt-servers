@@ -716,23 +716,50 @@ class PesterIRC(QtCore.QThread):
             self.moodUpdated.emit(handle, Mood("chummy"))
 
     def _mode(self, op, channel, mode, *handles):
-        """'MODE' message from server, a user or a channel's mode changed."""
-        PchumLog.debug(
-            "mode(op=%s, channel=%s, mode=%s, handles=%s)", op, channel, mode, handles
-        )
-        if not handles:
+        """'MODE' message from server, a user or a channel's mode changed.
+
+        This and the functions it calls to in the main thread seem pretty broken,
+        modes that aren't internally tracked aren't updated correctly."""
+
+        if len(handles) <= 0:
             handles = [""]
-        # opnick = op[0 : op.find("!")]
+        opnick = op[0 : op.find("!")]
+        PchumLog.debug("opnick=" + opnick)
+
+        self.modesUpdated.emit(channel, mode)
+
         # Channel section
+        # Okay so, as I understand it channel modes will always be applied to a channel even if the commands also sets a mode to a user.
+        # So "MODE #channel +ro handleHandle" will set +r to channel #channel as well as set +o to handleHandle
+        # Therefore the bellow method causes a crash if both user and channel mode are being set in one command.
+
+        # if op == channel or channel == self.parent.mainwindow.profile().handle:
+        #    modes = list(self.parent.mainwindow.modes)
+        #    if modes and modes[0] == "+": modes = modes[1:]
+        #    if mode[0] == "+":
+        #        for m in mode[1:]:
+        #            if m not in modes:
+        #                modes.extend(m)
+        #    elif mode[0] == "-":
+        #        for i in mode[1:]:
+        #            try:
+        #                modes.remove(i)
+        #            except ValueError:
+        #                pass
+        #    modes.sort()
+        #    self.parent.mainwindow.modes = "+" + "".join(modes)
+
+        # EXPIRIMENTAL FIX
+        # No clue how stable this is but since it doesn't seem to cause a crash it's probably an improvement.
         # This might be clunky with non-unrealircd IRC servers
         channel_mode = ""
         unrealircd_channel_modes = "cCdfGHikKLlmMNnOPpQRrsSTtVzZ"
         if any(md in mode for md in unrealircd_channel_modes):
             PchumLog.debug("Channel mode in string.")
-            self._send_irc.mode(channel)
             modes = list(self.mainwindow.modes)
             for md in unrealircd_channel_modes:
                 if mode.find(md) != -1:  # -1 means not found
+                    PchumLog.debug("md=" + md)
                     if mode[0] == "+":
                         modes.extend(md)
                         channel_mode = "+" + md
@@ -744,10 +771,12 @@ class PesterIRC(QtCore.QThread):
                             PchumLog.warning(
                                 "Can't remove channel mode that isn't set."
                             )
-                    self.userPresentUpdate.emit("", channel, f"{channel_mode}:{op}")
-                    PchumLog.debug("pre-mode=%s", mode)
+                    self.userPresentUpdate.emit(
+                        "", channel, channel_mode + ":%s" % (op)
+                    )
+                    PchumLog.debug("pre-mode=" + str(mode))
                     mode = mode.replace(md, "")
-                    PchumLog.debug("post-mode=%s", mode)
+                    PchumLog.debug("post-mode=" + str(mode))
             modes.sort()
             self.mainwindow.modes = "+" + "".join(modes)
 
@@ -757,14 +786,22 @@ class PesterIRC(QtCore.QThread):
             if l in ["+", "-"]:
                 cur = l
             else:
-                modes.append(f"{cur}{l}")
-        for i, m in enumerate(modes):
+                modes.append("{}{}".format(cur, l))
+        for (i, m) in enumerate(modes):
+
             # Server-set usermodes don't need to be passed.
-            if handles == [""] and not ("x" in m or "z" in m or "o" in m or "x" in m):
+            if (handles == [""]) & (("x" in m) | ("z" in m) | ("o" in m)) != True:
                 try:
-                    self.userPresentUpdate.emit(handles[i], channel, f"{m}:{op}")
+                    self.userPresentUpdate.emit(handles[i], channel, m + ":%s" % (op))
                 except IndexError as e:
-                    PchumLog.exception("modeSetIndexError: %s", e)
+                    PchumLog.exception("modeSetIndexError: %s" % e)
+            # print("i = " + i)
+            # print("m = " + m)
+            # self.parent.userPresentUpdate.emit(handles[i], channel, m+":%s" % (op))
+            # self.parent.userPresentUpdate.emit(handles[i], channel, m+":%s" % (op))
+            # Passing an empty handle here might cause a crash.
+            # except IndexError:
+            # self.parent.userPresentUpdate.emit("", channel, m+":%s" % (op))
 
     def _invite(self, sender, _you, channel):
         """'INVITE' message from server, someone invited us to a channel.
@@ -872,6 +909,7 @@ class PesterIRC(QtCore.QThread):
 
     def _channelmodeis(self, _server, _handle, channel, modes, _mode_params=""):
         """Numeric reply 324 RPL_CHANNELMODEIS, gives channel modes."""
+        PchumLog.debug("324 RPL_CHANNELMODEIS %s: %s", channel, modes)
         self.modesUpdated.emit(channel, modes)
 
     def _namreply(self, _server, _nick, _op, channel, names):
@@ -929,9 +967,7 @@ class PesterIRC(QtCore.QThread):
 
     def _reset_nick(self, oldnick):
         """Set our nick to a random pesterClient."""
-        random_number = int(
-            random.random() * 9999  # Random int in range 0 <---> 9999
-        )
+        random_number = int(random.random() * 9999)  # Random int in range 0 <---> 9999
         newnick = f"pesterClient{random_number}"
         self._send_irc.nick(newnick)
         self.nickCollision.emit(oldnick, newnick)

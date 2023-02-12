@@ -973,6 +973,7 @@ class PesterMemo(PesterConvo):
             self.userlist.addItem(u)
 
     def updateChanModes(self, modes, op):
+        PchumLog.debug("updateChanModes(%s, %s)", modes, op)
         if not hasattr(self, "modes"):
             self.modes = ""
         chanmodes = list(str(self.modes))
@@ -1413,8 +1414,8 @@ class PesterMemo(PesterConvo):
 
     @QtCore.pyqtSlot(QString, QString)
     def modesUpdated(self, channel, modes):
-        c = str(channel)
-        if c.lower() == self.channel.lower():
+        PchumLog.debug(f"modesUpdated(%s, %s)", channel, modes)
+        if channel.lower() == self.channel.lower():
             self.updateChanModes(modes, None)
 
     @QtCore.pyqtSlot(QString)
