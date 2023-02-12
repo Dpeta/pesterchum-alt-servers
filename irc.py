@@ -858,6 +858,7 @@ class PesterIRC(QtCore.QThread):
                 "REQ", "draft/metadata-notify-2"
             )  # <--- Not required in the unreal5 module implementation
             self._send_irc.cap("REQ", "pesterchum-tag")  # <--- Currently not using this
+            self._send_irc.cap("REQ", "twitch.tv/membership")  # Twitch silly
             self._send_irc.join("#pesterchum")
             # Get mood
             mood = profile.mood.value_str()
