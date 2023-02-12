@@ -787,8 +787,7 @@ class PesterIRC(QtCore.QThread):
                 cur = l
             else:
                 modes.append("{}{}".format(cur, l))
-        for (i, m) in enumerate(modes):
-
+        for i, m in enumerate(modes):
             # Server-set usermodes don't need to be passed.
             if (handles == [""]) & (("x" in m) | ("z" in m) | ("o" in m)) != True:
                 try:

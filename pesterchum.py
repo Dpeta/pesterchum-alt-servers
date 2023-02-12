@@ -4320,6 +4320,7 @@ class MainProgram(QtCore.QObject):
         self.attempts = 0
 
         # but it's at least better than the way it was before.
+        # FIXME: we should not pass widget here
         self.irc = PesterIRC(
             self.widget,
             self.widget.config.server(),
@@ -4498,7 +4499,11 @@ class MainProgram(QtCore.QObject):
             stop = None
         if stop is None:
             self.irc = PesterIRC(
-                self.widget.config, self.widget, verify_hostname=verify_hostname
+                self.widget,
+                self.widget.config.server(),
+                self.widget.config.port(),
+                self.widget.config.ssl(),
+                verify_hostname=verify_hostname,
             )
             self.connectWidgets(self.irc, self.widget)
             self.irc.start()
