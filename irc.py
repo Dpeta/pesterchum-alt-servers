@@ -303,9 +303,9 @@ class PesterIRC(QtCore.QThread):
         else:
             # Legacy
             PchumLog.warning(
-                "Server doesn't seem to support metadata, using legacy get_mood."
+                "Server doesn't seem to support metadata, using legacy GETMOOD."
             )
-            chumglub = "get_mood "
+            chumglub = "GETMOOD "
             for chum in chums:
                 if len(chumglub + chum.handle) >= 350:
                     try:
@@ -313,11 +313,11 @@ class PesterIRC(QtCore.QThread):
                     except OSError as e:
                         PchumLog.warning(e)
                         self.set_connection_broken()
-                    chumglub = "get_mood "
-                # No point in get_mood-ing services
+                    chumglub = "GETMOOD "
+                # No point in GETMOOD-ing services
                 if chum.handle.casefold() not in SERVICES:
                     chumglub += chum.handle
-            if chumglub != "get_mood ":
+            if chumglub != "GETMOOD ":
                 try:
                     self._send_irc.privmsg("#pesterchum", chumglub)
                 except OSError as e:
@@ -621,9 +621,8 @@ class PesterIRC(QtCore.QThread):
                 "https://github.com/Dpeta/pesterchum-alt-servers",
             )
         # ???
-        elif msg.startswith("NOQUIRKS") and chan[0] == "#":
-            op = nick[0 : nick.find("!")]
-            self.quirkDisable.emit(chan, msg[9:], op)
+        else:
+            PchumLog.warning("Unknown CTCP command '%s' from %s to %s", msg, nick, chan)
 
     def _privmsg(self, nick: str, chan: str, msg: str):
         """'PRIVMSG' message from server, the standard message."""
@@ -653,7 +652,7 @@ class PesterIRC(QtCore.QThread):
                         )
                         mood = Mood(0)
                     self.moodUpdated.emit(handle, mood)
-                elif msg.startswith("get_mood"):
+                elif msg.startswith("GETMOOD"):
                     mychumhandle = self.mainwindow.profile().handle
                     if mychumhandle in msg:
                         mymood = self.mainwindow.profile().mood.value_str()
@@ -730,6 +729,7 @@ class PesterIRC(QtCore.QThread):
         unrealircd_channel_modes = "cCdfGHikKLlmMNnOPpQRrsSTtVzZ"
         if any(md in mode for md in unrealircd_channel_modes):
             PchumLog.debug("Channel mode in string.")
+            self._send_irc.mode(channel)
             modes = list(self.mainwindow.modes)
             for md in unrealircd_channel_modes:
                 if mode.find(md) != -1:  # -1 means not found
@@ -762,7 +762,7 @@ class PesterIRC(QtCore.QThread):
             # Server-set usermodes don't need to be passed.
             if handles == [""] and not ("x" in m or "z" in m or "o" in m or "x" in m):
                 try:
-                    self.userPresentUpdate.emit(handles[i], channel, m + f":{op}")
+                    self.userPresentUpdate.emit(handles[i], channel, f"{m}:{op}")
                 except IndexError as e:
                     PchumLog.exception("modeSetIndexError: %s", e)
 
@@ -930,8 +930,8 @@ class PesterIRC(QtCore.QThread):
     def _reset_nick(self, oldnick):
         """Set our nick to a random pesterClient."""
         random_number = int(
-            random.random() * 9999
-        )  # Random int in range 1000 <---> 9999
+            random.random() * 9999  # Random int in range 0 <---> 9999
+        )
         newnick = f"pesterClient{random_number}"
         self._send_irc.nick(newnick)
         self.nickCollision.emit(oldnick, newnick)
@@ -966,24 +966,24 @@ class PesterIRC(QtCore.QThread):
     def _nomatchingkey(self, _target, _our_handle, failed_handle, _key, *_error):
         """METADATA DRAFT numeric reply 766 ERR_NOMATCHINGKEY, no matching key."""
         PchumLog.info("_nomatchingkey: %s", failed_handle)
-        # No point in get_mood-ing services
-        # Fallback to the normal get_mood method if getting mood via metadata fails.
+        # No point in GETMOOD-ing services
+        # Fallback to the normal GETMOOD method if getting mood via metadata fails.
         if failed_handle.casefold() not in SERVICES:
-            self._send_irc.privmsg("#pesterchum", f"get_mood {failed_handle}")
+            self._send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
 
     def _keynotset(self, _target, _our_handle, failed_handle, _key, *_error):
         """METADATA DRAFT numeric reply 768 ERR_KEYNOTSET, key isn't set."""
         PchumLog.info("_keynotset: %s", failed_handle)
-        # Fallback to the normal get_mood method if getting mood via metadata fails.
+        # Fallback to the normal GETMOOD method if getting mood via metadata fails.
         if failed_handle.casefold() not in SERVICES:
-            self._send_irc.privmsg("#pesterchum", f"get_mood {failed_handle}")
+            self._send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
 
     def _keynopermission(self, _target, _our_handle, failed_handle, _key, *_error):
         """METADATA DRAFT numeric reply 769 ERR_KEYNOPERMISSION, no permission for key."""
         PchumLog.info("_keynopermission: %s", failed_handle)
-        # Fallback to the normal get_mood method if getting mood via metadata fails.
+        # Fallback to the normal GETMOOD method if getting mood via metadata fails.
         if failed_handle.casefold() not in SERVICES:
-            self._send_irc.privmsg("#pesterchum", f"get_mood {failed_handle}")
+            self._send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
 
     def _metadatasubok(self, *params):
         """ "METADATA DRAFT numeric reply 770 RPL_METADATASUBOK, we subbed to a key."""
@@ -1007,5 +1007,4 @@ class PesterIRC(QtCore.QThread):
     askToConnect = QtCore.pyqtSignal(Exception)
     userPresentUpdate = QtCore.pyqtSignal("QString", "QString", "QString")
     cannotSendToChan = QtCore.pyqtSignal("QString", "QString")
-    quirkDisable = QtCore.pyqtSignal("QString", "QString", "QString")
     signal_forbiddenchannel = QtCore.pyqtSignal("QString", "QString")

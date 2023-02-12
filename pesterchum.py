@@ -4415,7 +4415,6 @@ class MainProgram(QtCore.QObject):
             (irc.modesUpdated, widget.modesUpdated),
             (irc.cannotSendToChan, widget.cannotSendToChan),
             (irc.signal_forbiddenchannel, widget.forbiddenchannel),
-            (irc.quirkDisable, widget.quirkDisable),
         )
 
     def connectWidgets(self, irc, widget):
@@ -4493,7 +4492,7 @@ class MainProgram(QtCore.QObject):
     def restartIRC(self, verify_hostname=True):
         if hasattr(self, "irc") and self.irc:
             self.disconnectWidgets(self.irc, self.widget)
-            stop = self.irc.stopIRC
+            stop = self.irc.stop_irc
             del self.irc
         else:
             stop = None
