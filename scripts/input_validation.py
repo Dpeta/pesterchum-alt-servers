@@ -53,19 +53,3 @@ def is_valid_rgb_color(value: str):
         if int(component) > 255:
             return False
     return True
-
-
-"""
-def is_valid_rgb_color(value: str):
-    "Returns True if an unparsed value (str) is a valid rgb color."
-    if re.search(_color_rgb, value):
-        return True
-    return False
-
-    
-def is_valid_hex_color(value: str):
-    "Returns True if an unparsed value (str) is a valid hex color."
-    if re.search(_color_hex, value):
-        return True
-    return False
-"""

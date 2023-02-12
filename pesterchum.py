@@ -4462,7 +4462,7 @@ class MainProgram(QtCore.QObject):
             self.widget.loadingscreen.tryAgain.connect(self.tryAgain)
             if (
                 hasattr(self, "irc")
-                and self.irc.registeredIRC
+                and self.irc.registered_irc
                 and not self.irc.unresponsive
             ):
                 return

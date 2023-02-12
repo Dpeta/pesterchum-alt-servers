@@ -5,11 +5,11 @@ References for the IRC protocol:
  - Updated IRC Client specification: https://www.rfc-editor.org/rfc/rfc2812
  - Modern IRC client protocol writeup: https://modern.ircdocs.horse
  - IRCv3 protocol additions: https://ircv3.net/irc/
- - Draft of metadata specification: https://gist.github.com/k4bek4be/92c2937cefd49990fbebd001faf2b237
+ - Draft of metadata spec: https://gist.github.com/k4bek4be/92c2937cefd49990fbebd001faf2b237
 
 Some code in this file may be based on the oyoyo IRC library,
 the license notice included with oyoyo source files is indented here:
-    
+
     # Copyright (c) 2008 Duncan Fordyce
     # Permission is hereby granted, free of charge, to any person obtaining a copy
     # of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,6 @@ the license notice included with oyoyo source files is indented here:
     # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     # THE SOFTWARE.
-
 """
 import socket
 import random
@@ -77,9 +76,9 @@ class PesterIRC(QtCore.QThread):
         self._send_irc = SendIRC()
 
         self.unresponsive = False
-        self.registeredIRC = False
+        self.registered_irc = False
         self.metadata_supported = False
-        self.stopIRC = None
+        self.stop_irc = None
         self._conn = None
         self._end = False  # Set to True when ending connection.
         self.joined = False
@@ -130,8 +129,8 @@ class PesterIRC(QtCore.QThread):
         is called on the main thread. Returning from this method ends the thread."""
         try:
             self.irc_connect()
-        except OSError as se:
-            self.stopIRC = se
+        except OSError as socket_exception:
+            self.stop_irc = socket_exception
             return
         while True:
             res = True
@@ -139,13 +138,13 @@ class PesterIRC(QtCore.QThread):
                 PchumLog.debug("update_irc()")
                 self.mainwindow.sincerecv = 0
                 res = self.update_irc()
-            except socket.timeout as se:
+            except socket.timeout as timeout:
                 PchumLog.debug("timeout in thread %s", self)
                 self._close()
-                self.stopIRC = "{}, {}".format(type(se), se)
+                self.stop_irc = f"{type(timeout)}, {timeout}"
                 return
-            except (OSError, IndexError, ValueError) as se:
-                self.stopIRC = "{}, {}".format(type(se), se)
+            except (OSError, IndexError, ValueError) as exception:
+                self.stop_irc = f"{type(exception)}, {exception}"
                 PchumLog.debug("Socket error, exiting thread.")
                 return
             else:
@@ -198,13 +197,11 @@ class PesterIRC(QtCore.QThread):
                 else:
                     if self._end:
                         break
-
                     split_buffer = buffer.split(b"\r\n")
                     buffer = b""
                     if split_buffer[-1]:
                         # Incomplete line, add it back to the buffer.
                         buffer = split_buffer.pop()
-
                     for line in split_buffer:
                         line = line.decode(encoding="utf-8", errors="replace")
                         tags, prefix, command, args = parse_irc_line(line)
@@ -214,7 +211,6 @@ class PesterIRC(QtCore.QThread):
                                 self._run_command(command, prefix, tags, *args)
                             else:
                                 self._run_command(command, prefix, *args)
-
                 yield True
         except OSError as socket_exception:
             PchumLog.warning(
@@ -271,9 +267,9 @@ class PesterIRC(QtCore.QThread):
             raise e
         self._conn = self._conn_generator()
 
-    def setConnectionBroken(self):
+    def set_connection_broken(self):
         """Called when the connection is broken."""
-        PchumLog.critical("setConnectionBroken() got called, disconnecting.")
+        PchumLog.critical("set_connection_broken() got called, disconnecting.")
         self.disconnectIRC()
 
     @QtCore.pyqtSlot()
@@ -281,11 +277,10 @@ class PesterIRC(QtCore.QThread):
         """Get a silly scrunkler from the generator!!"""
         try:
             res = next(self._conn)
-        except socket.timeout as se:
-            if self.registeredIRC:
+        except socket.timeout as socket_exception:
+            if self.registered_irc:
                 return True
-            else:
-                raise se
+            raise socket_exception
         except StopIteration:
             self._conn = self.conn_generator()
             return True
@@ -304,7 +299,7 @@ class PesterIRC(QtCore.QThread):
                     self._send_irc.metadata(chum.handle, "get", "mood")
                 except OSError as e:
                     PchumLog.warning(e)
-                    self.setConnectionBroken()
+                    self.set_connection_broken()
         else:
             # Legacy
             PchumLog.warning(
@@ -317,7 +312,7 @@ class PesterIRC(QtCore.QThread):
                         self._send_irc.privmsg("#pesterchum", chumglub)
                     except OSError as e:
                         PchumLog.warning(e)
-                        self.setConnectionBroken()
+                        self.set_connection_broken()
                     chumglub = "get_mood "
                 # No point in get_mood-ing services
                 if chum.handle.casefold() not in SERVICES:
@@ -327,7 +322,7 @@ class PesterIRC(QtCore.QThread):
                     self._send_irc.privmsg("#pesterchum", chumglub)
                 except OSError as e:
                     PchumLog.warning(e)
-                    self.setConnectionBroken()
+                    self.set_connection_broken()
 
     @QtCore.pyqtSlot(PesterList)
     def get_moods(self, chums):
@@ -378,8 +373,7 @@ class PesterIRC(QtCore.QThread):
                 if b:  # len > 0
                     return [a] + splittext([b])
                 return [a]
-            else:
-                return l
+            return l
 
         textl = splittext(textl)
         for t in textl:
@@ -593,7 +587,7 @@ class PesterIRC(QtCore.QThread):
 
     def _error(self, *params):
         """'ERROR' message from server, the server is terminating our connection."""
-        self.stopIRC = " ".join(params).strip()
+        self.stop_irc = " ".join(params).strip()
         self.disconnectIRC()
 
     def __ctcp(self, nick: str, chan: str, msg: str):
@@ -805,7 +799,7 @@ class PesterIRC(QtCore.QThread):
 
     def _welcome(self, _server, _nick, _msg):
         """Numeric reply 001 RPL_WELCOME, send when we've connected to the server."""
-        self.registeredIRC = (
+        self.registered_irc = (
             True  # Registered as in, the server has accepted our nick & user.
         )
         self.connected.emit()  # Alert main thread that we've connected.
@@ -922,7 +916,7 @@ class PesterIRC(QtCore.QThread):
         """Numeric reply 432 ERR_ERRONEUSNICKNAME, we have a forbidden or protocol-breaking nick."""
         # Server is not allowing us to connect.
         reason = "Handle is not allowed on this server.\n" + " ".join(args)
-        self.stopIRC = reason.strip()
+        self.stop_irc = reason.strip()
         self.disconnectIRC()
 
     def _nicknameinuse(self, _server, _cmd, nick, _msg):
