@@ -499,9 +499,9 @@ class PesterIRC(QtCore.QThread):
     def set_away(self, away=True):
         """Send AWAY to update away status, slot is called from main thread."""
         if away:
-            self.away("Idle")
+            self._send_irc.away("Idle")
         else:
-            self.away()
+            self._send_irc.away()
 
     @QtCore.pyqtSlot(str, str)
     def kill_some_quirks(self, channel, handle):
