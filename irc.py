@@ -129,16 +129,16 @@ class PesterIRC(QtCore.QThread):
         This function reimplements QThread::run() and is ran after self.irc.start()
         is called on the main thread. Returning from this method ends the thread."""
         try:
-            self.IRCConnect()
+            self.irc_connect()
         except OSError as se:
             self.stopIRC = se
             return
         while True:
             res = True
             try:
-                PchumLog.debug("updateIRC()")
+                PchumLog.debug("update_irc()")
                 self.mainwindow.sincerecv = 0
-                res = self.updateIRC()
+                res = self.update_irc()
             except socket.timeout as se:
                 PchumLog.debug("timeout in thread %s", self)
                 self._close()
@@ -261,7 +261,7 @@ class PesterIRC(QtCore.QThread):
             except OSError as e:
                 PchumLog.info("Error while closing socket, already broken? %s", e)
 
-    def IRCConnect(self):
+    def irc_connect(self):
         """Try to connect and signal for connect-anyway prompt on cert fail."""
         try:
             self._connect(self.verify_hostname)
@@ -277,7 +277,7 @@ class PesterIRC(QtCore.QThread):
         self.disconnectIRC()
 
     @QtCore.pyqtSlot()
-    def updateIRC(self):
+    def update_irc(self):
         """Get a silly scrunkler from the generator!!"""
         try:
             res = next(self._conn)
@@ -293,7 +293,7 @@ class PesterIRC(QtCore.QThread):
             return res
 
     @QtCore.pyqtSlot(PesterProfile)
-    def getMood(self, *chums):
+    def get_mood(self, *chums):
         """Get mood via metadata if supported"""
 
         # Get via metadata or via legacy method
@@ -308,9 +308,9 @@ class PesterIRC(QtCore.QThread):
         else:
             # Legacy
             PchumLog.warning(
-                "Server doesn't seem to support metadata, using legacy GETMOOD."
+                "Server doesn't seem to support metadata, using legacy get_mood."
             )
-            chumglub = "GETMOOD "
+            chumglub = "get_mood "
             for chum in chums:
                 if len(chumglub + chum.handle) >= 350:
                     try:
@@ -318,11 +318,11 @@ class PesterIRC(QtCore.QThread):
                     except OSError as e:
                         PchumLog.warning(e)
                         self.setConnectionBroken()
-                    chumglub = "GETMOOD "
-                # No point in GETMOOD-ing services
+                    chumglub = "get_mood "
+                # No point in get_mood-ing services
                 if chum.handle.casefold() not in SERVICES:
                     chumglub += chum.handle
-            if chumglub != "GETMOOD ":
+            if chumglub != "get_mood ":
                 try:
                     self._send_irc.privmsg("#pesterchum", chumglub)
                 except OSError as e:
@@ -330,17 +330,17 @@ class PesterIRC(QtCore.QThread):
                     self.setConnectionBroken()
 
     @QtCore.pyqtSlot(PesterList)
-    def getMoods(self, chums):
+    def get_moods(self, chums):
         """Get mood, slot is called from main thread."""
-        self.getMood(*chums)
+        self.get_mood(*chums)
 
     @QtCore.pyqtSlot(str, str)
-    def sendNotice(self, text, handle):
+    def send_notice(self, text, handle):
         """Send notice, slot is called from main thread."""
         self._send_irc.notice(handle, text)
 
     @QtCore.pyqtSlot(str, str)
-    def sendMessage(self, text, handle):
+    def send_message(self, text, handle):
         """......sends a message? this is a tad silly;;;"""
         textl = [text]
 
@@ -386,24 +386,24 @@ class PesterIRC(QtCore.QThread):
             self._send_irc.privmsg(handle, t)
 
     @QtCore.pyqtSlot(str, str)
-    def sendCTCP(self, handle, text):
+    def send_ctcp(self, handle, text):
         """Send CTCP message, slot is called from main thread."""
         self._send_irc.ctcp(handle, text)
 
     @QtCore.pyqtSlot(str, bool)
-    def startConvo(self, handle, initiated):
+    def start_convo(self, handle, initiated):
         """Send convo begin message and color, slot is called from main thread."""
         self._send_irc.privmsg(handle, f"COLOR >{self.mainwindow.profile().colorcmd()}")
         if initiated:
             self._send_irc.privmsg(handle, "PESTERCHUM:BEGIN")
 
     @QtCore.pyqtSlot(str)
-    def endConvo(self, handle):
+    def end_convo(self, handle):
         """Send convo cease message, slot is called from main thread."""
         self._send_irc.privmsg(handle, "PESTERCHUM:CEASE")
 
     @QtCore.pyqtSlot()
-    def updateProfile(self):
+    def update_profile(self):
         """....update profile? this shouldn't be a thing."""
         self._send_irc.nick(self.mainwindow.profile().handle)
         self.mainwindow.closeConversations(True)
@@ -413,7 +413,7 @@ class PesterIRC(QtCore.QThread):
         self.updateMood()
 
     @QtCore.pyqtSlot()
-    def updateMood(self):
+    def update_mood(self):
         """Update and send mood, slot is called from main thread."""
         mood = self.mainwindow.profile().mood.value_str()
         # Moods via metadata
@@ -422,7 +422,7 @@ class PesterIRC(QtCore.QThread):
         self._send_irc.privmsg("#pesterchum", f"MOOD >{mood}")
 
     @QtCore.pyqtSlot()
-    def updateColor(self):
+    def update_color(self):
         """Update and send color, slot is called from main thread."""
         # Update color metadata field
         color = self.mainwindow.profile().color
@@ -435,63 +435,63 @@ class PesterIRC(QtCore.QThread):
             )
 
     @QtCore.pyqtSlot(str)
-    def blockedChum(self, handle):
+    def blocked_chum(self, handle):
         """Send block message, slot is called from main thread."""
         self._send_irc.privmsg(handle, "PESTERCHUM:BLOCK")
 
     @QtCore.pyqtSlot(str)
-    def unblockedChum(self, handle):
+    def unblocked_chum(self, handle):
         """Send unblock message, slot is called from main thread."""
         self._send_irc.privmsg(handle, "PESTERCHUM:UNBLOCK")
 
     @QtCore.pyqtSlot(str)
-    def requestNames(self, channel):
+    def request_names(self, channel):
         """Send NAMES to request channel members, slot is called from main thread."""
         self._send_irc.names(channel)
 
     @QtCore.pyqtSlot()
-    def requestChannelList(self):
+    def request_channel_list(self):
         """Send LIST to request list of channels, slot is called from main thread."""
         self._send_irc.list()
 
     @QtCore.pyqtSlot(str)
-    def joinChannel(self, channel):
+    def join_channel(self, channel):
         """Send JOIN and MODE to join channel and get modes, slot is called from main thread."""
         self._send_irc.join(channel)
         self._send_irc.mode(channel)
 
     @QtCore.pyqtSlot(str)
-    def leftChannel(self, channel):
+    def left_channel(self, channel):
         """Send PART to leave channel, slot is called from main thread."""
         self._send_irc.part(channel)
 
     @QtCore.pyqtSlot(str, str, str)
-    def kickUser(self, channel, user, reason=""):
+    def kick_user(self, channel, user, reason=""):
         """Send KICK message to kick user from channel, slot is called from main thread."""
         self._send_irc.kick(channel, user, reason)
 
     @QtCore.pyqtSlot(str, str, str)
-    def setChannelMode(self, channel, mode, command):
+    def set_channel_mode(self, channel, mode, command):
         """Send MODE to set channel mode, slot is called from main thread."""
         self._send_irc.mode(channel, mode, command)
 
     @QtCore.pyqtSlot(str)
-    def channelNames(self, channel):
+    def channel_names(self, channel):
         """Send block message, slot is called from main thread."""
         self._send_irc.names(channel)
 
     @QtCore.pyqtSlot(str, str)
-    def inviteChum(self, handle, channel):
+    def invite_chum(self, handle, channel):
         """Send INVITE message to invite someone to a channel, slot is called from main thread."""
         self._send_irc.invite(handle, channel)
 
     @QtCore.pyqtSlot()
-    def pingServer(self):
+    def ping_server(self):
         """Send PING to server to verify connectivity, slot is called from main thread."""
         self._send_irc.ping("B33")
 
     @QtCore.pyqtSlot(bool)
-    def setAway(self, away=True):
+    def set_away(self, away=True):
         """Send AWAY to update away status, slot is called from main thread."""
         if away:
             self.away("Idle")
@@ -499,12 +499,12 @@ class PesterIRC(QtCore.QThread):
             self.away()
 
     @QtCore.pyqtSlot(str, str)
-    def killSomeQuirks(self, channel, handle):
+    def kill_some_quirks(self, channel, handle):
         """Send NOQUIRKS ctcp message, disables quirks. Slot is called from main thread."""
         self._send_irc.ctcp(channel, "NOQUIRKS", handle)
 
     @QtCore.pyqtSlot()
-    def disconnectIRC(self):
+    def disconnect_irc(self):
         """Send QUIT and close connection, slot is called from main thread."""
         self._send_irc.quit(f"{_pcVersion} <3")
         self._end = True
@@ -659,7 +659,7 @@ class PesterIRC(QtCore.QThread):
                         )
                         mood = Mood(0)
                     self.moodUpdated.emit(handle, mood)
-                elif msg.startswith("GETMOOD"):
+                elif msg.startswith("get_mood"):
                     mychumhandle = self.mainwindow.profile().handle
                     if mychumhandle in msg:
                         mymood = self.mainwindow.profile().mood.value_str()
@@ -797,7 +797,7 @@ class PesterIRC(QtCore.QThread):
         self.moodUpdated.emit(oldhandle, Mood("offline"))
         self.userPresentUpdate.emit(f"{oldhandle}:{newnick}", "", "nick")
         if newnick in self.mainwindow.chumList.chums:
-            self.getMood(newchum)
+            self.get_mood(newchum)
         if oldhandle == self.mainwindow.randhandler.randNick:
             self.mainwindow.randhandler.setRunning(False)
         elif newnick == self.mainwindow.randhandler.randNick:
@@ -912,7 +912,7 @@ class PesterIRC(QtCore.QThread):
             for chum in chums:
                 if chum.handle in namelist:
                     lesschums.append(chum)
-            self.getMood(*lesschums)
+            self.get_mood(*lesschums)
 
     def _cannotsendtochan(self, _server, _handle, channel, msg):
         """Numeric reply 404 ERR_CANNOTSENDTOCHAN, we aren't in the channel or don't have voice."""
@@ -972,24 +972,24 @@ class PesterIRC(QtCore.QThread):
     def _nomatchingkey(self, _target, _our_handle, failed_handle, _key, *_error):
         """METADATA DRAFT numeric reply 766 ERR_NOMATCHINGKEY, no matching key."""
         PchumLog.info("_nomatchingkey: %s", failed_handle)
-        # No point in GETMOOD-ing services
-        # Fallback to the normal GETMOOD method if getting mood via metadata fails.
+        # No point in get_mood-ing services
+        # Fallback to the normal get_mood method if getting mood via metadata fails.
         if failed_handle.casefold() not in SERVICES:
-            self._send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
+            self._send_irc.privmsg("#pesterchum", f"get_mood {failed_handle}")
 
     def _keynotset(self, _target, _our_handle, failed_handle, _key, *_error):
         """METADATA DRAFT numeric reply 768 ERR_KEYNOTSET, key isn't set."""
         PchumLog.info("_keynotset: %s", failed_handle)
-        # Fallback to the normal GETMOOD method if getting mood via metadata fails.
+        # Fallback to the normal get_mood method if getting mood via metadata fails.
         if failed_handle.casefold() not in SERVICES:
-            self._send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
+            self._send_irc.privmsg("#pesterchum", f"get_mood {failed_handle}")
 
     def _keynopermission(self, _target, _our_handle, failed_handle, _key, *_error):
         """METADATA DRAFT numeric reply 769 ERR_KEYNOPERMISSION, no permission for key."""
         PchumLog.info("_keynopermission: %s", failed_handle)
-        # Fallback to the normal GETMOOD method if getting mood via metadata fails.
+        # Fallback to the normal get_mood method if getting mood via metadata fails.
         if failed_handle.casefold() not in SERVICES:
-            self._send_irc.privmsg("#pesterchum", f"GETMOOD {failed_handle}")
+            self._send_irc.privmsg("#pesterchum", f"get_mood {failed_handle}")
 
     def _metadatasubok(self, *params):
         """ "METADATA DRAFT numeric reply 770 RPL_METADATASUBOK, we subbed to a key."""
