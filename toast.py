@@ -103,7 +103,7 @@ class ToastMachine:
         def realShow(self):
             self.machine.displaying = True
             t = None
-            for (k, v) in self.machine.types.items():
+            for k, v in self.machine.types.items():
                 if self.machine.type == k:
                     try:
                         args = inspect.getargspec(v.__init__).args

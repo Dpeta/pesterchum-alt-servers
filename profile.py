@@ -64,7 +64,7 @@ class PesterLog:
             if handle not in self.convos:
                 log_time = datetime.now().strftime("%Y-%m-%d.%H.%M")
                 self.convos[handle] = {}
-                for (format, t) in modes.items():
+                for format, t in modes.items():
                     if not os.path.exists(
                         "{}/{}/{}/{}".format(self.logpath, self.handle, handle, format)
                     ):
@@ -81,7 +81,7 @@ class PesterLog:
                     )
                     self.convos[handle][format] = fp
 
-            for (format, t) in modes.items():
+            for format, t in modes.items():
                 f = self.convos[handle][format]
                 f.write(t + "\r\n")
                 # flush + fsync force a write,
@@ -446,10 +446,10 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         try:
             with open(_datadir + "server.json") as server_file:
                 read_file = server_file.read()
-                server_file.close()
                 server_obj = json.loads(read_file)
             return server_obj["server"]
         except:
+            PchumLog.exception("Failed to load server, falling back to default.")
             try:
                 with open(_datadir + "server.json", "w") as server_file:
                     json_server_file = {
@@ -458,7 +458,6 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
                         "TLS": True,
                     }
                     server_file.write(json.dumps(json_server_file, indent=4))
-                    server_file.close()
                 server = "irc.pesterchum.xyz"
             except:
                 return self.config.get("server", "irc.pesterchum.xyz")
@@ -469,11 +468,11 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         try:
             with open(_datadir + "server.json") as server_file:
                 read_file = server_file.read()
-                server_file.close()
-                server_obj = json.loads(read_file)
+            server_obj = json.loads(read_file)
             port = server_obj["port"]
             return port
         except:
+            PchumLog.exception("Failed to load port, falling back to default.")
             return self.config.get("port", "6697")
 
     def ssl(self):
@@ -482,10 +481,23 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         try:
             with open(_datadir + "server.json") as server_file:
                 read_file = server_file.read()
-                server_file.close()
-                server_obj = json.loads(read_file)
+            server_obj = json.loads(read_file)
             return server_obj["TLS"]
         except:
+            PchumLog.exception("Failed to load TLS setting, falling back to default.")
+            return self.config.get("TLS", True)
+
+    def password(self):
+        try:
+            with open(_datadir + "server.json") as server_file:
+                read_file = server_file.read()
+            server_obj = json.loads(read_file)
+            password = ""
+            if "pass" in server_obj:
+                password = server_obj["pass"]
+            return password
+        except:
+            PchumLog.exception("Failed to load TLS setting, falling back to default.")
             return self.config.get("TLS", True)
 
     def soundOn(self):
@@ -737,7 +749,7 @@ class userProfile:
     def setMentions(self, mentions):
         i = None
         try:
-            for (i, m) in enumerate(mentions):
+            for i, m in enumerate(mentions):
                 re.compile(m)
         except re.error as e:
             PchumLog.error("#{} Not a valid regular expression: {}".format(i, e))
@@ -835,7 +847,7 @@ class PesterProfileDB(dict):
                 json.dump(chumdict, fp)
 
         u = []
-        for (handle, c) in chumdict.items():
+        for handle, c in chumdict.items():
             options = dict()
             if "group" in c:
                 options["group"] = c["group"]
@@ -960,7 +972,7 @@ class pesterTheme(dict):
         return v
 
     def pathHook(self, d):
-        for (k, v) in d.items():
+        for k, v in d.items():
             if isinstance(v, str):
                 s = Template(v)
                 d[k] = s.safe_substitute(path=self.path)

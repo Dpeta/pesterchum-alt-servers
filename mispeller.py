@@ -7,8 +7,8 @@ kbloc = [
     [x for x in "zxcvbnm,.>/?"],
 ]
 kbdict = {}
-for (i, l) in enumerate(kbloc):
-    for (j, k) in enumerate(l):
+for i, l in enumerate(kbloc):
+    for j, k in enumerate(l):
         kbdict[k] = (i, j)
 
 sounddict = {

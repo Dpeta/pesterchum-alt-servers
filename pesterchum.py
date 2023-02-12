@@ -2971,7 +2971,7 @@ class PesterWindow(MovingWindow):
         # Tell everyone we're in a chat with that we just went idle.
         sysColor = QtGui.QColor(self.theme["convo/systemMsgColor"])
         verb = self.theme["convo/text/idle"]
-        for (h, convo) in self.convos.items():
+        for h, convo in self.convos.items():
             # karxi: There's an irritating issue here involving a lack of
             # consideration for case-sensitivity.
             # This fix is a little sloppy, and I need to look into what it
@@ -3051,7 +3051,6 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot()
     def joinSelectedMemo(self):
-
         time = str(self.memochooser.timeinput.text())
         secret = self.memochooser.secretChannel.isChecked()
         invite = self.memochooser.inviteChannel.isChecked()
@@ -3246,7 +3245,7 @@ class PesterWindow(MovingWindow):
                 # combine
                 self.createTabWindow()
                 newconvos = {}
-                for (h, c) in self.convos.items():
+                for h, c in self.convos.items():
                     c.setParent(self.tabconvo)
                     self.tabconvo.addChat(c)
                     self.tabconvo.show()
@@ -3276,7 +3275,7 @@ class PesterWindow(MovingWindow):
                 # combine
                 newmemos = {}
                 self.createMemoTabWindow()
-                for (h, m) in self.memos.items():
+                for h, m in self.memos.items():
                     m.setParent(self.tabmemo)
                     self.tabmemo.addChat(m)
                     self.tabmemo.show()
@@ -3806,9 +3805,10 @@ class PesterWindow(MovingWindow):
                 "port": int(
                     server_and_port[1]
                 ),  # to make sure port is a valid integer, and raise an exception if it cannot be converted.
+                "pass": self.auth_pass_qline.text(),
                 "TLS": self.TLS_checkbox.isChecked(),
             }
-            PchumLog.info("server:    " + str(server))
+            PchumLog.info("server: %s", server)
         except:
             msgbox = QtWidgets.QMessageBox()
             msgbox.setStyleSheet(
@@ -3951,12 +3951,24 @@ class PesterWindow(MovingWindow):
             layout.addWidget(cancel)
             layout.addWidget(ok)
             main_layout = QtWidgets.QVBoxLayout()
+
             nep_prompt = QtWidgets.QLabel(
                 ":33 < Please put in the server's address in the format HOSTNAME:PORT\n:33 < Fur example, irc.pesterchum.xyz:6697"
             )
             nep_prompt.setStyleSheet("QLabel { color: #416600; font-weight: bold;}")
+
+            auth_pass_prompt = QtWidgets.QLabel(":33 < type the password!! (optional)")
+            auth_pass_prompt.setStyleSheet(
+                "QLabel { color: #416600; font-weight: bold;}"
+            )
+
+            self.auth_pass_qline = QtWidgets.QLineEdit(self)
+            self.auth_pass_qline.setMinimumWidth(200)
+
             main_layout.addWidget(nep_prompt)
             main_layout.addWidget(self.customServerPrompt_qline)
+            main_layout.addWidget(auth_pass_prompt)
+            main_layout.addWidget(self.auth_pass_qline)
             main_layout.addLayout(TLS_layout)
             main_layout.addLayout(layout)
 
@@ -4049,6 +4061,11 @@ class PesterWindow(MovingWindow):
 
             try:
                 selected_entry = self.serverBox.currentIndex()
+                PchumLog.debug(
+                    "'%s' == '%s'",
+                    server_obj[selected_entry]["server"],
+                    self.serverBox.currentText(),
+                )
                 assert (
                     server_obj[selected_entry]["server"] == self.serverBox.currentText()
                 )
@@ -4061,9 +4078,13 @@ class PesterWindow(MovingWindow):
 
             try:
                 with open(_datadir + "server.json", "w") as server_file:
+                    password = ""
+                    if "pass" in server_obj[selected_entry]:
+                        password = server_obj[selected_entry]["pass"]
                     json_server_file = {
                         "server": server_obj[selected_entry]["server"],
                         "port": server_obj[selected_entry]["port"],
+                        "pass": password,
                         "TLS": server_obj[selected_entry]["TLS"],
                     }
                     server_file.write(json.dumps(json_server_file, indent=4))
@@ -4090,12 +4111,13 @@ class PesterWindow(MovingWindow):
             for i in range(len(server_obj)):
                 server_list_items.append(server_obj[i]["server"])
         except:
+            PchumLog.exception("")
             if not self.chooseServerAskedToReset:
                 self.chooseServerAskedToReset = True
                 self.resetServerlist()
                 return 1
 
-        PchumLog.info("server_list_items:    " + str(server_list_items))
+        PchumLog.info("server_list_items: %s", server_list_items)
 
         # Widget 1
         self.chooseServerWidged = QtWidgets.QDialog()
@@ -4188,7 +4210,7 @@ class PesterWindow(MovingWindow):
     trayIconSignal = QtCore.pyqtSignal(int)
     blockedChum = QtCore.pyqtSignal("QString")
     unblockedChum = QtCore.pyqtSignal("QString")
-    kickUser = QtCore.pyqtSignal("QString", "QString")
+    kickUser = QtCore.pyqtSignal("QString", "QString", "QString")
     joinChannel = QtCore.pyqtSignal("QString")
     leftChannel = QtCore.pyqtSignal("QString")
     setChannelMode = QtCore.pyqtSignal("QString", "QString", "QString")
@@ -4293,7 +4315,7 @@ class MainProgram(QtCore.QObject):
         for k in Mood.moodcats:
             moodCategories[k] = moodMenu.addMenu(k.upper())
         self.moodactions = {}
-        for (i, m) in enumerate(Mood.moods):
+        for i, m in enumerate(Mood.moods):
             maction = QAction(m.upper(), self)
             mobj = PesterMoodAction(i, self.widget.moods.updateMood)
             maction.triggered.connect(mobj.updateMood)
@@ -4321,7 +4343,14 @@ class MainProgram(QtCore.QObject):
         self.attempts = 0
 
         # but it's at least better than the way it was before.
-        self.irc = PesterIRC(self.widget.config, self.widget)
+        # FIXME: we should not pass widget here
+        self.irc = PesterIRC(
+            self.widget,
+            self.widget.config.server(),
+            self.widget.config.port(),
+            self.widget.config.ssl(),
+            password=self.widget.config.password(),
+        )
         self.connectWidgets(self.irc, self.widget)
 
         self.widget.passIRC(
@@ -4364,107 +4393,33 @@ class MainProgram(QtCore.QObject):
     def trayMessageClick(self):
         self.widget.config.set("traymsg", False)
 
-    widget2irc = [
-        ("sendMessage(QString, QString)", "sendMessage(QString, QString)"),
-        ("sendNotice(QString, QString)", "sendNotice(QString, QString)"),
-        ("sendCTCP(QString, QString)", "sendCTCP(QString, QString)"),
-        ("newConvoStarted(QString, bool)", "startConvo(QString, bool)"),
-        ("convoClosed(QString)", "endConvo(QString)"),
-        ("profileChanged()", "updateProfile()"),
-        ("moodRequest(PyQt_PyObject)", "getMood(PyQt_PyObject)"),
-        ("moodsRequest(PyQt_PyObject)", "getMoods(PyQt_PyObject)"),
-        ("moodUpdated()", "updateMood()"),
-        ("mycolorUpdated()", "updateColor()"),
-        ("blockedChum(QString)", "blockedChum(QString)"),
-        ("unblockedChum(QString)", "unblockedChum(QString)"),
-        ("requestNames(QString)", "requestNames(QString)"),
-        ("requestChannelList()", "requestChannelList()"),
-        ("joinChannel(QString)", "joinChannel(QString)"),
-        ("leftChannel(QString)", "leftChannel(QString)"),
-        ("kickUser(QString, QString)", "kickUser(QString, QString)"),
-        (
-            "setChannelMode(QString, QString, QString)",
-            "setChannelMode(QString, QString, QString)",
-        ),
-        ("channelNames(QString)", "channelNames(QString)"),
-        ("inviteChum(QString, QString)", "inviteChum(QString, QString)"),
-        ("pingServer()", "pingServer()"),
-        ("setAway(bool)", "setAway(bool)"),
-        ("killSomeQuirks(QString, QString)", "killSomeQuirks(QString, QString)"),
-        ("disconnectIRC()", "disconnectIRC()"),
-    ]
-    # IRC --> Main window
-    irc2widget = [
-        ("connected()", "connected()"),
-        (
-            "moodUpdated(QString, PyQt_PyObject)",
-            "updateMoodSlot(QString, PyQt_PyObject)",
-        ),
-        (
-            "colorUpdated(QString, QtGui.QColor)",
-            "updateColorSlot(QString, QtGui.QColor)",
-        ),
-        ("messageReceived(QString, QString)", "deliverMessage(QString, QString)"),
-        (
-            "memoReceived(QString, QString, QString)",
-            "deliverMemo(QString, QString, QString)",
-        ),
-        ("noticeReceived(QString, QString)", "deliverNotice(QString, QString)"),
-        ("inviteReceived(QString, QString)", "deliverInvite(QString, QString)"),
-        ("nickCollision(QString, QString)", "nickCollision(QString, QString)"),
-        ("getSvsnickedOn(QString, QString)", "getSvsnickedOn(QString, QString)"),
-        ("myHandleChanged(QString)", "myHandleChanged(QString)"),
-        (
-            "namesReceived(QString, PyQt_PyObject)",
-            "updateNames(QString, PyQt_PyObject)",
-        ),
-        (
-            "userPresentUpdate(QString, QString, QString)",
-            "userPresentUpdate(QString, QString, QString)",
-        ),
-        ("channelListReceived(PyQt_PyObject)", "updateChannelList(PyQt_PyObject)"),
-        (
-            "timeCommand(QString, QString, QString)",
-            "timeCommand(QString, QString, QString)",
-        ),
-        ("chanInviteOnly(QString)", "chanInviteOnly(QString)"),
-        ("modesUpdated(QString, QString)", "modesUpdated(QString, QString)"),
-        ("cannotSendToChan(QString, QString)", "cannotSendToChan(QString, QString)"),
-        ("tooManyPeeps()", "tooManyPeeps()"),
-        (
-            "quirkDisable(QString, QString, QString)",
-            "quirkDisable(QString, QString, QString)",
-        ),
-        ("forbiddenchannel(QString)", "forbiddenchannel(QString)"),
-    ]
-
     def ircQtConnections(self, irc, widget):
         # IRC --> Main window
         return (
-            (widget.sendMessage, irc.sendMessage),
-            (widget.sendNotice, irc.sendNotice),
-            (widget.sendCTCP, irc.sendCTCP),
-            (widget.newConvoStarted, irc.startConvo),
-            (widget.convoClosed, irc.endConvo),
-            (widget.profileChanged, irc.updateProfile),
-            (widget.moodRequest, irc.getMood),
-            (widget.moodsRequest, irc.getMoods),
-            (widget.moodUpdated, irc.updateMood),
-            (widget.mycolorUpdated, irc.updateColor),
-            (widget.blockedChum, irc.blockedChum),
-            (widget.unblockedChum, irc.unblockedChum),
-            (widget.requestNames, irc.requestNames),
-            (widget.requestChannelList, irc.requestChannelList),
-            (widget.joinChannel, irc.joinChannel),
-            (widget.leftChannel, irc.leftChannel),
-            (widget.kickUser, irc.kickUser),
-            (widget.setChannelMode, irc.setChannelMode),
-            (widget.channelNames, irc.channelNames),
-            (widget.inviteChum, irc.inviteChum),
-            (widget.pingServer, irc.pingServer),
-            (widget.setAway, irc.setAway),
-            (widget.killSomeQuirks, irc.killSomeQuirks),
-            (widget.disconnectIRC, irc.disconnectIRC),
+            (widget.sendMessage, irc.send_message),
+            (widget.sendNotice, irc.send_notice),
+            (widget.sendCTCP, irc.send_ctcp),
+            (widget.newConvoStarted, irc.start_convo),
+            (widget.convoClosed, irc.end_convo),
+            (widget.profileChanged, irc.update_profile),
+            (widget.moodRequest, irc.get_mood),
+            (widget.moodsRequest, irc.get_moods),
+            (widget.moodUpdated, irc.update_mood),
+            (widget.mycolorUpdated, irc.update_color),
+            (widget.blockedChum, irc.blocked_chum),
+            (widget.unblockedChum, irc.unblocked_chum),
+            (widget.requestNames, irc.request_names),
+            (widget.requestChannelList, irc.request_channel_list),
+            (widget.joinChannel, irc.join_channel),
+            (widget.leftChannel, irc.left_channel),
+            (widget.kickUser, irc.kick_user),
+            (widget.setChannelMode, irc.set_channel_mode),
+            (widget.channelNames, irc.channel_names),
+            (widget.inviteChum, irc.invite_chum),
+            (widget.pingServer, irc.ping_server),
+            (widget.setAway, irc.set_away),
+            (widget.killSomeQuirks, irc.kill_some_quirks),
+            (widget.disconnectIRC, irc.disconnect_irc),
             # Main window --> IRC
             (irc.connected, widget.connected),
             (irc.askToConnect, widget.connectAnyway),
@@ -4484,9 +4439,7 @@ class MainProgram(QtCore.QObject):
             (irc.chanInviteOnly, widget.chanInviteOnly),
             (irc.modesUpdated, widget.modesUpdated),
             (irc.cannotSendToChan, widget.cannotSendToChan),
-            (irc.forbiddenchannel, widget.forbiddenchannel),
-            (irc.tooManyPeeps, widget.tooManyPeeps),
-            (irc.quirkDisable, widget.quirkDisable),
+            (irc.signal_forbiddenchannel, widget.forbiddenchannel),
         )
 
     def connectWidgets(self, irc, widget):
@@ -4533,7 +4486,7 @@ class MainProgram(QtCore.QObject):
             self.widget.loadingscreen.tryAgain.connect(self.tryAgain)
             if (
                 hasattr(self, "irc")
-                and self.irc.registeredIRC
+                and self.irc.registered_irc
                 and not self.irc.unresponsive
             ):
                 return
@@ -4564,13 +4517,18 @@ class MainProgram(QtCore.QObject):
     def restartIRC(self, verify_hostname=True):
         if hasattr(self, "irc") and self.irc:
             self.disconnectWidgets(self.irc, self.widget)
-            stop = self.irc.stopIRC
+            stop = self.irc.stop_irc
             del self.irc
         else:
             stop = None
         if stop is None:
             self.irc = PesterIRC(
-                self.widget.config, self.widget, verify_hostname=verify_hostname
+                self.widget,
+                self.widget.config.server(),
+                self.widget.config.port(),
+                self.widget.config.ssl(),
+                password=self.widget.config.password(),
+                verify_hostname=verify_hostname,
             )
             self.connectWidgets(self.irc, self.widget)
             self.irc.start()

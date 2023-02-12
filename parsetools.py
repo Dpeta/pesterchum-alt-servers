@@ -64,9 +64,9 @@ def reloadQuirkFunctions():
 def lexer(string, objlist):
     """objlist is a list: [(objecttype, re),...] list is in order of preference"""
     stringlist = [string]
-    for (oType, regexp) in objlist:
+    for oType, regexp in objlist:
         newstringlist = []
-        for (stri, s) in enumerate(stringlist):
+        for stri, s in enumerate(stringlist):
             if type(s) not in [str, str]:
                 newstringlist.append(s)
                 continue
@@ -339,7 +339,7 @@ def convertTags(lexed, format="html"):
         lexed = lexMessage(lexed)
     escaped = ""
     # firststr = True
-    for (i, o) in enumerate(lexed):
+    for i, o in enumerate(lexed):
         if type(o) in [str, str]:
             if format == "html":
                 escaped += (
@@ -429,9 +429,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
     curlen = 0
     # Maximum number of characters *to* use.
     if not maxlen:
-        maxlen = _max_msg_len(
-            None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.realname
-        )
+        maxlen = _max_msg_len(None, None, ctx.mainwindow.profile().handle, "pcc31")
     elif maxlen < 0:
         # Subtract the (negative) length, giving us less leeway in this
         # function.
@@ -440,7 +438,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
                 None,
                 None,
                 ctx.mainwindow.profile().handle,
-                ctx.mainwindow.irc.cli.realname,
+                "pcc31",
             )
             + maxlen
         )
@@ -805,11 +803,9 @@ def kxhandleInput(ctx, text=None, flavor=None):
         # We'll use those later.
 
     # Split the messages so we don't go over the buffer and lose text.
-    maxlen = _max_msg_len(
-        None, None, ctx.mainwindow.profile().handle, ctx.mainwindow.irc.cli.realname
-    )
+    maxlen = _max_msg_len(None, None, ctx.mainwindow.profile().handle, "pcc31")
     # ctx.mainwindow.profile().handle ==> Get handle
-    # ctx.mainwindow.irc.cli.realname  ==> Get ident (Same as realname in this case.)
+    # "pcc31"  ==> Get ident (Same as realname in this case.)
     # Since we have to do some post-processing, we need to adjust the maximum
     # length we can use.
     if flavor == "convo":
