@@ -61,13 +61,22 @@ SERVICES = [
 class PesterIRC(QtCore.QThread):
     """Class for making a thread that manages the connection to server."""
 
-    def __init__(self, window, server: str, port: int, ssl: bool, verify_hostname=True):
+    def __init__(
+        self,
+        window,
+        server: str,
+        port: int,
+        ssl: bool,
+        password="",
+        verify_hostname=True,
+    ):
         QtCore.QThread.__init__(self)
         self.mainwindow = window
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = server  # Server to connect to.
         self.port = port  # Port on server to connect to.
+        self.password = password  # Optional password for PASS.
         self.ssl = ssl  # Whether to connect over SSL/TLS.
         self.verify_hostname = (
             verify_hostname  # Whether to verify server hostname. (SSL-only)
@@ -179,6 +188,8 @@ class PesterIRC(QtCore.QThread):
         self.socket.settimeout(90)
         self._send_irc.socket = self.socket
 
+        if self.password:
+            self._send_irc.pass_(self.password)
         self._send_irc.nick(self.mainwindow.profile().handle)
         self._send_irc.user("pcc31", "pcc31")
 
@@ -404,7 +415,7 @@ class PesterIRC(QtCore.QThread):
         self.mainwindow.doAutoIdentify()
         self.mainwindow.autoJoinDone = False
         self.mainwindow.doAutoJoins()
-        self.updateMood()
+        self.update_mood()
 
     @QtCore.pyqtSlot()
     def update_mood(self):

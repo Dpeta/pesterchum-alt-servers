@@ -446,10 +446,10 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         try:
             with open(_datadir + "server.json") as server_file:
                 read_file = server_file.read()
-                server_file.close()
                 server_obj = json.loads(read_file)
             return server_obj["server"]
         except:
+            PchumLog.exception("Failed to load server, falling back to default.")
             try:
                 with open(_datadir + "server.json", "w") as server_file:
                     json_server_file = {
@@ -458,7 +458,6 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
                         "TLS": True,
                     }
                     server_file.write(json.dumps(json_server_file, indent=4))
-                    server_file.close()
                 server = "irc.pesterchum.xyz"
             except:
                 return self.config.get("server", "irc.pesterchum.xyz")
@@ -469,11 +468,11 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         try:
             with open(_datadir + "server.json") as server_file:
                 read_file = server_file.read()
-                server_file.close()
-                server_obj = json.loads(read_file)
+            server_obj = json.loads(read_file)
             port = server_obj["port"]
             return port
         except:
+            PchumLog.exception("Failed to load port, falling back to default.")
             return self.config.get("port", "6697")
 
     def ssl(self):
@@ -482,10 +481,23 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         try:
             with open(_datadir + "server.json") as server_file:
                 read_file = server_file.read()
-                server_file.close()
-                server_obj = json.loads(read_file)
+            server_obj = json.loads(read_file)
             return server_obj["TLS"]
         except:
+            PchumLog.exception("Failed to load TLS setting, falling back to default.")
+            return self.config.get("TLS", True)
+
+    def password(self):
+        try:
+            with open(_datadir + "server.json") as server_file:
+                read_file = server_file.read()
+            server_obj = json.loads(read_file)
+            password = ""
+            if "pass" in server_obj:
+                password = server_obj["pass"]
+            return password
+        except:
+            PchumLog.exception("Failed to load TLS setting, falling back to default.")
             return self.config.get("TLS", True)
 
     def soundOn(self):

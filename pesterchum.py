@@ -3805,9 +3805,10 @@ class PesterWindow(MovingWindow):
                 "port": int(
                     server_and_port[1]
                 ),  # to make sure port is a valid integer, and raise an exception if it cannot be converted.
+                "pass": self.auth_pass_qline.text(),
                 "TLS": self.TLS_checkbox.isChecked(),
             }
-            PchumLog.info("server:    " + str(server))
+            PchumLog.info("server: %s", server)
         except:
             msgbox = QtWidgets.QMessageBox()
             msgbox.setStyleSheet(
@@ -3950,12 +3951,24 @@ class PesterWindow(MovingWindow):
             layout.addWidget(cancel)
             layout.addWidget(ok)
             main_layout = QtWidgets.QVBoxLayout()
+
             nep_prompt = QtWidgets.QLabel(
                 ":33 < Please put in the server's address in the format HOSTNAME:PORT\n:33 < Fur example, irc.pesterchum.xyz:6697"
             )
             nep_prompt.setStyleSheet("QLabel { color: #416600; font-weight: bold;}")
+
+            auth_pass_prompt = QtWidgets.QLabel(":33 < type the password!! (optional)")
+            auth_pass_prompt.setStyleSheet(
+                "QLabel { color: #416600; font-weight: bold;}"
+            )
+
+            self.auth_pass_qline = QtWidgets.QLineEdit(self)
+            self.auth_pass_qline.setMinimumWidth(200)
+
             main_layout.addWidget(nep_prompt)
             main_layout.addWidget(self.customServerPrompt_qline)
+            main_layout.addWidget(auth_pass_prompt)
+            main_layout.addWidget(self.auth_pass_qline)
             main_layout.addLayout(TLS_layout)
             main_layout.addLayout(layout)
 
@@ -4048,6 +4061,11 @@ class PesterWindow(MovingWindow):
 
             try:
                 selected_entry = self.serverBox.currentIndex()
+                PchumLog.debug(
+                    "'%s' == '%s'",
+                    server_obj[selected_entry]["server"],
+                    self.serverBox.currentText(),
+                )
                 assert (
                     server_obj[selected_entry]["server"] == self.serverBox.currentText()
                 )
@@ -4060,9 +4078,13 @@ class PesterWindow(MovingWindow):
 
             try:
                 with open(_datadir + "server.json", "w") as server_file:
+                    password = ""
+                    if "pass" in server_obj[selected_entry]:
+                        password = server_obj[selected_entry]["pass"]
                     json_server_file = {
                         "server": server_obj[selected_entry]["server"],
                         "port": server_obj[selected_entry]["port"],
+                        "pass": password,
                         "TLS": server_obj[selected_entry]["TLS"],
                     }
                     server_file.write(json.dumps(json_server_file, indent=4))
@@ -4089,12 +4111,13 @@ class PesterWindow(MovingWindow):
             for i in range(len(server_obj)):
                 server_list_items.append(server_obj[i]["server"])
         except:
+            PchumLog.exception("")
             if not self.chooseServerAskedToReset:
                 self.chooseServerAskedToReset = True
                 self.resetServerlist()
                 return 1
 
-        PchumLog.info("server_list_items:    " + str(server_list_items))
+        PchumLog.info("server_list_items: %s", server_list_items)
 
         # Widget 1
         self.chooseServerWidged = QtWidgets.QDialog()
@@ -4326,6 +4349,7 @@ class MainProgram(QtCore.QObject):
             self.widget.config.server(),
             self.widget.config.port(),
             self.widget.config.ssl(),
+            password=self.widget.config.password(),
         )
         self.connectWidgets(self.irc, self.widget)
 
@@ -4503,6 +4527,7 @@ class MainProgram(QtCore.QObject):
                 self.widget.config.server(),
                 self.widget.config.port(),
                 self.widget.config.ssl(),
+                password=self.widget.config.password(),
                 verify_hostname=verify_hostname,
             )
             self.connectWidgets(self.irc, self.widget)

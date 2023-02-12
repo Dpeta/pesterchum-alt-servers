@@ -54,6 +54,12 @@ class SendIRC:
         """Send PONG command to reply to server PING."""
         self._send("PONG", token)
 
+    def pass_(self, password):
+        """Send a 'connection password' to the server.
+
+        Function is 'pass_' because 'pass' is reserved."""
+        self._send("PASS", text=password)
+
     def nick(self, nick):
         """Send USER command to communicate nick to server."""
         self._send("NICK", nick)
