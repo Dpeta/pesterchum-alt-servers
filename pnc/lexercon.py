@@ -1,4 +1,4 @@
-from .unicolor import Color
+from pnc.unicolor import Color
 
 import re
 

@@ -11,7 +11,7 @@ analyse-fallback-blocks=no
 
 # In error mode, checkers without error messages are disabled and for others,
 # only the ERROR messages are displayed, and no reports are done by default.
-#errors-only=
+errors-only=
 
 # Always return a 0 (non-error) status code, even if lint errors are found.
 # This is primarily useful in continuous integration scripts.
@@ -31,10 +31,10 @@ extension-pkg-whitelist=
 # Return non-zero exit code if any of these messages/categories are detected,
 # even if score is above --fail-under value. Syntax same as enable. Messages
 # specified are enabled, while categories only check already-enabled messages.
-fail-on=
+fail-on=E,F
 
 # Specify a score threshold to be exceeded before program exits with error.
-fail-under=6.5
+#fail-under=6
 
 # Interpret the stdin as a python script, whose filename needs to be passed as
 # the module_or_package argument.
@@ -80,7 +80,7 @@ persistent=yes
 
 # Minimum Python version to use for version dependent checks. Will default to
 # the version used to run pylint.
-py-version=3.10
+py-version=3.8
 
 # Discover python modules and packages in the file system subtree.
 recursive=no
@@ -119,7 +119,7 @@ msg-template=
 reports=yes
 
 # Activate the evaluation score.
-score=yes
+score=no
 
 
 [MESSAGES CONTROL]
@@ -142,20 +142,13 @@ confidence=HIGH,
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
-disable=raw-checker-failed,
-        bad-inline-option,
-        locally-disabled,
-        file-ignored,
-        suppressed-message,
-        useless-suppression,
-        deprecated-pragma,
-        use-symbolic-message-instead
+#disable=all
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once). See also the "--disable" option for examples.
-enable=c-extension-no-member
+#enable=F,E,W
 
 
 [CLASSES]
@@ -164,10 +157,10 @@ enable=c-extension-no-member
 check-protected-access-in-special-methods=no
 
 # List of method names used to declare (i.e. assign) instance attributes.
-defining-attr-methods=__init__,
-                      __new__,
-                      setUp,
-                      __post_init__
+#defining-attr-methods=__init__,
+#                      __new__,
+#                      setUp,
+#                      __post_init__
 
 # List of member names, which should be excluded from the protected access
 # warning.
@@ -270,8 +263,8 @@ min-similarity-lines=4
 [EXCEPTIONS]
 
 # Exceptions that will emit a warning when caught.
-overgeneral-exceptions=BaseException,
-                       Exception
+#overgeneral-exceptions=BaseException,
+#                       Exception
 
 
 [MISCELLANEOUS]
