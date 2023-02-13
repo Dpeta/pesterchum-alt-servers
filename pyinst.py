@@ -147,29 +147,29 @@ if (sys.version_info[0] > 2) and (sys.version_info[1] > 8):
         action=argparse.BooleanOptionalAction,
     )
     _ARGUMENTS = parser.parse_args()
-    if _ARGUMENTS.clean == True:
+    if _ARGUMENTS.clean:
         delete_builddist = "y"
-    elif _ARGUMENTS.clean == False:
+    elif _ARGUMENTS.clean is False:
         delete_builddist = "n"
 
-    if _ARGUMENTS.upx == True:
+    if _ARGUMENTS.upx:
         upx_enabled = "y"
-    elif _ARGUMENTS.upx == False:
+    elif _ARGUMENTS.upx is False:
         upx_enabled = "n"
 
-    if _ARGUMENTS.crt == True:
+    if _ARGUMENTS.crt:
         package_universal_crt = "y"
-    elif _ARGUMENTS.crt == False:
+    elif _ARGUMENTS.crt is False:
         package_universal_crt = "n"
 
-    if _ARGUMENTS.onefile == True:
+    if _ARGUMENTS.onefile:
         onefile = "y"
-    elif _ARGUMENTS.onefile == False:
+    elif _ARGUMENTS.onefile is False:
         onefile = "n"
 
-    if _ARGUMENTS.windowed == True:
+    if _ARGUMENTS.windowed:
         windowed = "y"
-    elif _ARGUMENTS.windowed == False:
+    elif _ARGUMENTS.windowed is False:
         windowed = "n"
 else:
     # Python 3.8 and below
@@ -232,7 +232,7 @@ else:
         windowed = "n"
 
 parser.print_usage()
-if (_ARGUMENTS.prompts != False) and (_ARGUMENTS.prompts != "False"):
+if (_ARGUMENTS.prompts is not False) and (_ARGUMENTS.prompts != "False"):
     try:
         print(
             "This is a script to make building with Pyinstaller a bit more conventient."
@@ -245,7 +245,7 @@ if (_ARGUMENTS.prompts != False) and (_ARGUMENTS.prompts != "False"):
             upx_enabled = input("Enable UPX? (Y/N): ").lower()
         if upx_enabled == "y":
             print("If upx is on your path you don't need to include anything here.")
-            if is_64bit == True:
+            if is_64bit:
                 upx_dir = input("UPX directory [D:\\upx-3.96-win64]: ")
                 if upx_dir == "":
                     upx_dir = "D:\\upx-3.96-win64"  # Default dir for me :)
@@ -269,7 +269,7 @@ if (_ARGUMENTS.prompts != False) and (_ARGUMENTS.prompts != "False"):
                     "Try to include universal CRT? (Y/N): "
                 ).lower()
             if package_universal_crt == "y":
-                if is_64bit == True:
+                if is_64bit:
                     crt_path = input(
                         "Path to universal CRT: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64]: "
                     )
@@ -311,12 +311,12 @@ if (_ARGUMENTS.prompts != False) and (_ARGUMENTS.prompts != "False"):
         sys.exit("KeyboardInterrupt")
 else:
     # no-prompt was given
-    if _ARGUMENTS.clean == None:
+    if _ARGUMENTS.clean is None:
         delete_builddist = "n"
-    if _ARGUMENTS.upx == None:
+    if _ARGUMENTS.upx is None:
         upx_enabled = "n"
-    if _ARGUMENTS.crt == None:
-        if is_64bit == True:
+    if _ARGUMENTS.crt is None:
+        if is_64bit:
             crt_path = os.path.join(
                 "C:%s" % os.sep,
                 "Program Files (x86)",
@@ -340,9 +340,9 @@ else:
             )
         print("crt_path = " + crt_path)
         package_universal_crt = "y"
-    if _ARGUMENTS.onefile == None:
+    if _ARGUMENTS.onefile is None:
         onefile = "y"
-    if _ARGUMENTS.windowed == None:
+    if _ARGUMENTS.windowed is None:
         windowed = "y"
 
 if delete_builddist == "y":
@@ -390,7 +390,7 @@ if sys.platform == "win32":
     if package_universal_crt == "y":
         run_win32.append("--paths=%s" % crt_path)
         if os.path.exists(crt_path):
-            if is_64bit == False:
+            if not is_64bit:
                 run_win32.append(
                     "--add-binary=%s\\api-ms-win-core-console-l1-1-0.dll;." % crt_path
                 )
@@ -527,7 +527,7 @@ if sys.platform == "win32":
                     "--add-binary=%s\\api-ms-win-crt-utility-l1-1-0.dll;." % crt_path
                 )
                 run_win32.append("--add-binary=%s\\ucrtbase.dll;." % crt_path)
-            elif is_64bit == True:
+            elif is_64bit:
                 run_win32.append(
                     "--add-binary=%s\\api-ms-win-core-console-l1-1-0.dll;." % crt_path
                 )

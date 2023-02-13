@@ -895,7 +895,7 @@ class PesterConvo(QtWidgets.QFrame):
         self.optionsMenu.removeAction(self.blockAction)
 
     def updateColor(self, color):
-        PchumLog.debug("convo updateColor: " + str(color))
+        PchumLog.debug("convo updateColor: %s", color)
         self.chum.color = color
 
     def addMessage(self, msg, me=True):

@@ -85,9 +85,7 @@ class ScriptQuirks:
                     continue
             except Exception as e:
                 PchumLog.warning(
-                    "Error loading {}: {} (in quirks.py)".format(
-                        os.path.basename(name), e
-                    )
+                    "Error loading %s: %s (in quirks.py)", os.path.basename(name), e
                 )
             else:
                 if self.modHas(module, "setup"):

@@ -291,15 +291,15 @@ class PesterProfile:
         caps = [l for l in handle if l.isupper()]
         if not caps:
             caps = [""]
-        PchumLog.debug("handle = " + str(handle))
-        PchumLog.debug("caps = " + str(caps))
+        PchumLog.debug("handle = %s", handle)
+        PchumLog.debug("caps = %s", caps)
         # Fallback for invalid string
         try:
             initials = (handle[0] + caps[0]).upper()
         except:
             PchumLog.exception("")
             initials = "XX"
-        PchumLog.debug("initials = " + str(initials))
+        PchumLog.debug("initials = %s", initials)
         if hasattr(self, "time"):
             if time:
                 if self.time > time:

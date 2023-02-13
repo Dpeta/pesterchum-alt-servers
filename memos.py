@@ -1371,7 +1371,7 @@ class PesterMemo(PesterConvo):
                     else:
                         timed = timeProtocol(cmd)
             except:
-                PchumLog.warning("Invalid PESTERCHUM:TIME> " + str(cmd))
+                PchumLog.warning("Invalid PESTERCHUM:TIME> %s", cmd)
                 timed = timedelta(0)
 
         if handle in self.times:
@@ -1414,7 +1414,7 @@ class PesterMemo(PesterConvo):
 
     @QtCore.pyqtSlot(QString, QString)
     def modesUpdated(self, channel, modes):
-        PchumLog.debug(f"modesUpdated(%s, %s)", channel, modes)
+        PchumLog.debug("modesUpdated(%s, %s)", channel, modes)
         if channel.lower() == self.channel.lower():
             self.updateChanModes(modes, None)
 
@@ -1496,8 +1496,8 @@ class PesterMemo(PesterConvo):
         # else:
         #    ttracker = TimeTracker(timedelta(0))
         opchum = PesterProfile(op)
-        PchumLog.debug("op = " + op)
-        PchumLog.debug("opchum = " + opchum.handle)
+        PchumLog.debug("op = %s", op)
+        PchumLog.debug("opchum = %s", opchum.handle)
         if op in self.times:
             opgrammar = self.times[op].getGrammar()
         elif op == self.mainwindow.profile().handle:
@@ -1679,7 +1679,7 @@ class PesterMemo(PesterConvo):
                             )
                     except IndexError as e:
                         # This shouldn't happen
-                        PchumLog.warning("kickmsg IndexError: %s" % e)
+                        PchumLog.warning("kickmsg IndexError: %s", e)
                 msgbox.setInformativeText(kick_msg)
                 msgbox.setStandardButtons(
                     QtWidgets.QMessageBox.StandardButton.Ok

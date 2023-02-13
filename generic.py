@@ -145,7 +145,7 @@ class MovingWindow(QtWidgets.QFrame):
         # Assuming everything is supported, we only need this function to call "self.windowHandle().startSystemMove()".
         # If not supported, startSystemMove() returns False and the legacy code runs anyway.
         try:
-            if self.windowHandle().startSystemMove() != True:
+            if not self.windowHandle().startSystemMove():
                 if event.button() == 1:
                     self.moving = event.globalPos() - self.pos()
         except AttributeError as e:

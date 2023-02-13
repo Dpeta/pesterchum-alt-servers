@@ -24,7 +24,13 @@ if ostools.isLinux():
 
 # import console
 from pnc.dep.attrdict import AttrDict
-from user_profile import userConfig, userProfile, pesterTheme, PesterLog, PesterProfileDB
+from user_profile import (
+    userConfig,
+    userProfile,
+    pesterTheme,
+    PesterLog,
+    PesterProfileDB,
+)
 from menus import (
     PesterChooseQuirks,
     PesterChooseTheme,
@@ -667,13 +673,10 @@ class chumArea(RightClickTree):
     def showAllChums(self):
         for c in self.chums:
             chandle = c.handle
-            if not len(
-                self.findItems(
-                    chandle,
-                    QtCore.Qt.MatchFlag.MatchExactly
-                    | QtCore.Qt.MatchFlag.MatchRecursive,
-                )
-            ):
+            if not self.findItems(
+                chandle,
+                QtCore.Qt.MatchFlag.MatchExactly | QtCore.Qt.MatchFlag.MatchRecursive,
+            ):  # len is 0
                 # if True:# For if it doesn't work at all :/
                 chumLabel = chumListing(c, self.mainwindow)
                 self.addItem(chumLabel)
@@ -1802,8 +1805,10 @@ class PesterWindow(MovingWindow):
                 (
                     "Possible desync, system time changed by %s "
                     "seconds since last check. abs(%s - %s)"
-                )
-                % (timeDif, currentTime, self.lastCheckPing)
+                ),
+                timeDif,
+                currentTime,
+                self.lastCheckPing,
             )
             self.sincerecv = 80  # Allows 2 more ping attempts before disconnect.
         self.lastCheckPing = time.time()
@@ -2433,8 +2438,8 @@ class PesterWindow(MovingWindow):
                     self.honksound.setSource(
                         QtCore.QUrl.fromLocalFile("themes/honk.wav")
                     )
-        except Exception as err:
-            PchumLog.error(f"Warning: Error loading sounds! ({err!r})")
+        except:
+            PchumLog.exception("Warning: Error loading sounds!")
             self.alarm = NoneSound()
             self.memosound = NoneSound()
             self.namesound = NoneSound()
@@ -2462,7 +2467,7 @@ class PesterWindow(MovingWindow):
                     if self.sound_type == QtMultimedia.QSoundEffect:
                         sound.setVolume(vol)
             except Exception as err:
-                PchumLog.warning(f"Couldn't set volume: {err}")
+                PchumLog.warning("Couldn't set volume: %s", err)
 
     def canSetVolume(self):
         """Returns the state of volume setting capabilities."""
@@ -2648,9 +2653,8 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot(QString, QtGui.QColor)
     def updateColorSlot(self, handle, color):
-        PchumLog.debug("updateColorSlot, " + str(handle) + ", " + str(color))
-        h = str(handle)
-        self.changeColor(h, color)
+        PchumLog.debug("updateColorSlot(%s, %s)", handle, color)
+        self.changeColor(handle, color)
 
     @QtCore.pyqtSlot(QString, QString)
     def deliverMessage(self, handle, msg):
@@ -2675,9 +2679,7 @@ class PesterWindow(MovingWindow):
             msgbox.setStyleSheet(
                 "QMessageBox{ %s }" % self.theme["main/defaultwindow/style"]
             )
-            msgbox.setText(
-                "This chumhandle has been registered; " "you may not use it."
-            )
+            msgbox.setText("This chumhandle has been registered; you may not use it.")
             msgbox.setInformativeText(
                 "Your handle is now being changed to %s." % (changedto)
             )
@@ -3770,7 +3772,7 @@ class PesterWindow(MovingWindow):
         msg = QtWidgets.QMessageBox(self)
         msg.setText("D: TOO MANY PEOPLE!!!")
         msg.setInformativeText(
-            "The server has hit max capacity." "Please try again later."
+            "The server has hit max capacity. Please try again later."
         )
         # msg.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
         msg.exec()
@@ -3789,7 +3791,7 @@ class PesterWindow(MovingWindow):
         self.irc = irc
 
     def updateServerJson(self):
-        PchumLog.info(self.customServerPrompt_qline.text() + " chosen")
+        PchumLog.info("'%s' chosen.", self.customServerPrompt_qline.text())
         server_and_port = self.customServerPrompt_qline.text().split(":")
         try:
             server = {
@@ -3996,7 +3998,7 @@ class PesterWindow(MovingWindow):
                     self.resetServerlist()
                     return 1
 
-            PchumLog.info(f"server_list_items: {server_list_items}")
+            PchumLog.info("server_list_items: %s", server_list_items)
 
             # Widget 1
             self.chooseRemoveServerWidged = QtWidgets.QDialog()
@@ -4042,7 +4044,7 @@ class PesterWindow(MovingWindow):
             self.chooseRemoveServerWidged.show()
             self.chooseRemoveServerWidged.setFocus()
         else:
-            PchumLog.info(self.serverBox.currentText() + " chosen.")
+            PchumLog.info("'%s' chosen.", self.serverBox.currentText())
 
             with open(_datadir + "serverlist.json") as server_file:
                 read_file = server_file.read()
@@ -4261,8 +4263,8 @@ class MainProgram(QtCore.QObject):
                 windll.shell32.SetCurrentProcessExplicitAppUserModelID(wid)
             except Exception as err:
                 # Log, but otherwise ignore any exceptions.
-                PchumLog.error(f"Failed to set AppUserModel ID: {err}")
-                PchumLog.error(f"Attempted to set as {wid!r}.")
+                PchumLog.error("Failed to set AppUserModel ID: %s", err)
+                PchumLog.error("Attempted to set as %s.", wid)
             # Back to our scheduled program.
 
         self.app = QtWidgets.QApplication(sys.argv)
@@ -4570,7 +4572,7 @@ class MainProgram(QtCore.QObject):
         # Show error to end user and log.
         try:
             # Log to log file
-            PchumLog.error("{}, {}".format(exc, value))
+            PchumLog.error("%s, %s", exc, value)
 
             # Try to write to separate logfile
             try:
