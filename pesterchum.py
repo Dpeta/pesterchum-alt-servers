@@ -3787,9 +3787,6 @@ class PesterWindow(MovingWindow):
         self.parent.trayicon.hide()
         self.app.quit()
 
-    def passIRC(self, irc):
-        self.irc = irc
-
     def updateServerJson(self):
         PchumLog.info("'%s' chosen.", self.customServerPrompt_qline.text())
         server_and_port = self.customServerPrompt_qline.text().split(":")
@@ -3817,13 +3814,13 @@ class PesterWindow(MovingWindow):
 
         with open(_datadir + "serverlist.json") as server_file:
             read_file = server_file.read()
-            server_file.close()
-            server_list_obj = json.loads(read_file)
+        server_list_obj = json.loads(read_file)
         server_list_obj.append(server)
         try:
             with open(_datadir + "serverlist.json", "w") as server_file:
                 server_file.write(json.dumps(server_list_obj, indent=4))
-                server_file.close()
+                server_file.flush()
+                os.fsync(server_file.fileno())
         except:
             PchumLog.error("failed")
 
@@ -3857,7 +3854,8 @@ class PesterWindow(MovingWindow):
             if reply == QtWidgets.QMessageBox.ButtonRole.YesRole:
                 with open(_datadir + "serverlist.json", "w") as server_file:
                     server_file.write(json.dumps(default_server_list, indent=4))
-                    server_file.close()
+                    server_file.flush()
+                    os.fsync(server_file.fileno())
 
         else:
             PchumLog.warning(
@@ -3866,7 +3864,8 @@ class PesterWindow(MovingWindow):
             )
             with open(_datadir + "serverlist.json", "w") as server_file:
                 server_file.write(json.dumps(default_server_list, indent=4))
-                server_file.close()
+                server_file.flush()
+                os.fsync(server_file.fileno())
         self.chooseServer()
 
     def removeServer(self):
@@ -3904,7 +3903,8 @@ class PesterWindow(MovingWindow):
             try:
                 with open(_datadir + "serverlist.json", "w") as server_file:
                     server_file.write(json.dumps(server_list_obj, indent=4))
-                    server_file.close()
+                    server_file.flush()
+                    os.fsync(server_file.fileno())
             except:
                 PchumLog.error("failed")
 
@@ -3988,8 +3988,7 @@ class PesterWindow(MovingWindow):
             try:
                 with open(_datadir + "serverlist.json") as server_file:
                     read_file = server_file.read()
-                    server_file.close()
-                    server_obj = json.loads(read_file)
+                server_obj = json.loads(read_file)
                 for i in range(len(server_obj)):
                     server_list_items.append(server_obj[i]["server"])
             except:
@@ -4048,8 +4047,7 @@ class PesterWindow(MovingWindow):
 
             with open(_datadir + "serverlist.json") as server_file:
                 read_file = server_file.read()
-                server_file.close()
-                server_obj = json.loads(read_file)
+            server_obj = json.loads(read_file)
 
             selected_entry = None
 
@@ -4082,13 +4080,25 @@ class PesterWindow(MovingWindow):
                         "TLS": server_obj[selected_entry]["TLS"],
                     }
                     server_file.write(json.dumps(json_server_file, indent=4))
-                    server_file.close()
+                    server_file.flush()
+                    os.fsync(server_file.fileno())
             except:
                 PchumLog.error("Failed to set server :(")
 
             # Continue running Pesterchum as usual
             # Sorry-
-            self.irc.start()
+
+            # FIXME: we should not pass widget here
+            self.parent.irc = PesterIRC(
+                self.parent.widget,
+                self.parent.widget.config.server(),
+                self.parent.widget.config.port(),
+                self.parent.widget.config.ssl(),
+                password=self.parent.widget.config.password(),
+            )
+            self.parent.connectWidgets(self.parent.irc, self.parent.widget)
+
+            self.parent.irc.start()
             self.parent.reconnectok = False
             self.parent.showLoading(self.parent.widget)
             self.show()  # Not required?
@@ -4100,8 +4110,7 @@ class PesterWindow(MovingWindow):
         try:
             with open(_datadir + "serverlist.json") as server_file:
                 read_file = server_file.read()
-                server_file.close()
-                server_obj = json.loads(read_file)
+            server_obj = json.loads(read_file)
             for i in range(len(server_obj)):
                 server_list_items.append(server_obj[i]["server"])
         except:
@@ -4336,20 +4345,8 @@ class MainProgram(QtCore.QObject):
 
         self.attempts = 0
 
-        # but it's at least better than the way it was before.
-        # FIXME: we should not pass widget here
-        self.irc = PesterIRC(
-            self.widget,
-            self.widget.config.server(),
-            self.widget.config.port(),
-            self.widget.config.ssl(),
-            password=self.widget.config.password(),
-        )
-        self.connectWidgets(self.irc, self.widget)
+        self.irc = None  # Defined after gui chooser
 
-        self.widget.passIRC(
-            self.irc
-        )  # Maybe this is absolutely terrible in practice, but screw it.
         self.widget.gainAttention[QtWidgets.QWidget].connect(self.alertWindow)
 
         # self.app.lastWindowClosed.connect(self.lastWindow)
