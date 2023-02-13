@@ -49,31 +49,31 @@ class Lexeme:
         raise NotImplementedError
 
 
-class Message(Lexeme):
-    """An object designed to represent a message, possibly containing Lexeme
-    objects in their native form as well. Intended to be a combination of a
-    list and a string, combining the former with the latter's methods."""
-
-    def __init__(self, contents, origin):
-        lexer = Lexer.lexer_for(origin)()
-        working = lexer.lex(contents)
-        # TODO: Rebuild all lexemes so that they all 'come from' the same
-        # format (e.g. their .origin values are all the same as the Message's).
-        for i, elt in enumerate(working):
-            try:
-                # Try to rebuild for the new format
-                elt = elt.rebuild(origin)
-            except AttributeError:
-                # It doesn't let us rebuild, so it's probably not a Lexeme
-                continue
-            else:
-                # Assign it to the proper place, replacing the old one
-                working[i] = elt
-        self.origin = origin
-        self.contents = working
-        self.string = "".join(lexer.list_convert(working))
-
-    # TODO: Finish all the rest of this.
+#class Message(Lexeme):
+#    """An object designed to represent a message, possibly containing Lexeme
+#    objects in their native form as well. Intended to be a combination of a
+#    list and a string, combining the former with the latter's methods."""
+#
+#    def __init__(self, contents, origin):
+#        lexer = Lexer.lexer_for(origin)()
+#        working = lexer.lex(contents)
+#        # TODO: Rebuild all lexemes so that they all 'come from' the same
+#        # format (e.g. their .origin values are all the same as the Message's).
+#        for i, elt in enumerate(working):
+#            try:
+#                # Try to rebuild for the new format
+#                elt = elt.rebuild(origin)
+#            except AttributeError:
+#                # It doesn't let us rebuild, so it's probably not a Lexeme
+#                continue
+#            else:
+#                # Assign it to the proper place, replacing the old one
+#                working[i] = elt
+#        self.origin = origin
+#        self.contents = working
+#        self.string = "".join(lexer.list_convert(working))
+#
+#    # TODO: Finish all the rest of this.
 
 
 class Specifier(Lexeme):
@@ -587,10 +587,11 @@ class RelayChat(Lexer):
                     # Add a </c> since we'll need one anyway
 
                     # Is closecolor accessible here?
-                    try:
-                        closecolor()
-                    except Exception as e:
-                        print(e)
+                    # No. :/
+                    # try:
+                    #     closecolor()
+                    # except Exception as e:
+                    #     print(e)
 
                     ##if isinstance(color, LineColor):
                     if isinstance(cstack.pop(), LineColor):
@@ -610,10 +611,10 @@ class RelayChat(Lexer):
                         del cstack[-1]
                         # Add a </c>
                         # Is closecolor accessible here?
-                        try:
-                            closecolor()
-                        except Exception as e:
-                            print(e)
+                        # try:
+                        #     closecolor()
+                        # except Exception as e:
+                        #     print(e)
                     else:
                         # It's a line color, so stop searching.
                         # Using break here prevents the 'else'

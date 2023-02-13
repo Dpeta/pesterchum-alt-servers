@@ -49,7 +49,11 @@ class ScriptQuirks:
     def load(self):
         self.last = self.quirks.copy()
         self.quirks.clear()
-        extension = self.getExtension()
+        try:
+            extension = self.getExtension()
+        except AttributeError:
+            PchumLog.exception("No self.getExtension(), does ScriptQuirks need to be subclassed?")
+            return
         filenames = []
         if not os.path.exists(os.path.join(self.home, "quirks")):
             os.makedirs(os.path.join(self.home, "quirks"), exist_ok=True)
@@ -65,7 +69,11 @@ class ScriptQuirks:
 
         modules = []
         for filename in filenames:
-            extension_length = len(self.getExtension())
+            try:
+                extension_length = len(self.getExtension())
+            except AttributeError:
+                PchumLog.exception("No self.getExtension(), does ScriptQuirks need to be subclassed?")
+                return
             name = os.path.basename(filename)[:-extension_length]
             try:
                 module = self.loadModule(name, filename)

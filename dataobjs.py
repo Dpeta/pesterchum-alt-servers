@@ -300,13 +300,16 @@ class PesterProfile:
             PchumLog.exception("")
             initials = "XX"
         PchumLog.debug("initials = " + str(initials))
-        if hasattr(self, "time") and time:
-            if self.time > time:
-                return "F" + initials
-            elif self.time < time:
-                return "P" + initials
+        if hasattr(self, "time"):
+            if time:
+                if self.time > time:
+                    return "F" + initials
+                elif self.time < time:
+                    return "P" + initials
+                else:
+                    return "C" + initials
             else:
-                return "C" + initials
+                return initials
         else:
             return initials
 
@@ -458,44 +461,24 @@ class PesterProfile:
                     )
                 )
         else:
-            # Is timeGrammar defined? Not sure if this works as intented, added try except block to be safe.
-            try:
-                initials = timeGrammar.pcf + self.initials() + timeGrammar.number
-                if opchum.handle == reason:
-                    return (
-                        "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo."
-                        % (opchum.colorhtml(), opinit, self.colorhtml(), initials)
+            PchumLog.exception("")
+            initials = self.initials()
+            if opchum.handle == reason:
+                return (
+                    "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo."
+                    % (opchum.colorhtml(), opinit, self.colorhtml(), initials)
+                )
+            else:
+                return (
+                    "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>."
+                    % (
+                        opchum.colorhtml(),
+                        opinit,
+                        self.colorhtml(),
+                        initials,
+                        str(reason),
                     )
-                else:
-                    return (
-                        "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>."
-                        % (
-                            opchum.colorhtml(),
-                            opinit,
-                            self.colorhtml(),
-                            initials,
-                            str(reason),
-                        )
-                    )
-            except:
-                PchumLog.exception("")
-                initials = self.initials()
-                if opchum.handle == reason:
-                    return (
-                        "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo."
-                        % (opchum.colorhtml(), opinit, self.colorhtml(), initials)
-                    )
-                else:
-                    return (
-                        "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo: <c=black>[%s]</c>."
-                        % (
-                            opchum.colorhtml(),
-                            opinit,
-                            self.colorhtml(),
-                            initials,
-                            str(reason),
-                        )
-                    )
+                )
 
     # As far as I'm aware, there's no IRC reply for this, this seems impossible to check for in practice.
     def memopermabanmsg(self, opchum, opgrammar, syscolor, timeGrammar):

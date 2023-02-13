@@ -4,7 +4,7 @@ __all__ = ["Color"]
 # in mind that this may be phased out in the future.
 
 
-from .dep.attrdict import AttrDict
+from pnc.dep.attrdict import AttrDict
 
 import collections
 import functools
