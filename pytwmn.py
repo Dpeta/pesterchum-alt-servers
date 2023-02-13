@@ -30,6 +30,7 @@ def confExists():
     except:
         return False
 
+
 def init(host="127.0.0.1", port=None):
     if not port:
         port = 9797

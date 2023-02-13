@@ -168,12 +168,14 @@ _ARGUMENTS = parser.parse_args()
 try:
     # PyQt6, QtMultimedia is prefered.
     from PyQt6 import QtMultimedia
+
     print("Audio module is PyQt6 QtMultimedia.")
 except ImportError:
     if ostools.isWin32() or ostools.isOSX():
         # PyQt5 QtMultimedia has native backends for MacOS and Windows
         try:
             from PyQt5 import QtMultimedia
+
             print(
                 "Using PyQt5 QtMultimedia as sound module. (fallback, PyQt6 QtMultimedia not availible)"
             )
@@ -194,12 +196,14 @@ except ImportError:
         # PyQt5 QtMultimedia needs gstreamer on linux, so pygame is prefered.
         try:
             import pygame
+
             print(
                 "Using pygame as sound module. (fallback, PyQt6 QtMultimedia not availible)"
             )
         except ImportError:
             try:
                 from PyQt5 import QtMultimedia
+
                 print(
                     "Using PyQt5 QtMultimedia as sound module. (fallback, PyQt6 QtMultimedia and pygame not availible)"
                 )

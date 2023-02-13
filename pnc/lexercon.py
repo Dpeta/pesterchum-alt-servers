@@ -49,7 +49,7 @@ class Lexeme:
         raise NotImplementedError
 
 
-#class Message(Lexeme):
+# class Message(Lexeme):
 #    """An object designed to represent a message, possibly containing Lexeme
 #    objects in their native form as well. Intended to be a combination of a
 #    list and a string, combining the former with the latter's methods."""

@@ -52,7 +52,9 @@ class ScriptQuirks:
         try:
             extension = self.getExtension()
         except AttributeError:
-            PchumLog.exception("No self.getExtension(), does ScriptQuirks need to be subclassed?")
+            PchumLog.exception(
+                "No self.getExtension(), does ScriptQuirks need to be subclassed?"
+            )
             return
         filenames = []
         if not os.path.exists(os.path.join(self.home, "quirks")):
@@ -72,7 +74,9 @@ class ScriptQuirks:
             try:
                 extension_length = len(self.getExtension())
             except AttributeError:
-                PchumLog.exception("No self.getExtension(), does ScriptQuirks need to be subclassed?")
+                PchumLog.exception(
+                    "No self.getExtension(), does ScriptQuirks need to be subclassed?"
+                )
                 return
             name = os.path.basename(filename)[:-extension_length]
             try:

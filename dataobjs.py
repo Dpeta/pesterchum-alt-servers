@@ -464,9 +464,11 @@ class PesterProfile:
             PchumLog.exception("")
             initials = self.initials()
             if opchum.handle == reason:
-                return (
-                    "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo."
-                    % (opchum.colorhtml(), opinit, self.colorhtml(), initials)
+                return "<c=%s>%s</c> banned <c=%s>%s</c> from responding to memo." % (
+                    opchum.colorhtml(),
+                    opinit,
+                    self.colorhtml(),
+                    initials,
                 )
             else:
                 return (

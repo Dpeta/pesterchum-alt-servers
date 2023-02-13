@@ -202,7 +202,7 @@ class ToastMachine:
 
                 try:
                     pytwmn.init()
-                except Exception :
+                except Exception:
                     PchumLog.exception("Problem initilizing pytwmn.")
                     return
                     # self.type = type = "default"
