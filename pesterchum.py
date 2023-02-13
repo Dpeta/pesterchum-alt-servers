@@ -169,7 +169,7 @@ try:
     # PyQt6, QtMultimedia is prefered.
     from PyQt6 import QtMultimedia
 
-    # print("Audio module is PyQt6 QtMultimedia.")
+    print("Audio module is PyQt6 QtMultimedia.")
 except ImportError:
     if ostools.isWin32() or ostools.isOSX():
         # PyQt5 QtMultimedia has native backends for MacOS and Windows
@@ -181,11 +181,6 @@ except ImportError:
             )
         except ImportError:
             try:
-                try:
-                    # Mute pygame support print
-                    os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
-                except:
-                    pass
                 import pygame
 
                 print(
@@ -200,11 +195,6 @@ except ImportError:
     else:
         # PyQt5 QtMultimedia needs gstreamer on linux, so pygame is prefered.
         try:
-            try:
-                # Mute pygame support print
-                os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
-            except:
-                pass
             import pygame
 
             print(
@@ -2292,7 +2282,7 @@ class PesterWindow(MovingWindow):
         self.moodsLabel.setStyleSheet(theme["main/moodlabel/style"])
 
         if hasattr(self, "moods"):
-            self.moods.removeButtons()
+            self.moods.removeButtons()  # pylint: disable=access-member-before-definition
         mood_list = theme["main/moods"]
         mood_list = [{str(k): v for (k, v) in d.items()} for d in mood_list]
         self.moods = PesterMoodHandler(
@@ -2345,9 +2335,10 @@ class PesterWindow(MovingWindow):
         # if self.theme.has_key("main/mychumhandle/currentMood"):
         try:
             moodicon = self.profile().mood.icon(theme)
-            if hasattr(self, "currentMoodIcon") and self.currentMoodIcon:
-                self.currentMoodIcon.hide()
-                self.currentMoodIcon = None
+            if hasattr(self, "currentMoodIcon"):
+                if hasattr(self.currentMoodIcon, "hide"):  # pylint: disable=E0203
+                    self.currentMoodIcon.hide()  # pylint: disable=E0203
+                    self.currentMoodIcon = None
             self.currentMoodIcon = QtWidgets.QLabel(self)
             self.currentMoodIcon.setPixmap(moodicon.pixmap(moodicon.realsize()))
             self.currentMoodIcon.move(*theme["main/mychumhandle/currentMood"])
@@ -2389,12 +2380,12 @@ class PesterWindow(MovingWindow):
         # Set up the sounds we're using.
         try:
             # Pygame
-            soundclass = pygame.mixer.Sound
-        except:
+            soundclass = pygame.mixer.Sound  # pylint: disable=used-before-assignment
+        except (NameError, AttributeError):
             try:
                 # QtMultimedia
                 soundclass = QtMultimedia.QSoundEffect
-            except:
+            except (NameError, AttributeError):
                 # death
                 soundclass = NoneSound
                 PchumLog.warning("No sound module loaded?")
@@ -3656,8 +3647,9 @@ class PesterWindow(MovingWindow):
         self.mycolorUpdated.emit()
 
     def aboutPesterchum(self):
-        if hasattr(self, "aboutwindow") and self.aboutwindow:
-            return
+        if hasattr(self, "aboutwindow"):
+            if self.aboutwindow:  # pylint: disable=access-member-before-definition
+                return
         self.aboutwindow = AboutPesterchum(self)
         self.aboutwindow.exec()
         self.aboutwindow = None

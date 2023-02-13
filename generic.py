@@ -27,9 +27,6 @@ class CaseInsensitiveDict(dict):
     def __contains__(self, key):
         return super().__contains__(key.lower())
 
-    def has_key(self, key):
-        return key.lower() in super()
-
     def __delitem__(self, key):
         super().__delitem__(key.lower())
 

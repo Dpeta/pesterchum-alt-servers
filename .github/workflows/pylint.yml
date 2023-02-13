@@ -1,0 +1,20 @@
+name: Pylint
+on: push
+jobs:
+  pylint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python 3.10 x64
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          architecture: 'x64'
+      - name: Install Dependencies
+        run: python3 -m pip install PyQt6 certifi PyInstaller
+      - name: Install Pylint
+        run: python3 -m pip install --pre pylint
+      - name: Run Pylint
+        run: |
+          cd ..
+          PYLINTRC=pesterchum-alt-servers/.pylintrc python -m pylint --recursive=y pesterchum-alt-servers

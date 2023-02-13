@@ -1,3 +1,4 @@
+"""FIXME: not sure how this works exactly but it seems kinda broken!!"""
 import os
 
 # import time
@@ -25,7 +26,7 @@ pynotify = None
 
 
 class DefaultToast:
-    def __init__(self, machine, title, msg, icon):
+    def __init__(self, machine, title, msg, icon, parent=None):
         self.machine = machine
         self.title = title
         self.msg = msg
@@ -148,7 +149,7 @@ class ToastMachine:
                             self.machine, self.title, self.msg, self.icon
                         )
                 else:
-                    t = DefaultToast(self.title, self.msg, self.icon)
+                    t = DefaultToast(self.machine, self.title, self.msg, self.icon)
             t.show()
 
     def __init__(
@@ -201,8 +202,8 @@ class ToastMachine:
 
                 try:
                     pytwmn.init()
-                except pytwmn.ERROR as e:
-                    PchumLog.error("Problem initilizing pytwmn: " + str(e))
+                except Exception:
+                    PchumLog.exception("Problem initilizing pytwmn.")
                     return
                     # self.type = type = "default"
             self.type = type
@@ -230,8 +231,9 @@ class ToastMachine:
 
 class PesterToast(QtWidgets.QWidget, DefaultToast):
     def __init__(self, machine, title, msg, icon, time=3000, parent=None):
-        kwds = dict(machine=machine, title=title, msg=msg, icon=icon)
-        super().__init__(parent, **kwds)
+        # FIXME: Not sure how this works exactly either xd, can't we init the parents seperately?
+        kwds = dict(parent=parent, machine=machine, title=title, msg=msg, icon=icon)
+        super().__init__(**kwds)
 
         self.machine = machine
         self.time = time

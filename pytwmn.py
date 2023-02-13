@@ -20,9 +20,12 @@ class TwmnError(Exception):
 
 
 def confExists():
+    # FIXME
     try:
         from xdg import BaseDirectory
-
+    except ImportError:
+        return False
+    try:
         return os.path.join(BaseDirectory.xdg_config_home, "twmn/twmn.conf")
     except:
         return False
