@@ -24,7 +24,7 @@ if ostools.isLinux():
 
 # import console
 from pnc.dep.attrdict import AttrDict
-from profile import userConfig, userProfile, pesterTheme, PesterLog, PesterProfileDB
+from user_profile import userConfig, userProfile, pesterTheme, PesterLog, PesterProfileDB
 from menus import (
     PesterChooseQuirks,
     PesterChooseTheme,
