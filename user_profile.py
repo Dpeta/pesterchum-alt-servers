@@ -203,7 +203,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
             # Backup pesterchum.js file.
             # Useful because it seems to randomly get blanked for people.
             backup_path = os.path.join(_datadir, "backup")
-            if os.path.exists(backup_path) == False:
+            if not os.path.exists(backup_path):
                 os.makedirs(backup_path)
             current_backup = datetime.now().day % 5
             shutil.copyfile(
@@ -223,17 +223,17 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
                 "w",
             ) as pzip:
                 for x in profile_list:
-                    if x.endswith(".js") == True:
+                    if x.endswith(".js"):
                         with open(self.filename) as f:
                             pzip.writestr(x, f.read())
 
-            PchumLog.info("Updated backups-%s." % current_backup)
+            PchumLog.info("Updated backups-%s.", current_backup)
         except shutil.Error as e:
-            PchumLog.warning(f"Failed to make backup, shutil error?\n{e}")
+            PchumLog.warning("Failed to make backup, shutil error?\n%s", e)
         except zipfile.BadZipFile as e:
-            PchumLog.warning(f"Failed to make backup, BadZipFile?\n{e}")
+            PchumLog.warning("Failed to make backup, BadZipFile?\n%s", e)
         except OSError as e:
-            PchumLog.warning(f"Failed to make backup, no permission?\n{e}")
+            PchumLog.warning("Failed to make backup, no permission?\n%s", e)
 
     def chums(self):
         if "chums" not in self.config:
@@ -557,7 +557,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
                 if filename[l - 3 : l] == ".js":
                     profs.append(filename[0 : l - 3])
         profs.sort()
-        PchumLog.info("Profiles: %s" % str(profs))
+        PchumLog.info("Profiles: %s", profs)
 
         # Validity check
         PchumLog.info("Starting profile check. . .")
@@ -565,12 +565,12 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
             c_profile = os.path.join(profileloc, x + ".js")
             try:
                 json.load(open(c_profile))
-                PchumLog.info(x + ": Pass.")
+                PchumLog.info("%s: Pass.", x)
             except json.JSONDecodeError as e:
-                PchumLog.warning(x + ": Fail.")
+                PchumLog.warning("%s: Fail.", x)
                 PchumLog.warning(e)
                 profs.remove(x)
-                PchumLog.warning(x + " removed from profile list.")
+                PchumLog.warning("%s removed from profile list.", x)
 
                 msgBox = QtWidgets.QMessageBox()
                 msgBox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
@@ -753,7 +753,7 @@ class userProfile:
             for i, m in enumerate(mentions):
                 re.compile(m)
         except re.error as e:
-            PchumLog.error("#{} Not a valid regular expression: {}".format(i, e))
+            PchumLog.error("#%s Not a valid regular expression: %s", i, e)
         else:
             self.mentions = mentions
             self.userprofile["mentions"] = mentions

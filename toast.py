@@ -85,7 +85,7 @@ class ToastMachine:
                 return self.icon
 
         def importanceM(self, importance=None):
-            if importance != None:
+            if importance:
                 self.importance = importance
             else:
                 return self.importance

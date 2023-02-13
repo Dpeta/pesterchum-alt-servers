@@ -41,14 +41,13 @@ class PythonQuirks(ScriptQuirks):
                     if not isinstance(obj("test"), str):
                         raise Exception
                 except:
-                    # print("Quirk malformed: %s" % (obj.command))
-                    PchumLog.error("Quirk malformed: %s" % (obj.command))
+                    PchumLog.error("Quirk malformed: %s", obj.command)
 
                     # Since this is executed before QApplication is constructed,
                     # This prevented pesterchum from starting entirely when a quirk was malformed :/
                     # (QWidget: Must construct a QApplication before a QWidget)
 
-                    if QtWidgets.QApplication.instance() != None:
+                    if QtWidgets.QApplication.instance() is not None:
                         msgbox = QtWidgets.QMessageBox()
                         msgbox.setWindowTitle("Error!")
                         msgbox.setText("Quirk malformed: %s" % (obj.command))

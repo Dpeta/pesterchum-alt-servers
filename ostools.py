@@ -55,7 +55,7 @@ def validateDataDir():
 
     dirs = [datadir, profile, quirks, logs, errorlogs, backup]
     for d in dirs:
-        if (os.path.isdir(d) == False) or (os.path.exists(d) == False):
+        if not os.path.isdir(d) or not os.path.exists(d):
             os.makedirs(d, exist_ok=True)
 
     # pesterchum.js

@@ -460,7 +460,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
     while len(lexed) > 0:
         rounds += 1
         if debug:
-            PchumLog.info(f"[Starting round {rounds}...]")
+            PchumLog.info("[Starting round %s...]", rounds)
         msg = lexed.popleft()
         msglen = 0
         is_text = False
@@ -501,7 +501,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
                     # instead?
                     subround += 1
                     if debug:
-                        PchumLog.info(f"[Splitting round {rounds}-{subround}...]")
+                        PchumLog.info("[Splitting round %s-%s...]", rounds, subround)
                     point = msg.rfind(" ", 0, lenl)
                     if point < 0:
                         # No spaces to break on...ugh. Break at the last space
@@ -514,12 +514,12 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
                     # Remove what we just added.
                     msg = msg[point:]
                     if debug:
-                        PchumLog.info(f"msg = {msg!r}")
+                        PchumLog.info("msg = %s", msg)
                 else:
                     # Catch the remainder.
                     stack.append(msg)
                     if debug:
-                        PchumLog.info(f"msg caught; stack = {stack!r}")
+                        PchumLog.info("msg caught; stack = %s", stack)
                 # Done processing. Pluck out the first portion so we can
                 # continue processing, clean it up a bit, then add the rest to
                 # our waiting list.
@@ -650,7 +650,7 @@ def kxsplitMsg(lexed, ctx, fmt="pchum", maxlen=None, debug=False):
         # Once we're finally out of things to add, we're, well...out.
         # So add working to the result one last time.
         working = kxpclexer.list_convert(working)
-        if len(working) > 0:
+        if working:  # len > 0
             if debug:
                 print(f"Adding end trails: {working!r}")
             working = "".join(working)
@@ -760,7 +760,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
             msgbox.exec()
             return
 
-    PchumLog.info('--> recv "%s"' % msg)
+    PchumLog.info("--> recv '%s'", msg)
     # karxi: We have a list...but I'm not sure if we ever get anything else, so
     # best to play it safe. I may remove this during later refactoring.
     if isinstance(msg, list):
@@ -791,7 +791,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
     # Put what's necessary in before splitting.
     # Fetch our time if we're producing this for a memo.
     if flavor == "memos":
-        if ctx.time.getTime() == None:
+        if ctx.time.getTime() is None:
             ctx.sendtime()
         grammar = ctx.time.getGrammar()
         # Oh, great...there's a parsing error to work around. Times are added

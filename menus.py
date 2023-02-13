@@ -1026,7 +1026,7 @@ class PesterChooseProfile(QtWidgets.QDialog):
                 "%s is taken already! Pick a new profile." % (collision)
             )
             layout_0.addWidget(collision_warning)
-        elif svsnick != None:
+        elif svsnick is not None:
             svsnick_warning = QtWidgets.QLabel(
                 "Your handle got changed from %s to %s! Pick a new profile." % svsnick
             )
