@@ -166,7 +166,7 @@ class pesterQuirks:
                 # Exclude option is checked
                 if checkstate == 2:
                     # Check for substring that should be excluded.
-                    excludes = list()
+                    excludes = []
                     # Check for links, store in list.
                     for match in re.finditer(_urlre, string):
                         excludes.append(match)
@@ -189,7 +189,7 @@ class pesterQuirks:
                             if excludes[n].end() > excludes[n + 1].start():
                                 excludes.pop(n)
                         # Seperate parts to be quirked.
-                        sendparts = list()
+                        sendparts = []
                         # Add string until start of exclude at index 0.
                         until = excludes[0].start()
                         sendparts.append(string[:until])
@@ -203,10 +203,10 @@ class pesterQuirks:
                         sendparts.append(string[after:])
 
                         # Quirk to-be-quirked parts.
-                        recvparts = list()
+                        recvparts = []
                         for part in sendparts:
                             # No split, apply like normal.
-                            if q.type == "regexp" or q.type == "random":
+                            if q.type in ("regexp", "random"):
                                 recvparts.append(
                                     q.apply(part, first=(i == 0), last=lastStr)
                                 )
@@ -227,8 +227,8 @@ class pesterQuirks:
                         string += recvparts[-1]
                     else:
                         # No split, apply like normal.
-                        if q.type != "prefix" and q.type != "suffix":
-                            if q.type == "regexp" or q.type == "random":
+                        if q.type not in ("prefix", "suffix"):
+                            if q.type in ("regexp", "random"):
                                 string = q.apply(string, first=(i == 0), last=lastStr)
                             else:
                                 string = q.apply(string)
@@ -238,8 +238,8 @@ class pesterQuirks:
                             string = q.apply(string)
                 else:
                     # No split, apply like normal.
-                    if q.type != "prefix" and q.type != "suffix":
-                        if q.type == "regexp" or q.type == "random":
+                    if q.type not in ("prefix", "suffix"):
+                        if q.type in ("regexp", "random"):
                             string = q.apply(string, first=(i == 0), last=lastStr)
                         else:
                             string = q.apply(string)
@@ -396,22 +396,21 @@ class PesterProfile:
         )
 
     def memoclosemsg(self, syscolor, initials, verb):
-        if type(initials) == type(list()):
+        if isinstance(initials, list):
             return "<c={}><c={}>{}</c> {}.</c>".format(
                 syscolor.name(),
                 self.colorhtml(),
                 ", ".join(initials),
                 verb,
             )
-        else:
-            return "<c={}><c={}>{}{}{}</c> {}.</c>".format(
-                syscolor.name(),
-                self.colorhtml(),
-                initials.pcf,
-                self.initials(),
-                initials.number,
-                verb,
-            )
+        return "<c={}><c={}>{}{}{}</c> {}.</c>".format(
+            syscolor.name(),
+            self.colorhtml(),
+            initials.pcf,
+            self.initials(),
+            initials.number,
+            verb,
+        )
 
     def memonetsplitmsg(self, syscolor, initials):
         if len(initials) <= 0:
@@ -439,7 +438,7 @@ class PesterProfile:
 
     def memobanmsg(self, opchum, opgrammar, syscolor, initials, reason):
         opinit = opgrammar.pcf + opchum.initials() + opgrammar.number
-        if type(initials) == type(list()):
+        if isinstance(initials, list):
             if opchum.handle == reason:
                 return (
                     "<c={}>{}</c> banned <c={}>{}</c> from responding to memo.".format(

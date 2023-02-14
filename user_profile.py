@@ -849,7 +849,7 @@ class PesterProfileDB(dict):
 
         u = []
         for handle, c in chumdict.items():
-            options = dict()
+            options = {}
             if "group" in c:
                 options["group"] = c["group"]
             if "notes" in c:

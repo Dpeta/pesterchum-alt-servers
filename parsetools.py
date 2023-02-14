@@ -13,7 +13,7 @@ except ImportError:
 import dataobjs
 
 # karxi: My own contribution to this - a proper lexer.
-import pnc.lexercon as lexercon
+from pnc import lexercon
 from generic import mysteryTime
 from quirks import ScriptQuirks
 from pyquirks import PythonQuirks

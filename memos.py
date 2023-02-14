@@ -107,7 +107,7 @@ class TimeGrammar:
         self.temporal = temporal
         self.pcf = pcf
         self.when = when
-        if number == "0" or number == 0:
+        if number in ("0", 0):
             self.number = ""
         else:
             self.number = str(number)
@@ -164,7 +164,7 @@ class TimeTracker(list):
         except TypeError:
             # (temporal, pcf, when) = pcfGrammar(mysteryTime())
             pcf = pcfGrammar(mysteryTime())[1]
-        if pcf == "C" or pcf == "?":
+        if pcf in ("C", "?"):
             return
         if timed in self.timerecord[pcf]:
             return
@@ -176,7 +176,7 @@ class TimeTracker(list):
             pcf = pcfGrammar(timed - timedelta(0))[1]
         except TypeError:
             pcf = pcfGrammar(mysteryTime())[1]
-        if pcf == "C" or pcf == "?":
+        if pcf in ("C", "?"):
             return 0
         if len(self.timerecord[pcf]) > 1:
             return self.timerecord[pcf].index(timed) + 1

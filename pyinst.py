@@ -238,10 +238,10 @@ if (_ARGUMENTS.prompts is not False) and (_ARGUMENTS.prompts != "False"):
             "This is a script to make building with Pyinstaller a bit more conventient."
         )
 
-        while (delete_builddist != "y") and (delete_builddist != "n"):
+        while delete_builddist not in ("y", "n"):
             delete_builddist = input("Delete build & dist folders? (Y/N): ").lower()
 
-        while (upx_enabled != "y") and (upx_enabled != "n"):
+        while upx_enabled not in ("y", "n"):
             upx_enabled = input("Enable UPX? (Y/N): ").lower()
         if upx_enabled == "y":
             print("If upx is on your path you don't need to include anything here.")
@@ -257,14 +257,14 @@ if (_ARGUMENTS.prompts is not False) and (_ARGUMENTS.prompts != "False"):
         elif upx_enabled == "n":
             upx_dir = ""
 
-        while (windowed != "y") and (windowed != "n"):
+        while windowed not in ("y", "n"):
             windowed = input("Build with '--windowed'? (Y/N): ").lower()
 
         if sys.platform == "win32":
             print(
                 "(https://pyinstaller.readthedocs.io/en/stable/usage.html?highlight=sdk#windows)"
             )
-            while (package_universal_crt != "y") and (package_universal_crt != "n"):
+            while package_universal_crt not in ("y", "n"):
                 package_universal_crt = input(
                     "Try to include universal CRT? (Y/N): "
                 ).lower()
@@ -303,8 +303,8 @@ if (_ARGUMENTS.prompts is not False) and (_ARGUMENTS.prompts != "False"):
                         )
                 print("crt_path = " + crt_path)
 
-        if (sys.platform == "win32") or (sys.platform == "linux"):
-            while (onefile != "y") and (onefile != "n"):
+        if sys.platform in ("win32", "linux"):
+            while onefile not in ("y", "n"):
                 onefile = input("Build with '--onefile'? (Y/N): ").lower()
 
     except KeyboardInterrupt:

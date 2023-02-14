@@ -160,6 +160,14 @@ enable=F, # Fatal
        wildcard-import,
        # Specific refactoring checks:
        use-implicit-booleaness-not-len,
+       useless-object-inheritance,
+       consider-using-from-import,
+       consider-using-in,
+       consider-using-join,
+       use-list-literal,
+       use-dict-literal,
+       useless-object-inheritance,
+       useless-return,
        # Specific basic checks:
        lost-exception,
        assert-on-tuple,
