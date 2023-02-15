@@ -357,7 +357,7 @@ class MemoText(PesterText):
             pass
 
     def addMessage(self, msg, chum):
-        if type(msg) in [str, str]:
+        if isinstance(msg, str):
             lexmsg = lexMessage(msg)
         else:
             lexmsg = msg
@@ -698,6 +698,8 @@ class PesterMemo(PesterConvo):
         return PesterIcon(self.mainwindow.theme["memos/memoicon"])
 
     def sendTimeInfo(self, newChum=False):
+        if self.mainwindow.config.irc_compatibility_mode():
+            return
         if newChum:
             self.messageSent.emit(
                 "PESTERCHUM:TIME>%s" % (delta2txt(self.time.getTime(), "server") + "i"),
@@ -1398,7 +1400,7 @@ class PesterMemo(PesterConvo):
     def sentMessage(self):
         text = str(self.textInput.text())
 
-        return parsetools.kxhandleInput(self, text, flavor="memos")
+        return parsetools.kxhandleInput(self, text, flavor="memos", irc_compatible=self.mainwindow.config.irc_compatibility_mode())
 
     @QtCore.pyqtSlot(QString)
     def namesUpdated(self, channel):
@@ -1730,7 +1732,7 @@ class PesterMemo(PesterConvo):
             txt_time = delta2txt(time, "server")
             # Only send if time isn't CURRENT, it's very spammy otherwise.
             # CURRENT should be the default already.
-            if txt_time != "i":
+            if txt_time != "i" and not self.mainwindow.config.irc_compatibility_mode():
                 serverText = "PESTERCHUM:TIME>" + txt_time
                 self.messageSent.emit(serverText, self.title())
         elif update == "+q":
@@ -1951,6 +1953,8 @@ class PesterMemo(PesterConvo):
 
     @QtCore.pyqtSlot()
     def sendtime(self):
+        if self.mainwindow.config.irc_compatibility_mode():
+            return
         # me = self.mainwindow.profile()
         # systemColor = QtGui.QColor(self.mainwindow.theme["memos/systemMsgColor"])
         time = txt2delta(self.timeinput.text())

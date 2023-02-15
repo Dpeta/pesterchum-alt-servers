@@ -323,10 +323,10 @@ class QuirkTesterWindow(QtWidgets.QDialog):
     def sentMessage(self):
         text = str(self.textInput.text())
 
-        return parsetools.kxhandleInput(self, text, "menus")
+        return parsetools.kxhandleInput(self, text, "menus", irc_compatible=self.mainwindow.config.irc_compatibility_mode())
 
     def addMessage(self, msg, me=True):
-        if type(msg) in [str, str]:
+        if isinstance(msg, str):
             lexmsg = lexMessage(msg)
         else:
             lexmsg = msg
@@ -1233,12 +1233,17 @@ class PesterOptions(QtWidgets.QDialog):
         self.tabs.button(-2).setChecked(True)
         self.pages = QtWidgets.QStackedWidget(self)
 
-        self.bandwidthcheck = QtWidgets.QCheckBox("Low Bandwidth", self)
-        if self.config.lowBandwidth():
-            self.bandwidthcheck.setChecked(True)
+        self.irc_mode_check = QtWidgets.QCheckBox("IRC compatibility mode", self)
+        if self.config.irc_compatibility_mode():
+            self.irc_mode_check.setChecked(True)
         bandwidthLabel = QtWidgets.QLabel(
-            "(Stops you for receiving the flood of MOODS,\n"
-            " though stops chumlist from working properly)"
+            "Enable this if you're planning on using Pesterchum on a server with normal IRC clients."
+            "\nDisables at least the following features:"
+            "\n - Moods (#pesterchum MOODs and METADATA moods)"
+            "\n - Message colors (COLOR > and METADATA color)"
+            "\n - Message color tags (<c=0,0,0>)"
+            "\n - Timelines (PESTERCHUM:CURRENT, etc.)"
+            "\n - PESTERCHUM:X commands (BEGIN, CEASE, BLOCK, IDLE, etc.)"
         )
         font = bandwidthLabel.font()
         font.setPointSize(8)
@@ -1617,7 +1622,7 @@ class PesterOptions(QtWidgets.QDialog):
         widget = QtWidgets.QWidget()
         layout_connect = QtWidgets.QVBoxLayout(widget)
         layout_connect.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
-        layout_connect.addWidget(self.bandwidthcheck)
+        layout_connect.addWidget(self.irc_mode_check)
         layout_connect.addWidget(bandwidthLabel)
         layout_connect.addWidget(self.autonickserv)
         layout_indent = QtWidgets.QVBoxLayout()

@@ -283,8 +283,7 @@ def kxlexMsg(string):
     # ...and that's it for this.
     return msg
 
-
-def lexMessage(string):
+def lexMessage(string: str):
     lexlist = [
         (mecmd, _mecmdre),
         (colorBegin, _ctag_begin),
@@ -302,10 +301,11 @@ def lexMessage(string):
         (honker, _honk),
     ]
 
-    string = str(string)
     string = string.replace("\n", " ").replace("\r", " ")
-    lexed = lexer(str(string), lexlist)
+    lexed = lexer(string, lexlist)
+    return balance(lexed)
 
+def balance(lexed):
     balanced = []
     beginc = 0
     endc = 0
@@ -683,7 +683,7 @@ def _is_ooc(msg, strict=True):
     return False
 
 
-def kxhandleInput(ctx, text=None, flavor=None):
+def kxhandleInput(ctx, text=None, flavor=None, irc_compatible=False):
     """The function that user input that should be sent to the server is routed
     through. Handles lexing, splitting, and quirk application, as well as
     sending."""
@@ -699,11 +699,10 @@ def kxhandleInput(ctx, text=None, flavor=None):
     if text is None:
         # Fetch the raw text from the input box.
         text = ctx.textInput.text()
-        text = str(ctx.textInput.text())
 
     # Preprocessing stuff.
     msg = text.strip()
-    if msg == "" or msg.startswith("PESTERCHUM:"):
+    if not msg or msg.startswith("PESTERCHUM:"):
         # We don't allow users to send system messages. There's also no
         # point if they haven't entered anything.
         return
@@ -736,7 +735,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
 
     # Begin message processing.
     # We use 'text' despite its lack of processing because it's simpler.
-    if should_quirk and not (is_action or is_ooc):
+    if should_quirk and not (is_action or is_ooc or irc_compatible):
         if flavor != "menus":
             # Fetch the quirks we'll have to apply.
             quirks = ctx.mainwindow.userprofile.quirks
@@ -827,7 +826,8 @@ def kxhandleInput(ctx, text=None, flavor=None):
     if flavor == "convo":
         # if ceased, rebegin
         if hasattr(ctx, "chumopen") and not ctx.chumopen:
-            ctx.mainwindow.newConvoStarted.emit(QString(ctx.title()), True)
+            if not irc_compatible:
+                ctx.mainwindow.newConvoStarted.emit(QString(ctx.title()), True)
             ctx.setChumOpen(True)
 
     # Post-process and send the messages.
@@ -846,7 +846,7 @@ def kxhandleInput(ctx, text=None, flavor=None):
         serverMsg = copy(lm)
 
         # Memo-specific processing.
-        if flavor == "memos" and not is_action:
+        if flavor == "memos" and not is_action and not irc_compatible:
             # Quirks were already applied, so get the prefix/postfix stuff
             # ready.
             # We fetched the information outside of the loop, so just
