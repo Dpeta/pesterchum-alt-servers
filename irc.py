@@ -862,7 +862,7 @@ class PesterIRC(QtCore.QThread):
             if any(feature.startswith("METADATA") for feature in features):
                 PchumLog.info("Server supports metadata.")
                 self.metadata_supported = True
-                            
+
     def _cap(self, server, nick, subcommand, tag):
         """IRCv3 capabilities command from server.
 

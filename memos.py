@@ -20,13 +20,16 @@ from parsetools import (
     timeProtocol,
     lexMessage,
     colorBegin,
+    addTimeInitial,
     mecmd,
     smiledict,
 )
 from logviewer import PesterLogViewer
 
 PchumLog = logging.getLogger("pchumLogger")
-
+_valid_memo_msg_start = re.compile(
+    r"^<c=((\d+,\d+,\d+)|(#([a-fA-F0-9]{6})|(#[a-fA-F0-9]{3})))>[A-Z]{3}:\s"
+)
 # Python 3
 QString = str
 
@@ -356,14 +359,36 @@ class MemoText(PesterText):
         except:
             pass
 
+    def make_valid(self, msg, chum, parent, window, me):
+        """Adds initials and color to a message if they're missing."""
+        if not re.match(_valid_memo_msg_start, msg):
+            if chum is me:
+                initials = me.initials()
+                color = me.colorcmd()
+                msg = f"<c={color}>{initials}: {msg}</c>"
+                msg = addTimeInitial(msg, parent.time.getGrammar())
+            else:
+                color = window.chumdb.getColor(chum.handle)
+                if color:
+                    (r, g, b, _a) = color.getRgb()
+                    color = f"{r},{g},{b}"
+                else:
+                    color = "0,0,0"
+                initials = chum.initials()
+                msg = f"<c={color}>{initials}: {msg}</c>"
+                msg = addTimeInitial(msg, parent.times[chum.handle].getGrammar())
+        return msg
+
     def addMessage(self, msg, chum):
-        if isinstance(msg, str):
-            lexmsg = lexMessage(msg)
-        else:
-            lexmsg = msg
         parent = self.parent()
         window = parent.mainwindow
         me = window.profile()
+        if isinstance(msg, str):
+            if self.mainwindow.config.force_prefix():
+                msg = self.make_valid(msg, chum, parent, window, me)
+            lexmsg = lexMessage(msg)
+        else:
+            lexmsg = msg
         if self.mainwindow.config.animations():
             for m in self.urls:
                 if convertTags(lexmsg).find(self.urls[m].toString()) != -1:
@@ -1400,7 +1425,12 @@ class PesterMemo(PesterConvo):
     def sentMessage(self):
         text = str(self.textInput.text())
 
-        return parsetools.kxhandleInput(self, text, flavor="memos", irc_compatible=self.mainwindow.config.irc_compatibility_mode())
+        return parsetools.kxhandleInput(
+            self,
+            text,
+            flavor="memos",
+            irc_compatible=self.mainwindow.config.irc_compatibility_mode(),
+        )
 
     @QtCore.pyqtSlot(QString)
     def namesUpdated(self, channel):

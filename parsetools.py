@@ -283,6 +283,7 @@ def kxlexMsg(string):
     # ...and that's it for this.
     return msg
 
+
 def lexMessage(string: str):
     lexlist = [
         (mecmd, _mecmdre),
@@ -304,6 +305,7 @@ def lexMessage(string: str):
     string = string.replace("\n", " ").replace("\r", " ")
     lexed = lexer(string, lexlist)
     return balance(lexed)
+
 
 def balance(lexed):
     balanced = []

@@ -1096,7 +1096,12 @@ class PesterConvo(QtWidgets.QFrame):
         text = self.textInput.text()
         text = str(self.textInput.text())
 
-        return parsetools.kxhandleInput(self, text, flavor="convo", irc_compatible=self.mainwindow.config.irc_compatibility_mode())
+        return parsetools.kxhandleInput(
+            self,
+            text,
+            flavor="convo",
+            irc_compatible=self.mainwindow.config.irc_compatibility_mode(),
+        )
 
     @QtCore.pyqtSlot()
     def addThisChum(self):

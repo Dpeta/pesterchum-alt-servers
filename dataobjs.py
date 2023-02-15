@@ -321,7 +321,7 @@ class PesterProfile:
 
     def colorcmd(self):
         if self.color:
-            (r, g, b, _) = self.color.getRgb()
+            (r, g, b, _a) = self.color.getRgb()
             return "%d,%d,%d" % (r, g, b)
         else:
             return "0,0,0"

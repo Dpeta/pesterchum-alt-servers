@@ -1897,9 +1897,10 @@ class PesterWindow(MovingWindow):
         event.accept()
 
     def newMessage(self, handle, msg):
-        if not self.config.irc_compatibility_mode() and handle in self.config.getBlocklist():
+        if handle in self.config.getBlocklist():
             # yeah suck on this
-            self.sendMessage.emit("PESTERCHUM:BLOCKED", handle)
+            if not self.config.irc_compatibility_mode():
+                self.sendMessage.emit("PESTERCHUM:BLOCKED", handle)
             return
         # notify
         if self.config.notifyOptions() & self.config.NEWMSG:
@@ -1951,7 +1952,6 @@ class PesterWindow(MovingWindow):
             # TODO: This is really bad practice. Fix it later.
             return
         memo = self.memos[chan]
-        msg = str(msg)
         if handle not in memo.times:
             # new chum! time current
             newtime = datetime.timedelta(0)
@@ -3442,15 +3442,20 @@ class PesterWindow(MovingWindow):
             curnotify = self.config.notifyOptions()
             if notifysetting != curnotify:
                 self.config.set("notifyOptions", notifysetting)
-            # low bandwidth
+            # IRC compatibility (previously low bandwidth)
             irc_mode_setting = self.optionmenu.irc_mode_check.isChecked()
-            curbandwidth = self.config.irc_compatibility_mode()
-            if irc_mode_setting != curbandwidth:
+            current_irc_mode = self.config.irc_compatibility_mode()
+            if irc_mode_setting != current_irc_mode:
                 self.config.set("irc_compatibility_mode", irc_mode_setting)
                 if irc_mode_setting:
                     self.leftChannel.emit("#pesterchum")
                 else:
                     self.joinChannel.emit("#pesterchum")
+            # Force prefix
+            force_prefix_setting = self.optionmenu.force_prefix_check.isChecked()
+            current_prefix_setting = self.config.force_prefix()
+            if force_prefix_setting != current_prefix_setting:
+                self.config.set("force_prefix", force_prefix_setting)
             # nickserv
             autoidentify = self.optionmenu.autonickserv.isChecked()
             nickservpass = self.optionmenu.nickservpass.text()
