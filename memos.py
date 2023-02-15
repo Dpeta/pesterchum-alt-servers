@@ -32,7 +32,7 @@ QString = str
 
 
 def delta2txt(d, format="pc"):
-    if type(d) is mysteryTime:
+    if isinstance(d, mysteryTime):
         return "?"
     if format == "pc":
         sign = "+" if d >= timedelta(0) else "-"
@@ -107,7 +107,7 @@ class TimeGrammar:
         self.temporal = temporal
         self.pcf = pcf
         self.when = when
-        if number == "0" or number == 0:
+        if number in ("0", 0):
             self.number = ""
         else:
             self.number = str(number)
@@ -117,7 +117,7 @@ class TimeTracker(list):
     def __init__(self, time=None):
         # mysteryTime breaks stuff now, so, uh
         # I'm replacing it with 1 day...
-        if type(time) == mysteryTime:
+        if isinstance(time, mysteryTime):
             time = timedelta(microseconds=1)
         self.timerecord = {"P": [], "F": []}
         self.open = {}
@@ -131,7 +131,7 @@ class TimeTracker(list):
 
     def addTime(self, timed):
         # mysteryTime </3
-        if type(timed) == mysteryTime:
+        if isinstance(timed, mysteryTime):
             timed = timedelta(microseconds=1)
         try:
             i = self.index(timed)
@@ -164,7 +164,7 @@ class TimeTracker(list):
         except TypeError:
             # (temporal, pcf, when) = pcfGrammar(mysteryTime())
             pcf = pcfGrammar(mysteryTime())[1]
-        if pcf == "C" or pcf == "?":
+        if pcf in ("C", "?"):
             return
         if timed in self.timerecord[pcf]:
             return
@@ -176,7 +176,7 @@ class TimeTracker(list):
             pcf = pcfGrammar(timed - timedelta(0))[1]
         except TypeError:
             pcf = pcfGrammar(mysteryTime())[1]
-        if pcf == "C" or pcf == "?":
+        if pcf in ("C", "?"):
             return 0
         if len(self.timerecord[pcf]) > 1:
             return self.timerecord[pcf].index(timed) + 1
@@ -241,7 +241,7 @@ class TimeInput(QtWidgets.QLineEdit):
     def setSlider(self):
         value = str(self.text())
         timed = txt2delta(value)
-        if type(timed) is mysteryTime:
+        if isinstance(timed, mysteryTime):
             self.timeslider.setValue(0)
             self.setText("?")
             return
@@ -306,7 +306,7 @@ class MemoText(PesterText):
             self.mainwindow = self.parent().mainwindow
         else:
             self.mainwindow = self.parent()
-        if type(parent.parent) is PesterTabWindow:
+        if isinstance(parent.parent, PesterTabWindow):
             self.tabobject = parent.parent()
             self.hasTabs = True
         else:
@@ -371,7 +371,7 @@ class MemoText(PesterText):
                         m.start()
         chumdb = window.chumdb
         if chum is not me:  # SO MUCH WH1T3SP4C3 >:]
-            if type(lexmsg[0]) is colorBegin:  # get color tag
+            if isinstance(lexmsg[0], colorBegin):  # get color tag
                 colortag = lexmsg[0]
                 try:
                     color = QtGui.QColor(*[int(c) for c in colortag.color.split(",")])
@@ -419,7 +419,7 @@ class MemoText(PesterText):
                     msg = msg + "</c>"
             return '<span style="color:#000000">' + msg + "</span>"
 
-        if type(lexmsg[0]) is mecmd:
+        if isinstance(lexmsg[0], mecmd):
             memsg = chum.memsg(systemColor, lexmsg, time=time.getGrammar())
             window.chatlog.log(parent.channel, memsg)
             self.append(convertTags(memsg))
@@ -721,7 +721,7 @@ class PesterMemo(PesterConvo):
             c.setForeground(QtGui.QBrush(color))
 
     def addMessage(self, text, handle):
-        if type(handle) is bool:
+        if isinstance(handle, bool):
             chum = self.mainwindow.profile()
         else:
             chum = PesterProfile(handle)

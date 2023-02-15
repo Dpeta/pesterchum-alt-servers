@@ -93,7 +93,7 @@ class ToastMachine:
         def show(self):
             if self.machine.on:
                 # Use libnotify's queue if using libnotify
-                if self.machine.type == "libnotify" or self.machine.type == "twmn":
+                if self.machine.type in ("libnotify", "twmn"):
                     self.realShow()
                 elif self.machine.toasts:
                     self.machine.toasts.append(self)
@@ -116,7 +116,7 @@ class ToastMachine:
                         extras["parent"] = self.machine.parent
                     if "time" in args:
                         extras["time"] = self.time
-                    if k == "libnotify" or k == "twmn":
+                    if k in ("libnotify", "twmn"):
                         t = v(self.title, self.msg, self.icon, **extras)
                     else:
                         t = v(self.machine, self.title, self.msg, self.icon, **extras)

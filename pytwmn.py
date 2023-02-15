@@ -45,7 +45,7 @@ def init(host="127.0.0.1", port=None):
                         break
         except OSError:
             raise TwmnError(TwmnError.NO_CONF)
-    if type(port) == type(""):
+    if isinstance(port, str):
         port = int(port)
     global s
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

@@ -14,7 +14,6 @@ except ImportError:
 from dataobjs import PesterHistory
 from parsetools import convertTags, lexMessage, mecmd, colorBegin, colorEnd, smiledict
 import parsetools
-from pnc.dep.attrdict import AttrDict
 
 PchumLog = logging.getLogger("pchumLogger")
 
@@ -33,33 +32,33 @@ class PesterTabWindow(QtWidgets.QFrame):
         self.tabs.tabCloseRequested[int].connect(self.tabClose)
         self.tabs.tabMoved[int, int].connect(self.tabMoved)
 
-        self.shortcuts = AttrDict()
-        self.shortcuts.tabNext = QShortcut(
+        self.shortcuts = {}
+        self.shortcuts["tabNext"] = QShortcut(
             QtGui.QKeySequence("Ctrl+j"),
             self,
             context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut,
         )
-        self.shortcuts.tabLast = QShortcut(
+        self.shortcuts["tabLast"] = QShortcut(
             QtGui.QKeySequence("Ctrl+k"),
             self,
             context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut,
         )
         # Note that we use reversed keys here.
-        self.shortcuts.tabUp = QShortcut(
+        self.shortcuts["tabUp"] = QShortcut(
             QtGui.QKeySequence("Ctrl+PgDown"),
             self,
             context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut,
         )
-        self.shortcuts.tabDn = QShortcut(
+        self.shortcuts["tabDn"] = QShortcut(
             QtGui.QKeySequence("Ctrl+PgUp"),
             self,
             context=QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut,
         )
 
-        self.shortcuts.tabNext.activated.connect(self.nudgeTabNext)
-        self.shortcuts.tabUp.activated.connect(self.nudgeTabNext)
-        self.shortcuts.tabLast.activated.connect(self.nudgeTabLast)
-        self.shortcuts.tabDn.activated.connect(self.nudgeTabLast)
+        self.shortcuts["tabNext"].activated.connect(self.nudgeTabNext)
+        self.shortcuts["tabUp"].activated.connect(self.nudgeTabNext)
+        self.shortcuts["tabLast"].activated.connect(self.nudgeTabLast)
+        self.shortcuts["tabDn"].activated.connect(self.nudgeTabLast)
 
         self.initTheme(self.mainwindow.theme)
         self.layout = QtWidgets.QVBoxLayout()
@@ -378,7 +377,7 @@ class PesterText(QtWidgets.QTextEdit):
             self.mainwindow = self.parent().mainwindow
         else:
             self.mainwindow = self.parent()
-        if type(parent.parent) is PesterTabWindow:
+        if isinstance(parent.parent, PesterTabWindow):
             self.tabobject = parent.parent()
             self.hasTabs = True
         else:
@@ -515,7 +514,7 @@ class PesterText(QtWidgets.QTextEdit):
             imsg = chum.idlemsg(systemColor, window.theme["convo/text/idle"])
             window.chatlog.log(chum.handle, imsg)
             self.append(convertTags(imsg))
-        elif type(lexmsg[0]) is mecmd:
+        elif isinstance(lexmsg[0], mecmd):
             memsg = chum.memsg(systemColor, lexmsg)
             if chum is me:
                 window.chatlog.log(parent.chum.handle, memsg)
@@ -544,7 +543,7 @@ class PesterText(QtWidgets.QTextEdit):
                 window.chatlog.log(parent.chum.handle, lexmsg)
             else:
                 if (
-                    (window.idler.auto or window.idler.manual)
+                    (window.idler["auto"] or window.idler["manual"])
                     and parent.chumopen
                     and not parent.isBot(chum.handle)
                 ):
@@ -675,7 +674,7 @@ class PesterInput(QtWidgets.QLineEdit):
                 self.setText(prev)
         elif event.key() in [QtCore.Qt.Key.Key_PageUp, QtCore.Qt.Key.Key_PageDown]:
             self.parent().textArea.keyPressEvent(event)
-        self.parent().mainwindow.idler.time = 0
+        self.parent().mainwindow.idler["time"] = 0
         super().keyPressEvent(event)
 
 

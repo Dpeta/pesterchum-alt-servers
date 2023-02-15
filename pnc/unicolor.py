@@ -2,10 +2,6 @@ __all__ = ["Color"]
 
 # karxi: Copied from my old Textsub script. Please forgive the mess, and keep
 # in mind that this may be phased out in the future.
-
-
-from pnc.dep.attrdict import AttrDict
-
 import collections
 import functools
 import sys
@@ -410,7 +406,7 @@ class Color:
 
 # All of these are effectively equivalent to the Qt-provided colors, so they
 # could be phased out - but there's no need to, yet.
-_svg_colors = AttrDict()
+_svg_colors = {}
 _irc_colors = {}
 _svg_colors.update(
     {

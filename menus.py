@@ -37,9 +37,7 @@ class PesterQuirkItem(QtWidgets.QTreeWidgetItem):
         """Sets the order of quirks if auto-sorted by Qt. Obsolete now."""
         if self.quirk.type == "prefix":
             return True
-        elif (
-            self.quirk.type == "replace" or self.quirk.type == "regexp"
-        ) and quirkitem.type == "suffix":
+        elif self.quirk.type in ("replace", "regexp") and quirkitem.type == "suffix":
             return True
         else:
             return False
@@ -103,7 +101,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
         self.changeCheckState()
 
     def currentQuirk(self):
-        if type(self.currentItem()) is PesterQuirkItem:
+        if isinstance(self.currentItem(), PesterQuirkItem):
             return self.currentItem()
         else:
             return None

@@ -11,10 +11,10 @@ class mysteryTime(timedelta):
         return self
 
     def __eq__(self, other):
-        return type(other) is mysteryTime
+        return isinstance(other, mysteryTime)
 
     def __neq__(self, other):
-        return type(other) is not mysteryTime
+        return not isinstance(other, mysteryTime)
 
 
 class CaseInsensitiveDict(dict):
