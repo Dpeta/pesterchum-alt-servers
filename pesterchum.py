@@ -23,7 +23,6 @@ if ostools.isLinux():
     import libseccomp
 
 # import console
-from pnc.dep.attrdict import AttrDict
 from user_profile import (
     userConfig,
     userProfile,
@@ -162,8 +161,8 @@ BOTNAMES.extend(SERVICES)
 # Save the main app. From here, we should be able to get everything else in
 # order, for console use.
 _CONSOLE = False
-_CONSOLE_ENV = AttrDict()
-_CONSOLE_ENV.PAPP = None
+_CONSOLE_ENV = {}
+_CONSOLE_ENV["PAPP"] = None
 # Python 3
 QString = str
 # Command line arguments
@@ -1313,7 +1312,7 @@ class PesterWindow(MovingWindow):
             ),
         )
         # For debugging
-        _CONSOLE_ENV.PAPP = self
+        _CONSOLE_ENV["PAPP"] = self
         # TODO: karxi: SO! At the end of this function it seems like that
         # object is just made into None or.../something/. Somehow, it just
         # DIES, and I haven't the slightest idea why. I've tried multiple ways
@@ -1332,7 +1331,7 @@ class PesterWindow(MovingWindow):
         self.memos = CaseInsensitiveDict()
         self.tabconvo = None
         self.tabmemo = None
-        self.shortcuts = AttrDict()
+        self.shortcuts = {}
 
         self.setAutoFillBackground(False)
         self.setObjectName("main")
@@ -1637,26 +1636,24 @@ class PesterWindow(MovingWindow):
 
         self.waitingMessages = waitingMessageHolder(self)
 
-        self.idler = AttrDict(
-            dict(
-                # autoidle
-                auto=False,
-                # setidle
-                manual=False,
-                # idlethreshold
-                threshold=60 * self.config.idleTime(),
-                # idleaction
-                action=self.idleaction,
-                # idletimer
-                timer=QtCore.QTimer(self),
-                # idleposition
-                pos=QtGui.QCursor.pos(),
-                # idletime
-                time=0,
-            )
-        )
-        self.idler.timer.timeout.connect(self.checkIdle)
-        self.idler.timer.start(1000)
+        self.idler = {
+            # autoidle
+            "auto": False,
+            # setidle
+            "manual": False,
+            # idlethreshold
+            "threshold": 60 * self.config.idleTime(),
+            # idleaction
+            "action": self.idleaction,
+            # idletimer
+            "timer": QtCore.QTimer(self),
+            # idleposition
+            "pos": QtGui.QCursor.pos(),
+            # idletime
+            "time": 0,
+        }
+        self.idler["timer"].timeout.connect(self.checkIdle)
+        self.idler["timer"].start(1000)
 
         if not self.config.defaultprofile():
             self.changeProfile()
@@ -2912,49 +2909,49 @@ class PesterWindow(MovingWindow):
     def toggleIdle(self, idle):
         if idle:
             # We checked the box to go idle.
-            self.idler.manual = True
+            self.idler["manual"] = True
             self.setAway.emit(True)
             self.randhandler.setIdle(True)
             self._sendIdleMsgs()
         else:
-            self.idler.manual = False
+            self.idler["manual"] = False
             self.setAway.emit(False)
             self.randhandler.setIdle(False)
-            self.idler.time = 0
+            self.idler["time"] = 0
 
     # karxi: TODO: Need to consider sticking an idle-setter here.
     @QtCore.pyqtSlot()
     def checkIdle(self):
         newpos = QtGui.QCursor.pos()
-        oldpos = self.idler.pos
+        oldpos = self.idler["pos"]
         # Save the new position.
-        self.idler.pos = newpos
+        self.idler["pos"] = newpos
 
-        if self.idler.manual:
+        if self.idler["manual"]:
             # We're already idle, because the user said to be.
-            self.idler.time = 0
+            self.idler["time"] = 0
             return
-        elif self.idler.auto:
-            self.idler.time = 0
+        elif self.idler["auto"]:
+            self.idler["time"] = 0
             if newpos != oldpos:
                 # Cursor moved; unset idle.
-                self.idler.auto = False
+                self.idler["auto"] = False
                 self.setAway.emit(False)
                 self.randhandler.setIdle(False)
             return
 
         if newpos != oldpos:
             # Our cursor has moved, which means we can't be idle.
-            self.idler.time = 0
+            self.idler["time"] = 0
             return
 
         # If we got here, WE ARE NOT IDLE, but may become so
-        self.idler.time += 1
-        if self.idler.time >= self.idler.threshold:
+        self.idler["time"] += 1
+        if self.idler["time"] >= self.idler["threshold"]:
             # We've been idle for long enough to fall automatically idle.
-            self.idler.auto = True
+            self.idler["auto"] = True
             # We don't need this anymore.
-            self.idler.time = 0
+            self.idler["time"] = 0
             # Make it clear that we're idle.
             self.setAway.emit(True)
             self.randhandler.setIdle(True)
@@ -3369,7 +3366,7 @@ class PesterWindow(MovingWindow):
             curidle = self.config.idleTime()
             if idlesetting != curidle:
                 self.config.set("idleTime", idlesetting)
-                self.idler.threshold = 60 * idlesetting
+                self.idler["threshold"] = 60 * idlesetting
             # theme
             ghostchumsetting = self.optionmenu.ghostchum.isChecked()
             curghostchum = self.config.ghostchum()
