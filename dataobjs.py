@@ -35,7 +35,7 @@ _handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
 
 class pesterQuirk:
     def __init__(self, quirk):
-        if type(quirk) != dict:
+        if not isinstance(quirk, dict):
             raise ValueError("Quirks must be given a dictionary")
         self.quirk = quirk
         self.type = self.quirk["type"]
@@ -136,9 +136,9 @@ class pesterQuirks:
         return [q.quirk for q in self.quirklist]
 
     def addQuirk(self, q):
-        if type(q) == dict:
+        if isinstance(q, dict):
             self.quirklist.append(pesterQuirk(q))
-        elif type(q) == pesterQuirk:
+        elif isinstance(q, pesterQuirk):
             self.quirklist.append(q)
 
     def apply(self, lexed, first=False, last=False):

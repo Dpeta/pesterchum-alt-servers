@@ -310,10 +310,10 @@ def lexMessage(string):
     beginc = 0
     endc = 0
     for o in lexed:
-        if type(o) is colorBegin:
+        if isinstance(o, colorBegin):
             beginc += 1
             balanced.append(o)
-        elif type(o) is colorEnd:
+        elif isinstance(o, colorEnd):
             if beginc >= endc:
                 endc += 1
                 balanced.append(o)
@@ -942,9 +942,9 @@ class parseLeaf:
     def expand(self, mo):
         out = ""
         for n in self.nodes:
-            if type(n) == parseLeaf:
+            if isinstance(n, parseLeaf):
                 out += n.expand(mo)
-            elif type(n) == backreference:
+            elif isinstance(n, backreference):
                 out += mo.group(int(n.number))
             else:
                 out += n

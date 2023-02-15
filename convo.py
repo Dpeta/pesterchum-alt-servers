@@ -377,7 +377,7 @@ class PesterText(QtWidgets.QTextEdit):
             self.mainwindow = self.parent().mainwindow
         else:
             self.mainwindow = self.parent()
-        if type(parent.parent) is PesterTabWindow:
+        if isinstance(parent.parent, PesterTabWindow):
             self.tabobject = parent.parent()
             self.hasTabs = True
         else:
@@ -514,7 +514,7 @@ class PesterText(QtWidgets.QTextEdit):
             imsg = chum.idlemsg(systemColor, window.theme["convo/text/idle"])
             window.chatlog.log(chum.handle, imsg)
             self.append(convertTags(imsg))
-        elif type(lexmsg[0]) is mecmd:
+        elif isinstance(lexmsg[0], mecmd):
             memsg = chum.memsg(systemColor, lexmsg)
             if chum is me:
                 window.chatlog.log(parent.chum.handle, memsg)

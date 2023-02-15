@@ -373,7 +373,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
             self.set("chums", newchums)
 
     def removeChum(self, chum):
-        if type(chum) is PesterProfile:
+        if isinstance(chum, PesterProfile):
             handle = chum.handle
         else:
             handle = chum
@@ -605,7 +605,7 @@ class userProfile:
     def __init__(self, user):
         self.profiledir = _datadir + "profiles"
 
-        if type(user) is PesterProfile:
+        if isinstance(user, PesterProfile):
             self.chat = user
             self.userprofile = {
                 "handle": user.handle,

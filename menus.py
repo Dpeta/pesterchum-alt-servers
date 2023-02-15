@@ -101,7 +101,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
         self.changeCheckState()
 
     def currentQuirk(self):
-        if type(self.currentItem()) is PesterQuirkItem:
+        if isinstance(self.currentItem(), PesterQuirkItem):
             return self.currentItem()
         else:
             return None
