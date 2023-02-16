@@ -362,7 +362,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         return self.config.get("irc_compatibility_mode", False)
 
     def force_prefix(self):
-        return self.config.get("force_prefix", False)
+        return self.config.get("force_prefix", True)
 
     def ghostchum(self):
         return self.config.get("ghostchum", False)

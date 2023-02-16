@@ -28,7 +28,7 @@ from logviewer import PesterLogViewer
 
 PchumLog = logging.getLogger("pchumLogger")
 _valid_memo_msg_start = re.compile(
-    r"^<c=((\d+,\d+,\d+)|(#([a-fA-F0-9]{6})|(#[a-fA-F0-9]{3})))>[A-Z]{3}:\s"
+    r"^<c=((\d+,\d+,\d+)|(#([a-fA-F0-9]{6})|(#[a-fA-F0-9]{3})))>([A-Z]{3}):\s"
 )
 # Python 3
 QString = str
@@ -361,9 +361,17 @@ class MemoText(PesterText):
 
     def make_valid(self, msg, chum, parent, window, me):
         """Adds initials and color to a message if they're missing."""
-        if not re.match(_valid_memo_msg_start, msg):
+        initials = chum.initials()
+        match = re.match(_valid_memo_msg_start, msg)
+        detected_initials = None
+        if match:
+            try:
+                # Get initials used in msg, check if valid later
+                detected_initials = match.group(6)[1:]
+            except IndexError:
+                pass  # IndexError is fine, just means the initials are invalid
+        if not match or detected_initials != initials:
             if chum is me:
-                initials = me.initials()
                 color = me.colorcmd()
                 msg = f"<c={color}>{initials}: {msg}</c>"
                 msg = addTimeInitial(msg, parent.time.getGrammar())
@@ -374,7 +382,6 @@ class MemoText(PesterText):
                     color = f"{r},{g},{b}"
                 else:
                     color = "0,0,0"
-                initials = chum.initials()
                 msg = f"<c={color}>{initials}: {msg}</c>"
                 msg = addTimeInitial(msg, parent.times[chum.handle].getGrammar())
         return msg

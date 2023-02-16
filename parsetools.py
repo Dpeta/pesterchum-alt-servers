@@ -737,7 +737,7 @@ def kxhandleInput(ctx, text=None, flavor=None, irc_compatible=False):
 
     # Begin message processing.
     # We use 'text' despite its lack of processing because it's simpler.
-    if should_quirk and not (is_action or is_ooc or irc_compatible):
+    if should_quirk and not (is_action or is_ooc):
         if flavor != "menus":
             # Fetch the quirks we'll have to apply.
             quirks = ctx.mainwindow.userprofile.quirks
@@ -846,6 +846,11 @@ def kxhandleInput(ctx, text=None, flavor=None, irc_compatible=False):
         # should be kept to the end because of that, near the emission.
         clientMsg = copy(lm)
         serverMsg = copy(lm)
+
+        # If in IRC-compatible mode, remove color tags.
+        if irc_compatible:
+            serverMsg = re.sub(_ctag_begin, "", serverMsg)
+            serverMsg = re.sub(_ctag_end, "", serverMsg)
 
         # Memo-specific processing.
         if flavor == "memos" and not is_action and not irc_compatible:

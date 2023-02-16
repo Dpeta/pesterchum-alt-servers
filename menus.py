@@ -1226,7 +1226,7 @@ class PesterOptions(QtWidgets.QDialog):
             "Logging",
             "Idle/Updates",
             "Theme",
-            "Connection",
+            "IRC",
         ]
         if parent.advanced:
             self.tabNames.append("Advanced")
@@ -1244,10 +1244,10 @@ class PesterOptions(QtWidgets.QDialog):
         bandwidthLabel = QtWidgets.QLabel(
             "Enable this if you're planning on using Pesterchum on a server with normal IRC clients."
             "\nStops the client from sending or requesting:"
-            "\n - Moods (#pesterchum MOODs and METADATA moods)"
-            "\n - Message colors (COLOR > and METADATA color)"
-            "\n - Message color tags (<c=0,0,0>)"
-            "\n - Timelines (PESTERCHUM:CURRENT, etc.)"
+            "\n - Non-metadata moods (MOOD >0, GETMOOD, etc.)"
+            "\n - Non-metadata dm colors (COLOR >0,0,0)"
+            "\n - Memo message initials and color (<c=0,0,0>EB: </c>)"
+            "\n - Memo timelines"
             "\n - Misc. PESTERCHUM:X commands (BEGIN, CEASE, BLOCK, IDLE, etc.)"
         )
         font = bandwidthLabel.font()
@@ -1255,12 +1255,12 @@ class PesterOptions(QtWidgets.QDialog):
         bandwidthLabel.setFont(font)
 
         self.force_prefix_check = QtWidgets.QCheckBox(
-            "Add initials to memo messages without initials", self
+            "Force all memo messages to have valid initials.", self
         )
         if self.config.force_prefix():
             self.force_prefix_check.setChecked(True)
         initials_label = QtWidgets.QLabel(
-            "Enable this when chatting with normal IRC users or to forcibly un-scratch Doc Scratch."
+            "Disable to allow users to send messages without initials, like Doc Scratch."
         )
         font = initials_label.font()
         font.setPointSize(8)
