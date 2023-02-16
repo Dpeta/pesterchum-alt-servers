@@ -27,7 +27,7 @@ PchumLog = logging.getLogger("pchumLogger")
 QString = str
 
 _ctag_begin = re.compile(r"(?i)<c=(.*?)>")
-_gtag_begin = re.compile(r"(?i)<g[a-f]>")
+# _gtag_begin = re.compile(r"(?i)<g[a-f]>")
 _ctag_end = re.compile(r"(?i)</c>")
 _ctag_rgb = re.compile(r"\d+,\d+,\d+")
 _urlre = re.compile(r"(?i)(?:^|(?<=\s))(?:(?:https?|ftp)://|magnet:)[^\s]+")
@@ -37,8 +37,8 @@ _handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
 _imgre = re.compile(r"""(?i)<img src=['"](\S+)['"]\s*/>""")
 _mecmdre = re.compile(r"^(/me|PESTERCHUM:ME)(\S*)")
 _oocre = re.compile(r"([\[(\{])\1.*([\])\}])\2")
-_format_begin = re.compile(r"(?i)<([ibu])>")
-_format_end = re.compile(r"(?i)</([ibu])>")
+# _format_begin = re.compile(r"(?i)<([ibu])>")
+# _format_end = re.compile(r"(?i)</([ibu])>")
 _honk = re.compile(r"(?i)\bhonk\b")
 _groupre = re.compile(r"\\([0-9]+)")
 
@@ -288,7 +288,7 @@ def lexMessage(string: str):
     lexlist = [
         (mecmd, _mecmdre),
         (colorBegin, _ctag_begin),
-        (colorBegin, _gtag_begin),
+        # (colorBegin, _gtag_begin),
         (colorEnd, _ctag_end),
         # karxi: Disabled this for now. No common versions of Pesterchum
         # actually use it, save for Chumdroid...which shouldn't.
