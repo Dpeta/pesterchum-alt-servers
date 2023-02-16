@@ -323,10 +323,15 @@ class QuirkTesterWindow(QtWidgets.QDialog):
     def sentMessage(self):
         text = str(self.textInput.text())
 
-        return parsetools.kxhandleInput(self, text, "menus")
+        return parsetools.kxhandleInput(
+            self,
+            text,
+            "menus",
+            irc_compatible=self.mainwindow.config.irc_compatibility_mode(),
+        )
 
     def addMessage(self, msg, me=True):
-        if type(msg) in [str, str]:
+        if isinstance(msg, str):
             lexmsg = lexMessage(msg)
         else:
             lexmsg = msg
@@ -1221,7 +1226,7 @@ class PesterOptions(QtWidgets.QDialog):
             "Logging",
             "Idle/Updates",
             "Theme",
-            "Connection",
+            "IRC",
         ]
         if parent.advanced:
             self.tabNames.append("Advanced")
@@ -1233,16 +1238,33 @@ class PesterOptions(QtWidgets.QDialog):
         self.tabs.button(-2).setChecked(True)
         self.pages = QtWidgets.QStackedWidget(self)
 
-        self.bandwidthcheck = QtWidgets.QCheckBox("Low Bandwidth", self)
-        if self.config.lowBandwidth():
-            self.bandwidthcheck.setChecked(True)
+        self.irc_mode_check = QtWidgets.QCheckBox("IRC compatibility mode", self)
+        if self.config.irc_compatibility_mode():
+            self.irc_mode_check.setChecked(True)
         bandwidthLabel = QtWidgets.QLabel(
-            "(Stops you for receiving the flood of MOODS,\n"
-            " though stops chumlist from working properly)"
+            "Enable this if you're planning on using Pesterchum on a server with normal IRC clients."
+            "\nStops the client from sending or requesting:"
+            "\n - Non-metadata moods (MOOD >0, GETMOOD, etc.)"
+            "\n - Non-metadata dm colors (COLOR >0,0,0)"
+            "\n - Memo message initials and color (<c=0,0,0>EB: </c>)"
+            "\n - Memo timelines"
+            "\n - Misc. PESTERCHUM:X commands (BEGIN, CEASE, BLOCK, IDLE, etc.)"
         )
         font = bandwidthLabel.font()
         font.setPointSize(8)
         bandwidthLabel.setFont(font)
+
+        self.force_prefix_check = QtWidgets.QCheckBox(
+            "Force all memo messages to have valid initials.", self
+        )
+        if self.config.force_prefix():
+            self.force_prefix_check.setChecked(True)
+        initials_label = QtWidgets.QLabel(
+            "Disable to allow users to send messages without initials, like Doc Scratch."
+        )
+        font = initials_label.font()
+        font.setPointSize(8)
+        initials_label.setFont(font)
 
         self.autonickserv = QtWidgets.QCheckBox("Auto-Identify with NickServ", self)
         self.autonickserv.setChecked(parent.userprofile.getAutoIdentify())
@@ -1617,8 +1639,10 @@ class PesterOptions(QtWidgets.QDialog):
         widget = QtWidgets.QWidget()
         layout_connect = QtWidgets.QVBoxLayout(widget)
         layout_connect.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
-        layout_connect.addWidget(self.bandwidthcheck)
+        layout_connect.addWidget(self.irc_mode_check)
         layout_connect.addWidget(bandwidthLabel)
+        layout_connect.addWidget(self.force_prefix_check)
+        layout_connect.addWidget(initials_label)
         layout_connect.addWidget(self.autonickserv)
         layout_indent = QtWidgets.QVBoxLayout()
         layout_indent.addWidget(self.nickservpass)

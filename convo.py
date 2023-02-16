@@ -898,7 +898,7 @@ class PesterConvo(QtWidgets.QFrame):
         self.chum.color = color
 
     def addMessage(self, msg, me=True):
-        if type(msg) in [str, str]:
+        if isinstance(msg, str):
             lexmsg = lexMessage(msg)
         else:
             lexmsg = msg
@@ -1096,7 +1096,12 @@ class PesterConvo(QtWidgets.QFrame):
         text = self.textInput.text()
         text = str(self.textInput.text())
 
-        return parsetools.kxhandleInput(self, text, flavor="convo")
+        return parsetools.kxhandleInput(
+            self,
+            text,
+            flavor="convo",
+            irc_compatible=self.mainwindow.config.irc_compatibility_mode(),
+        )
 
     @QtCore.pyqtSlot()
     def addThisChum(self):

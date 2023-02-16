@@ -358,8 +358,11 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
             "notifyOptions", self.SIGNIN | self.NEWMSG | self.NEWCONVO | self.INITIALS
         )
 
-    def lowBandwidth(self):
-        return self.config.get("lowBandwidth", False)
+    def irc_compatibility_mode(self):
+        return self.config.get("irc_compatibility_mode", False)
+
+    def force_prefix(self):
+        return self.config.get("force_prefix", True)
 
     def ghostchum(self):
         return self.config.get("ghostchum", False)

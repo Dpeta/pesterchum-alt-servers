@@ -20,13 +20,16 @@ from parsetools import (
     timeProtocol,
     lexMessage,
     colorBegin,
+    addTimeInitial,
     mecmd,
     smiledict,
 )
 from logviewer import PesterLogViewer
 
 PchumLog = logging.getLogger("pchumLogger")
-
+_valid_memo_msg_start = re.compile(
+    r"^<c=((\d+,\d+,\d+)|(#([a-fA-F0-9]{6})|(#[a-fA-F0-9]{3})))>([A-Z]{3}):\s"
+)
 # Python 3
 QString = str
 
@@ -356,14 +359,43 @@ class MemoText(PesterText):
         except:
             pass
 
+    def make_valid(self, msg, chum, parent, window, me):
+        """Adds initials and color to a message if they're missing."""
+        initials = chum.initials()
+        match = re.match(_valid_memo_msg_start, msg)
+        detected_initials = None
+        if match:
+            try:
+                # Get initials used in msg, check if valid later
+                detected_initials = match.group(6)[1:]
+            except IndexError:
+                pass  # IndexError is fine, just means the initials are invalid
+        if not match or detected_initials != initials:
+            if chum is me:
+                color = me.colorcmd()
+                msg = f"<c={color}>{initials}: {msg}</c>"
+                msg = addTimeInitial(msg, parent.time.getGrammar())
+            else:
+                color = window.chumdb.getColor(chum.handle)
+                if color:
+                    (r, g, b, _a) = color.getRgb()
+                    color = f"{r},{g},{b}"
+                else:
+                    color = "0,0,0"
+                msg = f"<c={color}>{initials}: {msg}</c>"
+                msg = addTimeInitial(msg, parent.times[chum.handle].getGrammar())
+        return msg
+
     def addMessage(self, msg, chum):
-        if type(msg) in [str, str]:
-            lexmsg = lexMessage(msg)
-        else:
-            lexmsg = msg
         parent = self.parent()
         window = parent.mainwindow
         me = window.profile()
+        if isinstance(msg, str):
+            if self.mainwindow.config.force_prefix():
+                msg = self.make_valid(msg, chum, parent, window, me)
+            lexmsg = lexMessage(msg)
+        else:
+            lexmsg = msg
         if self.mainwindow.config.animations():
             for m in self.urls:
                 if convertTags(lexmsg).find(self.urls[m].toString()) != -1:
@@ -698,6 +730,8 @@ class PesterMemo(PesterConvo):
         return PesterIcon(self.mainwindow.theme["memos/memoicon"])
 
     def sendTimeInfo(self, newChum=False):
+        if self.mainwindow.config.irc_compatibility_mode():
+            return
         if newChum:
             self.messageSent.emit(
                 "PESTERCHUM:TIME>%s" % (delta2txt(self.time.getTime(), "server") + "i"),
@@ -1398,7 +1432,12 @@ class PesterMemo(PesterConvo):
     def sentMessage(self):
         text = str(self.textInput.text())
 
-        return parsetools.kxhandleInput(self, text, flavor="memos")
+        return parsetools.kxhandleInput(
+            self,
+            text,
+            flavor="memos",
+            irc_compatible=self.mainwindow.config.irc_compatibility_mode(),
+        )
 
     @QtCore.pyqtSlot(QString)
     def namesUpdated(self, channel):
@@ -1730,7 +1769,7 @@ class PesterMemo(PesterConvo):
             txt_time = delta2txt(time, "server")
             # Only send if time isn't CURRENT, it's very spammy otherwise.
             # CURRENT should be the default already.
-            if txt_time != "i":
+            if txt_time != "i" and not self.mainwindow.config.irc_compatibility_mode():
                 serverText = "PESTERCHUM:TIME>" + txt_time
                 self.messageSent.emit(serverText, self.title())
         elif update == "+q":
@@ -1951,6 +1990,8 @@ class PesterMemo(PesterConvo):
 
     @QtCore.pyqtSlot()
     def sendtime(self):
+        if self.mainwindow.config.irc_compatibility_mode():
+            return
         # me = self.mainwindow.profile()
         # systemColor = QtGui.QColor(self.mainwindow.theme["memos/systemMsgColor"])
         time = txt2delta(self.timeinput.text())

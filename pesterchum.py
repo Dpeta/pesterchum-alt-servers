@@ -1899,7 +1899,8 @@ class PesterWindow(MovingWindow):
     def newMessage(self, handle, msg):
         if handle in self.config.getBlocklist():
             # yeah suck on this
-            self.sendMessage.emit("PESTERCHUM:BLOCKED", handle)
+            if not self.config.irc_compatibility_mode():
+                self.sendMessage.emit("PESTERCHUM:BLOCKED", handle)
             return
         # notify
         if self.config.notifyOptions() & self.config.NEWMSG:
@@ -1951,7 +1952,6 @@ class PesterWindow(MovingWindow):
             # TODO: This is really bad practice. Fix it later.
             return
         memo = self.memos[chan]
-        msg = str(msg)
         if handle not in memo.times:
             # new chum! time current
             newtime = datetime.timedelta(0)
@@ -2007,7 +2007,7 @@ class PesterWindow(MovingWindow):
             self.trollslum.updateMood(handle, mood)
 
     def newConversation(self, chum, initiated=True):
-        if type(chum) in [str, str]:
+        if isinstance(chum, str):
             matchingChums = [c for c in self.chumList.chums if c.handle == chum]
             if len(matchingChums) > 0:
                 mood = matchingChums[0].mood
@@ -2032,7 +2032,7 @@ class PesterWindow(MovingWindow):
         )
         convoWindow.windowClosed["QString"].connect(self.closeConvo)
         self.convos[chum.handle] = convoWindow
-        if str(chum.handle).upper() in BOTNAMES:
+        if chum.handle.upper() in BOTNAMES or self.config.irc_compatibility_mode():
             convoWindow.toggleQuirks(True)
             convoWindow.quirksOff.setChecked(True)
             if str(chum.handle).upper() in CUSTOMBOTS:
@@ -2616,7 +2616,8 @@ class PesterWindow(MovingWindow):
                     self.theme["convo/text/ceasepester"],
                 ),
             )
-            self.convoClosed.emit(handle)
+            if not self.config.irc_compatibility_mode():
+                self.convoClosed.emit(handle)
         self.chatlog.finish(h)
         del self.convos[h]
 
@@ -2881,7 +2882,8 @@ class PesterWindow(MovingWindow):
             newtroll = PesterProfile(h)
             self.trollslum.addTroll(newtroll)
             self.moodRequest.emit(newtroll)
-        self.blockedChum.emit(handle)
+        if not self.config.irc_compatibility_mode():
+            self.blockedChum.emit(handle)
 
     @QtCore.pyqtSlot(QString)
     def unblockChum(self, handle):
@@ -2902,8 +2904,9 @@ class PesterWindow(MovingWindow):
             self.trollslum.removeTroll(handle)
         self.config.addChum(chum)
         self.chumList.addChum(chum)
-        self.moodRequest.emit(chum)
-        self.unblockedChum.emit(handle)
+        if not self.config.irc_compatibility_mode():
+            self.moodRequest.emit(chum)
+            self.unblockedChum.emit(handle)
 
     @QtCore.pyqtSlot(bool)
     def toggleIdle(self, idle):
@@ -2968,7 +2971,7 @@ class PesterWindow(MovingWindow):
             # might affect, but I've been using it for months and haven't
             # noticed any issues....
             handle = convo.chum.handle
-            if self.isBot(handle):
+            if self.isBot(handle) and not self.config.irc_compatibility_mode():
                 # Don't send these idle messages.
                 continue
             # karxi: Now we just use 'handle' instead of 'h'.
@@ -3439,15 +3442,20 @@ class PesterWindow(MovingWindow):
             curnotify = self.config.notifyOptions()
             if notifysetting != curnotify:
                 self.config.set("notifyOptions", notifysetting)
-            # low bandwidth
-            bandwidthsetting = self.optionmenu.bandwidthcheck.isChecked()
-            curbandwidth = self.config.lowBandwidth()
-            if bandwidthsetting != curbandwidth:
-                self.config.set("lowBandwidth", bandwidthsetting)
-                if bandwidthsetting:
+            # IRC compatibility (previously low bandwidth)
+            irc_mode_setting = self.optionmenu.irc_mode_check.isChecked()
+            current_irc_mode = self.config.irc_compatibility_mode()
+            if irc_mode_setting != current_irc_mode:
+                self.config.set("irc_compatibility_mode", irc_mode_setting)
+                if irc_mode_setting:
                     self.leftChannel.emit("#pesterchum")
                 else:
                     self.joinChannel.emit("#pesterchum")
+            # Force prefix
+            force_prefix_setting = self.optionmenu.force_prefix_check.isChecked()
+            current_prefix_setting = self.config.force_prefix()
+            if force_prefix_setting != current_prefix_setting:
+                self.config.set("force_prefix", force_prefix_setting)
             # nickserv
             autoidentify = self.optionmenu.autonickserv.isChecked()
             nickservpass = self.optionmenu.nickservpass.text()

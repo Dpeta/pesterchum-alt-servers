@@ -829,25 +829,26 @@ class PesterIRC(QtCore.QThread):
         )
         self.connected.emit()  # Alert main thread that we've connected.
         profile = self.mainwindow.profile()
-        if not self.mainwindow.config.lowBandwidth():
-            # Negotiate capabilities
-            self._send_irc.cap("REQ", "message-tags")
-            self._send_irc.cap(
-                "REQ", "draft/metadata-notify-2"
-            )  # <--- Not required in the unreal5 module implementation
-            self._send_irc.cap("REQ", "pesterchum-tag")  # <--- Currently not using this
-            self._send_irc.cap("REQ", "twitch.tv/membership")  # Twitch silly
-            self._send_irc.join("#pesterchum")
-            # Get mood
-            mood = profile.mood.value_str()
-            # Moods via metadata
-            self._send_irc.metadata("*", "sub", "mood")
-            self._send_irc.metadata("*", "set", "mood", mood)
-            # Color via metadata
-            self._send_irc.metadata("*", "sub", "color")
-            self._send_irc.metadata("*", "set", "color", profile.color.name())
-            # Backwards compatible moods
-            self._send_irc.privmsg("#pesterchum", f"MOOD >{mood}")
+        if self.mainwindow.config.irc_compatibility_mode():
+            return
+        # Negotiate capabilities
+        self._send_irc.cap("REQ", "message-tags")
+        self._send_irc.cap(
+            "REQ", "draft/metadata-notify-2"
+        )  # <--- Not required in the unreal5 module implementation
+        self._send_irc.cap("REQ", "pesterchum-tag")  # <--- Currently not using this
+        self._send_irc.cap("REQ", "twitch.tv/membership")  # Twitch silly
+        self._send_irc.join("#pesterchum")
+        # Get mood
+        mood = profile.mood.value_str()
+        # Moods via metadata
+        self._send_irc.metadata("*", "sub", "mood")
+        self._send_irc.metadata("*", "set", "mood", mood)
+        # Color via metadata
+        self._send_irc.metadata("*", "sub", "color")
+        self._send_irc.metadata("*", "set", "color", profile.color.name())
+        # Backwards compatible moods
+        self._send_irc.privmsg("#pesterchum", f"MOOD >{mood}")
 
     def _featurelist(self, _target, _handle, *params):
         """Numerical reply 005 RPL_ISUPPORT to communicate supported server features.
@@ -857,8 +858,8 @@ class PesterIRC(QtCore.QThread):
         """
         features = params[:-1]
         PchumLog.info("Server _featurelist: %s", features)
-        for feature in features:
-            if feature.casefold().startswith("metadata"):
+        if not self.metadata_supported:
+            if any(feature.startswith("METADATA") for feature in features):
                 PchumLog.info("Server supports metadata.")
                 self.metadata_supported = True
 
