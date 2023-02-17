@@ -1568,9 +1568,12 @@ class PesterOptions(QtWidgets.QDialog):
         current_audio_device = self.config.audioDevice()
         active_index = None
         try:
-            for i, output in enumerate(QtMultimedia.QMediaDevices.audioOutputs()):
-                self.audioDeviceBox.addItem(f"{output.description()}", output.id())
-                if output.id() == current_audio_device:
+            for i, device in enumerate(QtMultimedia.QMediaDevices.audioOutputs()):
+                self.audioDeviceBox.addItem(f"{device.description()}", device.id())
+                if (
+                    device.id() == current_audio_device
+                    and device.Mode == QtMultimedia.QAudioDevice.Mode.Output
+                ):
                     active_index = i
             if active_index is not None:
                 self.audioDeviceBox.setCurrentIndex(active_index)
