@@ -1,12 +1,13 @@
 import re
+import logging
 from os import remove
 
 try:
-    from PyQt6 import QtCore, QtGui, QtWidgets
+    from PyQt6 import QtCore, QtGui, QtWidgets, QtMultimedia
     from PyQt6.QtGui import QAction
 except ImportError:
     print("PyQt5 fallback (menus.py)")
-    from PyQt5 import QtCore, QtGui, QtWidgets
+    from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
     from PyQt5.QtWidgets import QAction
 
 import ostools
@@ -20,6 +21,8 @@ from parsetools import lexMessage
 
 QString = str
 _datadir = ostools.getDataDir()
+# Logger
+PchumLog = logging.getLogger("pchumLogger")
 
 
 class PesterQuirkItem(QtWidgets.QTreeWidgetItem):
@@ -1559,6 +1562,21 @@ class PesterOptions(QtWidgets.QDialog):
 
         # Sound
         widget = QtWidgets.QWidget()
+        # Choose audio device
+        audioDeviceLabel = QtWidgets.QLabel("Audio output device:")
+        self.audioDeviceBox = QtWidgets.QComboBox(self)
+        current_audio_device = self.config.audioDevice()
+        active_index = None
+        try:
+            for i, output in enumerate(QtMultimedia.QMediaDevices.audioOutputs()):
+                self.audioDeviceBox.addItem(f"{output.description()}", output.id())
+                if output.id() == current_audio_device:
+                    active_index = i
+            if active_index is not None:
+                self.audioDeviceBox.setCurrentIndex(active_index)
+        except AttributeError:
+            PchumLog.warning("Can't get audio devices, not using PyQt6 QtMultimedia?")
+
         layout_sound = QtWidgets.QVBoxLayout(widget)
         layout_sound.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_sound.addWidget(self.soundcheck)
@@ -1574,6 +1592,10 @@ class PesterOptions(QtWidgets.QDialog):
         layout_indent.setContentsMargins(22, 0, 0, 0)
         layout_sound.addLayout(layout_indent)
         layout_sound.addSpacing(15)
+        layout_audioDevice = QtWidgets.QHBoxLayout()
+        layout_audioDevice.addWidget(audioDeviceLabel)
+        layout_audioDevice.addWidget(self.audioDeviceBox)
+        layout_sound.addLayout(layout_audioDevice)
         mvol = QtWidgets.QLabel("Master Volume:", self)
         # If we can't set the volume, grey this out as well
         # ~mvol.setEnabled(parent.canSetVolume())

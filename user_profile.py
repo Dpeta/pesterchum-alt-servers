@@ -524,6 +524,15 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
     def volume(self):
         return self.config.get("volume", 100)
 
+    def audioDevice(self):
+        """Return audio device ID.
+
+        Can't store a QByteArray, so decode/encoding is required."""
+        device = self.config.get("audioDevice", None)
+        if device:
+            device = device.encode(encoding="utf-8")
+        return device
+
     def trayMessage(self):
         return self.config.get("traymsg", True)
 

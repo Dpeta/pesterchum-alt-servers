@@ -2451,6 +2451,10 @@ class PesterWindow(MovingWindow):
             self.honksound,
         ]
 
+        audio_device = self.config.audioDevice()
+        if audio_device:
+            self.setAudioDevice(audio_device)
+
     def setVolume(self, vol_percent):
         vol = vol_percent / 100.0
         for sound in self.sounds:
@@ -2465,6 +2469,18 @@ class PesterWindow(MovingWindow):
                         sound.setVolume(vol)
             except Exception as err:
                 PchumLog.warning("Couldn't set volume: %s", err)
+
+    def setAudioDevice(self, device_id: bytes):
+        """Sets the audio device for all sound effects, only works with QtMultimedia.
+
+        Device_id is an unique identifier for the audio device in bytes."""
+        if "QtMultimedia" not in globals():
+            PchumLog.warning("Not using QtMultimedia, can't set audio device.")
+            return
+        for output in QtMultimedia.QMediaDevices.audioOutputs():
+            if device_id == output.id():
+                for sound in self.sounds:
+                    sound.setAudioDevice(output)
 
     def canSetVolume(self):
         """Returns the state of volume setting capabilities."""
@@ -3314,6 +3330,12 @@ class PesterWindow(MovingWindow):
             if volumesetting != curvolume:
                 self.config.set("volume", volumesetting)
                 self.setVolume(volumesetting)
+            # Audio device
+            audio_device_id = self.optionmenu.audioDeviceBox.currentData()
+            # ID is a QByteArray, but we can't store that, so it needs to be decoded first.
+            if audio_device_id:
+                self.config.set("audioDevice", str(audio_device_id, "utf-8"))
+                self.setAudioDevice(audio_device_id)
             # timestamps
             timestampsetting = self.optionmenu.timestampcheck.isChecked()
             self.config.set("showTimeStamps", timestampsetting)
