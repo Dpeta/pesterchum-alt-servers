@@ -2403,16 +2403,14 @@ class PesterWindow(MovingWindow):
 
         # Use the class we chose to build the sound set.
         try:
-            if "pygame" in sys.modules:
+            if "pygame" in globals():
                 if soundclass == pygame.mixer.Sound:
                     self.alarm = soundclass(self.theme["main/sounds/alertsound"])
                     self.memosound = soundclass(self.theme["main/sounds/memosound"])
                     self.namesound = soundclass("themes/namealarm.wav")
                     self.ceasesound = soundclass(self.theme["main/sounds/ceasesound"])
                     self.honksound = soundclass("themes/honk.wav")
-            if ("PyQt6.QtMultimedia" in sys.modules) or (
-                "PyQt5.QtMultimedia" in sys.modules
-            ):
+            if "QtMultimedia" in globals():
                 if soundclass == QtMultimedia.QSoundEffect:
                     self.alarm = soundclass()
                     self.memosound = soundclass()
@@ -2459,12 +2457,10 @@ class PesterWindow(MovingWindow):
         vol = vol_percent / 100.0
         for sound in self.sounds:
             try:
-                if "pygame" in sys.modules:
+                if "pygame" in globals():
                     if self.sound_type == pygame.mixer.Sound:
                         sound.set_volume(vol)
-                if ("PyQt6.QtMultimedia" in sys.modules) or (
-                    "PyQt5.QtMultimedia" in sys.modules
-                ):
+                if "QtMultimedia" in globals():
                     if self.sound_type == QtMultimedia.QSoundEffect:
                         sound.setVolume(vol)
             except Exception as err:
@@ -4325,11 +4321,11 @@ class MainProgram(QtCore.QObject):
                 msgbox.exec()
 
         # If we're using pygame for sound we need to init
-        if "pygame" in sys.modules:
+        if "pygame" in globals():
             # we could set the frequency higher but i love how cheesy it sounds
             try:
                 pygame.mixer.init()
-            except (pygame.error, Exception) as err:
+            except Exception as err:
                 print("Warning: No sound! (pygame error: %s)" % err)
 
         self.widget = PesterWindow(options, parent=self, app=self.app)

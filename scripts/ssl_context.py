@@ -35,7 +35,7 @@ def get_ssl_context():
     the system provided ones, instead relying on a bundle installed with the
     python installer."""
     default_context = ssl.create_default_context()
-    if "certifi" not in sys.modules:
+    if "certifi" not in globals():
         return default_context
 
     # Get age of certifi module

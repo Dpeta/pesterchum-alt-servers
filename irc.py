@@ -550,10 +550,14 @@ class PesterIRC(QtCore.QThread):
                 mood = Mood(0)
             self.moodUpdated.emit(nick, mood)
         elif key.casefold() == "color":
-            if QtGui.QColor.isValidColorName(value):
-                color = QtGui.QColor.fromString(value)
-            else:
-                color = QtGui.QColor(0, 0, 0)
+            try:
+                if QtGui.QColor.isValidColorName(value):
+                    color = QtGui.QColor.fromString(value)
+                else:
+                    color = QtGui.QColor(0, 0, 0)
+            except AttributeError:
+                # PyQt5?
+                color = QtGui.QColor(value)
             self.colorUpdated.emit(nick, color)
 
     def _tagmsg(self, prefix, tags, *args):
