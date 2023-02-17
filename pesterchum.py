@@ -3880,8 +3880,8 @@ class PesterWindow(MovingWindow):
                 read_file = server_file.read()
                 server_file.close()
                 server_list_obj = json.loads(read_file)
-            for i in range(len(server_list_obj)):
-                server_list_items.append(server_list_obj[i]["server"])
+            for server in server_list_obj:
+                server_list_items.append(server["server"])
         except:
             if not self.chooseServerAskedToReset:
                 self.chooseServerAskedToReset = True
@@ -3898,8 +3898,8 @@ class PesterWindow(MovingWindow):
             selected_entry = self.removeServerBox.currentIndex()
         except (IndexError, AssertionError) as e:
             PchumLog.warning(e)
-            for i in range(len(server_list_obj)):
-                if server_list_obj[i]["server"] == self.removeServerBox.currentText():
+            for i, server in enumerate(server_list_obj):
+                if server["server"] == self.removeServerBox.currentText():
                     selected_entry = i
 
         if selected_entry is not None:
@@ -3994,8 +3994,8 @@ class PesterWindow(MovingWindow):
                 with open(_datadir + "serverlist.json") as server_file:
                     read_file = server_file.read()
                 server_obj = json.loads(read_file)
-                for i in range(len(server_obj)):
-                    server_list_items.append(server_obj[i]["server"])
+                for server in server_obj:
+                    server_list_items.append(server["server"])
             except:
                 if not self.chooseServerAskedToReset:
                     self.chooseServerAskedToReset = True
@@ -4010,8 +4010,8 @@ class PesterWindow(MovingWindow):
             # removeServerBox
             self.removeServerBox = QtWidgets.QComboBox()
 
-            for i in range(len(server_list_items)):
-                self.removeServerBox.addItem(server_list_items[i])
+            for server in server_list_items:
+                self.removeServerBox.addItem(server)
 
             # Buttons
             cancel = QtWidgets.QPushButton("CANCEL")
@@ -4069,8 +4069,8 @@ class PesterWindow(MovingWindow):
             except (IndexError, AssertionError) as e:
                 # fallback using 'server' as primary key
                 PchumLog.warning(e)
-                for i in range(len(server_obj)):
-                    if server_obj[i]["server"] == self.serverBox.currentText():
+                for i, server in enumerate(server_obj):
+                    if server["server"] == self.serverBox.currentText():
                         selected_entry = i
 
             try:
@@ -4116,8 +4116,8 @@ class PesterWindow(MovingWindow):
             with open(_datadir + "serverlist.json") as server_file:
                 read_file = server_file.read()
             server_obj = json.loads(read_file)
-            for i in range(len(server_obj)):
-                server_list_items.append(server_obj[i]["server"])
+            for server in server_obj:
+                server_list_items.append(server["server"])
         except:
             PchumLog.exception("")
             if not self.chooseServerAskedToReset:
@@ -4133,8 +4133,8 @@ class PesterWindow(MovingWindow):
         # Serverbox
         self.serverBox = QtWidgets.QComboBox()
 
-        for i in range(len(server_list_items)):
-            self.serverBox.addItem(server_list_items[i])
+        for server in server_list_items:
+            self.serverBox.addItem(server)
 
         self.serverBox.addItem("Add a server [Prompt]")
         self.serverBox.addItem("Remove a server [Prompt]")

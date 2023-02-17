@@ -221,9 +221,9 @@ class pesterQuirks:
                         # print("excludes: " + str(excludes))
                         # print("sendparts: " + str(sendparts))
                         # print("recvparts: " + str(recvparts))
-                        for part in range(0, len(excludes)):
+                        for part, exclude in enumerate(excludes):
                             string += recvparts[part]
-                            string += excludes[part].group()
+                            string += exclude.group()
                         string += recvparts[-1]
                     else:
                         # No split, apply like normal.

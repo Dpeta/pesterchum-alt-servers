@@ -166,6 +166,7 @@ enable=F, # Fatal
        consider-using-in,
        consider-using-join,
        consider-merging-isinstance,
+       consider-using-enumerate,
        isinstance-second-argument-not-valid-type,
        unidiomatic-typecheck,
        use-list-literal,
