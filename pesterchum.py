@@ -2473,13 +2473,10 @@ class PesterWindow(MovingWindow):
         if "QtMultimedia" not in globals():
             PchumLog.warning("Not using QtMultimedia, can't set audio device.")
             return
-        for device in QtMultimedia.QMediaDevices.audioOutputs():
-            if (
-                device_id == device.id()
-                and device.Mode == QtMultimedia.QAudioDevice.Mode.Output
-            ):
+        for output in QtMultimedia.QMediaDevices.audioOutputs():
+            if device_id == output.id():
                 for sound in self.sounds:
-                    sound.setAudioDevice(device)
+                    sound.setAudioDevice(output)
 
     def canSetVolume(self):
         """Returns the state of volume setting capabilities."""
