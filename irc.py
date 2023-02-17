@@ -833,8 +833,6 @@ class PesterIRC(QtCore.QThread):
         )
         self.connected.emit()  # Alert main thread that we've connected.
         profile = self.mainwindow.profile()
-        if self.mainwindow.config.irc_compatibility_mode():
-            return
         # Negotiate capabilities
         self._send_irc.cap("REQ", "message-tags")
         self._send_irc.cap(
@@ -842,7 +840,6 @@ class PesterIRC(QtCore.QThread):
         )  # <--- Not required in the unreal5 module implementation
         self._send_irc.cap("REQ", "pesterchum-tag")  # <--- Currently not using this
         self._send_irc.cap("REQ", "twitch.tv/membership")  # Twitch silly
-        self._send_irc.join("#pesterchum")
         # Get mood
         mood = profile.mood.value_str()
         # Moods via metadata
@@ -852,6 +849,9 @@ class PesterIRC(QtCore.QThread):
         self._send_irc.metadata("*", "sub", "color")
         self._send_irc.metadata("*", "set", "color", profile.color.name())
         # Backwards compatible moods
+        if self.mainwindow.config.irc_compatibility_mode():
+            return
+        self._send_irc.join("#pesterchum")
         self._send_irc.privmsg("#pesterchum", f"MOOD >{mood}")
 
     def _featurelist(self, _target, _handle, *params):
