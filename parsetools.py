@@ -24,7 +24,6 @@ PchumLog = logging.getLogger("pchumLogger")
 
 # I'll clean up the things that are no longer needed once the transition is
 # actually finished.
-QString = str
 
 _ctag_begin = re.compile(r"(?i)<c=(.*?)>")
 # _gtag_begin = re.compile(r"(?i)<g[a-f]>")
@@ -829,7 +828,7 @@ def kxhandleInput(ctx, text=None, flavor=None, irc_compatible=False):
         # if ceased, rebegin
         if hasattr(ctx, "chumopen") and not ctx.chumopen:
             if not irc_compatible:
-                ctx.mainwindow.newConvoStarted.emit(QString(ctx.title()), True)
+                ctx.mainwindow.newConvoStarted.emit(str(ctx.title()), True)
             ctx.setChumOpen(True)
 
     # Post-process and send the messages.

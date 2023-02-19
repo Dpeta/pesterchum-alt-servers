@@ -19,7 +19,6 @@ from version import _pcVersion
 from convo import PesterInput, PesterText
 from parsetools import lexMessage
 
-QString = str
 _datadir = ostools.getDataDir()
 # Logger
 PchumLog = logging.getLogger("pchumLogger")
@@ -1815,7 +1814,7 @@ class PesterUserlist(QtWidgets.QDialog):
         self.searchbox = QtWidgets.QLineEdit(self)
         # self.searchbox.setStyleSheet(theme["convo/input/style"]) # which style is better?
         self.searchbox.setPlaceholderText("Search")
-        self.searchbox.textChanged["QString"].connect(self.updateUsers)
+        self.searchbox.textChanged[str].connect(self.updateUsers)
 
         self.label = QtWidgets.QLabel("USERLIST")
         self.userarea = RightClickList(self)
@@ -1847,7 +1846,7 @@ class PesterUserlist(QtWidgets.QDialog):
 
         self.mainwindow.namesUpdated.connect(self.updateUsers)
 
-        self.mainwindow.userPresentSignal["QString", "QString", "QString"].connect(
+        self.mainwindow.userPresentSignal[str, str, str].connect(
             self.updateUserPresent
         )
         self.updateUsers()
@@ -1876,7 +1875,7 @@ class PesterUserlist(QtWidgets.QDialog):
                 self.userarea.addItem(item)
         self.userarea.sortItems()
 
-    @QtCore.pyqtSlot(QString, QString, QString)
+    @QtCore.pyqtSlot(str, str, str)
     def updateUserPresent(self, handle, channel, update):
         h = str(handle)
         c = str(channel)
@@ -1928,8 +1927,8 @@ class PesterUserlist(QtWidgets.QDialog):
             return
         self.pesterChum.emit(cur.text())
 
-    addChum = QtCore.pyqtSignal("QString")
-    pesterChum = QtCore.pyqtSignal("QString")
+    addChum = QtCore.pyqtSignal(str)
+    pesterChum = QtCore.pyqtSignal(str)
 
 
 class MemoListItem(QtWidgets.QTreeWidgetItem):

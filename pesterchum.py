@@ -163,8 +163,6 @@ BOTNAMES.extend(SERVICES)
 _CONSOLE = False
 _CONSOLE_ENV = {}
 _CONSOLE_ENV["PAPP"] = None
-# Python 3
-QString = str
 # Command line arguments
 _ARGUMENTS = parser.parse_args()
 
@@ -1211,7 +1209,7 @@ class trollSlum(chumArea):
     #     TypeError: connect() failed between triggered(bool) and unblockChumSignal()
     # I'm not sure why this was here in the first place-
     # Does removing it break anything else...?
-    # unblockChumSignal = QtCore.pyqtSignal('QString')
+    # unblockChumSignal = QtCore.pyqtSignal(str)
 
 
 class TrollSlumWindow(QtWidgets.QFrame):
@@ -1707,7 +1705,7 @@ class PesterWindow(MovingWindow):
             # We probably tried to interact with a call not available on this kernel.
             PchumLog.exception("")
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def updateMsg(self, ver, url):
         if not hasattr(self, "updatemenu"):
             self.updatemenu = None
@@ -2032,13 +2030,13 @@ class PesterWindow(MovingWindow):
         )
         convoWindow.windowClosed[str].connect(self.closeConvo)
         self.convos[chum.handle] = convoWindow
-        if chum.handle.upper() in BOTNAMES or self.config.irc_compatibility_mode():
+        if chum.handle.upper() in BOTNAMES:
             convoWindow.toggleQuirks(True)
             convoWindow.quirksOff.setChecked(True)
-            if str(chum.handle).upper() in CUSTOMBOTS:
-                self.newConvoStarted.emit(QString(chum.handle), initiated)
+            if not self.config.irc_compatibility_mode() or chum.handle.upper() in CUSTOMBOTS:
+                self.newConvoStarted.emit(chum.handle, initiated)
         else:
-            self.newConvoStarted.emit(QString(chum.handle), initiated)
+            self.newConvoStarted.emit(chum.handle, initiated)
         convoWindow.show()
 
     def createTabWindow(self):
@@ -2608,7 +2606,7 @@ class PesterWindow(MovingWindow):
             chum.color = color
         self.newConversation(chum)
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def closeConvo(self, handle):
         h = str(handle)
         try:
@@ -2633,7 +2631,7 @@ class PesterWindow(MovingWindow):
         self.chatlog.finish(h)
         del self.convos[h]
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def closeMemo(self, channel):
         c = str(channel)
         self.chatlog.finish(c)
@@ -2656,28 +2654,28 @@ class PesterWindow(MovingWindow):
         del self.tabmemo
         self.tabmemo = None
 
-    @QtCore.pyqtSlot(QString, Mood)
+    @QtCore.pyqtSlot(str, Mood)
     def updateMoodSlot(self, handle, mood):
         h = str(handle)
         self.updateMood(h, mood)
 
-    @QtCore.pyqtSlot(QString, QtGui.QColor)
+    @QtCore.pyqtSlot(str, QtGui.QColor)
     def updateColorSlot(self, handle, color):
         PchumLog.debug("updateColorSlot(%s, %s)", handle, color)
         self.changeColor(handle, color)
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def deliverMessage(self, handle, msg):
         h = str(handle)
         m = str(msg)
         self.newMessage(h, m)
 
-    @QtCore.pyqtSlot(QString, QString, QString)
+    @QtCore.pyqtSlot(str, str, str)
     def deliverMemo(self, chan, handle, msg):
         (c, h, m) = (str(chan), str(handle), str(msg))
         self.newMemoMsg(c, h, m)
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def deliverNotice(self, handle, msg):
         h = str(handle)
         m = str(msg)
@@ -2710,7 +2708,7 @@ class PesterWindow(MovingWindow):
             t = self.tm.Toast("%s:" % h, m)
             t.show()
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def deliverInvite(self, handle, channel):
         msgbox = QtWidgets.QMessageBox()
         msgbox.setText("You're invited!")
@@ -2739,25 +2737,25 @@ class PesterWindow(MovingWindow):
         if ret == QtWidgets.QMessageBox.StandardButton.Ok:
             self.newMemo(str(channel), "+0:00")
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def chanInviteOnly(self, channel):
         self.inviteOnlyChan.emit(channel)
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def cannotSendToChan(self, channel, msg):
         self.deliverMemo(channel, "ChanServ", msg)
 
     # Unused and redefined.
-    # @QtCore.pyqtSlot(QString, QString)
+    # @QtCore.pyqtSlot(str, str)
     # def modesUpdated(self, channel, modes):
     #    self.modesUpdated.emit(channel, modes)
-    @QtCore.pyqtSlot(QString, QString, QString)
+    @QtCore.pyqtSlot(str, str, str)
     def timeCommand(self, chan, handle, command):
         (c, h, cmd) = (str(chan), str(handle), str(command))
         if self.memos[c]:
             self.memos[c].timeUpdate(h, cmd)
 
-    @QtCore.pyqtSlot(QString, QString, QString)
+    @QtCore.pyqtSlot(str, str, str)
     def quirkDisable(self, channel, msg, op):
         (c, msg, op) = (str(channel), str(msg), str(op))
         if c not in self.memos:
@@ -2765,7 +2763,7 @@ class PesterWindow(MovingWindow):
         memo = self.memos[c]
         memo.quirkDisable(op, msg)
 
-    @QtCore.pyqtSlot(QString, PesterList)
+    @QtCore.pyqtSlot(str, PesterList)
     def updateNames(self, channel, names):
         c = str(channel)
         # update name DB
@@ -2773,7 +2771,7 @@ class PesterWindow(MovingWindow):
         # warn interested party of names
         self.namesUpdated.emit(c)
 
-    @QtCore.pyqtSlot(QString, QString, QString)
+    @QtCore.pyqtSlot(str, str, str)
     def userPresentUpdate(self, handle, channel, update):
         c = str(channel)
         n = str(handle)
@@ -2861,7 +2859,7 @@ class PesterWindow(MovingWindow):
                 self.addChum(chum)
             self.addchumdialog = None
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def removeChum(self, chumlisting):
         self.config.removeChum(chumlisting)
 
@@ -2874,7 +2872,7 @@ class PesterWindow(MovingWindow):
         if ok:
             self.sendMessage.emit("REPORT {} {}".format(handle, reason), "calSprite")
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def blockChum(self, handle):
         h = str(handle)
         self.config.addBlocklist(h)
@@ -2897,7 +2895,7 @@ class PesterWindow(MovingWindow):
         if not self.config.irc_compatibility_mode():
             self.blockedChum.emit(handle)
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def unblockChum(self, handle):
         h = str(handle)
         self.config.delBlocklist(h)
@@ -3103,13 +3101,13 @@ class PesterWindow(MovingWindow):
             self.requestNames.emit("#pesterchum")
             self.allusers.show()
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def userListAdd(self, handle):
         h = str(handle)
         chum = PesterProfile(h, chumdb=self.chumdb)
         self.addChum(chum)
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def userListPester(self, handle):
         h = str(handle)
         self.newConversation(h)
@@ -3724,7 +3722,7 @@ class PesterWindow(MovingWindow):
             )
         )
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def nickCollision(self, handle, tmphandle):
         if hasattr(self, "loadingscreen"):
             if self.loadingscreen is not None:
@@ -3747,7 +3745,7 @@ class PesterWindow(MovingWindow):
             h = str(handle)
             self.changeProfile(collision=h)
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def getSvsnickedOn(self, oldhandle, newhandle):
         if hasattr(self, "loadingscreen"):
             if self.loadingscreen is not None:
@@ -3765,7 +3763,7 @@ class PesterWindow(MovingWindow):
         if not self.chooseprofile:
             self.changeProfile(svsnick=(oldhandle, newhandle))
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def myHandleChanged(self, handle):
         # Update nick in channels
         for memo in self.memos.keys():
@@ -3800,7 +3798,7 @@ class PesterWindow(MovingWindow):
         # msg.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
         msg.exec()
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def forbiddenchannel(self, channel, reason):
         self.forbiddenChan.emit(channel, reason)
 

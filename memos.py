@@ -30,9 +30,6 @@ PchumLog = logging.getLogger("pchumLogger")
 _valid_memo_msg_start = re.compile(
     r"^<c=((\d+,\d+,\d+)|(#([a-fA-F0-9]{6})|(#[a-fA-F0-9]{3})))>([A-Z]{3}):\s"
 )
-# Python 3
-QString = str
-
 
 def delta2txt(d, format="pc"):
     if isinstance(d, mysteryTime):
@@ -1439,7 +1436,7 @@ class PesterMemo(PesterConvo):
             irc_compatible=self.mainwindow.config.irc_compatibility_mode(),
         )
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def namesUpdated(self, channel):
         c = str(channel)
         if c.lower() != self.channel.lower():
@@ -1451,13 +1448,13 @@ class PesterMemo(PesterConvo):
         for n in self.mainwindow.namesdb[self.channel]:
             self.addUser(n)
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def modesUpdated(self, channel, modes):
         PchumLog.debug("modesUpdated(%s, %s)", channel, modes)
         if channel.lower() == self.channel.lower():
             self.updateChanModes(modes, None)
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def closeInviteOnly(self, channel):
         c = str(channel)
         if c.lower() == self.channel.lower():
@@ -1480,7 +1477,7 @@ class PesterMemo(PesterConvo):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
             msgbox.exec()
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def closeForbidden(self, channel, reason):
         c = str(channel)
         if c.lower() == self.channel.lower():
@@ -1571,7 +1568,7 @@ class PesterMemo(PesterConvo):
             self.mainwindow.chatlog.log(self.channel, msg)
         del self.netsplit
 
-    @QtCore.pyqtSlot(QString, QString, QString)
+    @QtCore.pyqtSlot(str, str, str)
     def userPresentChange(self, handle, channel, update):
         # print("handle: %s, channel: %s, update: %s" % (handle, channel, update))
         h = str(handle)
