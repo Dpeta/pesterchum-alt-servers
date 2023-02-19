@@ -3587,7 +3587,14 @@ class PesterWindow(MovingWindow):
         if hasattr(self, "trollslum") and self.trollslum:
             self.trollslum.close()
         self.chooseprofile = None
-        self.profileChanged.emit()
+
+        # Instead of emiting profileChanged, do:
+        self.changeNick.emit(self.profile().handle)  # change nick
+        self.closeConversations(True)
+        self.doAutoIdentify()
+        self.autoJoinDone = True
+        self.doAutoJoins()
+        self.moodUpdated.emit()
 
     @QtCore.pyqtSlot()
     def showTrollSlum(self):
@@ -4206,7 +4213,6 @@ class PesterWindow(MovingWindow):
     sendNotice = QtCore.pyqtSignal(str, str)
     sendCTCP = QtCore.pyqtSignal(str, str)
     convoClosed = QtCore.pyqtSignal(str)
-    profileChanged = QtCore.pyqtSignal()
     animationSetting = QtCore.pyqtSignal(bool)
     moodRequest = QtCore.pyqtSignal(PesterProfile)
     moodsRequest = QtCore.pyqtSignal(PesterList)
@@ -4230,6 +4236,7 @@ class PesterWindow(MovingWindow):
     forbiddenChan = QtCore.pyqtSignal(str, str)
     closeSignal = QtCore.pyqtSignal()
     disconnectIRC = QtCore.pyqtSignal()
+    changeNick = QtCore.pyqtSignal(str)
     gainAttention = QtCore.pyqtSignal(QtWidgets.QWidget)
     pingServer = QtCore.pyqtSignal()
     setAway = QtCore.pyqtSignal(bool)
@@ -4399,7 +4406,6 @@ class MainProgram(QtCore.QObject):
             (widget.sendCTCP, irc.send_ctcp),
             (widget.newConvoStarted, irc.start_convo),
             (widget.convoClosed, irc.end_convo),
-            (widget.profileChanged, irc.update_profile),
             (widget.moodRequest, irc.get_mood),
             (widget.moodsRequest, irc.get_moods),
             (widget.moodUpdated, irc.update_mood),
@@ -4418,6 +4424,7 @@ class MainProgram(QtCore.QObject):
             (widget.setAway, irc.set_away),
             (widget.killSomeQuirks, irc.kill_some_quirks),
             (widget.disconnectIRC, irc.disconnect_irc),
+            (widget.changeNick, irc.send_nick),
             # Main window --> IRC
             (irc.connected, widget.connected),
             (irc.askToConnect, widget.connectAnyway),

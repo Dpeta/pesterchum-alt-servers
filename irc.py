@@ -414,16 +414,6 @@ class PesterIRC(QtCore.QThread):
         self._send_irc.privmsg(handle, "PESTERCHUM:CEASE")
 
     @QtCore.pyqtSlot()
-    def update_profile(self):
-        """....update profile? this shouldn't be a thing."""
-        self._send_irc.nick(self.mainwindow.profile().handle)
-        self.mainwindow.closeConversations(True)
-        self.mainwindow.doAutoIdentify()
-        self.mainwindow.autoJoinDone = False
-        self.mainwindow.doAutoJoins()
-        self.update_mood()
-
-    @QtCore.pyqtSlot()
     def update_mood(self):
         """Update and send mood, slot is called from main thread."""
         mood = self.mainwindow.profile().mood.value_str()
@@ -520,6 +510,10 @@ class PesterIRC(QtCore.QThread):
         self._send_irc.quit(f"{_pcVersion} <3")
         self._end = True
         self._close()
+
+    @QtCore.pyqtSlot(str)
+    def send_nick(self, nick: str):
+        self._send_irc.nick(nick)
 
     def _notice(self, nick, chan, msg):
         """Standard IRC 'NOTICE' message, primarily used for automated replies from services."""
