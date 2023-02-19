@@ -1152,8 +1152,8 @@ class PesterConvo(QtWidgets.QFrame):
     def toggleMute(self, toggled):
         self.notifications_muted = toggled
 
-    messageSent = QtCore.pyqtSignal("QString", "QString")
-    windowClosed = QtCore.pyqtSignal("QString")
+    messageSent = QtCore.pyqtSignal(str, str)
+    windowClosed = QtCore.pyqtSignal(str)
 
     aligndict = {
         "h": {

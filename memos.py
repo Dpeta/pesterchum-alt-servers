@@ -1461,7 +1461,7 @@ class PesterMemo(PesterConvo):
     def closeInviteOnly(self, channel):
         c = str(channel)
         if c.lower() == self.channel.lower():
-            self.mainwindow.inviteOnlyChan["QString"].disconnect(self.closeInviteOnly)
+            self.mainwindow.inviteOnlyChan[str].disconnect(self.closeInviteOnly)
             if self.parent():
                 PchumLog.info(self.channel)
                 i = self.parent().tabIndices[self.channel]
@@ -1484,7 +1484,7 @@ class PesterMemo(PesterConvo):
     def closeForbidden(self, channel, reason):
         c = str(channel)
         if c.lower() == self.channel.lower():
-            self.mainwindow.forbiddenChan["QString", "QString"].disconnect(
+            self.mainwindow.forbiddenChan[str, str].disconnect(
                 self.closeForbidden
             )
             if self.parent():
@@ -2040,7 +2040,7 @@ class PesterMemo(PesterConvo):
         self.mainwindow.waitingMessages.messageAnswered(self.channel)
         self.windowClosed.emit(self.title())
 
-    windowClosed = QtCore.pyqtSignal("QString")
+    windowClosed = QtCore.pyqtSignal(str)
 
 
 timelist = [

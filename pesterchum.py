@@ -1152,8 +1152,8 @@ class chumArea(RightClickTree):
         self.takeItem(chumLabel)
         self.addItem(chumLabel)
 
-    removeChumSignal = QtCore.pyqtSignal("QString")
-    blockChumSignal = QtCore.pyqtSignal("QString")
+    removeChumSignal = QtCore.pyqtSignal(str)
+    blockChumSignal = QtCore.pyqtSignal(str)
 
 
 class trollSlum(chumArea):
@@ -1295,13 +1295,13 @@ class TrollSlumWindow(QtWidgets.QFrame):
             self.blockChumSignal.emit(handle)
         self.addtrolldialog = None
 
-    blockChumSignal = QtCore.pyqtSignal("QString")
-    unblockChumSignal = QtCore.pyqtSignal("QString")
+    blockChumSignal = QtCore.pyqtSignal(str)
+    unblockChumSignal = QtCore.pyqtSignal(str)
 
 
 class PesterWindow(MovingWindow):
     disconnectIRC = QtCore.pyqtSignal()
-    sendMessage = QtCore.pyqtSignal("QString", "QString")
+    sendMessage = QtCore.pyqtSignal(str, str)
 
     def __init__(self, options, parent=None, app=None):
         super().__init__(
@@ -1596,8 +1596,8 @@ class PesterWindow(MovingWindow):
         self.chumList.itemActivated[QtWidgets.QTreeWidgetItem, int].connect(
             self.pesterSelectedChum
         )
-        self.chumList.removeChumSignal["QString"].connect(self.removeChum)
-        self.chumList.blockChumSignal["QString"].connect(self.blockChum)
+        self.chumList.removeChumSignal[str].connect(self.removeChum)
+        self.chumList.blockChumSignal[str].connect(self.blockChum)
 
         self.addChumButton = QtWidgets.QPushButton(
             self.theme["main/addchum/text"], self
@@ -1662,7 +1662,7 @@ class PesterWindow(MovingWindow):
         # if not ostools.isOSXLeopard():
         #    QtCore.QTimer.singleShot(1000, self.mspacheck)
 
-        self.pcUpdate["QString", "QString"].connect(self.updateMsg)
+        self.pcUpdate[str, str].connect(self.updateMsg)
 
         self.mychumhandleLabel.adjustSize()  # Required so "CHUMHANDLE:" regardless of style-sheet.
         self.moodsLabel.adjustSize()  # Required so "MOOD:" regardless of style-sheet.
@@ -2027,10 +2027,10 @@ class PesterWindow(MovingWindow):
             self.tabconvo.show()
         else:
             convoWindow = PesterConvo(chum, initiated, self)
-        convoWindow.messageSent["QString", "QString"].connect(
-            self.sendMessage["QString", "QString"]
+        convoWindow.messageSent[str, str].connect(
+            self.sendMessage[str, str]
         )
-        convoWindow.windowClosed["QString"].connect(self.closeConvo)
+        convoWindow.windowClosed[str].connect(self.closeConvo)
         self.convos[chum.handle] = convoWindow
         if chum.handle.upper() in BOTNAMES or self.config.irc_compatibility_mode():
             convoWindow.toggleQuirks(True)
@@ -2134,15 +2134,15 @@ class PesterWindow(MovingWindow):
         else:
             memoWindow = PesterMemo(channel, timestr, self, None)
         # connect signals
-        self.inviteOnlyChan["QString"].connect(memoWindow.closeInviteOnly)
-        self.forbiddenChan["QString", "QString"].connect(memoWindow.closeForbidden)
-        memoWindow.messageSent["QString", "QString"].connect(
-            self.sendMessage["QString", "QString"]
+        self.inviteOnlyChan[str].connect(memoWindow.closeInviteOnly)
+        self.forbiddenChan[str, str].connect(memoWindow.closeForbidden)
+        memoWindow.messageSent[str, str].connect(
+            self.sendMessage[str, str]
         )
-        memoWindow.windowClosed["QString"].connect(self.closeMemo)
-        self.namesUpdated["QString"].connect(memoWindow.namesUpdated)
-        self.modesUpdated["QString", "QString"].connect(memoWindow.modesUpdated)
-        self.userPresentSignal["QString", "QString", "QString"].connect(
+        memoWindow.windowClosed[str].connect(self.closeMemo)
+        self.namesUpdated[str].connect(memoWindow.namesUpdated)
+        self.modesUpdated[str, str].connect(memoWindow.modesUpdated)
+        self.userPresentSignal[str, str, str].connect(
             memoWindow.userPresentChange
         )
         # chat client send memo open
@@ -3098,8 +3098,8 @@ class PesterWindow(MovingWindow):
             self.allusers = PesterUserlist(self.config, self.theme, self)
             self.allusers.accepted.connect(self.userListClose)
             self.allusers.rejected.connect(self.userListClose)
-            self.allusers.addChum["QString"].connect(self.userListAdd)
-            self.allusers.pesterChum["QString"].connect(self.userListPester)
+            self.allusers.addChum[str].connect(self.userListAdd)
+            self.allusers.pesterChum[str].connect(self.userListPester)
             self.requestNames.emit("#pesterchum")
             self.allusers.show()
 
@@ -3613,8 +3613,8 @@ class PesterWindow(MovingWindow):
             return
         trolls = [PesterProfile(h) for h in self.config.getBlocklist()]
         self.trollslum = TrollSlumWindow(trolls, self)
-        self.trollslum.blockChumSignal["QString"].connect(self.blockChum)
-        self.trollslum.unblockChumSignal["QString"].connect(self.unblockChum)
+        self.trollslum.blockChumSignal[str].connect(self.blockChum)
+        self.trollslum.unblockChumSignal[str].connect(self.unblockChum)
         self.moodsRequest.emit(PesterList(trolls))
         self.trollslum.show()
 
@@ -4215,41 +4215,41 @@ class PesterWindow(MovingWindow):
         if ret == QtWidgets.QMessageBox.StandardButton.Yes:
             self.parent.restartIRC(verify_hostname=False)
 
-    pcUpdate = QtCore.pyqtSignal("QString", "QString")
+    pcUpdate = QtCore.pyqtSignal(str, str)
     closeToTraySignal = QtCore.pyqtSignal()
-    newConvoStarted = QtCore.pyqtSignal("QString", bool, name="newConvoStarted")
-    sendMessage = QtCore.pyqtSignal("QString", "QString")
-    sendNotice = QtCore.pyqtSignal("QString", "QString")
-    sendCTCP = QtCore.pyqtSignal("QString", "QString")
-    convoClosed = QtCore.pyqtSignal("QString")
+    newConvoStarted = QtCore.pyqtSignal(str, bool, name="newConvoStarted")
+    sendMessage = QtCore.pyqtSignal(str, str)
+    sendNotice = QtCore.pyqtSignal(str, str)
+    sendCTCP = QtCore.pyqtSignal(str, str)
+    convoClosed = QtCore.pyqtSignal(str)
     profileChanged = QtCore.pyqtSignal()
     animationSetting = QtCore.pyqtSignal(bool)
     moodRequest = QtCore.pyqtSignal(PesterProfile)
     moodsRequest = QtCore.pyqtSignal(PesterList)
     moodUpdated = QtCore.pyqtSignal()
     requestChannelList = QtCore.pyqtSignal()
-    requestNames = QtCore.pyqtSignal("QString")
-    namesUpdated = QtCore.pyqtSignal("QString")
-    modesUpdated = QtCore.pyqtSignal("QString", "QString")
-    userPresentSignal = QtCore.pyqtSignal("QString", "QString", "QString")
+    requestNames = QtCore.pyqtSignal(str)
+    namesUpdated = QtCore.pyqtSignal(str)
+    modesUpdated = QtCore.pyqtSignal(str, str)
+    userPresentSignal = QtCore.pyqtSignal(str, str, str)
     mycolorUpdated = QtCore.pyqtSignal()
     trayIconSignal = QtCore.pyqtSignal(int)
-    blockedChum = QtCore.pyqtSignal("QString")
-    unblockedChum = QtCore.pyqtSignal("QString")
-    kickUser = QtCore.pyqtSignal("QString", "QString", "QString")
-    joinChannel = QtCore.pyqtSignal("QString")
-    leftChannel = QtCore.pyqtSignal("QString")
-    setChannelMode = QtCore.pyqtSignal("QString", "QString", "QString")
-    channelNames = QtCore.pyqtSignal("QString")
-    inviteChum = QtCore.pyqtSignal("QString", "QString")
-    inviteOnlyChan = QtCore.pyqtSignal("QString")
-    forbiddenChan = QtCore.pyqtSignal("QString", "QString")
+    blockedChum = QtCore.pyqtSignal(str)
+    unblockedChum = QtCore.pyqtSignal(str)
+    kickUser = QtCore.pyqtSignal(str, str, str)
+    joinChannel = QtCore.pyqtSignal(str)
+    leftChannel = QtCore.pyqtSignal(str)
+    setChannelMode = QtCore.pyqtSignal(str, str, str)
+    channelNames = QtCore.pyqtSignal(str)
+    inviteChum = QtCore.pyqtSignal(str, str)
+    inviteOnlyChan = QtCore.pyqtSignal(str)
+    forbiddenChan = QtCore.pyqtSignal(str, str)
     closeSignal = QtCore.pyqtSignal()
     disconnectIRC = QtCore.pyqtSignal()
     gainAttention = QtCore.pyqtSignal(QtWidgets.QWidget)
     pingServer = QtCore.pyqtSignal()
     setAway = QtCore.pyqtSignal(bool)
-    killSomeQuirks = QtCore.pyqtSignal("QString", "QString")
+    killSomeQuirks = QtCore.pyqtSignal(str, str)
 
 
 class PesterTray(QtWidgets.QSystemTrayIcon):
