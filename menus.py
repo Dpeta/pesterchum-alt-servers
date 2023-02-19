@@ -1846,9 +1846,7 @@ class PesterUserlist(QtWidgets.QDialog):
 
         self.mainwindow.namesUpdated.connect(self.updateUsers)
 
-        self.mainwindow.userPresentSignal[str, str, str].connect(
-            self.updateUserPresent
-        )
+        self.mainwindow.userPresentSignal[str, str, str].connect(self.updateUserPresent)
         self.updateUsers()
 
         self.searchbox.setFocus()

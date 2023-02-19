@@ -31,6 +31,7 @@ _valid_memo_msg_start = re.compile(
     r"^<c=((\d+,\d+,\d+)|(#([a-fA-F0-9]{6})|(#[a-fA-F0-9]{3})))>([A-Z]{3}):\s"
 )
 
+
 def delta2txt(d, format="pc"):
     if isinstance(d, mysteryTime):
         return "?"
@@ -1481,9 +1482,7 @@ class PesterMemo(PesterConvo):
     def closeForbidden(self, channel, reason):
         c = str(channel)
         if c.lower() == self.channel.lower():
-            self.mainwindow.forbiddenChan[str, str].disconnect(
-                self.closeForbidden
-            )
+            self.mainwindow.forbiddenChan[str, str].disconnect(self.closeForbidden)
             if self.parent():
                 PchumLog.info(self.channel)
                 i = self.parent().tabIndices[self.channel]
