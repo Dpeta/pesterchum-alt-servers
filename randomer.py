@@ -77,6 +77,6 @@ class RandomHandler(QtCore.QObject):
                 msgbox.setInformativeText("Try again later :(")
                 msgbox.exec()
                 return
-            name = str(l[1])
+            name = l[1]
             PchumLog.info("Random Encounter name is: %s", name)
             self.mainwindow.newConversation(name)

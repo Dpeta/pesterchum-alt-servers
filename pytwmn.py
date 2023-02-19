@@ -54,8 +54,8 @@ def init(host="127.0.0.1", port=None):
 
 class Notification:
     def __init__(self, title="", msg="", icon=""):
-        self.title = str(title)
-        self.msg = str(msg)
+        self.title = title
+        self.msg = msg
         if icon.startswith("file://"):
             icon = icon[7:]
         self.icon = icon
@@ -68,16 +68,16 @@ class Notification:
         try:
             if self.time is None:
                 s.send(
-                    "<root><title>" + self.title + "</title>"
-                    "<content>" + self.msg + "</content>"
-                    "<icon>" + self.icon + "</icon></root>"
+                    f"<root><title>{self.title}</title>"
+                    f"<content>{self.msg}</content>"
+                    f"<icon>{self.icon}</icon></root>"
                 )
             else:
                 s.send(
-                    "<root><title>" + self.title + "</title>"
-                    "<content>" + self.msg + "</content>"
-                    "<icon>" + self.icon + "</icon>"
-                    "<duration>" + str(self.time) + "</duration></root>"
+                    f"<root><title>{self.title}</title>"
+                    f"<content>{self.msg}</content>"
+                    f"<icon>{self.icon}</icon>"
+                    f"<duration>{self.time}</duration></root>"
                 )
         except:
             raise TwmnError(TwmnError.NO_TWMND)

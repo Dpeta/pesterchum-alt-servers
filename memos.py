@@ -30,8 +30,6 @@ PchumLog = logging.getLogger("pchumLogger")
 _valid_memo_msg_start = re.compile(
     r"^<c=((\d+,\d+,\d+)|(#([a-fA-F0-9]{6})|(#[a-fA-F0-9]{3})))>([A-Z]{3}):\s"
 )
-# Python 3
-QString = str
 
 
 def delta2txt(d, format="pc"):
@@ -242,7 +240,7 @@ class TimeInput(QtWidgets.QLineEdit):
 
     @QtCore.pyqtSlot()
     def setSlider(self):
-        value = str(self.text())
+        value = self.text()
         timed = txt2delta(value)
         if isinstance(timed, mysteryTime):
             self.timeslider.setValue(0)
@@ -1010,10 +1008,9 @@ class PesterMemo(PesterConvo):
         PchumLog.debug("updateChanModes(%s, %s)", modes, op)
         if not hasattr(self, "modes"):
             self.modes = ""
-        chanmodes = list(str(self.modes))
+        chanmodes = list((self.modes))
         if chanmodes and chanmodes[0] == "+":
             chanmodes = chanmodes[1:]
-        modes = str(modes)
         if op:
             systemColor = QtGui.QColor(self.mainwindow.theme["memos/systemMsgColor"])
             chum = self.mainwindow.profile()
@@ -1430,7 +1427,7 @@ class PesterMemo(PesterConvo):
 
     @QtCore.pyqtSlot()
     def sentMessage(self):
-        text = str(self.textInput.text())
+        text = self.textInput.text()
 
         return parsetools.kxhandleInput(
             self,
@@ -1439,10 +1436,9 @@ class PesterMemo(PesterConvo):
             irc_compatible=self.mainwindow.config.irc_compatibility_mode(),
         )
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def namesUpdated(self, channel):
-        c = str(channel)
-        if c.lower() != self.channel.lower():
+        if channel.lower() != self.channel.lower():
             return
         # get namesdb (unused)
         # namesdb = self.mainwindow.namesdb
@@ -1451,17 +1447,16 @@ class PesterMemo(PesterConvo):
         for n in self.mainwindow.namesdb[self.channel]:
             self.addUser(n)
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def modesUpdated(self, channel, modes):
         PchumLog.debug("modesUpdated(%s, %s)", channel, modes)
         if channel.lower() == self.channel.lower():
             self.updateChanModes(modes, None)
 
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def closeInviteOnly(self, channel):
-        c = str(channel)
-        if c.lower() == self.channel.lower():
-            self.mainwindow.inviteOnlyChan["QString"].disconnect(self.closeInviteOnly)
+        if channel.lower() == self.channel.lower():
+            self.mainwindow.inviteOnlyChan[str].disconnect(self.closeInviteOnly)
             if self.parent():
                 PchumLog.info(self.channel)
                 i = self.parent().tabIndices[self.channel]
@@ -1472,7 +1467,7 @@ class PesterMemo(PesterConvo):
             msgbox.setStyleSheet(
                 "QMessageBox{ %s }" % self.mainwindow.theme["main/defaultwindow/style"]
             )
-            msgbox.setText("%s: Invites only!" % (c))
+            msgbox.setText(f"{channel}: Invites only!")
             msgbox.setInformativeText(
                 "This channel is invite-only. "
                 "You must get an invitation from someone on the inside before entering."
@@ -1480,13 +1475,10 @@ class PesterMemo(PesterConvo):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
             msgbox.exec()
 
-    @QtCore.pyqtSlot(QString, QString)
+    @QtCore.pyqtSlot(str, str)
     def closeForbidden(self, channel, reason):
-        c = str(channel)
-        if c.lower() == self.channel.lower():
-            self.mainwindow.forbiddenChan["QString", "QString"].disconnect(
-                self.closeForbidden
-            )
+        if channel.lower() == self.channel.lower():
+            self.mainwindow.forbiddenChan[str, str].disconnect(self.closeForbidden)
             if self.parent():
                 PchumLog.info(self.channel)
                 i = self.parent().tabIndices[self.channel]
@@ -1497,7 +1489,7 @@ class PesterMemo(PesterConvo):
             msgbox.setStyleSheet(
                 "QMessageBox{ %s }" % self.mainwindow.theme["main/defaultwindow/style"]
             )
-            msgbox.setText("%s: D: CANT JOIN MEMO!!!" % (c))
+            msgbox.setText(f"{channel}: D: CANT JOIN MEMO!!!")
             msgbox.setInformativeText(reason)
             msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
             msgbox.exec()
@@ -1571,13 +1563,10 @@ class PesterMemo(PesterConvo):
             self.mainwindow.chatlog.log(self.channel, msg)
         del self.netsplit
 
-    @QtCore.pyqtSlot(QString, QString, QString)
-    def userPresentChange(self, handle, channel, update):
-        # print("handle: %s, channel: %s, update: %s" % (handle, channel, update))
-        h = str(handle)
-        c = str(channel)
-        update = str(update)
-        # PchumLog.debug("h=%s\nc=%s\nupdate=%s" % (h,c,update))
+    @QtCore.pyqtSlot(str, str, str)
+    def userPresentChange(self, handle: str, channel: str, update: str):
+        h = handle
+        c = channel
         if update[0:4] == "kick":  # yeah, i'm lazy.
             l = update.split(":")
             update = l[0]
@@ -1794,7 +1783,7 @@ class PesterMemo(PesterConvo):
             for c in chums:
                 c.op = True
                 self.iconCrap(c)
-                if str(c.text()) == self.mainwindow.profile().handle:
+                if (c.text()) == self.mainwindow.profile().handle:
                     self.userlist.optionsMenu.addAction(self.opAction)
                     self.userlist.optionsMenu.addAction(self.voiceAction)
                     self.userlist.optionsMenu.addAction(self.banuserAction)
@@ -1811,7 +1800,7 @@ class PesterMemo(PesterConvo):
             for c in chums:
                 c.op = False
                 self.iconCrap(c)
-                if str(c.text()) == self.mainwindow.profile().handle:
+                if (c.text()) == self.mainwindow.profile().handle:
                     self.userlist.optionsMenu.removeAction(self.opAction)
                     self.userlist.optionsMenu.removeAction(self.voiceAction)
                     self.userlist.optionsMenu.removeAction(self.banuserAction)
@@ -1827,7 +1816,7 @@ class PesterMemo(PesterConvo):
             for c in chums:
                 c.halfop = True
                 self.iconCrap(c)
-                if str(c.text()) == self.mainwindow.profile().handle:
+                if (c.text()) == self.mainwindow.profile().handle:
                     self.userlist.optionsMenu.addAction(self.opAction)
                     self.userlist.optionsMenu.addAction(self.voiceAction)
                     self.userlist.optionsMenu.addAction(self.banuserAction)
@@ -1844,7 +1833,7 @@ class PesterMemo(PesterConvo):
             for c in chums:
                 c.halfop = False
                 self.iconCrap(c)
-                if str(c.text()) == self.mainwindow.profile().handle:
+                if (c.text()) == self.mainwindow.profile().handle:
                     self.userlist.optionsMenu.removeAction(self.opAction)
                     self.userlist.optionsMenu.removeAction(self.voiceAction)
                     self.userlist.optionsMenu.removeAction(self.banuserAction)
@@ -1892,21 +1881,21 @@ class PesterMemo(PesterConvo):
         user = self.userlist.currentItem()
         if not user:
             return
-        user = str(user.text())
+        user = user.text()
         self.mainwindow.newConversation(user)
 
     @QtCore.pyqtSlot()
     def addChumSlot(self):
         if not self.userlist.currentItem():
             return
-        currentChum = PesterProfile(str(self.userlist.currentItem().text()))
+        currentChum = PesterProfile((self.userlist.currentItem().text()))
         self.mainwindow.addChum(currentChum)
 
     @QtCore.pyqtSlot()
     def banSelectedUser(self):
         if not self.userlist.currentItem():
             return
-        currentHandle = str(self.userlist.currentItem().text())
+        currentHandle = self.userlist.currentItem().text()
         (reason, ok) = QtWidgets.QInputDialog.getText(
             self, "Ban User", "Enter the reason you are banning this user (optional):"
         )
@@ -1917,21 +1906,21 @@ class PesterMemo(PesterConvo):
     def opSelectedUser(self):
         if not self.userlist.currentItem():
             return
-        currentHandle = str(self.userlist.currentItem().text())
+        currentHandle = self.userlist.currentItem().text()
         self.mainwindow.setChannelMode.emit(self.channel, "+o", currentHandle)
 
     @QtCore.pyqtSlot()
     def voiceSelectedUser(self):
         if not self.userlist.currentItem():
             return
-        currentHandle = str(self.userlist.currentItem().text())
+        currentHandle = self.userlist.currentItem().text()
         self.mainwindow.setChannelMode.emit(self.channel, "+v", currentHandle)
 
     @QtCore.pyqtSlot()
     def killQuirkUser(self):
         if not self.userlist.currentItem():
             return
-        currentHandle = str(self.userlist.currentItem().text())
+        currentHandle = self.userlist.currentItem().text()
         self.mainwindow.killSomeQuirks.emit(self.channel, currentHandle)
 
     def resetSlider(self, time, send=True):
@@ -1964,7 +1953,6 @@ class PesterMemo(PesterConvo):
                 "Enter the chumhandle of the user you'd like to invite:",
             )
             if ok:
-                chum = str(chum)
                 self.mainwindow.inviteChum.emit(chum, self.channel)
             self.invitechums = None
 
@@ -2040,7 +2028,7 @@ class PesterMemo(PesterConvo):
         self.mainwindow.waitingMessages.messageAnswered(self.channel)
         self.windowClosed.emit(self.title())
 
-    windowClosed = QtCore.pyqtSignal("QString")
+    windowClosed = QtCore.pyqtSignal(str)
 
 
 timelist = [

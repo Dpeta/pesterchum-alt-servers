@@ -39,7 +39,7 @@ class PesterList(list):
 class PesterIcon(QtGui.QIcon):
     def __init__(self, *x):
         super().__init__(x[0])
-        if type(x[0]) in [str, str]:
+        if isinstance(x[0], str):
             self.icon_pixmap = QtGui.QPixmap(x[0])
         else:
             self.icon_pixmap = None
@@ -117,7 +117,7 @@ class MultiTextDialog(QtWidgets.QDialog):
         if r == QtWidgets.QDialog.DialogCode.Accepted:
             retval = {}
             for name, widget in self.inputs.items():
-                retval[name] = str(widget.text())
+                retval[name] = widget.text()
             return retval
         else:
             return None
@@ -150,7 +150,7 @@ class MovingWindow(QtWidgets.QFrame):
                     self.moving = event.globalPos() - self.pos()
         except AttributeError as e:
             print("PyQt <= 5.14?")
-            print(str(e))
+            print(e)
             if event.button() == 1:
                 self.moving = event.globalPos() - self.pos()
 

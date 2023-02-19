@@ -621,7 +621,7 @@ class userProfile:
             self.chat = user
             self.userprofile = {
                 "handle": user.handle,
-                "color": str(user.color.name()),
+                "color": user.color.name(),
                 "quirks": [],
                 "theme": "pesterchum",
             }
