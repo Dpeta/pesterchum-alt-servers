@@ -218,7 +218,7 @@ class PesterTabWindow(QtWidgets.QFrame):
         i = self.tabs.tabAt(self.mapFromGlobal(QtGui.QCursor.pos()))
         if i == -1:
             i = self.tabs.currentIndex()
-        handle = str(self.tabs.tabText(i))
+        handle = self.tabs.tabText(i)
         self.clearNewMessage(handle)
 
     def convoHasFocus(self, handle):
@@ -267,13 +267,13 @@ class PesterTabWindow(QtWidgets.QFrame):
             self.tabs.setTabIcon(tabi, c.icon())
         currenttabi = self.tabs.currentIndex()
         if currenttabi >= 0:
-            currentHandle = str(self.tabs.tabText(self.tabs.currentIndex()))
+            currentHandle = self.tabs.tabText(self.tabs.currentIndex())
             self.setWindowIcon(self.convos[currentHandle].icon())
         self.defaultTabTextColor = self.getTabTextColor()
 
     @QtCore.pyqtSlot(int)
     def tabClose(self, i):
-        handle = str(self.tabs.tabText(i))
+        handle = self.tabs.tabText(i)
         self.mainwindow.waitingMessages.messageAnswered(handle)
         # print(self.convos.keys())
         # I, legit don' t know why this is an issue, but, uh, yeah-
@@ -296,7 +296,7 @@ class PesterTabWindow(QtWidgets.QFrame):
             return
         if self.currentConvo == convo:
             currenti = self.tabs.currentIndex()
-            currenth = str(self.tabs.tabText(currenti))
+            currenth = self.tabs.tabText(currenti)
             self.currentConvo = self.convos[currenth]
         self.currentConvo.raiseChat()
 
@@ -307,7 +307,7 @@ class PesterTabWindow(QtWidgets.QFrame):
         if self.changedTab:
             self.changedTab = False
             return
-        handle = str(self.tabs.tabText(i))
+        handle = self.tabs.tabText(i)
         convo = self.convos[handle]
         if self.currentConvo:
             self.layout.removeWidget(self.currentConvo)
@@ -344,7 +344,7 @@ class PesterMovie(QtGui.QMovie):
         if text.mainwindow.config.animations():
             movie = self
             url = text.urls[movie].toString()
-            html = str(text.toHtml())
+            html = text.toHtml()
             if html.find(url) != -1:
                 try:
                     # PyQt6
@@ -606,7 +606,7 @@ class PesterText(QtWidgets.QTextEdit):
                 if url[0] == "#" and url != "#pesterchum":
                     self.parent().mainwindow.showMemos(url[1:])
                 elif url[0] == "@":
-                    handle = str(url[1:])
+                    handle = url[1:]
                     self.parent().mainwindow.newConversation(handle)
                 else:
                     if event.modifiers() == QtCore.Qt.KeyboardModifier.ControlModifier:
@@ -664,7 +664,7 @@ class PesterInput(QtWidgets.QLineEdit):
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key.Key_Up:
-            text = str(self.text())
+            text = self.text()
             next = self.parent().history.next(text)
             if next is not None:
                 self.setText(next)
@@ -1091,14 +1091,13 @@ class PesterConvo(QtWidgets.QFrame):
 
     @QtCore.pyqtSlot()
     def sentMessage(self):
-        # Offloaded to another function, like its sisters.
-        # Fetch the raw text from the input box.
-        text = self.textInput.text()
-        text = str(self.textInput.text())
+        """Offloaded to another function, like its sisters.
 
+        Fetch the raw text from the input box.
+        """
         return parsetools.kxhandleInput(
             self,
-            text,
+            self.textInput.text(),
             flavor="convo",
             irc_compatible=self.mainwindow.config.irc_compatibility_mode(),
         )

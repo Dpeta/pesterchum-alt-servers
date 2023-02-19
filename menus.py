@@ -29,7 +29,7 @@ class PesterQuirkItem(QtWidgets.QTreeWidgetItem):
         parent = None
         QtWidgets.QTreeWidgetItem.__init__(self, parent)
         self.quirk = quirk
-        self.setText(0, str(quirk))
+        self.setText(0, str(quirk))  # Typecast required.
 
     def update(self, quirk):
         self.quirk = quirk
@@ -235,7 +235,6 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
                 self, "Add Group", "Enter a name for the new quirk group:"
             )
             if ok:
-                gname = str(gname)
                 if re.search(r"[^A-Za-z0-9_\s]", gname) is not None:
                     msgbox = QtWidgets.QMessageBox()
                     msgbox.setInformativeText("THIS IS NOT A VALID GROUP NAME")
@@ -323,7 +322,7 @@ class QuirkTesterWindow(QtWidgets.QDialog):
 
     @QtCore.pyqtSlot()
     def sentMessage(self):
-        text = str(self.textInput.text())
+        text = self.textInput.text()
 
         return parsetools.kxhandleInput(
             self,
@@ -596,8 +595,8 @@ class PesterQuirkTypes(QtWidgets.QDialog):
                     page.itemAt(3).layout().itemAt(0).widget().setCheckState(
                         QtCore.Qt.CheckState(int(q["checkstate"]))
                     )
-                except (KeyError, ValueError) as e:
-                    print("KeyError: %s" % str(e))
+                except (KeyError, ValueError):
+                    PchumLog.exception("Exception setting replace quirk.")
             elif q["type"] == "regexp":
                 page.itemAt(2).layout().itemAt(1).layout().itemAt(1).widget().setText(
                     q["from"]
@@ -609,8 +608,8 @@ class PesterQuirkTypes(QtWidgets.QDialog):
                     page.itemAt(2).layout().itemAt(3).layout().itemAt(
                         0
                     ).widget().setCheckState(QtCore.Qt.CheckState(int(q["checkstate"])))
-                except (KeyError, ValueError) as e:
-                    print("KeyError: %s" % str(e))
+                except (KeyError, ValueError):
+                    PchumLog.exception("Exception setting regexp quirk.")
             elif q["type"] == "random":
                 self.regexp.setText(q["from"])
                 for v in q["randomlist"]:
@@ -619,8 +618,8 @@ class PesterQuirkTypes(QtWidgets.QDialog):
                     page.itemAt(2).layout().itemAt(2).layout().itemAt(
                         0
                     ).widget().setCheckState(QtCore.Qt.CheckState(int(q["checkstate"])))
-                except (KeyError, ValueError) as e:
-                    print("KeyError: %s" % str(e))
+                except (KeyError, ValueError):
+                    PchumLog.exception("Exception setting random quirk.")
             elif q["type"] == "spelling":
                 self.slider.setValue(q["percentage"])
                 try:
@@ -628,7 +627,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
                         QtCore.Qt.CheckState(int(q["checkstate"]))
                     )
                 except (KeyError, ValueError) as e:
-                    print("KeyError: %s" % str(e))
+                    PchumLog.exception("Exception setting spelling quirk.")
 
         self.setLayout(layout_0)
 
@@ -667,11 +666,11 @@ class PesterQuirkTypes(QtWidgets.QDialog):
 
     @QtCore.pyqtSlot(int)
     def printValue(self, value):
-        self.current.setText(str(value) + "%")
+        self.current.setText(f"{value}%")
 
     @QtCore.pyqtSlot()
     def addRandomString(self):
-        text = str(self.replaceinput.text())
+        text = self.replaceinput.text()
         item = QtWidgets.QListWidgetItem(text, self.replacelist)
         self.replaceinput.setText("")
         self.replaceinput.setFocus()
@@ -815,10 +814,10 @@ class PesterChooseQuirks(QtWidgets.QDialog):
         vdict["type"] = types[self.quirkadd.pages.currentIndex() - 1]
         page = self.quirkadd.pages.currentWidget().layout()
         if vdict["type"] in ("prefix", "suffix"):
-            vdict["value"] = str(page.itemAt(1).layout().itemAt(1).widget().text())
+            vdict["value"] = page.itemAt(1).layout().itemAt(1).widget().text()
         elif vdict["type"] == "replace":
-            vdict["from"] = str(page.itemAt(1).layout().itemAt(1).widget().text())
-            vdict["to"] = str(page.itemAt(2).layout().itemAt(1).widget().text())
+            vdict["from"] = page.itemAt(1).layout().itemAt(1).widget().text()
+            vdict["to"] = page.itemAt(2).layout().itemAt(1).widget().text()
             try:
                 # PyQt6
                 vdict["checkstate"] = str(
@@ -830,10 +829,10 @@ class PesterChooseQuirks(QtWidgets.QDialog):
                     page.itemAt(3).layout().itemAt(0).widget().checkState()
                 )
         elif vdict["type"] == "regexp":
-            vdict["from"] = str(
+            vdict["from"] = (
                 page.itemAt(2).layout().itemAt(1).layout().itemAt(1).widget().text()
             )
-            vdict["to"] = str(
+            vdict["to"] = (
                 page.itemAt(2).layout().itemAt(2).layout().itemAt(1).widget().text()
             )
             try:
@@ -1069,7 +1068,7 @@ class PesterChooseProfile(QtWidgets.QDialog):
     @QtCore.pyqtSlot()
     def validateProfile(self):
         if not self.profileBox or self.profileBox.currentIndex() == 0:
-            handle = str(self.chumHandle.text())
+            handle = self.chumHandle.text()
             if not PesterProfile.checkLength(handle):
                 self.errorMsg.setText("PROFILE HANDLE IS TOO LONG")
                 return
@@ -1084,7 +1083,7 @@ class PesterChooseProfile(QtWidgets.QDialog):
     @QtCore.pyqtSlot()
     def deleteProfile(self):
         if self.profileBox and self.profileBox.currentIndex() > 0:
-            handle = str(self.profileBox.currentText())
+            handle = self.profileBox.currentText()
             if handle == self.parent.profile().handle:
                 problem = QtWidgets.QMessageBox()
                 # karxi Will probably change this to its own name later.
@@ -1175,7 +1174,7 @@ class PesterMentions(QtWidgets.QDialog):
     def addMention(self, mitem=None):
         d = {"label": "Mention:", "inputname": "value"}
         if mitem is not None:
-            d["value"] = str(mitem.text())
+            d["value"] = mitem.text()
         pdict = MultiTextDialog("ENTER MENTION", self, d).getText()
         if pdict is None:
             return
@@ -1730,7 +1729,7 @@ class PesterOptions(QtWidgets.QDialog):
     def addAutoJoin(self, mitem=None):
         d = {"label": "Memo:", "inputname": "value"}
         if mitem is not None:
-            d["value"] = str(mitem.text())
+            d["value"] = mitem.text()
         pdict = MultiTextDialog("ENTER MEMO", self, d).getText()
         if pdict is None:
             return
@@ -1773,7 +1772,7 @@ class PesterOptions(QtWidgets.QDialog):
 
     @QtCore.pyqtSlot(int)
     def printValue(self, v):
-        self.currentVol.setText(str(v) + "%")
+        self.currentVol.setText(f"{v}%")
 
     @QtCore.pyqtSlot()
     def openMentions(self):
@@ -1796,7 +1795,7 @@ class PesterOptions(QtWidgets.QDialog):
     def updateMentions(self):
         m = []
         for i in range(self.mentionmenu.mentionlist.count()):
-            m.append(str(self.mentionmenu.mentionlist.item(i).text()))
+            m.append((self.mentionmenu.mentionlist.item(i).text()))
         self.parent().userprofile.setMentions(m)
         self.mentionmenu = None
 
@@ -1860,10 +1859,9 @@ class PesterUserlist(QtWidgets.QDialog):
             return
         self.userarea.clear()
         for n in names:
-            if (
-                str(self.searchbox.text()) == ""
-                or n.lower().find(str(self.searchbox.text()).lower()) != -1
-            ):
+            if (self.searchbox.text()) == "" or n.lower().find(
+                self.searchbox.text().lower()
+            ) != -1:
                 # Strip channel membership prefixes
                 n = n.strip("~").strip("@").strip("+").strip("&").strip("%")
                 item = QtWidgets.QListWidgetItem(n)
@@ -1875,18 +1873,16 @@ class PesterUserlist(QtWidgets.QDialog):
 
     @QtCore.pyqtSlot(str, str, str)
     def updateUserPresent(self, handle, channel, update):
-        h = str(handle)
-        c = str(channel)
         if update == "quit":
-            self.delUser(h)
-        elif update == "left" and c == "#pesterchum":
-            self.delUser(h)
-        elif update == "join" and c == "#pesterchum":
+            self.delUser(handle)
+        elif update == "left" and channel == "#pesterchum":
+            self.delUser(handle)
+        elif update == "join" and channel == "#pesterchum":
             if (
-                str(self.searchbox.text()) == ""
-                or h.lower().find(str(self.searchbox.text()).lower()) != -1
+                self.searchbox.text() == ""
+                or handle.lower().find(self.searchbox.text().lower()) != -1
             ):
-                self.addUser(h)
+                self.addUser(handle)
 
     def addUser(self, name):
         item = QtWidgets.QListWidgetItem(name)
@@ -1936,7 +1932,7 @@ class MemoListItem(QtWidgets.QTreeWidgetItem):
 
     def __lt__(self, other):
         column = self.treeWidget().sortColumn()
-        if str(self.text(column)).isdigit() and str(other.text(column)).isdigit():
+        if (self.text(column)).isdigit() and (other.text(column)).isdigit():
             return int(self.text(column)) < int(other.text(column))
         return self.text(column) < other.text(column)
 

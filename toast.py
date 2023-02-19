@@ -303,7 +303,7 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
         self.msg.setText(
             PesterToast.wrapText(
                 self.msg.font(),
-                str(self.msg.text()),
+                self.msg.text(),
                 self.parent().theme["toasts/width"],
                 self.parent().theme["toasts/content/style"],
             )
@@ -328,7 +328,7 @@ class PesterToast(QtWidgets.QWidget, DefaultToast):
     def done(self):
         QtWidgets.QWidget.hide(self)
         t = self.machine.toasts[0]
-        if t.title == str(self.title.text()) and t.msg == str(self.content):
+        if t.title == self.title.text() and t.msg == self.content:
             self.machine.toasts.pop(0)
             self.machine.displaying = False
         if self.machine.on:

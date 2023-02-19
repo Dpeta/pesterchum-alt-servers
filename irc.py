@@ -437,7 +437,7 @@ class PesterIRC(QtCore.QThread):
         """Update and send color, slot is called from main thread."""
         # Update color metadata field
         color = self.mainwindow.profile().color
-        self._send_irc.metadata("*", "set", "color", str(color.name()))
+        self._send_irc.metadata("*", "set", "color", color.name())
         # Send color messages
         for convo in list(self.mainwindow.convos.keys()):
             self._send_irc.privmsg(

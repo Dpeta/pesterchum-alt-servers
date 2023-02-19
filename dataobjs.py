@@ -147,7 +147,7 @@ class pesterQuirks:
 
         newlist = []
         for i, o in enumerate(lexed):
-            if type(o) not in [str, str]:
+            if not isinstance(o, str):
                 if i == 0:
                     string = " "
                     for p in prefix:
@@ -250,7 +250,7 @@ class pesterQuirks:
             newlist.append(string)
         final = []
         for n in newlist:
-            if type(n) in [str, str]:
+            if isinstance(n, str):
                 final.extend(lexMessage(n))
             else:
                 final.append(n)
@@ -456,7 +456,7 @@ class PesterProfile:
                         opinit,
                         self.colorhtml(),
                         ", ".join(initials),
-                        str(reason),
+                        reason,
                     )
                 )
         else:
@@ -477,7 +477,7 @@ class PesterProfile:
                         opinit,
                         self.colorhtml(),
                         initials,
-                        str(reason),
+                        reason,
                     )
                 )
 

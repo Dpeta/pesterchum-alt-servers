@@ -42,10 +42,7 @@ class PesterLogHighlighter(QtGui.QSyntaxHighlighter):
 
     def highlightBlock(self, text):
         for i in range(0, len(text) - (len(self.searchTerm) - 1)):
-            if (
-                str(text[i : i + len(self.searchTerm)]).lower()
-                == str(self.searchTerm).lower()
-            ):
+            if text[i : i + len(self.searchTerm)].lower() == self.searchTerm.lower():
                 self.setFormat(i, len(self.searchTerm), self.hilightstyle)
 
 
@@ -297,7 +294,7 @@ class PesterLogViewer(QtWidgets.QDialog):
         if len(self.tree.currentItem().text(0)) > len("September 2011"):
             self.loadLog(self.timeToFile(self.tree.currentItem().text(0)))
 
-    def loadLog(self, fname):
+    def loadLog(self, fname: str):
         fp = codecs.open(
             "%s/%s/%s/%s/%s"
             % (self.logpath, self.handle, self.chum, self.format, fname),
@@ -318,7 +315,7 @@ class PesterLogViewer(QtWidgets.QDialog):
         # textCur.movePosition(1)
         self.textArea.setTextCursor(textCur)
         self.instructions.setText(
-            "Pesterlog with " + self.chum + " on " + self.fileToTime(str(fname))
+            "Pesterlog with " + self.chum + " on " + self.fileToTime(fname)
         )
 
     def logSearch(self, search):
@@ -359,7 +356,7 @@ class PesterLogText(PesterText):
             if url[0] == "#" and url != "#pesterchum":
                 self.parent().parent.showMemos(url[1:])
             elif url[0] == "@":
-                handle = str(url[1:])
+                handle = url[1:]
                 self.parent().parent.newConversation(handle)
             else:
                 QtGui.QDesktopServices.openUrl(

@@ -66,7 +66,7 @@ def lexer(string, objlist):
     for oType, regexp in objlist:
         newstringlist = []
         for stri, s in enumerate(stringlist):
-            if type(s) not in [str, str]:
+            if not isinstance(s, str):
                 newstringlist.append(s)
                 continue
             lasti = 0
@@ -268,9 +268,8 @@ class mecmd(lexercon.Chunk):
 kxpclexer = lexercon.Pesterchum()
 
 
-def kxlexMsg(string):
-    # Do a bit of sanitization.
-    msg = str(string)
+def kxlexMsg(msg: str):
+    """Do a bit of sanitization."""
     # TODO: Let people paste line-by-line normally. Maybe have a mass-paste
     # right-click option?
     msg = msg.replace("\n", " ").replace("\r", " ")
@@ -327,7 +326,7 @@ def balance(lexed):
             balanced.append(colorEnd("</c>"))
     if len(balanced) == 0:
         balanced.append("")
-    if type(balanced[len(balanced) - 1]) not in [str, str]:
+    if not isinstance(balanced[len(balanced) - 1], str):
         balanced.append("")
     return balanced
 
@@ -336,12 +335,12 @@ def convertTags(lexed, format="html"):
     if format not in ["html", "bbcode", "ctag", "text"]:
         raise ValueError("Color format not recognized")
 
-    if type(lexed) in [str, str]:
+    if isinstance(lexed, str):
         lexed = lexMessage(lexed)
     escaped = ""
     # firststr = True
     for i, o in enumerate(lexed):
-        if type(o) in [str, str]:
+        if isinstance(o, str):
             if format == "html":
                 escaped += (
                     o.replace("&", "&amp;").replace(">", "&gt;").replace("<", "&lt;")
@@ -370,7 +369,7 @@ def _max_msg_len(mask=None, target=None, nick=None, ident=None):
 
     if mask is not None:
         # Since this will be included in what we send
-        limit -= len(str(mask))
+        limit -= len(mask)
     else:
         # Since we should always be able to fetch this
         # karxi: ... Which we can't, right now, unlike in the old script.
@@ -996,9 +995,7 @@ def parseRegexpFunctions(to):
     return parsed
 
 
-def img2smiley(string):
-    string = str(string)
-
+def img2smiley(string: str):
     def imagerep(mo):
         return reverse_smiley[mo.group(1)]
 
