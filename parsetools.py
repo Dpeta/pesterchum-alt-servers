@@ -40,7 +40,8 @@ _oocre = re.compile(r"([\[(\{])\1.*([\])\}])\2")
 # _format_end = re.compile(r"(?i)</([ibu])>")
 _honk = re.compile(r"(?i)\bhonk\b")
 _groupre = re.compile(r"\\([0-9]+)")
-_alternian = re.compile(r"<alt>.*?</alt>")  # Matches get set to alternian font
+_alternian_begin = re.compile(r"<alt>")  # Matches get set to alternian font
+_alternian_end = re.compile(r"</alt>")
 
 quirkloader = ScriptQuirks()
 _functionre = None
@@ -170,9 +171,9 @@ class hyperlink(lexercon.Chunk):
 
     def convert(self, format):
         if format == "html":
-            return "<a href='{}'>{}</a>".format(self.string, self.string)
+            return f"<a href='{self.string}'>{self.string}</a>"
         elif format == "bbcode":
-            return "[url]%s[/url]" % (self.string)
+            return f"[url]{self.string}[/url]"
         else:
             return self.string
 
@@ -185,13 +186,27 @@ class hyperlink_lazy(hyperlink):
         self.string = "http://" + string
 
 
-class alternianTag(lexercon.Chunk):
+class alternianTagBegin(lexercon.Chunk):
     def __init__(self, string):
         self.string = string
 
     def convert(self, format):
         if format == "html":
-            return f"<span style=\"font-family: 'AllisDaedric'\">{self.string}</span>"
+            return "<em style=\"font-family:'AllisDaedric'\">"
+        elif format == "text":
+            return ""
+        return self.string
+
+
+class alternianTagEnd(lexercon.Chunk):
+    def __init__(self, string):
+        self.string = string
+
+    def convert(self, format):
+        if format == "html":
+            return "</em>"
+        elif format == "text":
+            return ""
         return self.string
 
 
@@ -296,7 +311,8 @@ def kxlexMsg(msg: str):
 def lexMessage(string: str):
     lexlist = [
         (mecmd, _mecmdre),
-        (alternianTag, _alternian),
+        (alternianTagBegin, _alternian_begin),
+        (alternianTagEnd, _alternian_end),
         (colorBegin, _ctag_begin),
         # (colorBegin, _gtag_begin),
         (colorEnd, _ctag_end),
