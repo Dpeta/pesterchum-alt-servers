@@ -32,6 +32,7 @@ _ctagre = re.compile("(</?c=?.*?>)", re.I)
 _smilere = re.compile("|".join(list(smiledict.keys())))
 _memore = re.compile(r"(\s|^)(#[A-Za-z0-9_]+)")
 _handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
+_alternian = re.compile(r"<alt>.*?</alt>")
 
 
 class pesterQuirk:
@@ -175,6 +176,7 @@ class pesterQuirks:
                         re.finditer(_smilere, string),
                         re.finditer(_handlere, string),
                         re.finditer(_memore, string),
+                        re.finditer(_alternian, string),
                     )
                     excludes.extend(matches)
 

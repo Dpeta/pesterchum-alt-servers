@@ -40,6 +40,7 @@ _oocre = re.compile(r"([\[(\{])\1.*([\])\}])\2")
 # _format_end = re.compile(r"(?i)</([ibu])>")
 _honk = re.compile(r"(?i)\bhonk\b")
 _groupre = re.compile(r"\\([0-9]+)")
+_alternian = re.compile(r"<alt>.*?</alt>")  # Matches get set to alternian font
 
 quirkloader = ScriptQuirks()
 _functionre = None
@@ -184,6 +185,16 @@ class hyperlink_lazy(hyperlink):
         self.string = "http://" + string
 
 
+class alternianTag(lexercon.Chunk):
+    def __init__(self, string):
+        self.string = string
+
+    def convert(self, format):
+        if format == "html":
+            return f"<span style=\"font-family: 'AllisDaedric'\">{self.string}</span>"
+        return self.string
+
+
 class imagelink(lexercon.Chunk):
     def __init__(self, string, img):
         self.string = string
@@ -285,6 +296,7 @@ def kxlexMsg(msg: str):
 def lexMessage(string: str):
     lexlist = [
         (mecmd, _mecmdre),
+        (alternianTag, _alternian),
         (colorBegin, _ctag_begin),
         # (colorBegin, _gtag_begin),
         (colorEnd, _ctag_end),
