@@ -473,7 +473,9 @@ class chumArea(RightClickTree):
         self.setAnimated(True)
         self.setRootIsDecorated(False)
 
-        self.itemDoubleClicked[QtWidgets.QTreeWidgetItem, int].connect(self.expandGroup)
+        self.itemDoubleClicked.connect(
+            self.expandGroup
+        )  # [QtWidgets.QTreeWidgetItem, int]
 
     @QtCore.pyqtSlot()
     def beginNotify(self):
@@ -1588,7 +1590,7 @@ class PesterWindow(MovingWindow):
 
         chums = [PesterProfile(c, chumdb=self.chumdb) for c in set(self.config.chums())]
         self.chumList = chumArea(chums, self)
-        self.chumList.itemActivated[QtWidgets.QTreeWidgetItem, int].connect(
+        self.chumList.itemActivated.connect(  # [QtWidgets.QTreeWidgetItem, int]
             self.pesterSelectedChum
         )
         self.chumList.removeChumSignal[str].connect(self.removeChum)
@@ -4350,7 +4352,7 @@ class MainProgram(QtCore.QObject):
 
         self.trayicon.setContextMenu(self.traymenu)
         self.trayicon.show()
-        self.trayicon.activated[QtWidgets.QSystemTrayIcon.ActivationReason].connect(
+        self.trayicon.activated.connect(  # [QtWidgets.QSystemTrayIcon.ActivationReason]
             self.widget.systemTrayActivated
         )
         self.widget.trayIconSignal[int].connect(self.trayicon.changeTrayIcon)

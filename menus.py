@@ -53,7 +53,9 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
         self.mainwindow = mainwindow
         self.setStyleSheet("background:black; color:white;")
 
-        self.itemChanged[QtWidgets.QTreeWidgetItem, int].connect(self.changeCheckState)
+        self.itemChanged.connect(
+            self.changeCheckState
+        )  # [QtWidgets.QTreeWidgetItem, int]
 
         for q in mainwindow.userprofile.quirks:
             item = PesterQuirkItem(q)
@@ -1960,7 +1962,7 @@ class PesterMemoList(QtWidgets.QDialog):
         self.channelarea.setColumnWidth(1, 10)
         self.channelarea.setSortingEnabled(True)
         self.channelarea.sortByColumn(0, QtCore.Qt.SortOrder.AscendingOrder)
-        self.channelarea.itemDoubleClicked[QtWidgets.QTreeWidgetItem, int].connect(
+        self.channelarea.itemDoubleClicked.connect(  # [QtWidgets.QTreeWidgetItem, int]
             self.AcceptSelection
         )
 

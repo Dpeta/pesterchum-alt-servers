@@ -316,7 +316,7 @@ class MemoText(PesterText):
         self.setReadOnly(True)
         self.setMouseTracking(True)
         self.textSelected = False
-        self.copyAvailable[bool].connect(self.textReady)
+        self.copyAvailable.connect(self.textReady)  # (bool yes)
         self.urls = {}
         for k in smiledict:
             self.addAnimation(

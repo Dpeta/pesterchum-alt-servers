@@ -386,7 +386,7 @@ class PesterText(QtWidgets.QTextEdit):
         self.setReadOnly(True)
         self.setMouseTracking(True)
         self.textSelected = False
-        self.copyAvailable[bool].connect(self.textReady)
+        self.copyAvailable.connect(self.textReady)  # (bool yes)
         self.urls = {}
         self.lastmsg = None
         for k in smiledict:
@@ -407,7 +407,7 @@ class PesterText(QtWidgets.QTextEdit):
         movie = PesterMovie(self)
         movie.setFileName(fileName)
         self.urls[movie] = url
-        movie.frameChanged[int].connect(movie.animate)
+        movie.frameChanged.connect(movie.animate)  # (int frameNumber)
 
     """
     @QtCore.pyqtSlot(bool)
