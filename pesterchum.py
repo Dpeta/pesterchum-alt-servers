@@ -2545,10 +2545,11 @@ class PesterWindow(MovingWindow):
             self.waitingMessages.answerMessage()
 
     def doAutoIdentify(self):
-        if self.userprofile.getAutoIdentify():
-            self.sendMessage.emit(
-                "identify " + self.userprofile.getNickServPass(), "NickServ"
-            )
+        pass
+        # if self.userprofile.getAutoIdentify():
+        #    self.sendMessage.emit(
+        #        "identify " + self.userprofile.getNickServPass(), "NickServ"
+        #    )
 
     def doAutoJoins(self):
         if not self.autoJoinDone:

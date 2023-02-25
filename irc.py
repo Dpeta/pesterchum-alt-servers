@@ -115,6 +115,8 @@ class PesterIRC(QtCore.QThread):
             "768": self._keynotset,
             "769": self._keynopermission,
             "770": self._metadatasubok,
+            "903": self._saslsuccess,  # We did a SASL!! woo yeah!! (RPL_SASLSUCCESS)
+            "904": self._saslfail,  # oh no,,, cringe,,, (ERR_SASLFAIL)
             "error": self._error,
             "join": self._join,
             "kick": self._kick,
@@ -129,6 +131,7 @@ class PesterIRC(QtCore.QThread):
             "metadata": self._metadata,  # Metadata specification
             "tagmsg": self._tagmsg,  # IRCv3 message tags extension
             "cap": self._cap,  # IRCv3 Client Capability Negotiation
+            "authenticate": self._authenticate,  # IRCv3 SASL authentication
         }
 
     def run(self):
@@ -190,7 +193,28 @@ class PesterIRC(QtCore.QThread):
 
         if self.password:
             self._send_irc.pass_(self.password)
-        self._send_irc.nick(self.mainwindow.profile().handle)
+
+        # Negotiate capabilities
+        self._send_irc.cap("REQ", "message-tags")
+        self._send_irc.cap(
+            "REQ",
+            "draft/metadata-notify-2",  # <--- Not required for the unreal5 module.
+        )
+        self._send_irc.cap("REQ", "pesterchum-tag")  # <--- Currently not using this
+        self._send_irc.cap("REQ", "twitch.tv/membership")  # Twitch silly
+
+        # This should not be here.
+        profile = self.mainwindow.profile()
+        # Do SASL!!
+        if self.mainwindow.userprofile.getAutoIdentify():
+            self._send_irc.cap("REQ", "sasl")
+            self._send_irc.authenticate("PLAIN")
+        else:
+            # Without SASL, end caps here.
+            self._send_irc.cap("END")
+
+        # Send NICK & USER :3
+        self._send_irc.nick(profile.handle)
         self._send_irc.user("pcc31", "pcc31")
 
     def _conn_generator(self):
@@ -827,13 +851,6 @@ class PesterIRC(QtCore.QThread):
         )
         self.connected.emit()  # Alert main thread that we've connected.
         profile = self.mainwindow.profile()
-        # Negotiate capabilities
-        self._send_irc.cap("REQ", "message-tags")
-        self._send_irc.cap(
-            "REQ", "draft/metadata-notify-2"
-        )  # <--- Not required in the unreal5 module implementation
-        self._send_irc.cap("REQ", "pesterchum-tag")  # <--- Currently not using this
-        self._send_irc.cap("REQ", "twitch.tv/membership")  # Twitch silly
         # Get mood
         mood = profile.mood.value_str()
         # Moods via metadata
@@ -867,8 +884,9 @@ class PesterIRC(QtCore.QThread):
         See: https://ircv3.net/specs/extensions/capability-negotiation
         """
         PchumLog.info("CAP %s %s %s %s", server, nick, subcommand, tag)
-        # if tag == "message-tags":
-        #    if subcommand == "ACK":
+        if subcommand.casefold() == "nak" and tag.casefold() == "sasl":
+            # SASL isn't supported, end CAP negotation.
+            self._send_irc.cap("END")
 
     def _umodeis(self, _server, _handle, modes):
         """Numeric reply 221 RPL_UMODEIS, shows us our user modes."""
@@ -1012,6 +1030,23 @@ class PesterIRC(QtCore.QThread):
     def _metadatasubok(self, *params):
         """ "METADATA DRAFT numeric reply 770 RPL_METADATASUBOK, we subbed to a key."""
         PchumLog.info("_metadatasubok: %s", params)
+
+    def _authenticate(self, _, token):
+        """Handle IRCv3 SASL authneticate command from server."""
+        if token == "+":
+            # Try to send password now
+            self._send_irc.authenticate(
+                nick=self.mainwindow.profile().handle,
+                password=self.mainwindow.userprofile.getNickServPass(),
+            )
+
+    def _saslfail(self, *_msg):
+        """Handle 'RPL_SASLSUCCESS' reply from server, SASL authentication succeeded! woo yeah!!"""
+        self._send_irc.cap("END")
+
+    def _saslsuccess(self, *_msg):
+        """Handle 'ERR_SASLFAIL' reply from server, SASL failed somehow."""
+        self._send_irc.cap("END")
 
     moodUpdated = QtCore.pyqtSignal(str, Mood)
     colorUpdated = QtCore.pyqtSignal(str, QtGui.QColor)
