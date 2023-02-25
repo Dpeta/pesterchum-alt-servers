@@ -206,8 +206,9 @@ class PesterIRC(QtCore.QThread):
         # This should not be here.
         profile = self.mainwindow.profile()
         # Do SASL!!
+        self._send_irc.cap("REQ", "sasl")
         if self.mainwindow.userprofile.getAutoIdentify():
-            self._send_irc.cap("REQ", "sasl")
+            # Send plain, send end later when 903 or 904 is received.
             self._send_irc.authenticate("PLAIN")
         else:
             # Without SASL, end caps here.
@@ -538,6 +539,11 @@ class PesterIRC(QtCore.QThread):
     @QtCore.pyqtSlot(str)
     def send_nick(self, nick: str):
         self._send_irc.nick(nick)
+
+    @QtCore.pyqtSlot(str)
+    def send_authenticate(self, msg):
+        """Called from main thread via signal, send requirements."""
+        self._send_irc.authenticate(msg)
 
     def _notice(self, nick, chan, msg):
         """Standard IRC 'NOTICE' message, primarily used for automated replies from services."""
@@ -1042,11 +1048,13 @@ class PesterIRC(QtCore.QThread):
 
     def _saslfail(self, *_msg):
         """Handle 'RPL_SASLSUCCESS' reply from server, SASL authentication succeeded! woo yeah!!"""
-        self._send_irc.cap("END")
+        if not self.registered_irc:
+            self._send_irc.cap("END")
 
     def _saslsuccess(self, *_msg):
         """Handle 'ERR_SASLFAIL' reply from server, SASL failed somehow."""
-        self._send_irc.cap("END")
+        if not self.registered_irc:
+            self._send_irc.cap("END")
 
     moodUpdated = QtCore.pyqtSignal(str, Mood)
     colorUpdated = QtCore.pyqtSignal(str, QtGui.QColor)

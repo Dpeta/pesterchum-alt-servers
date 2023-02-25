@@ -2545,11 +2545,18 @@ class PesterWindow(MovingWindow):
             self.waitingMessages.answerMessage()
 
     def doAutoIdentify(self):
-        pass
-        # if self.userprofile.getAutoIdentify():
-        #    self.sendMessage.emit(
-        #        "identify " + self.userprofile.getNickServPass(), "NickServ"
-        #    )
+        """Identify to NickServ after we've already connected and are switching handle.
+
+        It'd be better to do this with only the AUTHENTICATE command even after connecting,
+        but UnrealIRCd doens't seem to support it yet? https://bugs.unrealircd.org/view.php?id=6084
+        The protocol allows it though, so hopefully it'll be a thing in the future.
+        For now it's better to just msg too for backwards compatibility.
+        """
+        if self.userprofile.getAutoIdentify():
+            # self.sendAuthenticate.emit("PLAIN")
+            self.sendMessage.emit(
+                f"identify {self.userprofile.getNickServPass()}", "NickServ"
+            )
 
     def doAutoJoins(self):
         if not self.autoJoinDone:
@@ -2563,7 +2570,6 @@ class PesterWindow(MovingWindow):
             self.loadingscreen.done(QtWidgets.QDialog.DialogCode.Accepted)
         self.loadingscreen = None
 
-        self.doAutoIdentify()
         self.doAutoJoins()
 
         # Start client --> server pings
@@ -4245,6 +4251,7 @@ class PesterWindow(MovingWindow):
     pingServer = QtCore.pyqtSignal()
     setAway = QtCore.pyqtSignal(bool)
     killSomeQuirks = QtCore.pyqtSignal(str, str)
+    sendAuthenticate = QtCore.pyqtSignal(str)
 
 
 class PesterTray(QtWidgets.QSystemTrayIcon):
@@ -4403,8 +4410,9 @@ class MainProgram(QtCore.QObject):
         self.widget.config.set("traymsg", False)
 
     def ircQtConnections(self, irc, widget):
-        # IRC --> Main window
         return (
+            # Connect widget signal to IRC slot/function. (IRC --> Widget)
+            # IRC runs on a different thread.
             (widget.sendMessage, irc.send_message),
             (widget.sendNotice, irc.send_notice),
             (widget.sendCTCP, irc.send_ctcp),
@@ -4429,7 +4437,8 @@ class MainProgram(QtCore.QObject):
             (widget.killSomeQuirks, irc.kill_some_quirks),
             (widget.disconnectIRC, irc.disconnect_irc),
             (widget.changeNick, irc.send_nick),
-            # Main window --> IRC
+            (widget.sendAuthenticate, irc.send_authenticate),
+            # Connect IRC signal to widget slot/function. (IRC --> Widget)
             (irc.connected, widget.connected),
             (irc.askToConnect, widget.connectAnyway),
             (irc.moodUpdated, widget.updateMoodSlot),
