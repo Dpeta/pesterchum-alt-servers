@@ -176,7 +176,8 @@ class SendIRC:
             sasl_string_base64 = base64.b64encode(sasl_string_bytes).decode(
                 encoding="utf-8"
             )
-            # Woo yeah woo yeah
+            # SASL string needs to be under 400 bytes,
+            # splitting over multiple messages is in the protocol but not implemented here.
             self._send("AUTHENTICATE", text=sasl_string_base64)
 
 

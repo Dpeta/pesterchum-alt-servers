@@ -115,8 +115,10 @@ class PesterIRC(QtCore.QThread):
             "768": self._keynotset,
             "769": self._keynopermission,
             "770": self._metadatasubok,
+            "902": self._sasl_skill_issue,  # ERR_NICKLOCKED, account is not available...
             "903": self._saslsuccess,  # We did a SASL!! woo yeah!! (RPL_SASLSUCCESS)
-            "904": self._saslfail,  # oh no,,, cringe,,, (ERR_SASLFAIL)
+            "904": self._sasl_skill_issue,  # oh no,,, cringe,,, (ERR_SASLFAIL)
+            "905": self._sasl_skill_issue,  # ERR_SASLTOOLONG, we don't split so end.
             "error": self._error,
             "join": self._join,
             "kick": self._kick,
@@ -1046,13 +1048,18 @@ class PesterIRC(QtCore.QThread):
                 password=self.mainwindow.userprofile.getNickServPass(),
             )
 
-    def _saslfail(self, *_msg):
-        """Handle 'RPL_SASLSUCCESS' reply from server, SASL authentication succeeded! woo yeah!!"""
+    def _sasl_skill_issue(self, *_msg):
+        """Handles all responses from server that indicate SASL authentication failed.
+
+        Replies that indicate we can't authenticate include: 902, 904, 905."""
         if not self.registered_irc:
+            self._send_irc.authenticate(
+                "*"
+            )  # Abort SASL, optional since we send cap END anyway.
             self._send_irc.cap("END")
 
     def _saslsuccess(self, *_msg):
-        """Handle 'ERR_SASLFAIL' reply from server, SASL failed somehow."""
+        """Handle 'RPL_SASLSUCCESS' reply from server, SASL authentication succeeded! woo yeah!!"""
         if not self.registered_irc:
             self._send_irc.cap("END")
 
