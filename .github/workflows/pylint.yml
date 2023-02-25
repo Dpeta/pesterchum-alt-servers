@@ -17,4 +17,4 @@ jobs:
       - name: Run Pylint
         run: |
           cd ..
-          PYLINTRC=pesterchum-alt-servers/.pylintrc python -m pylint --recursive=y pesterchum-alt-servers
+          python -m pylint "$PWD"
