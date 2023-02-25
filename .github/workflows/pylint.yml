@@ -15,6 +15,4 @@ jobs:
       - name: Install Pylint
         run: python3 -m pip install --pre pylint
       - name: Run Pylint
-        run: |
-          cd ..
-          python -m pylint "$PWD"
+        run: python -m pylint "$PWD"
