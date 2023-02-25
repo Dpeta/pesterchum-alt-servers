@@ -1653,9 +1653,10 @@ class PesterWindow(MovingWindow):
         if not self.config.defaultprofile():
             self.changeProfile()
 
-        # Fuck you some more OSX leopard! >:(
-        # if not ostools.isOSXLeopard():
-        #    QtCore.QTimer.singleShot(1000, self.mspacheck)
+        # Load font
+        QtGui.QFontDatabase.addApplicationFont(
+            os.path.join("fonts", "alternian", "AllisDaedric-VYWz.otf")
+        )
 
         self.pcUpdate[str, str].connect(self.updateMsg)
 

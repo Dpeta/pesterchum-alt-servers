@@ -17,6 +17,7 @@ add_data = [
     "smilies;smilies",
     "themes;themes",
     "docs;docs",
+    "fonts;fonts",
     "README.md;.",
     "LICENSE;.",
     "CHANGELOG.md;.",
@@ -28,6 +29,7 @@ data_folders = {
     "smilies": "smilies",
     "themes": "themes",
     "docs": "docs",
+    "fonts": "fonts",
 }
 data_files = {
     "README.md": "README.md.txt",

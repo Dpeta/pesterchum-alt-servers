@@ -56,6 +56,8 @@ def rainbow(text):
         re.finditer(_smilere, text),
         re.finditer(_memore, text),
         re.finditer(_handlere, text),
+        re.finditer(_alternian_begin, text),
+        re.finditer(_alternian_end, text),
     )
     for match in match_chain:
         for color_and_position in colors_and_positions:
@@ -161,3 +163,5 @@ _smilere = re.compile("|".join(list(smiledict.keys())))
 _urlre = re.compile(r"(?i)(?:^|(?<=\s))(?:(?:https?|ftp)://|magnet:)[^\s]+")
 _memore = re.compile(r"(\s|^)(#[A-Za-z0-9_]+)")
 _handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
+_alternian_begin = re.compile(r"<alt>")  # Matches get set to alternian font
+_alternian_end = re.compile(r"</alt>")

@@ -1,4 +1,8 @@
+import re
+import random
+import itertools
 import logging
+from datetime import datetime
 
 PchumLog = logging.getLogger("pchumLogger")
 try:
@@ -6,9 +10,6 @@ try:
 except ImportError:
     print("PyQt5 fallback (dataobjs.py)")
     from PyQt5 import QtGui
-from datetime import datetime
-import re
-import random
 
 from mood import Mood
 from parsetools import (
@@ -31,6 +32,7 @@ _ctagre = re.compile("(</?c=?.*?>)", re.I)
 _smilere = re.compile("|".join(list(smiledict.keys())))
 _memore = re.compile(r"(\s|^)(#[A-Za-z0-9_]+)")
 _handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
+_alternian = re.compile(r"<alt>.*?</alt>")
 
 
 class pesterQuirk:
@@ -167,20 +169,18 @@ class pesterQuirks:
                 if checkstate == 2:
                     # Check for substring that should be excluded.
                     excludes = []
-                    # Check for links, store in list.
-                    for match in re.finditer(_urlre, string):
-                        excludes.append(match)
-                    # Check for smilies, store in list.
-                    for match in re.finditer(_smilere, string):
-                        excludes.append(match)
-                    # Check for @handles, store in list.
-                    for match in re.finditer(_handlere, string):
-                        excludes.append(match)
-                    # Check for #memos, store in list.
-                    for match in re.finditer(_memore, string):
-                        excludes.append(match)
+                    # Return matches for links, smilies, handles, memos.
+                    # Chain the iterators and add to excludes list.
+                    matches = itertools.chain(
+                        re.finditer(_urlre, string),
+                        re.finditer(_smilere, string),
+                        re.finditer(_handlere, string),
+                        re.finditer(_memore, string),
+                        re.finditer(_alternian, string),
+                    )
+                    excludes.extend(matches)
 
-                    if len(excludes) >= 1:
+                    if excludes:
                         # SORT !!!
                         excludes.sort(key=lambda exclude: exclude.start())
                         # Recursion check.
