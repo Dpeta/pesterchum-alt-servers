@@ -95,6 +95,7 @@ class PesterIRC(QtCore.QThread):
         self.channel_list = []
         self.channel_field = None
 
+        # Dict for connection server commands/replies to handling functions.
         self.commands = {
             "001": self._welcome,
             "005": self._featurelist,
@@ -212,6 +213,8 @@ class PesterIRC(QtCore.QThread):
         if self.mainwindow.userprofile.getAutoIdentify():
             # Send plain, send end later when 903 or 904 is received.
             self._send_irc.authenticate("PLAIN")
+            # Always call CAP END after 5 seconds.
+            self.cap_negotation_started.emit()
         else:
             # Without SASL, end caps here.
             self._send_irc.cap("END")
@@ -316,6 +319,15 @@ class PesterIRC(QtCore.QThread):
         PchumLog.critical("set_connection_broken() got called, disconnecting.")
         self.disconnectIRC()
 
+    def end_cap_negotiation(self):
+        """Send CAP END to end capability negotation.
+
+        Called from SASL-related functions here,
+        but also from a timer on the main thread that always triggers after 5 seconds.
+        """
+        if not self.registered_irc:
+            self._send_irc.cap("END")
+
     @QtCore.pyqtSlot()
     def update_irc(self):
         """Get a silly scrunkler from the generator!!"""
@@ -326,7 +338,7 @@ class PesterIRC(QtCore.QThread):
                 return True
             raise socket_exception
         except StopIteration:
-            self._conn = self.conn_generator()
+            self._conn = self._conn_generator()
             return True
         else:
             return res
@@ -1051,17 +1063,13 @@ class PesterIRC(QtCore.QThread):
     def _sasl_skill_issue(self, *_msg):
         """Handles all responses from server that indicate SASL authentication failed.
 
-        Replies that indicate we can't authenticate include: 902, 904, 905."""
-        if not self.registered_irc:
-            self._send_irc.authenticate(
-                "*"
-            )  # Abort SASL, optional since we send cap END anyway.
-            self._send_irc.cap("END")
+        Replies that indicate we can't authenticate include: 902, 904, 905.
+        Aborts SASL by sending CAP END, ending capability negotiation."""
+        self.end_cap_negotiation()
 
     def _saslsuccess(self, *_msg):
         """Handle 'RPL_SASLSUCCESS' reply from server, SASL authentication succeeded! woo yeah!!"""
-        if not self.registered_irc:
-            self._send_irc.cap("END")
+        self.end_cap_negotiation()
 
     moodUpdated = QtCore.pyqtSignal(str, Mood)
     colorUpdated = QtCore.pyqtSignal(str, QtGui.QColor)
@@ -1082,3 +1090,4 @@ class PesterIRC(QtCore.QThread):
     userPresentUpdate = QtCore.pyqtSignal(str, str, str)
     cannotSendToChan = QtCore.pyqtSignal(str, str)
     signal_forbiddenchannel = QtCore.pyqtSignal(str, str)
+    cap_negotation_started = QtCore.pyqtSignal()

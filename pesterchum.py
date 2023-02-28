@@ -1633,6 +1633,10 @@ class PesterWindow(MovingWindow):
 
         self.waitingMessages = waitingMessageHolder(self)
 
+        # Create timer for IRC cap negotiation timeout, started in capStarted().
+        self.cap_negotiation_timeout = QtCore.QTimer()
+        self.cap_negotiation_timeout.singleShot = True
+
         self.idler = {
             # autoidle
             "auto": False,
@@ -3811,6 +3815,11 @@ class PesterWindow(MovingWindow):
         self.parent.trayicon.hide()
         self.app.quit()
 
+    @QtCore.pyqtSlot()
+    def capNegotationStarted(self):
+        """IRC thread started capabilities negotiation, end it if it takes longer than 5 seconds."""
+        self.cap_negotiation_timeout.start(5000)
+
     def updateServerJson(self):
         PchumLog.info("'%s' chosen.", self.customServerPrompt_qline.text())
         server_and_port = self.customServerPrompt_qline.text().split(":")
@@ -4438,6 +4447,7 @@ class MainProgram(QtCore.QObject):
             (widget.disconnectIRC, irc.disconnect_irc),
             (widget.changeNick, irc.send_nick),
             (widget.sendAuthenticate, irc.send_authenticate),
+            (widget.cap_negotiation_timeout.timeout, irc.end_cap_negotiation),
             # Connect IRC signal to widget slot/function. (IRC --> Widget)
             (irc.connected, widget.connected),
             (irc.askToConnect, widget.connectAnyway),
@@ -4458,6 +4468,7 @@ class MainProgram(QtCore.QObject):
             (irc.modesUpdated, widget.modesUpdated),
             (irc.cannotSendToChan, widget.cannotSendToChan),
             (irc.signal_forbiddenchannel, widget.forbiddenchannel),
+            (irc.cap_negotation_started, widget.capNegotationStarted),
         )
 
     def connectWidgets(self, irc, widget):
