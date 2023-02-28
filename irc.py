@@ -950,6 +950,7 @@ class PesterIRC(QtCore.QThread):
 
     def _endofnames(self, _server, _nick, channel, _msg):
         """Numeric reply 366 RPL_ENDOFNAMES, end of NAMES list of members, usually of a channel."""
+        namelist = None
         try:
             namelist = self.channelnames[channel]
         except KeyError:
@@ -958,7 +959,10 @@ class PesterIRC(QtCore.QThread):
                 if channel.casefold() == channel_name.casefold():
                     channel = channel_name
                     namelist = self.channelnames[channel]
-        del self.channelnames[channel]
+        if channel in self.channelnames:
+            self.channelnames.pop(channel)
+        if not namelist:
+            return
         self.namesReceived.emit(channel, PesterList(namelist))
         if channel == "#pesterchum" and not self.joined:
             self.joined = True
