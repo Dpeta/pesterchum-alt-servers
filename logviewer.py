@@ -115,7 +115,10 @@ class PesterLogUserSelect(QtWidgets.QDialog):
 
     @QtCore.pyqtSlot()
     def viewActivatedLog(self):
-        selectedchum = self.selectedchum().text()
+        selectedchum = self.selectedchum()
+        if not selectedchum:
+            return
+        selectedchum = selectedchum.text()
         if not hasattr(self, "pesterlogviewer"):
             self.pesterlogviewer = None
         if not self.pesterlogviewer:
