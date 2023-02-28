@@ -1,5 +1,6 @@
 """IRC-related functions and classes to be imported by irc.py"""
 import logging
+import base64
 
 PchumLog = logging.getLogger("pchumLogger")
 
@@ -41,7 +42,7 @@ class SendIRC:
 
         try:
             PchumLog.debug("Sending: %s", command)
-            self.socket.sendall(outgoing_bytes)
+            self.socket.send(outgoing_bytes)
         except OSError:
             PchumLog.exception("Error while sending: '%s'", command.strip())
             self.socket.close()
@@ -156,6 +157,28 @@ class SendIRC:
     def quit(self, reason=""):
         """Send QUIT to terminate connection."""
         self._send("QUIT", text=reason)
+
+    def authenticate(self, token=None, nick=None, password=None):
+        """Authenticate command for SASL.
+
+        Send either a token like 'PLAIN' or authenticate with nick and password.
+
+        Reference: https://ircv3.net/irc/#account-authentication-and-registration
+        """
+        if token:
+            self._send("AUTHENTICATE", text=token)
+            return
+        if nick and password:
+            # Authentication identity 'nick', authorization identity 'nick' and password 'password'.
+            sasl_string = f"{nick}\x00{nick}\x00{password}"
+            # Encode to use base64, then decode since 'text' only takes str.
+            sasl_string_bytes = sasl_string.encode(encoding="utf-8", errors="replace")
+            sasl_string_base64 = base64.b64encode(sasl_string_bytes).decode(
+                encoding="utf-8"
+            )
+            # SASL string needs to be under 400 bytes,
+            # splitting over multiple messages is in the protocol but not implemented here.
+            self._send("AUTHENTICATE", text=sasl_string_base64)
 
 
 def parse_irc_line(line: str):
