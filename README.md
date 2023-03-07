@@ -88,7 +88,7 @@ Pesterchum is a Python script. This means that as long as you have Python instal
  - [PyQt6] (prefered) or [PyQt5] (legacy)
      - Qt6 only supports maintained 64 bit operating systems, like Windows 10 or later for Windows. ([Qt 6.3 Supported Platforms](https://doc.qt.io/qt-6/supported-platforms.html))
      - Qt5 supports Windows 7 or later, but is past its EOL for non-commercial use. ([Qt 5.15 Supported Platforms](https://doc.qt.io/qt-6/supported-platforms.html))
- - (Optional) [pygame] can provide an alternative audio backend for certain systems.
+ - (Optional) [pygame-ce] or [pygame] can provide an alternative audio backend for certain systems.
      - Useful for Linux systems that don't meet the Qt6 requirements, as Qt5 Multimedia has a GStreamer dependency.
  - (Optional) [certifi] can provide alternative root certificates for TLS certificate validation.
      - Useful for MacOS, as Python doesn't use the system-provided certificates because of MacOS' outdated SSL library. Also miscellaneous systems without usable root certificates.
@@ -120,6 +120,7 @@ Pesterchum is a Python script. This means that as long as you have Python instal
 [PyQt5]: https://pypi.org/project/PyQt5/
 [PyQt6]: https://pypi.org/project/PyQt6/
 [pygame]: https://pypi.org/project/pygame/
+[pygame-ce]: https://pypi.org/project/pygame-ce/
 [certifi]: https://pypi.org/project/certifi/
 [GStreamer]: https://gstreamer.freedesktop.org/
 [libseccomp]: https://github.com/seccomp/libseccomp/
