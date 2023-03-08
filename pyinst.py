@@ -364,7 +364,7 @@ if sys.platform == "win32":
         "--name=Pesterchum",
         #'--noconfirm',               # Overwrite output directory.
         #'--windowed',                 # Hide console
-        "--icon=pesterchum.ico",
+        "--icon={}".format(os.path.join("img", "icon", "pesterchum.ico")),
         "--clean",  # Clear cache
     ]
 
@@ -702,7 +702,7 @@ elif sys.platform == "darwin":
         "--name=Pesterchum",
         #'--windowed',             # Hide console
         #'--noconfirm',           # Overwrite output directory.
-        "--icon=trayicon32.icns",  # Icon
+        "--icon={}".format(os.path.join("img", "icon", "pesterchum.icns")),
         "--onedir",
         "--clean",  # Clear cache
         #'--noupx'
@@ -734,7 +734,7 @@ elif sys.platform == "linux":
         "--name=Pesterchum",
         #'--windowed',             # Hide console
         #'--noconfirm',           # Overwrite output directory.
-        "--icon=trayicon32.icns",  # Icon
+        "--icon={}".format(os.path.join("img", "icon", "pesterchum.ico")),
         "--clean",  # Clear cache
     ]
 
