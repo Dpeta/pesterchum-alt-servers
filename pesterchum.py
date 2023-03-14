@@ -46,7 +46,6 @@ from generic import (
     PesterList,
     CaseInsensitiveDict,
     MovingWindow,
-    NoneSound,
     WMButton,
 )
 from convo import PesterTabWindow, PesterConvo
@@ -64,11 +63,20 @@ from randomer import RandomHandler, RANDNICK
 from toast import PesterToastMachine, PesterToast
 
 try:
-    from PyQt6 import QtCore, QtGui, QtWidgets
+    from PyQt6 import QtCore, QtGui, QtWidgets, QtMultimedia
     from PyQt6.QtGui import QAction, QActionGroup
+
+    # Give Linux QtMultimedia warning.
+    if ostools.isLinux():
+        print(
+            "QtMultimedia audio is a bit silly/goofy on Linux and relies on an appropriate"
+            " backend being availible."
+            "\nIf it doesn't work, try installing your distro's equivalent"
+            " of the qt6-multimedia-backend/qt6-multimedia/gstreamer packages."
+        )
 except ImportError:
     print("PyQt5 fallback (pesterchum.py)")
-    from PyQt5 import QtCore, QtGui, QtWidgets
+    from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
     from PyQt5.QtWidgets import QAction, QActionGroup
 
 # Data directory
@@ -141,60 +149,6 @@ BOTNAMES.extend(CUSTOMBOTS)
 BOTNAMES.extend(SERVICES)
 # Command line arguments
 _ARGUMENTS = parser.parse_args()
-
-# Import audio module
-# Qt6.4's ffmpeg audio backend makes using QtMultimedia on linux less risky
-try:
-    # PyQt6, QtMultimedia is prefered.
-    from PyQt6 import QtMultimedia
-
-    print("Audio module is PyQt6 QtMultimedia.")
-except ImportError:
-    if ostools.isWin32() or ostools.isOSX():
-        # PyQt5 QtMultimedia has native backends for MacOS and Windows
-        try:
-            from PyQt5 import QtMultimedia
-
-            print(
-                "Using PyQt5 QtMultimedia as sound module. (fallback, PyQt6 QtMultimedia not availible)"
-            )
-        except ImportError:
-            try:
-                import pygame
-
-                print(
-                    "Using pygame as sound module. (fallback, PyQt6 QtMultimedia and PyQt5 QtMultimedia not availible)"
-                )
-            except ImportError:
-                print(
-                    "All possible audio modules failed to import."
-                    "\nPossible audio modules in order of preference (Windows/MacOS): PyQt6 QtMultimedia > PyQt5 QtMultimedia > pygame"
-                )
-    # Linux or misc.
-    else:
-        # PyQt5 QtMultimedia needs gstreamer on linux, so pygame is prefered.
-        try:
-            import pygame
-
-            print(
-                "Using pygame as sound module. (fallback, PyQt6 QtMultimedia not availible)"
-            )
-        except ImportError:
-            try:
-                from PyQt5 import QtMultimedia
-
-                print(
-                    "Using PyQt5 QtMultimedia as sound module. (fallback, PyQt6 QtMultimedia and pygame not availible)"
-                )
-                print(
-                    "PyQt5 Multimedia will silently fail without GStreamer with relevant"
-                    " plugins on Linux, pygame is prefered when using PyQt5."
-                )
-            except ImportError:
-                print(
-                    "All possible audio modules failed to import."
-                    "\nLPossible audio modules in order of preference (Linux/Unknown): PyQt6 QtMultimedia > pygame > PyQt5 QtMultimedia"
-                )
 
 
 class waitingMessageHolder:
@@ -1372,8 +1326,6 @@ class PesterWindow(MovingWindow):
             self.honk = True
         self.modes = ""
 
-        self.sound_type = None
-
         self.randhandler = RandomHandler(self)
 
         try:
@@ -2202,69 +2154,28 @@ class PesterWindow(MovingWindow):
         self._setup_sounds()
         self.setVolume(self.config.volume())
 
-    def _setup_sounds(self, soundclass=None):
+    def _setup_sounds(self):
         """Set up the event sounds for later use."""
-        # Set up the sounds we're using.
+        # Define and load sounds
         try:
-            # Pygame
-            soundclass = pygame.mixer.Sound  # pylint: disable=used-before-assignment
-        except (NameError, AttributeError):
-            try:
-                # QtMultimedia
-                soundclass = QtMultimedia.QSoundEffect
-            except (NameError, AttributeError):
-                # death
-                soundclass = NoneSound
-                PchumLog.warning("No sound module loaded?")
-
-        self.sound_type = soundclass
-
-        # These get redefined if sound works
-        self.alarm = NoneSound()
-        self.memosound = NoneSound()
-        self.namesound = NoneSound()
-        self.ceasesound = NoneSound()
-        self.honksound = NoneSound()
-
-        # Use the class we chose to build the sound set.
-        try:
-            if "pygame" in globals():
-                if soundclass == pygame.mixer.Sound:
-                    self.alarm = soundclass(self.theme["main/sounds/alertsound"])
-                    self.memosound = soundclass(self.theme["main/sounds/memosound"])
-                    self.namesound = soundclass("themes/namealarm.wav")
-                    self.ceasesound = soundclass(self.theme["main/sounds/ceasesound"])
-                    self.honksound = soundclass("themes/honk.wav")
-            if "QtMultimedia" in globals():
-                if soundclass == QtMultimedia.QSoundEffect:
-                    self.alarm = soundclass()
-                    self.memosound = soundclass()
-                    self.namesound = soundclass()
-                    self.ceasesound = soundclass()
-                    self.honksound = soundclass()
-
-                    self.alarm.setSource(
-                        QtCore.QUrl.fromLocalFile(self.theme["main/sounds/alertsound"])
-                    )
-                    self.memosound.setSource(
-                        QtCore.QUrl.fromLocalFile(self.theme["main/sounds/memosound"])
-                    )
-                    self.namesound.setSource(
-                        QtCore.QUrl.fromLocalFile("themes/namealarm.wav")
-                    )
-                    self.ceasesound.setSource(
-                        QtCore.QUrl.fromLocalFile(self.theme["main/sounds/ceasesound"])
-                    )
-                    self.honksound.setSource(
-                        QtCore.QUrl.fromLocalFile("themes/honk.wav")
-                    )
+            self.alarm = QtMultimedia.QSoundEffect()
+            self.alarm.setSource(
+                QtCore.QUrl.fromLocalFile(self.theme["main/sounds/alertsound"])
+            )
+            self.memosound = QtMultimedia.QSoundEffect()
+            self.memosound.setSource(
+                QtCore.QUrl.fromLocalFile(self.theme["main/sounds/memosound"])
+            )
+            self.namesound = QtMultimedia.QSoundEffect()
+            self.namesound.setSource(QtCore.QUrl.fromLocalFile("themes/namealarm.wav"))
+            self.ceasesound = QtMultimedia.QSoundEffect()
+            self.ceasesound.setSource(
+                QtCore.QUrl.fromLocalFile(self.theme["main/sounds/ceasesound"])
+            )
+            self.honksound = QtMultimedia.QSoundEffect()
+            self.honksound.setSource(QtCore.QUrl.fromLocalFile("themes/honk.wav"))
         except:
             PchumLog.exception("Warning: Error loading sounds!")
-            self.alarm = NoneSound()
-            self.memosound = NoneSound()
-            self.namesound = NoneSound()
-            self.ceasesound = NoneSound()
-            self.honksound = NoneSound()
 
         self.sounds = [
             self.alarm,
@@ -2282,12 +2193,7 @@ class PesterWindow(MovingWindow):
         vol = vol_percent / 100.0
         for sound in self.sounds:
             try:
-                if "pygame" in globals():
-                    if self.sound_type == pygame.mixer.Sound:
-                        sound.set_volume(vol)
-                if "QtMultimedia" in globals():
-                    if self.sound_type == QtMultimedia.QSoundEffect:
-                        sound.setVolume(vol)
+                sound.setVolume(vol)
             except Exception as err:
                 PchumLog.warning("Couldn't set volume: %s", err)
 
@@ -2298,23 +2204,21 @@ class PesterWindow(MovingWindow):
         if "QtMultimedia" not in globals():
             PchumLog.warning("Not using QtMultimedia, can't set audio device.")
             return
-        for output in QtMultimedia.QMediaDevices.audioOutputs():
-            if device_id == output.id():
-                for sound in self.sounds:
-                    sound.setAudioDevice(output)
+        if hasattr(QtMultimedia, "QMediaDevices"):
+            # PyQt6
+            for output in QtMultimedia.QMediaDevices.audioOutputs():
+                if device_id == output.id():
+                    for sound in self.sounds:
+                        if sound:
+                            sound.setAudioDevice(output)
 
     def canSetVolume(self):
         """Returns the state of volume setting capabilities."""
         # If the volume can be changed by Pesterchum.
-        if self.sound_type is None:
-            # We haven't initialized yet.
-            return False
-        elif self.sound_type == NoneSound:
-            # Sound is dead
-            return False
-        else:
-            # We can set volume
-            return True
+        for sound in self.sounds:
+            if sound:
+                return True
+        return False  # All None. . .
 
     def changeTheme(self, theme):
         # check theme
@@ -4112,14 +4016,6 @@ class MainProgram(QtCore.QObject):
                 msgbox.setInformativeText(msg)
                 msgbox.setIcon(QtWidgets.QMessageBox.Icon.Critical)
                 msgbox.exec()
-
-        # If we're using pygame for sound we need to init
-        if "pygame" in globals():
-            # we could set the frequency higher but i love how cheesy it sounds
-            try:
-                pygame.mixer.init()
-            except Exception as err:
-                print("Warning: No sound! (pygame error: %s)" % err)
 
         self.widget = PesterWindow(options, parent=self, app=self.app)
         # self.widget.show() <== Already called in showLoading()

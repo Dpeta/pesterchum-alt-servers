@@ -88,8 +88,6 @@ Pesterchum is a Python script. This means that as long as you have Python instal
  - [PyQt6] (prefered) or [PyQt5] (legacy)
      - Qt6 only supports maintained 64 bit operating systems, like Windows 10 or later for Windows. ([Qt 6.3 Supported Platforms](https://doc.qt.io/qt-6/supported-platforms.html))
      - Qt5 supports Windows 7 or later, but is past its EOL for non-commercial use. ([Qt 5.15 Supported Platforms](https://doc.qt.io/qt-6/supported-platforms.html))
- - (Optional) [pygame-ce] or [pygame] can provide an alternative audio backend for certain systems.
-     - Useful for Linux systems that don't meet the Qt6 requirements, as Qt5 Multimedia has a GStreamer dependency.
  - (Optional) [certifi] can provide alternative root certificates for TLS certificate validation.
      - Useful for MacOS, as Python doesn't use the system-provided certificates because of MacOS' outdated SSL library. Also miscellaneous systems without usable root certificates.
  
@@ -102,9 +100,9 @@ Pesterchum is a Python script. This means that as long as you have Python instal
     - On macOS it's also possible to install (a more recent version of) Python via [Brew](https://brew.sh/).
 2. Install Pesterchum's dependencies with pip, run: ``python -m pip install -r requirements.txt``
     - If this fails, try running ``python -m pip install -U pip setuptools wheel`` to update pip, setuptools & wheel and then trying again.
-    - Alternatively, many linux distros also have packages for pyqt and pygame.
-        - Debian: [python3-pyqt6](https://packages.debian.org/testing/python/python3-pyqt6), [python3-pygame](https://packages.debian.org/testing/python/python3-pygame)
-        - Arch: [python-pyqt6](https://archlinux.org/packages/extra/x86_64/python-pyqt6/), [python-pygame](https://archlinux.org/packages/community/x86_64/python-pygame/)
+    - Alternatively, many linux distros also have packages for PyQt6.
+        - Debian: [python3-pyqt6](https://packages.debian.org/testing/python/python3-pyqt6)
+        - Arch: [python-pyqt6](https://archlinux.org/packages/extra/x86_64/python-pyqt6/)
 3. Download [this repository's source](https://github.com/Dpeta/pesterchum-alt-servers/archive/refs/heads/main.zip), or choose the "Source Code" option on any release, and extract the archive to a folder of your choice.
     - Alternatively, clone the repository with git.
 4. Navigate your terminal to the folder you chose with ``cd /folder/you/chose``.
@@ -116,8 +114,6 @@ Pesterchum is a Python script. This means that as long as you have Python instal
 [pip]: https://pypi.org/project/pip/
 [PyQt5]: https://pypi.org/project/PyQt5/
 [PyQt6]: https://pypi.org/project/PyQt6/
-[pygame]: https://pypi.org/project/pygame/
-[pygame-ce]: https://pypi.org/project/pygame-ce/
 [certifi]: https://pypi.org/project/certifi/
 [GStreamer]: https://gstreamer.freedesktop.org/
  
