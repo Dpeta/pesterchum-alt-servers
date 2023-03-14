@@ -1569,6 +1569,14 @@ class PesterWindow(MovingWindow):
         self.sincerecv = 0  # Time since last recv
         self.lastCheckPing = None
 
+        # These get redefined if sound works
+        self.alarm = None
+        self.memosound = None
+        self.namesound = None
+        self.ceasesound = None
+        self.honksound = None
+        self.sounds = []
+
         # Linux user-space API
         if ostools.isLinux():
             # Set no_new_privs bit.
