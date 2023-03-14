@@ -1426,8 +1426,6 @@ class PesterWindow(MovingWindow):
         memoaction = QAction(self.theme["main/menus/client/memos"], self)
         self.memoaction = memoaction
         memoaction.triggered.connect(self.showMemos)
-        self.importaction = QAction(self.theme["main/menus/client/import"], self)
-        self.importaction.triggered.connect(self.importExternalConfig)
         self.idleaction = QAction(self.theme["main/menus/client/idle"], self)
         self.idleaction.setCheckable(True)
         self.idleaction.toggled[bool].connect(self.toggleIdle)
@@ -1450,7 +1448,6 @@ class PesterWindow(MovingWindow):
         filemenu.addAction(talk)
         filemenu.addAction(self.idleaction)
         filemenu.addAction(grps)
-        filemenu.addAction(self.importaction)
         filemenu.addAction(self.reconnectAction)
         filemenu.addAction(exitaction)
 
@@ -2086,7 +2083,6 @@ class PesterWindow(MovingWindow):
         self.exitaction.setText(theme["main/menus/client/exit"])
         self.userlistaction.setText(theme["main/menus/client/userlist"])
         self.memoaction.setText(theme["main/menus/client/memos"])
-        self.importaction.setText(theme["main/menus/client/import"])
         self.idleaction.setText(theme["main/menus/client/idle"])
         self.reconnectAction.setText(theme["main/menus/client/reconnect"])
         self.filemenu.setTitle(theme["main/menus/client/_name"])
@@ -2828,50 +2824,6 @@ class PesterWindow(MovingWindow):
     @staticmethod
     def isBot(handle):
         return handle.upper() in BOTNAMES
-
-    @QtCore.pyqtSlot()
-    def importExternalConfig(self):
-        f = QtWidgets.QFileDialog.getOpenFileName(self)[0]
-        if f == "":
-            return
-        fp = open(f)
-        regexp_state = None
-        for l in fp:
-            # import chumlist
-            l = l.rstrip()
-            chum_mo = re.match("handle: ([A-Za-z0-9]+)", l)
-            if chum_mo is not None:
-                chum = PesterProfile(chum_mo.group(1))
-                self.addChum(chum)
-                continue
-            if regexp_state is not None:
-                replace_mo = re.match("replace: (.+)", l)
-                if replace_mo is not None:
-                    replace = replace_mo.group(1)
-                    try:
-                        re.compile(regexp_state)
-                    except re.error:
-                        continue
-                    newquirk = pesterQuirk(
-                        {"type": "regexp", "from": regexp_state, "to": replace}
-                    )
-                    qs = self.userprofile.quirks
-                    qs.addQuirk(newquirk)
-                    self.userprofile.setQuirks(qs)
-                regexp_state = None
-                continue
-            search_mo = re.match("search: (.+)", l)
-            if search_mo is not None:
-                regexp_state = search_mo.group(1)
-                continue
-            other_mo = re.match("(prefix|suffix): (.+)", l)
-            if other_mo is not None:
-                newquirk = pesterQuirk(
-                    {"type": other_mo.group(1), "value": other_mo.group(2)}
-                )
-                qs = self.userprofile.quirks
-                qs.addQuirk(newquirk)
-                self.userprofile.setQuirks(qs)
 
     @QtCore.pyqtSlot()
     def showMemos(self, channel=""):
@@ -4472,6 +4424,7 @@ class MainProgram(QtCore.QObject):
 
     def run(self):
         sys.exit(self.app.exec())
+
 
 if __name__ == "__main__":
     # We're being run as a script - not being imported.
