@@ -19,9 +19,6 @@ import ostools
 import nickservmsgs
 import pytwmn
 
-if ostools.isLinux():
-    import libseccomp
-
 # import console
 from user_profile import (
     userConfig,
@@ -114,21 +111,6 @@ parser.add_argument(
 parser.add_argument(
     "--nohonk", action="store_true", help="Disables the honk soundeffect 🤡📣"
 )
-if ostools.isLinux():
-    parser.add_argument(
-        "--no-seccomp",
-        action="store_true",
-        help=("Disable seccomp completely. (do this if it causes issues)"),
-    )
-    parser.add_argument(
-        "--strict-seccomp",
-        action="store_true",
-        help=(
-            "Apply a stricter seccomp-bpf filter that only allows required system calls."
-            " This breaks certain features like opening links."
-            " (Requires Linux and libseccomp's Python bindings.)"
-        ),
-    )
 
 # Set logging config section, log level is in oppts.
 # Logger
@@ -1692,22 +1674,6 @@ class PesterWindow(MovingWindow):
         if ostools.isLinux():
             # Set no_new_privs bit.
             self.set_no_new_privs()
-            # Activate seccomp.
-            self.seccomp(options)
-
-    def seccomp(self, options):
-        """Load seccomp-bpf filter depending on arguments passed."""
-        if "no-seccomp" in options:
-            if options["no-seccomp"]:
-                return
-        try:
-            libseccomp.load_seccomp_blacklist()  # Load blacklist filter by default
-            if "strict-seccomp" in options:
-                if options["strict-seccomp"]:
-                    libseccomp.load_seccomp_whitelist()  # Load whitelist filter if enabled
-        except RuntimeError:
-            # We probably tried to interact with a call not available on this kernel.
-            PchumLog.exception("")
 
     @QtCore.pyqtSlot(str, str)
     def updateMsg(self, ver, url):
@@ -4592,11 +4558,6 @@ class MainProgram(QtCore.QObject):
             # Disable honks
             if args.nohonk:
                 options["honk"] = False
-            if ostools.isLinux():
-                if args.strict_seccomp:
-                    options["strict-seccomp"] = True
-                if args.no_seccomp:
-                    options["no-seccomp"] = True
         except Exception as e:
             print(e)
             return options
