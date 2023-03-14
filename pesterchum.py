@@ -1305,6 +1305,14 @@ class PesterWindow(MovingWindow):
         # We really shouldn't run as root.
         self.root_check()
 
+        # These get redefined if sound works
+        self.alarm = None
+        self.memosound = None
+        self.namesound = None
+        self.ceasesound = None
+        self.honksound = None
+        self.sounds = []
+
         # karxi: For the record, these are set via commandline arguments. By
         # default, they aren't usable any other way - you can't set them via
         # the config files.
@@ -1569,14 +1577,6 @@ class PesterWindow(MovingWindow):
         self.sincerecv = 0  # Time since last recv
         self.lastCheckPing = None
 
-        # These get redefined if sound works
-        self.alarm = None
-        self.memosound = None
-        self.namesound = None
-        self.ceasesound = None
-        self.honksound = None
-        self.sounds = []
-
         # Linux user-space API
         if ostools.isLinux():
             # Set no_new_privs bit.
@@ -1816,9 +1816,9 @@ class PesterWindow(MovingWindow):
         # play sound here
         if self.config.soundOn():
             if self.config.chatSound() or convo.always_beep:
-                if msg in ["PESTERCHUM:CEASE", "PESTERCHUM:BLOCK"]:
+                if msg in ["PESTERCHUM:CEASE", "PESTERCHUM:BLOCK"] and self.ceasesound:
                     self.ceasesound.play()
-                else:
+                elif self.alarm:
                     self.alarm.play()
 
     def newMemoMsg(self, chan, handle, msg):
@@ -1854,16 +1854,20 @@ class PesterWindow(MovingWindow):
         if self.config.soundOn():
             if self.config.memoSound():
                 if self.config.nameSound():
-                    if mentioned:
+                    if mentioned and self.namesound:
                         self.namesound.play()
                         return
                 if not memo.notifications_muted:
-                    if self.honk and re.search(
-                        r"\bhonk\b", convertTags(msg, "text"), re.I
+                    if (
+                        self.honk
+                        and self.honksound
+                        and re.search(r"\bhonk\b", convertTags(msg, "text"), re.I)
                     ):
                         # TODO: I've got my eye on you, Gamzee.
                         self.honksound.play()
-                    elif self.config.memoPing() or memo.always_beep:
+                    elif (
+                        self.config.memoPing() or memo.always_beep
+                    ) and self.memosound:
                         self.memosound.play()
 
     def changeColor(self, handle, color):
