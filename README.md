@@ -92,9 +92,6 @@ Pesterchum is a Python script. This means that as long as you have Python instal
      - Useful for Linux systems that don't meet the Qt6 requirements, as Qt5 Multimedia has a GStreamer dependency.
  - (Optional) [certifi] can provide alternative root certificates for TLS certificate validation.
      - Useful for MacOS, as Python doesn't use the system-provided certificates because of MacOS' outdated SSL library. Also miscellaneous systems without usable root certificates.
- - (Optional) [libseccomp] and its Python bindings on Linux let Pesterchum apply seccomp-bpf restrictions on itself.
-    - Packages on Arch: ``libseccomp python-libseccomp``
-    - Packages on Debian: ``libseccomp2 python-seccomp``
  
 ### WALKTHROUGH
 
@@ -123,16 +120,11 @@ Pesterchum is a Python script. This means that as long as you have Python instal
 [pygame-ce]: https://pypi.org/project/pygame-ce/
 [certifi]: https://pypi.org/project/certifi/
 [GStreamer]: https://gstreamer.freedesktop.org/
-[libseccomp]: https://github.com/seccomp/libseccomp/
  
 ## FREEZE / BUILD <img src="themes/win95chum/admin.png">
 Here's a quick guide on how to freeze Pesterchum, (that is, packaging it with python as an executable). :3
 
 Ideally, you'll want to create and activate a [virtual environment](https://docs.python.org/3/library/venv.html) before anything else, this is not 100% required though.
-
-### [CX_FREEZE](https://cx-freeze.readthedocs.io/en/latest/index.html)
-1. ``python3 -m pip install cx_freeze``
-2. ``python3 setup.py build``
 
 ### [PYINSTALLER](https://pyinstaller.readthedocs.io/en/stable/)
 1. ``python3 -m pip install pyinstaller``

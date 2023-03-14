@@ -19,10 +19,6 @@ import ostools
 import nickservmsgs
 import pytwmn
 
-if ostools.isLinux():
-    import libseccomp
-
-# import console
 from user_profile import (
     userConfig,
     userProfile,
@@ -114,21 +110,6 @@ parser.add_argument(
 parser.add_argument(
     "--nohonk", action="store_true", help="Disables the honk soundeffect 🤡📣"
 )
-if ostools.isLinux():
-    parser.add_argument(
-        "--no-seccomp",
-        action="store_true",
-        help=("Disable seccomp completely. (do this if it causes issues)"),
-    )
-    parser.add_argument(
-        "--strict-seccomp",
-        action="store_true",
-        help=(
-            "Apply a stricter seccomp-bpf filter that only allows required system calls."
-            " This breaks certain features like opening links."
-            " (Requires Linux and libseccomp's Python bindings.)"
-        ),
-    )
 
 # Set logging config section, log level is in oppts.
 # Logger
@@ -158,11 +139,6 @@ SERVICES = [
 ]
 BOTNAMES.extend(CUSTOMBOTS)
 BOTNAMES.extend(SERVICES)
-# Save the main app. From here, we should be able to get everything else in
-# order, for console use.
-_CONSOLE = False
-_CONSOLE_ENV = {}
-_CONSOLE_ENV["PAPP"] = None
 # Command line arguments
 _ARGUMENTS = parser.parse_args()
 
@@ -1308,8 +1284,6 @@ class PesterWindow(MovingWindow):
                 | QtCore.Qt.WindowType.FramelessWindowHint
             ),
         )
-        # For debugging
-        _CONSOLE_ENV["PAPP"] = self
         # TODO: karxi: SO! At the end of this function it seems like that
         # object is just made into None or.../something/. Somehow, it just
         # DIES, and I haven't the slightest idea why. I've tried multiple ways
@@ -1452,8 +1426,6 @@ class PesterWindow(MovingWindow):
         memoaction = QAction(self.theme["main/menus/client/memos"], self)
         self.memoaction = memoaction
         memoaction.triggered.connect(self.showMemos)
-        self.importaction = QAction(self.theme["main/menus/client/import"], self)
-        self.importaction.triggered.connect(self.importExternalConfig)
         self.idleaction = QAction(self.theme["main/menus/client/idle"], self)
         self.idleaction.setCheckable(True)
         self.idleaction.toggled[bool].connect(self.toggleIdle)
@@ -1463,46 +1435,6 @@ class PesterWindow(MovingWindow):
         self.menu = QtWidgets.QMenuBar(self)
         self.menu.setNativeMenuBar(False)
         self.menu.setObjectName("mainmenu")
-
-        """
-        if self.theme.has_key("main/menus/client/console"):
-            self.console = AttrDict(
-                dict(
-                    window=None,
-                    action=QAction(self.theme["main/menus/client/console"], self),
-                    is_open=False,
-                )
-            )
-        else:
-            self.console = AttrDict(
-                dict(window=None, action=QAction("Console", self), is_open=False)
-            )
-        self.console.shortcuts = AttrDict(
-            dict(
-                conkey=QShortcut(
-                    QtGui.QKeySequence("Ctrl+`"),
-                    self,
-                    context=QtCore.Qt.ShortcutContext.ApplicationShortcut,
-                ),
-                curwgt=QShortcut(
-                    QtGui.QKeySequence("Ctrl+Alt+w"),
-                    self,
-                    context=QtCore.Qt.ShortcutContext.ApplicationShortcut,
-                ),
-            )
-        )
-        self.console.action.triggered.connect(self.toggleConsole)
-        # Make sure the shortcut works anywhere.
-        # karxi: There's something wrong with the inheritance scheme here.
-        # ~self.console.shortcuts.conkey.setContext(QtCore.Qt.ShortcutContext.ApplicationShortcut)
-        self.console.shortcuts.conkey.activated.connect(self.toggleConsole)
-        # ~# Use new-style connections
-        # ~self.console.shortcut.activated.connect(self.toggleConsole)
-        # Apparently those can crash sometimes...c'est la vie. Can't use 'em.
-        # ~self.connect(self.console.shortcuts.curwgt,
-        # ~        QtCore.SIGNAL('activate()'), self.console.
-        self.console.is_open = False
-        """
 
         filemenu = self.menu.addMenu(self.theme["main/menus/client/_name"])
         self.filemenu = filemenu
@@ -1516,9 +1448,6 @@ class PesterWindow(MovingWindow):
         filemenu.addAction(talk)
         filemenu.addAction(self.idleaction)
         filemenu.addAction(grps)
-        if _CONSOLE:
-            filemenu.addAction(self.console.action)
-        filemenu.addAction(self.importaction)
         filemenu.addAction(self.reconnectAction)
         filemenu.addAction(exitaction)
 
@@ -1692,22 +1621,6 @@ class PesterWindow(MovingWindow):
         if ostools.isLinux():
             # Set no_new_privs bit.
             self.set_no_new_privs()
-            # Activate seccomp.
-            self.seccomp(options)
-
-    def seccomp(self, options):
-        """Load seccomp-bpf filter depending on arguments passed."""
-        if "no-seccomp" in options:
-            if options["no-seccomp"]:
-                return
-        try:
-            libseccomp.load_seccomp_blacklist()  # Load blacklist filter by default
-            if "strict-seccomp" in options:
-                if options["strict-seccomp"]:
-                    libseccomp.load_seccomp_whitelist()  # Load whitelist filter if enabled
-        except RuntimeError:
-            # We probably tried to interact with a call not available on this kernel.
-            PchumLog.exception("")
 
     @QtCore.pyqtSlot(str, str)
     def updateMsg(self, ver, url):
@@ -2052,76 +1965,6 @@ class PesterWindow(MovingWindow):
         self.tabmemo = MemoTabWindow(self)
         self.tabmemo.windowClosed.connect(self.memoTabsClosed)
 
-    """
-    @QtCore.pyqtSlot()
-    def toggleConsole(self):
-        if not _CONSOLE:
-            # We don't have the module file for this at the moment.
-            return
-        win = self.console.window
-        if win is None:
-            # We have no console window; make one.
-            PchumLog.info("Making a console....")
-            self.console.window = win = console.ConsoleWindow(parent=self)
-            PchumLog.info("Console made.")
-            # 'ConsoleWindow' object has no attribute 'windowClosed'
-            win.finished.connect(self.consoleWindowClosed)
-            self.console.shortcuts.curwgt.activated.connect(win.designateCurrentWidget)
-
-        if self.console.is_open:
-            for wgt in win.findChildren(QtWidgets.QWidget):
-                try:
-                    focused = wgt.hasFocus()
-                except AttributeError:
-                    # The widget doesn't have a hasFocus method.
-                    # Just to reduce ambiguity
-                    focused = False
-                    # Try the next one.
-                    continue
-                # No error, let's see if we're actually focused.
-                if focused:
-                    PchumLog.debug(
-                        "{0!r} is in focus (parent: {1!r}); hiding".format(
-                            wgt, wgt.parent()
-                        )
-                    )
-                    # This widget, a child of our console, has focus.
-                    # So...the console has focus.
-                    # Set focus to the text input just for good measure.
-                    win.text.input.setFocus()
-                    # ...then hide it all.
-                    win.hide()
-                    self.console.is_open = False
-                    break
-            else:
-                # The console is open, but not in focus. Bring it to the fore.
-                # NOTE: This is a bit of a kludgy method - it may not work
-                # properly on Windows. Need to look into workarounds.
-                #
-                # karxi: I *think* that Windows doesn't mind if the
-                # process/window that 'owns' this one changes our focus, since
-                # the application ultimately already *has* our focus - but I'm
-                # not sure.
-                PchumLog.debug("Console isn't in focus; fixing")
-                win.raise_()
-                win.show()
-                win.activateWindow()
-
-                win.text.input.setFocus()
-                # No need to explicitly set it as open; it already is.
-        else:
-            PchumLog.debug("Console not visible; showing")
-            # Console isn't visible - show it.
-            win.show()
-            self.console.is_open = True
-
-    @QtCore.pyqtSlot()
-    def consoleWindowClosed(self):
-        self.console.is_open = False
-        self.console.window = None
-        PchumLog.info("Console closed.")
-    """
-
     def newMemo(self, channel, timestr, secret=False, invite=False):
         if channel == "#pesterchum":
             return
@@ -2240,7 +2083,6 @@ class PesterWindow(MovingWindow):
         self.exitaction.setText(theme["main/menus/client/exit"])
         self.userlistaction.setText(theme["main/menus/client/userlist"])
         self.memoaction.setText(theme["main/menus/client/memos"])
-        self.importaction.setText(theme["main/menus/client/import"])
         self.idleaction.setText(theme["main/menus/client/idle"])
         self.reconnectAction.setText(theme["main/menus/client/reconnect"])
         self.filemenu.setTitle(theme["main/menus/client/_name"])
@@ -2255,17 +2097,6 @@ class PesterWindow(MovingWindow):
         self.chanServAction.setText(self.theme["main/menus/help/chanserv"])
         self.nickServAction.setText(self.theme["main/menus/help/nickserv"])
         self.helpmenu.setTitle(self.theme["main/menus/help/_name"])
-
-        # Console
-        ##        if self.theme.has_key("main/menus/client/console"):
-        ##            self.console.action.setText(self.theme["main/menus/client/console"])
-        ##        else:
-        ##            self.console.action.setText("Console")
-        # has_key doesn't work out here for some reason, possibly because of inherits?
-        # try:
-        #    self.console.action.setText(self.theme["main/menus/client/console"])
-        # except:
-        #    self.console.action.setText("Console")
 
         try:
             self.reportBugAction.setText(self.theme["main/menus/help/reportbug"])
@@ -2366,11 +2197,6 @@ class PesterWindow(MovingWindow):
 
         self.mychumhandleLabel.adjustSize()  # Required so "CHUMHANDLE:" regardless of style-sheet.
         self.moodsLabel.adjustSize()  # Required so "MOOD:" regardless of style-sheet.
-
-        if _CONSOLE:
-            if self.console.window:
-                # A bit of an ugly hack....
-                self.console.window.changeTheme(theme)
 
         # sounds
         self._setup_sounds()
@@ -2998,50 +2824,6 @@ class PesterWindow(MovingWindow):
     @staticmethod
     def isBot(handle):
         return handle.upper() in BOTNAMES
-
-    @QtCore.pyqtSlot()
-    def importExternalConfig(self):
-        f = QtWidgets.QFileDialog.getOpenFileName(self)[0]
-        if f == "":
-            return
-        fp = open(f)
-        regexp_state = None
-        for l in fp:
-            # import chumlist
-            l = l.rstrip()
-            chum_mo = re.match("handle: ([A-Za-z0-9]+)", l)
-            if chum_mo is not None:
-                chum = PesterProfile(chum_mo.group(1))
-                self.addChum(chum)
-                continue
-            if regexp_state is not None:
-                replace_mo = re.match("replace: (.+)", l)
-                if replace_mo is not None:
-                    replace = replace_mo.group(1)
-                    try:
-                        re.compile(regexp_state)
-                    except re.error:
-                        continue
-                    newquirk = pesterQuirk(
-                        {"type": "regexp", "from": regexp_state, "to": replace}
-                    )
-                    qs = self.userprofile.quirks
-                    qs.addQuirk(newquirk)
-                    self.userprofile.setQuirks(qs)
-                regexp_state = None
-                continue
-            search_mo = re.match("search: (.+)", l)
-            if search_mo is not None:
-                regexp_state = search_mo.group(1)
-                continue
-            other_mo = re.match("(prefix|suffix): (.+)", l)
-            if other_mo is not None:
-                newquirk = pesterQuirk(
-                    {"type": other_mo.group(1), "value": other_mo.group(2)}
-                )
-                qs = self.userprofile.quirks
-                qs.addQuirk(newquirk)
-                self.userprofile.setQuirks(qs)
 
     @QtCore.pyqtSlot()
     def showMemos(self, channel=""):
@@ -4592,11 +4374,6 @@ class MainProgram(QtCore.QObject):
             # Disable honks
             if args.nohonk:
                 options["honk"] = False
-            if ostools.isLinux():
-                if args.strict_seccomp:
-                    options["strict-seccomp"] = True
-                if args.no_seccomp:
-                    options["no-seccomp"] = True
         except Exception as e:
             print(e)
             return options
@@ -4648,16 +4425,6 @@ class MainProgram(QtCore.QObject):
     def run(self):
         sys.exit(self.app.exec())
 
-
-def _retrieveGlobals():
-    # NOTE: Yes, this is a terrible kludge so that the console can work
-    # properly. I'm open to alternatives.
-    return globals()
-
-
-# def main():
-#    pesterchum = MainProgram()
-#    pesterchum.run()
 
 if __name__ == "__main__":
     # We're being run as a script - not being imported.
