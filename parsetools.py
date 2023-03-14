@@ -18,8 +18,6 @@ from generic import mysteryTime
 from quirks import ScriptQuirks
 from pyquirks import PythonQuirks
 
-# from luaquirks import LuaQuirks
-
 PchumLog = logging.getLogger("pchumLogger")
 
 # I'll clean up the things that are no longer needed once the transition is
@@ -50,7 +48,6 @@ _functionre = None
 def loadQuirks():
     global quirkloader, _functionre
     quirkloader.add(PythonQuirks())
-    # quirkloader.add(LuaQuirks())
     quirkloader.loadAll()
     quirkloader.funcre()
     _functionre = re.compile(r"%s" % quirkloader.funcre())
