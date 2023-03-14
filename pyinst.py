@@ -9,9 +9,6 @@ import PyInstaller.__main__
 is_64bit = sys.maxsize > 2**32
 # is_linux = sys.platform.startswith("linux")
 exclude_modules = []
-# if is_linux == False:
-#    print("Not Linux, excluding pygame.")
-#    exclude_modules.append('pygame')
 add_data = [
     "quirks;quirks",
     "smilies;smilies",
