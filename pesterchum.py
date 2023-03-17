@@ -1257,6 +1257,9 @@ class PesterWindow(MovingWindow):
         self.tabconvo = None
         self.tabmemo = None
         self.shortcuts = {}
+        self.aboutwindow = None
+        self.moods = None
+        self.currentMoodIcon = None
 
         self.setAutoFillBackground(False)
         self.setObjectName("main")
@@ -2077,8 +2080,8 @@ class PesterWindow(MovingWindow):
         self.moodsLabel.move(*theme["main/moodlabel/loc"])
         self.moodsLabel.setStyleSheet(theme["main/moodlabel/style"])
 
-        if hasattr(self, "moods"):
-            self.moods.removeButtons()  # pylint: disable=access-member-before-definition
+        if self.moods:
+            self.moods.removeButtons()
         mood_list = theme["main/moods"]
         mood_list = [{str(k): v for (k, v) in d.items()} for d in mood_list]
         self.moods = PesterMoodHandler(
@@ -2131,9 +2134,9 @@ class PesterWindow(MovingWindow):
         # if self.theme.has_key("main/mychumhandle/currentMood"):
         try:
             moodicon = self.profile().mood.icon(theme)
-            if hasattr(self, "currentMoodIcon"):
-                if hasattr(self.currentMoodIcon, "hide"):  # pylint: disable=E0203
-                    self.currentMoodIcon.hide()  # pylint: disable=E0203
+            if self.currentMoodIcon:
+                if hasattr(self.currentMoodIcon, "hide"):
+                    self.currentMoodIcon.hide()
                     self.currentMoodIcon = None
             self.currentMoodIcon = QtWidgets.QLabel(self)
             self.currentMoodIcon.setPixmap(moodicon.pixmap(moodicon.realsize()))
@@ -3375,9 +3378,8 @@ class PesterWindow(MovingWindow):
         self.mycolorUpdated.emit()
 
     def aboutPesterchum(self):
-        if hasattr(self, "aboutwindow"):
-            if self.aboutwindow:  # pylint: disable=access-member-before-definition
-                return
+        if self.aboutwindow:
+            return
         self.aboutwindow = AboutPesterchum(self)
         self.aboutwindow.exec()
         self.aboutwindow = None
