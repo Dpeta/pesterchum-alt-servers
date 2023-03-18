@@ -47,15 +47,7 @@ from scripts.ssl_context import get_ssl_context
 from scripts.input_validation import is_valid_mood, is_valid_rgb_color
 
 PchumLog = logging.getLogger("pchumLogger")
-SERVICES = [
-    "nickserv",
-    "chanserv",
-    "memoserv",
-    "operserv",
-    "helpserv",
-    "hostserv",
-    "botserv",
-]
+from scripts.services import SERVICES
 
 
 class PesterIRC(QtCore.QThread):

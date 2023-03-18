@@ -25,6 +25,7 @@ from parsetools import (
     smiledict,
 )
 from logviewer import PesterLogViewer
+from scripts.services import BOTNAMES
 
 PchumLog = logging.getLogger("pchumLogger")
 _valid_memo_msg_start = re.compile(
@@ -389,7 +390,10 @@ class MemoText(PesterText):
         window = parent.mainwindow
         me = window.profile()
         if isinstance(msg, str):
-            if self.mainwindow.config.force_prefix():
+            if (
+                self.mainwindow.config.force_prefix()
+                and chum.handle.casefold() not in BOTNAMES
+            ):
                 msg = self.make_valid(msg, chum, parent, window, me)
             lexmsg = lexMessage(msg)
         else:
