@@ -16,7 +16,6 @@ if os.path.dirname(sys.argv[0]):
     os.chdir(os.path.dirname(sys.argv[0]))
 
 import ostools
-import nickservmsgs
 import pytwmn
 
 from user_profile import (
@@ -61,6 +60,7 @@ from irc import PesterIRC
 from logviewer import PesterLogUserSelect, PesterLogViewer
 from randomer import RandomHandler, RANDNICK
 from toast import PesterToastMachine, PesterToast
+from scripts.services import SERVICES, CUSTOMBOTS, BOTNAMES, translate_nickserv_msg
 
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets, QtMultimedia
@@ -133,20 +133,6 @@ stream_handler.setFormatter(formatter)
 PchumLog.addHandler(file_handler)
 PchumLog.addHandler(stream_handler)
 
-# Global variables
-BOTNAMES = []
-CUSTOMBOTS = ["CALSPRITE", RANDNICK.upper()]
-SERVICES = [
-    "NICKSERV",
-    "CHANSERV",
-    "MEMOSERV",
-    "OPERSERV",
-    "HELPSERV",
-    "HOSTSERV",
-    "BOTSERV",
-]
-BOTNAMES.extend(CUSTOMBOTS)
-BOTNAMES.extend(SERVICES)
 # Command line arguments
 _ARGUMENTS = parser.parse_args()
 
@@ -1787,7 +1773,7 @@ class PesterWindow(MovingWindow):
                 t.show()
             elif not self.config.notifyOptions() & self.config.NEWCONVO:
                 if msg[:11] != "PESTERCHUM:":
-                    if handle.upper() not in BOTNAMES:
+                    if handle.casefold() not in BOTNAMES:
                         t = self.tm.Toast(
                             "From: %s" % handle, re.sub("</?c(=.*?)?>", "", msg)
                         )
@@ -1912,12 +1898,12 @@ class PesterWindow(MovingWindow):
         convoWindow.messageSent[str, str].connect(self.sendMessage[str, str])
         convoWindow.windowClosed[str].connect(self.closeConvo)
         self.convos[chum.handle] = convoWindow
-        if chum.handle.upper() in BOTNAMES:
+        if chum.handle.casefold() in BOTNAMES:
             convoWindow.toggleQuirks(True)
             convoWindow.quirksOff.setChecked(True)
             if (
                 not self.config.irc_compatibility_mode()
-                or chum.handle.upper() in CUSTOMBOTS
+                or chum.handle.casefold() in CUSTOMBOTS
             ):
                 self.newConvoStarted.emit(chum.handle, initiated)
         else:
@@ -2450,11 +2436,11 @@ class PesterWindow(MovingWindow):
         elif h in self.convos:
             self.newMessage(h, m)
         elif h.upper() == "NICKSERV" and "PESTERCHUM:" not in m:
-            m = nickservmsgs.translate(m)
+            m = translate_nickserv_msg(m)
             if m:
                 t = self.tm.Toast("NickServ:", m)
                 t.show()
-        elif ("PESTERCHUM:" not in m) and (h.upper() in SERVICES):
+        elif "PESTERCHUM:" not in m and h.casefold() in SERVICES:
             # Show toast for rest services notices
             # "Your VHOST is actived", "You have one new memo", etc.
             t = self.tm.Toast("%s:" % h, m)
@@ -2742,7 +2728,7 @@ class PesterWindow(MovingWindow):
     # Presented here so it can be called by other scripts.
     @staticmethod
     def isBot(handle):
-        return handle.upper() in BOTNAMES
+        return handle.casefold() in BOTNAMES
 
     @QtCore.pyqtSlot()
     def showMemos(self, channel=""):
