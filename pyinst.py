@@ -18,8 +18,6 @@ add_data = [
     "README.md;.",
     "LICENSE;.",
     "CHANGELOG.md;.",
-    "PCskins.png;.",
-    "Pesterchum.png;.",
 ]
 data_folders = {
     "quirks": "quirks",
@@ -32,15 +30,11 @@ data_files = {
     "README.md": "README.md.txt",
     "LICENSE": "LICENSE.txt",
     "CHANGELOG.md": "CHANGELOG.md.txt",
-    "PCskins.png": ".",
-    "Pesterchum.png": ".",
 }
 data_files_linux = {
     "README.md": "README.md",
     "LICENSE": "LICENSE.txt",
     "CHANGELOG.md": "CHANGELOG.md",
-    "PCskins.png": ".",
-    "Pesterchum.png": ".",
 }
 # Some of these might not be required anymore,
 # newer versions of PyInstaller claim to exclude certain problematic DDLs automatically.
