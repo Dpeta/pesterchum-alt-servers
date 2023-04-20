@@ -3497,6 +3497,7 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot()
     def killApp(self):
+        PchumLog.info("killApp() called")
         self.disconnectIRC.emit()
         self.parent.trayicon.hide()
         self.app.quit()
@@ -4065,10 +4066,13 @@ class MainProgram(QtCore.QObject):
         self.app.aboutToQuit.connect(self.death)
 
     def death(self):
-        # app murder in progress
-        # print("death inbound")
-        if hasattr(self, "widget"):
-            self.widget.killApp()
+        """app murder in progress, kill the IRC thread if it didnt die already."""
+        PchumLog.debug("death inbound")
+        if hasattr(self, "irc"):
+            if self.irc:
+                if self.irc.isRunning():
+                    PchumLog.debug("Calling exit() on IRC thread.")
+                    self.irc.exit()
 
     # def lastWindow(self):
     #    print("all windows closed")
