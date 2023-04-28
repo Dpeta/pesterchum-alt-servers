@@ -112,6 +112,11 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
 
     @QtCore.pyqtSlot()
     def upShiftQuirk(self):
+        # We cannot move the quirk up if there are no selected quirks,
+        # or if there are none period.
+        if self.currentItem() is None:
+            return
+
         found = self.findItems(
             self.currentItem().text(0), QtCore.Qt.MatchFlag.MatchExactly
         )
@@ -150,6 +155,11 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
 
     @QtCore.pyqtSlot()
     def downShiftQuirk(self):
+        # We cannot move the quirk down if there are no selected quirks,
+        # or if there are none period.
+        if self.currentItem() is None:
+            return
+
         found = self.findItems(
             self.currentItem().text(0), QtCore.Qt.MatchFlag.MatchExactly
         )
