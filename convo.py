@@ -999,10 +999,6 @@ class PesterConvo(QtWidgets.QFrame):
 
     def closeEvent(self, event):
         self.mainwindow.waitingMessages.messageAnswered(self.title())
-        for movie in self.textArea.urls.copy():
-            movie.setFileName("")  # Required, sometimes, for some reason. . .
-            movie.stop()
-            del movie
         self.windowClosed.emit(self.title())
 
     def setChumOpen(self, o):
