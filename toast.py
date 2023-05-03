@@ -232,7 +232,13 @@ class ToastMachine:
 class PesterToast(QtWidgets.QWidget, DefaultToast):
     def __init__(self, machine, title, msg, icon, time=3000, parent=None):
         # FIXME: Not sure how this works exactly either xd, can't we init the parents seperately?
-        kwds = dict(parent=parent, machine=machine, title=title, msg=msg, icon=icon)
+        kwds = {
+            "parent": parent,
+            "machine": machine,
+            "title": title,
+            "msg": msg,
+            "icon": icon,
+        }
         super().__init__(**kwds)
 
         self.machine = machine
