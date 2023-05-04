@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Python 3.10 x64
+      - name: Setup Python 3.11 x64
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
           architecture: 'x64'
       - name: Update pip
         run: python -m pip install --upgrade pip
@@ -33,10 +33,10 @@ jobs:
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Python 3.10 x64
+      - name: Setup Python 3.11 x64
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
           architecture: 'x64'
       - name: Update pip
         run: python -m pip install --upgrade pip
@@ -49,11 +49,11 @@ jobs:
       - name: Run PyInstaller
         run: python3 pyinst.py --no-prompts --onefile --no-upx --crt --no-clean --windowed
       - name: Create archive (.zip)
-        run: tar.exe -a -c -f Pesterchum_win64_py310.zip -C dist Pesterchum
+        run: tar.exe -a -c -f Pesterchum_win64_py311.zip -C dist Pesterchum
       - uses: actions/upload-artifact@v3
         with:
-          name: Pesterchum_win64_py310.zip
-          path: Pesterchum_win64_py310.zip
+          name: Pesterchum_win64_py311.zip
+          path: Pesterchum_win64_py311.zip
 
   build_win32_38:
     runs-on: windows-2019
@@ -85,10 +85,10 @@ jobs:
     runs-on: macos-11
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Python 3.10 x64
+      - name: Setup Python 3.11 x64
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
           architecture: 'x64'
       - name: Update pip
         run: python -m pip install --upgrade pip

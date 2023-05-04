@@ -107,7 +107,7 @@ class ToastMachine:
             for k, v in self.machine.types.items():
                 if self.machine.type == k:
                     try:
-                        args = inspect.getargspec(v.__init__).args
+                        args = inspect.getfullargspec(v.__init__).args
                     except:
                         args = []
 
@@ -133,7 +133,7 @@ class ToastMachine:
                 if "default" in self.machine.types:
                     if (
                         "parent"
-                        in inspect.getargspec(
+                        in inspect.getfullargspec(
                             self.machine.types["default"].__init__
                         ).args
                     ):
