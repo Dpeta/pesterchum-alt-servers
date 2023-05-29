@@ -326,13 +326,19 @@ class PesterLogViewer(QtWidgets.QDialog):
         self.hilight.rehighlight()
 
     def fileToMonthYear(self, fname):
-        time = strptime(
-            fname[(fname.index(".") + 1) : fname.index(".txt")], "%Y-%m-%d.%H.%M"
-        )
+        time = strptime(fname[-20:-4], "%Y-%m-%d.%H.%M")
+        # #pesterchum.online.2023-05-27.00.54.txt
+        #                    ^^^^^^^^^^^^^^^^
+        # Doesnt raise an exception if the memo name has one or more periods like the old one
+        # But also is not as dynamic. Could also be solved by a regex or counting how many periods are in there total,
+        # but this seemed like a simple approach, assuming the format doesnt change anytime soon, which seems unlikely :P
+        # Also doesnt fail if a memo contains ".txt" like the old way
+        # old fromat -> fname[(fname.index(".") + 1) : fname.index(".txt")], "%Y-%m-%d.%H.%M"
+        # ~ (lis)anne
         return [strftime("%B", time), strftime("%Y", time)]
 
     def fileToTime(self, fname):
-        timestr = fname[(fname.index(".") + 1) : fname.index(".txt")]
+        timestr = fname[-20:-4]
         return strftime("%a %d %b %Y %H %M", strptime(timestr, "%Y-%m-%d.%H.%M"))
 
     def timeToFile(self, time):
