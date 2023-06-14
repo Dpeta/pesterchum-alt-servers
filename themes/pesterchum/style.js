@@ -18,7 +18,10 @@
            },
   "sounds": { "alertsound": "$path/alarm.wav",
                           "memosound": "$path/alarm2.wav",
-                          "ceasesound": "$path/cease.wav" },
+                          "ceasesound": "$path/cease.wav",
+                          "namealarm": "$path/namealarm.wav",
+                          "honk": "$path/honk.wav"
+                        },
   "menus": {"client": {"_name": "CLIENT",
                        "options": "OPTIONS",
                        "memos": "MEMOS",

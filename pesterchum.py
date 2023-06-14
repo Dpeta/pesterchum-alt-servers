@@ -2168,13 +2168,17 @@ class PesterWindow(MovingWindow):
                 QtCore.QUrl.fromLocalFile(self.theme["main/sounds/memosound"])
             )
             self.namesound = QtMultimedia.QSoundEffect()
-            self.namesound.setSource(QtCore.QUrl.fromLocalFile("themes/namealarm.wav"))
+            self.namesound.setSource(
+                QtCore.QUrl.fromLocalFile(self.theme["main/sounds/namealarm"])
+            )
             self.ceasesound = QtMultimedia.QSoundEffect()
             self.ceasesound.setSource(
                 QtCore.QUrl.fromLocalFile(self.theme["main/sounds/ceasesound"])
             )
             self.honksound = QtMultimedia.QSoundEffect()
-            self.honksound.setSource(QtCore.QUrl.fromLocalFile("themes/honk.wav"))
+            self.honksound.setSource(
+                QtCore.QUrl.fromLocalFile(self.theme["main/sounds/honk"])
+            )
         except:
             PchumLog.exception("Warning: Error loading sounds!")
 
