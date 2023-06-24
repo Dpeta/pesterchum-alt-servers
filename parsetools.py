@@ -1107,7 +1107,7 @@ class ThemeException(Exception):
 
 
 def themeChecker(theme):
-    needs = [ 
+    needs = [
         "main/size",
         "main/icon",
         "main/windowtitle",

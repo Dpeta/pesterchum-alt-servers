@@ -986,15 +986,15 @@ class pesterTheme(dict):
 
     def pathHook(self, dict):
         # This converts strings containing $path into the proper paths
-        # Honestly ive never even seen this Template stuff before. very funky! 
+        # Honestly ive never even seen this Template stuff before. very funky!
         for key, value in dict.items():
             if isinstance(value, str):
                 templ = Template(value)
                 dict[key] = templ.safe_substitute(path=self.path)
             elif isinstance(value, list):
                 # ~lisanne : for dealing with 'main/fonts' which is an array which contains filepaths with $
-                # probably good to have for future additions 
-                for idx,item in enumerate(value):
+                # probably good to have for future additions
+                for idx, item in enumerate(value):
                     item = value[idx]
                     if isinstance(item, str):
                         # not very DRY of me >:3c
