@@ -1107,12 +1107,18 @@ class ThemeException(Exception):
 
 
 def themeChecker(theme):
-    needs = [
+    needs = [ 
         "main/size",
         "main/icon",
         "main/windowtitle",
         "main/style",
+        "main/fonts",
         "main/background-image",
+        "main/sounds/namealarm",
+        "main/sounds/alertsound",
+        "main/sounds/memosound",
+        "main/sounds/ceasesound",
+        "main/sounds/honk",
         "main/menubar/style",
         "main/menu/menuitem",
         "main/menu/style",

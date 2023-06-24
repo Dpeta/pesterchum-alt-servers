@@ -2,6 +2,7 @@
  {"style": "background-repeat: no-repeat;",
   "background-image": "$path/pcbg.png",
   "size": [232, 380],
+  "fonts": [],
   "icon": "$path/trayicon.png",
   "newmsgicon": "$path/trayicon2.png",
   "windowtitle": "PESTERCHUM 6.0",
