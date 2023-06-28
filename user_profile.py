@@ -984,12 +984,23 @@ class pesterTheme(dict):
                     raise e
         return v
 
-    def pathHook(self, d):
-        for k, v in d.items():
-            if isinstance(v, str):
-                s = Template(v)
-                d[k] = s.safe_substitute(path=self.path)
-        return d
+    def pathHook(self, dict):
+        # This converts strings containing $path into the proper paths
+        # Honestly ive never even seen this Template stuff before. very funky!
+        for key, value in dict.items():
+            if isinstance(value, str):
+                templ = Template(value)
+                dict[key] = templ.safe_substitute(path=self.path)
+            elif isinstance(value, list):
+                # ~lisanne : for dealing with 'main/fonts' which is an array which contains filepaths with $
+                # probably good to have for future additions
+                for idx, item in enumerate(value):
+                    item = value[idx]
+                    if isinstance(item, str):
+                        # not very DRY of me >:3c
+                        templ = Template(item)
+                        value[idx] = templ.safe_substitute(path=self.path)
+        return dict
 
     def get(self, key, default):
         keys = key.split("/")

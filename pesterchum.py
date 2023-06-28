@@ -1540,6 +1540,8 @@ class PesterWindow(MovingWindow):
         # Load font
         QtGui.QFontDatabase.addApplicationFont(
             os.path.join("fonts", "alternian", "AllisDaedric-VYWz.otf")
+            # ~lisanne "alternian lol" TODO:  make the parsetools 'alternianTagBegin' lex part use the theme's "main/alternian-font-family" value instead of just assuming "AllisDaedric"
+            # This way themes can change what the alternian font looks like
         )
 
         self.pcUpdate[str, str].connect(self.updateMsg)
@@ -1991,6 +1993,26 @@ class PesterWindow(MovingWindow):
             self.choosetheme.exec()
 
     def initTheme(self, theme):
+        # First doing the fonts because any style may depend on it
+        QtGui.QFontDatabase.removeAllApplicationFonts()  # GOODBYE previous fonts
+        QtGui.QFontDatabase.addApplicationFont(
+            os.path.join("fonts", "alternian", "AllisDaedric-VYWz.otf")
+        )  # haha oops we still need that one!!! for now!! (check `~lisanne "alternian lol" TODO` up above)
+
+        for font_path in theme["main/fonts"]:
+            # ~lisanne : loads fonts from the `main/fonts` key in a theme
+            # Note that this wont load fonts from inherited themes
+            # that seems fine imo, esp since u could still load them through `$path/../inheritedtheme/somefont.ttf`
+            PchumLog.debug("Loading font " + font_path)
+            fontID = QtGui.QFontDatabase.addApplicationFont(font_path)
+            if fontID == -1:
+                PchumLog.error("Failed loading font: " + font_path)
+                # TODO? Maybe make this spawn an error popup 
+            else:
+                PchumLog.debug(
+                    f"Font families: {(QtGui.QFontDatabase.applicationFontFamilies(fontID))} (id: {fontID})"
+                )
+
         self.resize(*theme["main/size"])
         self.setWindowIcon(PesterIcon(theme["main/icon"]))
         self.setWindowTitle(theme["main/windowtitle"])
