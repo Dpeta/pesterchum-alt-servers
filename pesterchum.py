@@ -2003,14 +2003,16 @@ class PesterWindow(MovingWindow):
             # ~lisanne : loads fonts from the `main/fonts` key in a theme
             # Note that this wont load fonts from inherited themes
             # that seems fine imo, esp since u could still load them through `$path/../inheritedtheme/somefont.ttf`
-            PchumLog.debug("Loading font " + font_path)
+            PchumLog.debug("Loading font %s", font_path)
             fontID = QtGui.QFontDatabase.addApplicationFont(font_path)
             if fontID == -1:
-                PchumLog.error("Failed loading font: " + font_path)
-                # TODO? Maybe make this spawn an error popup 
+                PchumLog.error("Failed loading font: %s", font_path)
+                # TODO? Maybe make this spawn an error popup
             else:
                 PchumLog.debug(
-                    f"Font families: {(QtGui.QFontDatabase.applicationFontFamilies(fontID))} (id: {fontID})"
+                    "Font families: %s (id: %s)",
+                    QtGui.QFontDatabase.applicationFontFamilies(fontID),
+                    fontID,
                 )
 
         self.resize(*theme["main/size"])
