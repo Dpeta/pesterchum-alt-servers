@@ -12,6 +12,7 @@ except ImportError:
 
 import ostools
 import parsetools
+from thememanager import ThemeManagerWidget
 from generic import RightClickList, RightClickTree, MultiTextDialog
 from dataobjs import pesterQuirk, PesterProfile, PesterHistory
 from memos import TimeSlider, TimeInput
@@ -1425,6 +1426,13 @@ class PesterOptions(QtWidgets.QDialog):
         layout_5.addWidget(QtWidgets.QLabel("Minutes before Idle:"))
         layout_5.addWidget(self.idleBox)
 
+        layout_repo_url = QtWidgets.QHBoxLayout()
+        self.repoUrlBox = QtWidgets.QLineEdit(self)
+        self.repoUrlBox.setText(self.config.theme_repo_url())
+        
+        layout_repo_url.addWidget(QtWidgets.QLabel("Theme repository db URL:"))
+        layout_repo_url.addWidget(self.repoUrlBox)
+
         # self.updateBox = QtWidgets.QComboBox(self)
         # self.updateBox.addItem("Once a Day")
         # self.updateBox.addItem("Once a Week")
@@ -1455,6 +1463,7 @@ class PesterOptions(QtWidgets.QDialog):
                 self.themeBox.setCurrentIndex(i)
         self.refreshtheme = QtWidgets.QPushButton("Refresh current theme", self)
         self.refreshtheme.clicked.connect(parent.themeSelectOverride)
+        self.themeManager = ThemeManagerWidget(self.config)
         self.ghostchum = QtWidgets.QCheckBox("Pesterdunk Ghostchum!!", self)
         self.ghostchum.setChecked(self.config.ghostchum())
 
@@ -1656,6 +1665,7 @@ class PesterOptions(QtWidgets.QDialog):
         layout_idle = QtWidgets.QVBoxLayout(widget)
         layout_idle.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_idle.addLayout(layout_5)
+        layout_idle.addLayout(layout_repo_url)
         layout_idle.addLayout(layout_6)
         # if not ostools.isOSXLeopard():
         #    layout_idle.addWidget(self.mspaCheck)
@@ -1668,6 +1678,7 @@ class PesterOptions(QtWidgets.QDialog):
         layout_theme.addWidget(QtWidgets.QLabel("Pick a Theme:"))
         layout_theme.addWidget(self.themeBox)
         layout_theme.addWidget(self.refreshtheme)
+        layout_theme.addWidget(self.themeManager)
         layout_theme.addWidget(self.ghostchum)
         self.pages.addWidget(widget)
 

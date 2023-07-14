@@ -3101,6 +3101,11 @@ class PesterWindow(MovingWindow):
             if idlesetting != curidle:
                 self.config.set("idleTime", idlesetting)
                 self.idler["threshold"] = 60 * idlesetting
+            # theme repo url
+            repourlsetting = self.optionmenu.repoUrlBox.text()
+            if repourlsetting != self.config.theme_repo_url():
+                self.config.set('theme_repo_url', repourlsetting)
+                
             # theme
             ghostchumsetting = self.optionmenu.ghostchum.isChecked()
             curghostchum = self.config.ghostchum()
@@ -4194,6 +4199,7 @@ class MainProgram(QtCore.QObject):
         self.irc.finished.disconnect(self.restartIRC)
 
     def showUpdate(self, q):
+        # ~Lisanne: Doesn't seem to be used anywhere, old update notif mechanism?
         new_url = q.get()
         if new_url[0]:
             self.widget.pcUpdate.emit(new_url[0], new_url[1])
