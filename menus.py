@@ -12,7 +12,7 @@ except ImportError:
 
 import ostools
 import parsetools
-from thememanager import ThemeManagerWidget
+from theme_repo_manager import ThemeManagerWidget
 from generic import RightClickList, RightClickTree, MultiTextDialog
 from dataobjs import pesterQuirk, PesterProfile, PesterHistory
 from memos import TimeSlider, TimeInput
@@ -1454,16 +1454,34 @@ class PesterOptions(QtWidgets.QDialog):
         if not parent.randhandler.running:
             self.randomscheck.setEnabled(False)
 
-        avail_themes = self.config.availableThemes()
         self.themeBox = QtWidgets.QComboBox(self)
-        notheme = theme.name not in avail_themes
-        for i, t in enumerate(avail_themes):
-            self.themeBox.addItem(t)
-            if (not notheme and t == theme.name) or (notheme and t == "pesterchum"):
-                self.themeBox.setCurrentIndex(i)
+        def reset_themeBox():
+            avail_themes = self.config.availableThemes()
+            PchumLog.debug("Resetting themeself.themeBox")
+            self.themeBox.clear()
+            notheme = theme.name not in avail_themes
+            for i, t in enumerate(avail_themes):
+                self.themeBox.addItem(t)
+                if (not notheme and t == theme.name) or (notheme and t == "pesterchum"):
+                    self.themeBox.setCurrentIndex(i)
+            self.themeBox.setSizePolicy(
+                QtWidgets.QSizePolicy(
+                    QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+                    QtWidgets.QSizePolicy.Policy.Minimum,
+                )
+            )
+        reset_themeBox()
         self.refreshtheme = QtWidgets.QPushButton("Refresh current theme", self)
         self.refreshtheme.clicked.connect(parent.themeSelectOverride)
+        self.refreshtheme.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Minimum,
+                QtWidgets.QSizePolicy.Policy.Minimum,
+            )
+        )
         self.themeManager = ThemeManagerWidget(self.config)
+        self.themeManager.rebuilt.connect( reset_themeBox )
+        # This makes it so that the themeBox gets updated when a theme is installed or removed through the repository
         self.ghostchum = QtWidgets.QCheckBox("Pesterdunk Ghostchum!!", self)
         self.ghostchum.setChecked(self.config.ghostchum())
 
@@ -1676,8 +1694,12 @@ class PesterOptions(QtWidgets.QDialog):
         layout_theme = QtWidgets.QVBoxLayout(widget)
         layout_theme.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout_theme.addWidget(QtWidgets.QLabel("Pick a Theme:"))
-        layout_theme.addWidget(self.themeBox)
-        layout_theme.addWidget(self.refreshtheme)
+
+        layout_theme_hbox = QtWidgets.QHBoxLayout()
+        layout_theme_hbox.addWidget(self.themeBox)
+        layout_theme_hbox.addWidget(self.refreshtheme)
+        layout_theme.addLayout(layout_theme_hbox)
+        layout_theme.addWidget(QtWidgets.QLabel("Get new themes:"))
         layout_theme.addWidget(self.themeManager)
         layout_theme.addWidget(self.ghostchum)
         self.pages.addWidget(widget)
