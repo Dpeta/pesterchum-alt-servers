@@ -109,7 +109,6 @@ class ThemeManager(QtCore.QObject):
         if reply.error() != QtNetwork.QNetworkReply.NetworkError.NoError:
             PchumLog.error("An error occured contacting the repository: %s" % reply.error())
             self.errored.emit("An error occured contacting the repository: %s" % reply.error())
-            print([reply.error()])
             return
         try:
             original_url = reply.request().url().url()
@@ -126,17 +125,32 @@ class ThemeManager(QtCore.QObject):
                 self.database = json.loads(as_json)
                 self.database_entries = {}
                 if not self.is_database_valid():
+                    self.database = {}
                     PchumLog.error('Incorrect database format, missing "entries"')
                     self.errored.emit('Incorrect database format, missing "entries"')
                     return
-                self.database_entries = {}
+
+                # Filter out non-QTchum client themes, like for godot
+                for dbindex in range(len(self.database['entries'])-1, -1, -1): # Iterate over the database in reverse
+                    dbitem = self.database['entries'][dbindex]
+                    if dbitem['client'] != "pesterchum":
+                        PchumLog.debug("Removed database theme %s because it is not compatible with this client" % dbitem['name'])
+                        self.database['entries'].pop(dbindex)
+                # Make an easy lookup table instead of the array we get from the DB
                 for dbitem in self.database['entries']:
                     self.database_entries[dbitem['name']] = dbitem
                 self.database_refreshed.emit(self.database)
         except json.decoder.JSONDecodeError as e:
-            PchumLog.error("Could not decode JSON: %s" % e)
-            self.errored.emit("Could not decode JSON: %s" % e)
+            PchumLog.error("Could not decode theme database JSON: %s" % e)
+            self.errored.emit("Could not decode theme database JSON: %s" % e)
             return
+        except KeyError as e:
+            self.database = {}
+            self.database_entries = {}
+            PchumLog.error("Vital key missing from theme database: %s" % e)
+            self.errored.emit("Vital key missing from theme database: %s" % e)
+            return
+
 
 
     def _handle_downloaded_zip(self, zip_buffer, theme):
@@ -216,7 +230,7 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         self.lbl_theme_name = QtWidgets.QLabel("Click a theme to get started")
         self.lbl_theme_name.setTextInteractionFlags(_flag_selectable)
         self.lbl_theme_name.setStyleSheet("QLabel { font-size: 16px; font-weight:bold;}")
-        self.lbl_theme_name.setWordWrap(False)
+        self.lbl_theme_name.setWordWrap(True)
         layout_vbox_scroll_insides.addWidget(self.lbl_theme_name)
         
         # Author name
