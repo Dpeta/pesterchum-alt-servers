@@ -63,10 +63,15 @@ class ThemeManager(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def refresh_database(self):
+        # Fetches a new copy of the theme database from the given URL
+        # The initialisation & processing of it is handled in self._on_reply
         PchumLog.debug("Refreshing theme repo database @ %s" % self.config.theme_repo_url())
         promise = self.NAManager.get(QtNetwork.QNetworkRequest(QtCore.QUrl(self.config.theme_repo_url())))
 
     def delete_theme(self, theme_name):
+        # TODO: check if other installed themes inherit from this to avoid broken themes
+        # would require some kinda confirmation popup which i havent figure out yet
+        PchumLog.info("Deleting installed repo theme %s" % theme_name)
         theme = self.manifest[theme_name]
         directory = os.path.join(getDataDir(), 'themes', theme['name'])
         if os.path.isdir(directory):
@@ -81,28 +86,98 @@ class ThemeManager(QtCore.QObject):
         PchumLog.debug("Saved manifes.js to %s" % self.manifest_path)
 
     def validate_manifest(self):
+        # Checks if the themes the manifest claims are installed actually exists
+        # Removes them from the manifest if they dont
         all_themes = self.config.availableThemes()
         for theme_name in self.manifest:
             if not theme_name in all_themes:
-                PchumLog.warning("Theme %s from the manifest seems to have been deleted" % theme_name)
+                PchumLog.warning("Supposedly installed theme %s from the manifest seems to have been deleted, removing from manifest now" % theme_name)
+                self.manifest.pop(theme_name)
 
     def download_theme(self, theme_name):
+        # Downloads the theme .zip
+        # The actual installing is handled by _on_reply when the theme is downloaded
+        # Performs no version checks or dependency handling
+        # Use install_theme() instead unless you know what you're doing
         PchumLog.info("Downloading %s" % theme_name)
+        if not theme_name in self.database_entries:
+            PchumLog.error("Theme name %s does not exist in the database!" % theme_name)
+            return
+        PchumLog.debug("(From %s)" % self.database_entries[theme_name]['download'])
         promise = self.NAManager.get(QtNetwork.QNetworkRequest(QtCore.QUrl(self.database_entries[theme_name]['download'])))
         self.downloads[self.database_entries[theme_name]['download']] = self.database_entries[theme_name]
+    
+    def install_theme(self, theme_name, force_install=False):
+        # A higher way to install a theme than download_theme
+        # Checks if the theme is already installed & if its up to date
+        # Also recursively handled dependencies, which download_theme does not
+        # !! note that this does not check if theres a circular dependency !!
+        # Setting force_install to True will install a given theme, even if it is deemed unnecessary to do so or its inherit dependency cannot be installed
+        # This gives it the same no-nonsense operation as download_theme, but with the checks in place
+        PchumLog.info("Installing theme %s" % theme_name)
+        if force_install:
+            PchumLog.debug("(force_install is enabled)")
+        if not theme_name in self.database_entries:
+            PchumLog.error("Theme %s does not exist in the database!" % theme_name)
+            self.errored.emit("Theme %s does not exist in the database!" % theme_name)
+            return
+
+        all_themes = self.config.availableThemes()
+        theme = self.database_entries[theme_name]
+        if not self.is_installed(theme_name) and theme_name in all_themes: # Theme exists, but not installed by manager
+            PchumLog.warning("Theme %s is already installed manually. The manual version will get shadowed by the repository version & will not be usable" % theme_name)
+
+        # Check depedencies
+        if theme['inherits'] != "":
+            if self.is_installed(theme['inherits']):
+                # Inherited theme is installed. A-OK
+                PchumLog.debug("Theme %s requires theme %s, which is already installed through the repository" % (theme_name, theme['inherits']))
+            if theme['inherits'] in all_themes:
+                # Inherited theme is manually installed. A-OK
+                PchumLog.debug("Theme %s requires theme %s, which is already installed manually by the user" % (theme_name, theme['inherits']))
+            elif theme['inherits'] in self.database_entries:
+                # The Inherited theme is not installed, but can be. A-OK
+                PchumLog.info("Theme %s requires theme %s, which will now be installed" % (theme_name, theme['inherits']))
+                self.install_theme(theme['inherits'])
+            else:
+                # Inherited theme is not installed, and can't be installed automatically. Exits unless force_install is True
+                if force_install:
+                    PchumLog.error("Theme %s requires theme %s, which is not installed and not in the database. Installing %s anyways, because force_install is True" % (theme_name, theme, theme_name['inherits']))
+                else:
+                    PchumLog.error("Theme %s requires theme %s, which is not installed and not in the database. Cancelling install" % (theme_name, theme['inherits']))
+                    self.errored.emit("Theme %s requires theme %s, which is not installed and not in the database. Cancelling install" % (theme_name, theme['inherits']))
+                    return
+
+        # Check if there's no need to re-install theme
+        # This is done after the dependency check in case an inherited theme is missing two levels down
+        if self.is_installed(theme_name) and not self.has_update(theme_name): # Theme is installed by manager, and is up-to-date
+            if force_install:
+                PchumLog.warning("Theme %s is already installed, and no update is available. Installing anyways, because force_install is True" % theme_name)
+            else:
+                PchumLog.warning("Theme %s is already installed, and no update is available. Cancelling install" % theme_name)
+                self.errored.emit("Theme %s is already installed, and no update is available. Cancelling install" % theme_name)
+                return
+
+        # All is ok. or we're just ignoring the errors through force_install
+        # No matter. downloading time
+        self.download_theme(theme_name)
 
     def has_update(self, theme_name):
+        # Has the given theme an update available
+        # Returns False if the theme is installed manually or when the theme is up to date
         if self.is_installed(theme_name) and theme_name in self.database_entries:
-            return self.manifest[theme_name]['version'] != self.database_entries[theme_name]['version']
+            return self.manifest[theme_name]['version'] < self.database_entries[theme_name]['version']
         return False
     
     def is_installed(self, theme_name):
+        # checks if a theme is installed through the manager
+        # Note that this will return False if the given name is a theme that the user installed manually!
         return theme_name in self.manifest
 
     def is_database_valid(self):
         return 'entries' in self.database and isinstance(self.database.get('entries'), list)
 
-    # using a slot here raises `ERROR - <class 'TypeError'>, connect() failed between finished(QNetworkReply*) and _on_reply()``
+    # using a slot decorator here raises `ERROR - <class 'TypeError'>, connect() failed between finished(QNetworkReply*) and _on_reply()``
     # maybe because of the underscore?
     # @QtCore.pyqtSlot(QtNetwork.QNetworkReply)
     def _on_reply(self, reply):
@@ -114,13 +189,16 @@ class ThemeManager(QtCore.QObject):
             original_url = reply.request().url().url()
             # Check if zipfile or database fetch
             if original_url in self.downloads:
+                # This is a theme zip!
                 theme = self.downloads[original_url]
-                self._handle_downloaded_zip(bytes(reply.readAll()), theme)
+                self._handle_downloaded_zip(bytes(reply.readAll()), theme['name'])
                 self.downloads.pop(original_url)
                 self.manifest[theme['name']] = theme
                 self.save_manifest()
                 self.manifest_updated.emit(self.manifest)
+                PchumLog.info("Theme %s is now installed" % theme['name'])
             else:
+                # This is a database refresh!
                 as_json = bytes(reply.readAll()).decode("utf-8")
                 self.database = json.loads(as_json)
                 self.database_entries = {}
@@ -139,7 +217,9 @@ class ThemeManager(QtCore.QObject):
                 # Make an easy lookup table instead of the array we get from the DB
                 for dbitem in self.database['entries']:
                     self.database_entries[dbitem['name']] = dbitem
+                PchumLog.info("Database refreshed")
                 self.database_refreshed.emit(self.database)
+
         except json.decoder.JSONDecodeError as e:
             PchumLog.error("Could not decode theme database JSON: %s" % e)
             self.errored.emit("Could not decode theme database JSON: %s" % e)
@@ -153,11 +233,11 @@ class ThemeManager(QtCore.QObject):
 
 
 
-    def _handle_downloaded_zip(self, zip_buffer, theme):
-        # ~liasnne TODO: i dont know if this is inside a thread or not so
-        # probably check to make sure it is
-        # when its not 5 am
-        directory = os.path.join(getDataDir(), 'themes', theme['name'])
+    def _handle_downloaded_zip(self, zip_buffer, theme_name):
+        # Unzips the downloaded theme package in-memory to datadir/themes/theme_name
+        # I dont think this runs in a thread so it may block, but its so fast i dont think it really matters
+        # But i guess if its a zip bomb itll crash
+        directory = os.path.join(getDataDir(), 'themes', theme_name)
         with zipfile.ZipFile(io.BytesIO(zip_buffer)) as z:
             if os.path.isdir(directory):
                 rmtree(directory)
@@ -254,6 +334,7 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         # requires. shows up if a theme has "inherits" set & we dont have it installed
         self.lbl_requires = QtWidgets.QLabel("")
         self.lbl_requires.setTextInteractionFlags(_flag_selectable)
+        self.lbl_requires.setWordWrap(True)
         layout_vbox_scroll_insides.addWidget(self.lbl_requires)
         
         # Version number. this will also show the current installed one if there is an update
@@ -310,7 +391,7 @@ class ThemeManagerWidget(QtWidgets.QWidget):
 
     def _on_install_clicked(self):
         theme = themeManager.database['entries'][self.list_results.currentRow()]
-        themeManager.download_theme(theme['name'])
+        themeManager.install_theme(theme['name'])
     
     @QtCore.pyqtSlot(QtWidgets.QListWidgetItem)
     def _on_theme_selected(self, item):
@@ -329,9 +410,9 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         self.lbl_description.setText(theme['description'])
         version_text = "Version %s" % theme['version']
         if has_update:
-            version_text += " (Installed: %s)" % themeManager.manifest[theme_name]['version']
+            version_text += " (installed: %s)" % themeManager.manifest[theme_name]['version']
         self.lbl_version.setText( version_text )
-        self.lbl_requires.setText( ("Requires %s" % theme['inherits']) if theme['inherits'] else "")
+        self.lbl_requires.setText( ("Requires %s" % theme['inherits'] + (' (installed)' if theme['inherits'] in self.config.availableThemes() else '')) if theme['inherits'] else "")
         self.lbl_last_update.setText( "Released on: " + datetime.fromtimestamp(theme['updated']).strftime("%d/%m/%Y, %H:%M") )
 
     @QtCore.pyqtSlot(dict)
