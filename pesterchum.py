@@ -3104,8 +3104,8 @@ class PesterWindow(MovingWindow):
             # theme repo url
             repourlsetting = self.optionmenu.repoUrlBox.text()
             if repourlsetting != self.config.theme_repo_url():
-                self.config.set('theme_repo_url', repourlsetting)
-                
+                self.config.set("theme_repo_url", repourlsetting)
+
             # theme
             ghostchumsetting = self.optionmenu.ghostchum.isChecked()
             curghostchum = self.config.ghostchum()

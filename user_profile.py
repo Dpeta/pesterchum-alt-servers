@@ -362,7 +362,10 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         return self.config.get("irc_compatibility_mode", False)
 
     def theme_repo_url(self):
-        return self.config.get('theme_repo_url', 'https://raw.githubusercontent.com/mocchapi/pesterchum-themes/main/db.json')
+        return self.config.get(
+            "theme_repo_url",
+            "https://raw.githubusercontent.com/mocchapi/pesterchum-themes/main/db.json",
+        )
 
     def force_prefix(self):
         return self.config.get("force_prefix", True)
@@ -784,7 +787,6 @@ class userProfile:
 
     def getTheme(self):
         return self.theme
-
 
     def getAutoIdentify(self):
         return self.autoidentify

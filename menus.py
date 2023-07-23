@@ -1429,7 +1429,7 @@ class PesterOptions(QtWidgets.QDialog):
         layout_repo_url = QtWidgets.QHBoxLayout()
         self.repoUrlBox = QtWidgets.QLineEdit(self)
         self.repoUrlBox.setText(self.config.theme_repo_url())
-        
+
         layout_repo_url.addWidget(QtWidgets.QLabel("Theme repository db URL:"))
         layout_repo_url.addWidget(self.repoUrlBox)
 
@@ -1455,6 +1455,7 @@ class PesterOptions(QtWidgets.QDialog):
             self.randomscheck.setEnabled(False)
 
         self.themeBox = QtWidgets.QComboBox(self)
+
         def reset_themeBox():
             avail_themes = self.config.availableThemes()
             PchumLog.debug("Resetting themeself.themeBox")
@@ -1470,6 +1471,7 @@ class PesterOptions(QtWidgets.QDialog):
                     QtWidgets.QSizePolicy.Policy.Minimum,
                 )
             )
+
         reset_themeBox()
         self.refreshtheme = QtWidgets.QPushButton("Refresh current theme", self)
         self.refreshtheme.clicked.connect(parent.themeSelectOverride)
@@ -1480,7 +1482,7 @@ class PesterOptions(QtWidgets.QDialog):
             )
         )
         self.themeManager = ThemeManagerWidget(self.config)
-        self.themeManager.rebuilt.connect( reset_themeBox )
+        self.themeManager.rebuilt.connect(reset_themeBox)
         # This makes it so that the themeBox gets updated when a theme is installed or removed through the repository
         self.ghostchum = QtWidgets.QCheckBox("Pesterdunk Ghostchum!!", self)
         self.ghostchum.setChecked(self.config.ghostchum())
