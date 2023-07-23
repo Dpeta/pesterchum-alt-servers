@@ -61,7 +61,7 @@ class ThemeManager(QtCore.QObject):
         super().__init__()
         with open(self.manifest_path, "r") as f:
             self.manifest = json.load(f)
-        PchumLog.debug("Manifest.js loaded with: %s" % self.manifest)
+        PchumLog.debug("Manifest.js loaded with: %s", self.manifest)
         self.config = config
         self.NAManager = QtNetwork.QNetworkAccessManager()
         self.NAManager.finished[QtNetwork.QNetworkReply].connect(self._on_reply)
@@ -73,7 +73,7 @@ class ThemeManager(QtCore.QObject):
         # Fetches a new copy of the theme database from the given URL
         # The initialisation & processing of it is handled in self._on_reply
         PchumLog.debug(
-            "Refreshing theme repo database @ %s" % self.config.theme_repo_url()
+            "Refreshing theme repo database @ %s", self.config.theme_repo_url()
         )
         promise = self.NAManager.get(
             QtNetwork.QNetworkRequest(QtCore.QUrl(self.config.theme_repo_url()))
@@ -82,7 +82,7 @@ class ThemeManager(QtCore.QObject):
     def delete_theme(self, theme_name):
         # TODO: check if other installed themes inherit from this to avoid broken themes
         # would require some kinda confirmation popup which i havent figure out yet
-        PchumLog.info("Deleting installed repo theme %s" % theme_name)
+        PchumLog.info("Deleting installed repo theme %s", theme_name)
         theme = self.manifest[theme_name]
         directory = os.path.join(getDataDir(), "themes", theme["name"])
         if os.path.isdir(directory):
@@ -94,7 +94,7 @@ class ThemeManager(QtCore.QObject):
     def save_manifest(self):
         with open(self.manifest_path, "w") as f:
             json.dump(self.manifest, f)
-        PchumLog.debug("Saved manifes.js to %s" % self.manifest_path)
+        PchumLog.debug("Saved manifes.js to %s", self.manifest_path)
 
     def validate_manifest(self):
         # Checks if the themes the manifest claims are installed actually exists
@@ -103,8 +103,8 @@ class ThemeManager(QtCore.QObject):
         for theme_name in self.manifest:
             if not theme_name in all_themes:
                 PchumLog.warning(
-                    "Supposedly installed theme %s from the manifest seems to have been deleted, removing from manifest now"
-                    % theme_name
+                    "Supposedly installed theme %s from the manifest seems to have been deleted, removing from manifest now",
+                    theme_name,
                 )
                 self.manifest.pop(theme_name)
 
@@ -113,11 +113,11 @@ class ThemeManager(QtCore.QObject):
         # The actual installing is handled by _on_reply when the theme is downloaded
         # Performs no version checks or dependency handling
         # Use install_theme() instead unless you know what you're doing
-        PchumLog.info("Downloading %s" % theme_name)
+        PchumLog.info("Downloading %s", theme_name)
         if not theme_name in self.database_entries:
-            PchumLog.error("Theme name %s does not exist in the database!" % theme_name)
+            PchumLog.error("Theme name %s does not exist in the database!", theme_name)
             return
-        PchumLog.debug("(From %s)" % self.database_entries[theme_name]["download"])
+        PchumLog.debug("(From %s)", self.database_entries[theme_name]["download"])
         promise = self.NAManager.get(
             QtNetwork.QNetworkRequest(
                 QtCore.QUrl(self.database_entries[theme_name]["download"])
@@ -134,12 +134,12 @@ class ThemeManager(QtCore.QObject):
         # !! note that this does not check if theres a circular dependency !!
         # Setting force_install to True will install a given theme, even if it is deemed unnecessary to do so or its inherit dependency cannot be installed
         # This gives it the same no-nonsense operation as download_theme, but with the checks in place
-        PchumLog.info("Installing theme %s" % theme_name)
+        PchumLog.info("Installing theme %s", theme_name)
         if force_install:
             PchumLog.debug("(force_install is enabled)")
         if not theme_name in self.database_entries:
-            PchumLog.error("Theme %s does not exist in the database!" % theme_name)
-            self.errored.emit("Theme %s does not exist in the database!" % theme_name)
+            PchumLog.error("Theme %s does not exist in the database!", theme_name)
+            self.errored.emit("Theme %s does not exist in the database!", theme_name)
             return
 
         all_themes = self.config.availableThemes()
@@ -148,8 +148,8 @@ class ThemeManager(QtCore.QObject):
             not self.is_installed(theme_name) and theme_name in all_themes
         ):  # Theme exists, but not installed by manager
             PchumLog.warning(
-                "Theme %s is already installed manually. The manual version will get shadowed by the repository version & will not be usable"
-                % theme_name
+                "Theme %s is already installed manually. The manual version will get shadowed by the repository version & will not be usable",
+                theme_name,
             )
 
         # Check depedencies
@@ -157,37 +157,42 @@ class ThemeManager(QtCore.QObject):
             if self.is_installed(theme["inherits"]):
                 # Inherited theme is installed. A-OK
                 PchumLog.debug(
-                    "Theme %s requires theme %s, which is already installed through the repository"
-                    % (theme_name, theme["inherits"])
+                    "Theme %s requires theme %s, which is already installed through the repository",
+                    theme_name,
+                    theme["inherits"],
                 )
             if theme["inherits"] in all_themes:
                 # Inherited theme is manually installed. A-OK
                 PchumLog.debug(
-                    "Theme %s requires theme %s, which is already installed manually by the user"
-                    % (theme_name, theme["inherits"])
+                    "Theme %s requires theme %s, which is already installed manually by the user",
+                    theme_name,
+                    theme["inherits"],
                 )
             elif theme["inherits"] in self.database_entries:
                 # The Inherited theme is not installed, but can be. A-OK
                 PchumLog.info(
-                    "Theme %s requires theme %s, which will now be installed"
-                    % (theme_name, theme["inherits"])
+                    "Theme %s requires theme %s, which will now be installed",
+                    theme_name,
+                    theme["inherits"],
                 )
                 self.install_theme(theme["inherits"])
             else:
                 # Inherited theme is not installed, and can't be installed automatically. Exits unless force_install is True
                 if force_install:
                     PchumLog.error(
-                        "Theme %s requires theme %s, which is not installed and not in the database. Installing %s anyways, because force_install is True"
-                        % (theme_name, theme, theme_name["inherits"])
+                        "Theme %s requires theme %s, which is not installed and not in the database. Installing %s anyways, because force_install is True",
+                        (theme_name, theme, theme_name["inherits"]),
                     )
                 else:
                     PchumLog.error(
-                        "Theme %s requires theme %s, which is not installed and not in the database. Cancelling install"
-                        % (theme_name, theme["inherits"])
+                        "Theme %s requires theme %s, which is not installed and not in the database. Cancelling install",
+                        theme_name,
+                        theme["inherits"],
                     )
                     self.errored.emit(
-                        "Theme %s requires theme %s, which is not installed and not in the database. Cancelling install"
-                        % (theme_name, theme["inherits"])
+                        "Theme %s requires theme %s, which is not installed and not in the database. Cancelling install",
+                        theme_name,
+                        theme["inherits"],
                     )
                     return
 
@@ -198,17 +203,17 @@ class ThemeManager(QtCore.QObject):
         ):  # Theme is installed by manager, and is up-to-date
             if force_install:
                 PchumLog.warning(
-                    "Theme %s is already installed, and no update is available. Installing anyways, because force_install is True"
-                    % theme_name
+                    "Theme %s is already installed, and no update is available. Installing anyways, because force_install is True",
+                    theme_name,
                 )
             else:
                 PchumLog.warning(
-                    "Theme %s is already installed, and no update is available. Cancelling install"
-                    % theme_name
+                    "Theme %s is already installed, and no update is available. Cancelling install",
+                    theme_name,
                 )
                 self.errored.emit(
-                    "Theme %s is already installed, and no update is available. Cancelling install"
-                    % theme_name
+                    "Theme %s is already installed, and no update is available. Cancelling install",
+                    theme_name,
                 )
                 return
 
@@ -242,10 +247,10 @@ class ThemeManager(QtCore.QObject):
     def _on_reply(self, reply):
         if reply.error() != QtNetwork.QNetworkReply.NetworkError.NoError:
             PchumLog.error(
-                "An error occured contacting the repository: %s" % reply.error()
+                "An error occured contacting the repository: %s", reply.error()
             )
             self.errored.emit(
-                "An error occured contacting the repository: %s" % reply.error()
+                "An error occured contacting the repository: %s", reply.error()
             )
             return
         try:
@@ -259,7 +264,7 @@ class ThemeManager(QtCore.QObject):
                 self.manifest[theme["name"]] = theme
                 self.save_manifest()
                 self.manifest_updated.emit(self.manifest)
-                PchumLog.info("Theme %s is now installed" % theme["name"])
+                PchumLog.info("Theme %s is now installed", theme["name"])
             else:
                 # This is a database refresh!
                 as_json = bytes(reply.readAll()).decode("utf-8")
@@ -289,14 +294,14 @@ class ThemeManager(QtCore.QObject):
                 self.database_refreshed.emit(self.database)
 
         except json.decoder.JSONDecodeError as e:
-            PchumLog.error("Could not decode theme database JSON: %s" % e)
-            self.errored.emit("Could not decode theme database JSON: %s" % e)
+            PchumLog.error("Could not decode theme database JSON: %s", e)
+            self.errored.emit("Could not decode theme database JSON: %s", e)
             return
         except KeyError as e:
             self.database = {}
             self.database_entries = {}
-            PchumLog.error("Vital key missing from theme database: %s" % e)
-            self.errored.emit("Vital key missing from theme database: %s" % e)
+            PchumLog.error("Vital key missing from theme database: %s", e)
+            self.errored.emit("Vital key missing from theme database: %s", e)
             return
 
     def _handle_downloaded_zip(self, zip_buffer, theme_name):
@@ -326,7 +331,7 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         ]
         self.config = config
         global themeManager
-        if themeManager == None or not themeManager.is_database_valid():
+        if themeManager is None or not themeManager.is_database_valid():
             themeManager = ThemeManager(config)
             self.setupUI()
         else:
@@ -478,22 +483,24 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         self.btn_uninstall.setVisible(themeManager.is_installed(theme_name))
 
         self.lbl_theme_name.setText(theme_name)
-        self.lbl_author_name.setText("By %s" % theme["author"])
+        self.lbl_author_name.setText("By %s", theme["author"])
         self.lbl_description.setText(theme["description"])
-        version_text = "Version %s" % theme["version"]
+        version_text = "Version %s", theme["version"]
         if has_update:
             version_text += (
-                " (installed: %s)" % themeManager.manifest[theme_name]["version"]
+                " (installed: %s)",
+                themeManager.manifest[theme_name]["version"],
             )
         self.lbl_version.setText(version_text)
         self.lbl_requires.setText(
             (
-                "Requires %s" % theme["inherits"]
+                "Requires %s",
+                theme["inherits"]
                 + (
                     " (installed)"
                     if theme["inherits"] in self.config.availableThemes()
                     else ""
-                )
+                ),
             )
             if theme["inherits"]
             else ""
@@ -529,7 +536,7 @@ class ThemeManagerWidget(QtWidgets.QWidget):
                 else:
                     status = "~ (installed)"
                     icon = self.icons[1]
-            text = "%s by %s %s" % (dbitem["name"], dbitem["author"], status)
+            text = "%s by %s %s", (dbitem["name"], dbitem["author"], status)
             item = QtWidgets.QListWidgetItem(icon, text)
             self.list_results.addItem(item)
 
