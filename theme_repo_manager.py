@@ -181,7 +181,9 @@ class ThemeManager(QtCore.QObject):
                 if force_install:
                     PchumLog.error(
                         "Theme %s requires theme %s, which is not installed and not in the database. Installing %s anyways, because force_install is True",
-                        (theme_name, theme, theme_name["inherits"]),
+                        theme_name,
+                        theme,
+                        theme_name["inherits"],
                     )
                 else:
                     PchumLog.error(
@@ -283,8 +285,8 @@ class ThemeManager(QtCore.QObject):
                     dbitem = self.database["entries"][dbindex]
                     if dbitem["client"] != "pesterchum":
                         PchumLog.debug(
-                            "Removed database theme %s because it is not compatible with this client"
-                            % dbitem["name"]
+                            "Removed database theme %s because it is not compatible with this client",
+                            dbitem["name"],
                         )
                         self.database["entries"].pop(dbindex)
                 # Make an easy lookup table instead of the array we get from the DB
