@@ -139,7 +139,7 @@ class ThemeManager(QtCore.QObject):
             PchumLog.debug("(force_install is enabled)")
         if not theme_name in self.database_entries:
             PchumLog.error("Theme %s does not exist in the database!", theme_name)
-            self.errored.emit("Theme %s does not exist in the database!", theme_name)
+            self.errored.emit("Theme %s does not exist in the database!" % theme_name)
             return
 
         all_themes = self.config.availableThemes()
@@ -192,9 +192,8 @@ class ThemeManager(QtCore.QObject):
                         theme["inherits"],
                     )
                     self.errored.emit(
-                        "Theme %s requires theme %s, which is not installed and not in the database. Cancelling install",
-                        theme_name,
-                        theme["inherits"],
+                        "Theme %s requires theme %s, which is not installed and not in the database. Cancelling install"
+                        % (theme_name, theme["inherits"])
                     )
                     return
 
@@ -214,8 +213,8 @@ class ThemeManager(QtCore.QObject):
                     theme_name,
                 )
                 self.errored.emit(
-                    "Theme %s is already installed, and no update is available. Cancelling install",
-                    theme_name,
+                    "Theme %s is already installed, and no update is available. Cancelling install"
+                    % theme_name
                 )
                 return
 
@@ -252,7 +251,7 @@ class ThemeManager(QtCore.QObject):
                 "An error occured contacting the repository: %s", reply.error()
             )
             self.errored.emit(
-                "An error occured contacting the repository: %s", reply.error()
+                "An error occured contacting the repository: %s" % reply.error()
             )
             return
         try:
@@ -297,13 +296,13 @@ class ThemeManager(QtCore.QObject):
 
         except json.decoder.JSONDecodeError as e:
             PchumLog.error("Could not decode theme database JSON: %s", e)
-            self.errored.emit("Could not decode theme database JSON: %s", e)
+            self.errored.emit("Could not decode theme database JSON: %s" % e)
             return
         except KeyError as e:
             self.database = {}
             self.database_entries = {}
             PchumLog.error("Vital key missing from theme database: %s", e)
-            self.errored.emit("Vital key missing from theme database: %s", e)
+            self.errored.emit("Vital key missing from theme database: %s" % e)
             return
 
     def _handle_downloaded_zip(self, zip_buffer, theme_name):
@@ -485,38 +484,32 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         self.btn_uninstall.setVisible(themeManager.is_installed(theme_name))
 
         self.lbl_theme_name.setText(theme_name)
-        self.lbl_author_name.setText("By %s", theme["author"])
+        self.lbl_author_name.setText("By %s" % theme["author"])
         self.lbl_description.setText(theme["description"])
-        version_text = "Version %s", theme["version"]
+        version_text = "Version %s" % theme["version"]
         if has_update:
             version_text += (
-                " (installed: %s)",
-                themeManager.manifest[theme_name]["version"],
+                " (installed: %s)" % themeManager.manifest[theme_name]["version"]
             )
         self.lbl_version.setText(version_text)
-        self.lbl_requires.setText(
-            (
-                "Requires %s",
-                theme["inherits"]
-                + (
-                    " (installed)"
-                    if theme["inherits"] in self.config.availableThemes()
-                    else ""
-                ),
-            )
-            if theme["inherits"]
-            else ""
+        requires_text = ""
+        if theme["inherits"]:
+            requires_text += "Requires %s" % theme["inherits"]
+        if theme["inherits"] in self.config.availableThemes():
+            requires_text += " (installed)"
+        self.lbl_requires.setText((requires_text) if theme["inherits"] else "")
+        last_update_text = "Released on: "
+        last_update_text += datetime.fromtimestamp(theme["updated"]).strftime(
+            "%d/%m/%Y, %H:%M"
         )
-        self.lbl_last_update.setText(
-            "Released on: "
-            + datetime.fromtimestamp(theme["updated"]).strftime("%d/%m/%Y, %H:%M")
-        )
+        self.lbl_last_update.setText(last_update_text)
 
     @QtCore.pyqtSlot(dict)
     def _on_database_refreshed(self, _):
         self.rebuild()
 
     def rebuild(self):
+        prev_selected_index = self.list_results.currentRow()
         database = themeManager.database
         self.list_results.clear()
         self.lbl_error.setText("")
@@ -538,23 +531,29 @@ class ThemeManagerWidget(QtWidgets.QWidget):
                 else:
                     status = "~ (installed)"
                     icon = self.icons[1]
-            text = "%s by %s %s", (dbitem["name"], dbitem["author"], status)
+            text = "%s by %s %s" % (dbitem["name"], dbitem["author"], status)
             item = QtWidgets.QListWidgetItem(icon, text)
             self.list_results.addItem(item)
 
-        self.btn_install.setDisabled(True)
-        for lbl in [
-            self.lbl_author_name,
-            self.lbl_description,
-            self.lbl_version,
-            self.lbl_requires,
-            self.lbl_last_update,
-        ]:
-            lbl.setText("")
-        self.lbl_theme_name.setText("Click a theme to get started")
-        self.btn_uninstall.setVisible(False)
-        self.btn_install.setVisible(True)
-        self.btn_install.setDisabled(True)
+        if prev_selected_index > -1:
+            # Re-select last item, if it was selected
+            self.list_results.setCurrentRow(prev_selected_index)
+            self._on_theme_selected(self.list_results.currentItem())
+        else:
+            # Return sidebar info panel to defaults if nothing was selected
+            self.btn_install.setDisabled(True)
+            for lbl in [
+                self.lbl_author_name,
+                self.lbl_description,
+                self.lbl_version,
+                self.lbl_requires,
+                self.lbl_last_update,
+            ]:
+                lbl.setText("")
+            self.lbl_theme_name.setText("Click a theme to get started")
+            self.btn_uninstall.setVisible(False)
+            self.btn_install.setVisible(True)
+            self.btn_install.setDisabled(True)
 
         self.rebuilt.emit()
         PchumLog.debug("Rebuilt emitted")
