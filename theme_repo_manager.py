@@ -63,6 +63,9 @@ class ThemeManager(QtCore.QObject):
             self.manifest = json.load(f)
         PchumLog.debug("Manifest.js loaded with: %s", self.manifest)
         self.config = config
+        # TODO: maybe make seperate QNetworkAccessManagers for theme downloads, database fetches, and integrity checkfile
+        # OR figure out how to connect the signal to tasks instead of the whole object
+        # That way we dont have to figure out what got downloaded afterwards, and can just have a _on_reply_theme & _on_reply_database or something
         self.NAManager = QtNetwork.QNetworkAccessManager()
         self.NAManager.finished[QtNetwork.QNetworkReply].connect(self._on_reply)
         self.validate_manifest()
@@ -99,6 +102,7 @@ class ThemeManager(QtCore.QObject):
     def validate_manifest(self):
         # Checks if the themes the manifest claims are installed actually exists
         # Removes them from the manifest if they dont
+        to_pop = set()
         all_themes = self.config.availableThemes()
         for theme_name in self.manifest:
             if not theme_name in all_themes:
@@ -106,7 +110,11 @@ class ThemeManager(QtCore.QObject):
                     "Supposedly installed theme %s from the manifest seems to have been deleted, removing from manifest now",
                     theme_name,
                 )
-                self.manifest.pop(theme_name)
+                # Cannot be popped while iterating!
+                to_pop.add(theme_name)
+
+        for theme_name in to_pop:
+            self.manifest.pop(theme_name)
 
     def download_theme(self, theme_name):
         # Downloads the theme .zip
