@@ -370,7 +370,7 @@ class ThemeManagerWidget(QtWidgets.QWidget):
                 QtWidgets.QSizePolicy.Policy.Expanding,
             )
         )
-        self.list_results.itemClicked.connect(self._on_theme_selected)
+        self.list_results.itemSelectionChanged.connect(self._on_theme_selected)
         layout_hbox_list_and_details.addWidget(self.list_results)
 
         # This is the right side, has the install buttons & all the theme details of the selected item
@@ -479,8 +479,8 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         theme = themeManager.database["entries"][self.list_results.currentRow()]
         themeManager.install_theme(theme["name"])
 
-    @QtCore.pyqtSlot(QtWidgets.QListWidgetItem)
-    def _on_theme_selected(self, item):
+    @QtCore.pyqtSlot()
+    def _on_theme_selected(self):
         index = self.list_results.currentRow()
         theme = themeManager.database["entries"][index]
         theme_name = theme["name"]
@@ -546,7 +546,7 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         if prev_selected_index > -1:
             # Re-select last item, if it was selected
             self.list_results.setCurrentRow(prev_selected_index)
-            self._on_theme_selected(self.list_results.currentItem())
+            self._on_theme_selected()
         else:
             # Return sidebar info panel to defaults if nothing was selected
             self.btn_install.setDisabled(True)
