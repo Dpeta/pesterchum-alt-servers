@@ -51,17 +51,24 @@ def validateDataDir():
     logs = os.path.join(datadir, "logs")
     errorlogs = os.path.join(datadir, "errorlogs")
     backup = os.path.join(datadir, "backup")
-    js_pchum = os.path.join(datadir, "pesterchum.js")
+    themes = os.path.join(datadir, "themes")
+    # ~lisanne `datadir/themes` is for repository installed themes
+    # Apparently everything checks this folder for themes already
+    # So hopefully im not plugging into an existng system on accident
 
-    dirs = [datadir, profile, quirks, logs, errorlogs, backup]
+    js_pchum = os.path.join(datadir, "pesterchum.js")
+    js_manifest = os.path.join(datadir, "manifest.js")
+
+    dirs = [datadir, profile, quirks, logs, themes, errorlogs, backup]
     for d in dirs:
         if not os.path.isdir(d) or not os.path.exists(d):
             os.makedirs(d, exist_ok=True)
 
     # pesterchum.js
-    if not os.path.exists(js_pchum):
-        with open(js_pchum, "w") as f:
-            f.write("{}")
+    for filepath in [js_pchum, js_manifest]:
+        if not os.path.exists(filepath):
+            with open(filepath, "w") as f:
+                f.write("{}")
 
 
 def getDataDir():
