@@ -1903,12 +1903,8 @@ class PesterWindow(MovingWindow):
         if chum.handle.casefold() in BOTNAMES:
             convoWindow.toggleQuirks(True)
             convoWindow.quirksOff.setChecked(True)
-            if (
-                not self.config.irc_compatibility_mode()
-                or chum.handle.casefold() in CUSTOMBOTS
-            ):
-                self.newConvoStarted.emit(chum.handle, initiated)
-        else:
+        elif not self.config.irc_compatibility_mode():
+            # Send PESTERCHUM:BEGIN and color.
             self.newConvoStarted.emit(chum.handle, initiated)
         convoWindow.show()
 
