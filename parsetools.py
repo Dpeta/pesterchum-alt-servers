@@ -17,6 +17,7 @@ from pnc import lexercon
 from generic import mysteryTime
 from quirks import ScriptQuirks
 from pyquirks import PythonQuirks
+from scripts.services import BOTNAMES
 
 PchumLog = logging.getLogger("pchumLogger")
 
@@ -851,8 +852,8 @@ def kxhandleInput(ctx, text=None, flavor=None, irc_compatible=False):
     if flavor == "convo":
         # if ceased, rebegin
         if hasattr(ctx, "chumopen") and not ctx.chumopen:
-            if not irc_compatible:
-                ctx.mainwindow.newConvoStarted.emit(str(ctx.title()), True)
+            if not irc_compatible and ctx.title().casefold() not in BOTNAMES:
+                ctx.mainwindow.newConvoStarted.emit(ctx.title(), True)
             ctx.setChumOpen(True)
 
     # Post-process and send the messages.
