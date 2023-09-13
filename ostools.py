@@ -10,6 +10,7 @@ except ImportError:
 
 DATADIR = None
 
+
 def isOSX():
     return sys.platform == "darwin"
 
@@ -84,10 +85,10 @@ def getDataDir():
         # This means that anytime its called during runtime after init will just return a lie. it will just give you a different path
         # (Because the Application now has a Name which in turn makes it return an application-name-specific writableLocation, which pchum isnt expecting anywhere)
         # so
-        # here im caching the result at init & returning that 
+        # here im caching the result at init & returning that
         # seemed like the safest way to do this without breaking half of this program
         return DATADIR
-    
+
     try:
         if isOSX():
             return os.path.join(
@@ -113,5 +114,6 @@ def getDataDir():
     except UnicodeDecodeError as e:
         print(e)
         return ""
+
 
 DATADIR = getDataDir()
