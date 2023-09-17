@@ -375,14 +375,14 @@ class PesterProfile:
 
     def moodmsg(self, mood, syscolor, theme):
         return (
-            "<c=%s>-- %s <c=%s>[%s]</c> changed their mood to %s <img src='%s' /> --</c>"
+            '<c=%s>-- %s <c=%s>[%s]</c> changed their mood to %s <img src="%s" /> --</c>'
             % (
                 syscolor.name(),
                 self.handle,
                 self.colorhtml(),
                 self.initials(),
                 mood.name().upper(),
-                theme["main/chums/moods"][mood.name()]["icon"],
+                theme["main/chums/moods"][mood.name()]["icon"].replace(" ", "%20"),
             )
         )
 
