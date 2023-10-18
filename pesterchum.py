@@ -1552,15 +1552,7 @@ class PesterWindow(MovingWindow):
         self.chooseServerAskedToReset = False
         self.chooseServer()
 
-        # Update RE bot
-        try:
-            if self.userprofile.getRandom():
-                code = "+"
-            else:
-                code = "-"
-            self.sendNotice.emit(code, RANDNICK)
-        except:
-            PchumLog.warning("No randomEncounter set in userconfig?")
+        # Update RE bot used 2 b here but has now been moved to self.connected(), since this is too early (~lisanne)
 
         # Client --> Server pings
         self.pingtimer = QtCore.QTimer()
@@ -1999,6 +1991,9 @@ class PesterWindow(MovingWindow):
             # ~lisanne : loads fonts from the `main/fonts` key in a theme
             # Note that this wont load fonts from inherited themes
             # that seems fine imo, esp since u could still load them through `$path/../inheritedtheme/somefont.ttf`
+            #    >>> Im from the future, loading like that breaks             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            #    >>> if the source or target theme is installed thru repo and the other manual
+            #    >>> oh well.
             PchumLog.debug("Loading font %s", font_path)
             fontID = QtGui.QFontDatabase.addApplicationFont(font_path)
             if fontID == -1:
@@ -2342,6 +2337,19 @@ class PesterWindow(MovingWindow):
             self.lastCheckPing = time.time()
         else:
             PchumLog.warning("No ping timer.")
+
+        # ~Lisanne: tell randomEncounter our preferences
+        # This does not account for the RE bot restarting while we're connected
+        # But thats rare enough that it probably does not really matter
+        try:
+            if self.randhandler.running:
+                self.randhandler.setRandomer(self.userprofile.getRandom(), force=True)
+            else:
+                PchumLog.warning(
+                    "Could not tell randomEncounter of our preferences because it is offline"
+                )
+        except Exception as e:
+            PchumLog.warning("No randomEncounter set in userconfig?")
 
     @QtCore.pyqtSlot()
     def blockSelectedChum(self):
@@ -3383,11 +3391,8 @@ class PesterWindow(MovingWindow):
         self.changeProfile()
         # Update RE bot
         try:
-            if self.userprofile.getRandom():
-                code = "+"
-            else:
-                code = "-"
-            self.sendNotice.emit(code, RANDNICK)
+            if self.randhandler.running:
+                self.randhandler.setRandomer(self.userprofile.getRandom(), force=True)
         except:
             PchumLog.warning("No randomEncounter set in userconfig?")
         self.mycolorUpdated.emit()
