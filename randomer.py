@@ -28,9 +28,12 @@ class RandomHandler(QtCore.QObject):
         self.queue.append("?")
         self.mainwindow.sendNotice.emit("?", self.randNick)
 
-    def setRandomer(self, r):
-        if r != self.mainwindow.userprofile.getRandom():
-            if r:
+    def setRandomer(self, value, force=False):
+        # Notifies randomEncounter of our preferences
+        # Only does so if the new value differs from what is stored in userprofile
+        # Can be forced to notify anyways by providing `force=True`
+        if value != self.mainwindow.userprofile.getRandom() or force:
+            if value:
                 code = "+"
             else:
                 code = "-"
