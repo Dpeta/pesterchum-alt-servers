@@ -871,11 +871,6 @@ def kxhandleInput(ctx, text=None, flavor=None, irc_compatible=False):
         clientMsg = copy(lm)
         serverMsg = copy(lm)
 
-        # If in IRC-compatible mode, remove color tags.
-        if irc_compatible:
-            serverMsg = re.sub(_ctag_begin, "", serverMsg)
-            serverMsg = re.sub(_ctag_end, "", serverMsg)
-
         # Memo-specific processing.
         if flavor == "memos" and not is_action and not irc_compatible:
             # Quirks were already applied, so get the prefix/postfix stuff
