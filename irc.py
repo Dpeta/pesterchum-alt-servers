@@ -309,7 +309,7 @@ class PesterIRC(QtCore.QThread):
     def set_connection_broken(self):
         """Called when the connection is broken."""
         PchumLog.critical("set_connection_broken() got called, disconnecting.")
-        self.disconnectIRC()
+        self.disconnect_irc()
 
     def end_cap_negotiation(self):
         """Send CAP END to end capability negotation.
@@ -638,8 +638,12 @@ class PesterIRC(QtCore.QThread):
 
     def _error(self, *params):
         """'ERROR' message from server, the server is terminating our connection."""
-        self.stop_irc = " ".join(params).strip()
-        self.disconnectIRC()
+        self.stop_irc = ""
+        for param in params:
+            if param:
+                self.stop_irc += " " + param.strip()
+        self.stop_irc = self.stop_irc.strip()
+        self.disconnect_irc()
 
     def __ctcp(self, nick: str, chan: str, msg: str):
         """Client-to-client protocol handling.
@@ -977,7 +981,7 @@ class PesterIRC(QtCore.QThread):
         # Server is not allowing us to connect.
         reason = "Handle is not allowed on this server.\n" + " ".join(args)
         self.stop_irc = reason.strip()
-        self.disconnectIRC()
+        self.disconnect_irc()
 
     def _nicknameinuse(self, _server, _cmd, nick, _msg):
         """Numerical reply 433 ERR_NICKNAMEINUSE, raised when changing nick to nick in use."""
