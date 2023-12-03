@@ -738,6 +738,7 @@ class PesterIRC(QtCore.QThread):
         PchumLog.info('---> recv "QUIT %s: %s"', handle, reason)
         if handle == self.mainwindow.randhandler.randNick:
             self.mainwindow.randhandler.setRunning(False)
+            self.updateRandomEncounter.emit()
         server = self.mainwindow.config.server()
         baseserver = server[server.rfind(".", 0, server.rfind(".")) :]
         if reason.count(baseserver) == 2:
@@ -770,6 +771,7 @@ class PesterIRC(QtCore.QThread):
         if channel == "#pesterchum":
             if handle == self.mainwindow.randhandler.randNick:
                 self.mainwindow.randhandler.setRunning(True)
+                self.updateRandomEncounter.emit()
             self.moodUpdated.emit(handle, Mood("chummy"))
 
     def _mode(self, op, channel, mode_msg, *handles):
@@ -857,8 +859,10 @@ class PesterIRC(QtCore.QThread):
             self.get_mood(newchum)
         if oldhandle == self.mainwindow.randhandler.randNick:
             self.mainwindow.randhandler.setRunning(False)
+            self.updateRandomEncounter.emit()
         elif newnick == self.mainwindow.randhandler.randNick:
             self.mainwindow.randhandler.setRunning(True)
+            self.updateRandomEncounter.emit()
 
     def _welcome(self, _server, _nick, _msg):
         """Numeric reply 001 RPL_WELCOME, send when we've connected to the server."""
@@ -965,6 +969,7 @@ class PesterIRC(QtCore.QThread):
             self.mainwindow.randhandler.setRunning(
                 self.mainwindow.randhandler.randNick in namelist
             )
+            self.updateRandomEncounter.emit()
             chums = self.mainwindow.chumList.chums
             lesschums = []
             for chum in chums:
@@ -1091,3 +1096,4 @@ class PesterIRC(QtCore.QThread):
     cannotSendToChan = QtCore.pyqtSignal(str, str)
     signal_forbiddenchannel = QtCore.pyqtSignal(str, str)
     cap_negotation_started = QtCore.pyqtSignal()
+    updateRandomEncounter = QtCore.pyqtSignal()
