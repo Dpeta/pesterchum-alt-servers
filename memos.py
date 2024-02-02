@@ -360,6 +360,9 @@ class MemoText(PesterText):
 
     def make_valid(self, msg, chum, parent, window, me):
         """Adds initials and color to a message if they're missing."""
+        if msg.startswith("/me"):
+            # /me is always valid
+            return msg
         initials = chum.initials()
         match = re.match(_valid_memo_msg_start, msg)
         detected_initials = None
