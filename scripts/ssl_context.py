@@ -1,4 +1,5 @@
 """Provides a function for creating an appropriate SSL context."""
+
 import ssl
 import sys
 import datetime

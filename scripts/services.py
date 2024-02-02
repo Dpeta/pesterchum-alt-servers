@@ -1,4 +1,5 @@
 """Lists, dicts, and functions related to services."""
+
 from randomer import RANDNICK
 
 # List of all common services bots. (for .casefold() matching)
