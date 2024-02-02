@@ -368,7 +368,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         )
 
     def force_prefix(self):
-        return self.config.get("force_prefix", True)
+        return self.config.get("force_prefix", False)
 
     def ghostchum(self):
         return self.config.get("ghostchum", False)
