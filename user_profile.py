@@ -582,9 +582,10 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         for x in profs:
             c_profile = os.path.join(profileloc, x + ".js")
             try:
-                json.load(open(c_profile))
+                with open(c_profile, "r") as file:
+                    json.load(file)
                 PchumLog.info("%s: Pass.", x)
-            except json.JSONDecodeError as e:
+            except (json.JSONDecodeError, OSError) as e:
                 PchumLog.warning("%s: Fail.", x)
                 PchumLog.warning(e)
                 profs.remove(x)
