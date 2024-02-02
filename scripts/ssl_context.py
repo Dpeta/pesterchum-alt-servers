@@ -45,8 +45,8 @@ def get_ssl_context():
     certifi_age = current_date - certifi_date
 
     empty_cert_store = list(default_context.cert_store_stats().values()).count(0) == 3
-    # 31557600 seconds is approximately 1 year
-    if empty_cert_store or certifi_age.total_seconds() <= 31557600:
+    # 94672800 seconds is approximately 3 years
+    if empty_cert_store or certifi_age.total_seconds() <= 94672800:
         PchumLog.info("Using SSL/TLS context with certifi-provided root certificates.")
         return ssl.create_default_context(cafile=certifi.where())
     PchumLog.info("Using SSL/TLS context with system-provided root certificates.")
