@@ -1,10 +1,38 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.6.0] - 2024-02-02
+
+### Added
+ - Theme repository integration by [mocchapi](https://github.com/mocchapi) (https://github.com/Dpeta/pesterchum-alt-servers/pull/146)
+ - "IRC compatibility mode" to disable most Pesterchum-specific features and be more IRC compliant. This way the client won't send random PESTERCHUM:/COLOR> commands which normal IRC clients won't process anyway.
+ - Menu option to force valid initials in memos/channels.
+ - Menu option to choose audio output device.
+ - Password (IRC "PASS") field for servers, you need this for twitch.
+ - Twitch capability requests because yea.
+
+### Fix
+ - The wrong server being picked occasionally. (now chosen based on list index)
+ - Spaces in moodmsg paths not being encoded by [mocchapi](https://github.com/mocchapi) (https://github.com/Dpeta/pesterchum-alt-servers/pull/157)
+ - Accessing text when no quirks selected by [trainstopperd](https://github.com/trainstopperd) (https://github.com/Dpeta/pesterchum-alt-servers/pull/133)
+
+### Changed
+ - Networking no longer relies on a modified oyoyo library.
+ - Did some flaking/linting with pyupgrade/autoflake.
+ - Use isinstance() for typechecks.
+ - A ton of pylint recommendations. (check .pylintrc)
+ - Chain iterators and extend when excluding links from quirks. (this is faster)
+
+### Deprecated
+ - Lua quirks because they were broken and unused, the library it used also has no Python 3 compatible release.
+ - Files for cx_freeze building since these aren't really being used currently.
+ - Added seccomp support and then removed it again immediately because it was a completely unnecessary feature tbh </3
+ - CTCP quirk disable.
+
 ## [v2.5.3] - 2022-12-27
 
 ### Changed
- - The certifi certificate bundle is now generally prefered over the system-provided bundle if it's a recent version. The main rationale for this is that the Windows cert store is sometimes outdated. (https://github.com/Dpeta/pesterchum-alt-servers/pull/108)
+ - The certifi certificate bundle is now generally preferred over the system-provided bundle if it's a recent version. The main rationale for this is that the Windows cert store is sometimes outdated. (https://github.com/Dpeta/pesterchum-alt-servers/pull/108)
 
 ### Fix
  - Certain menu options not saving on mac. (https://github.com/Dpeta/pesterchum-alt-servers/pull/107)
