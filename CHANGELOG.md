@@ -5,6 +5,7 @@
 
 ### Added
  - Theme repository integration by [mocchapi](https://github.com/mocchapi) (https://github.com/Dpeta/pesterchum-alt-servers/pull/146)
+    - Default URL is blanked for now.
  - "IRC compatibility mode" to disable most Pesterchum-specific features and be more IRC compliant. This way the client won't send random PESTERCHUM:/COLOR> commands which normal IRC clients won't process anyway.
  - Menu option to force valid initials in memos/channels.
  - Menu option to choose audio output device.
