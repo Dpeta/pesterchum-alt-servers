@@ -18,8 +18,7 @@ try:
         | QtCore.Qt.AlignmentFlag.AlignLeft
         | QtCore.Qt.AlignmentFlag.AlignTop
     )
-except ImportError as e:
-    raise e
+except ImportError:
     print("PyQt5 fallback (thememanager.py)")
     from PyQt5 import QtCore, QtGui, QtWidgets, QtNetwork
     from PyQt5.QtWidgets import QAction
@@ -134,9 +133,9 @@ class ThemeManager(QtCore.QObject):
                 QtCore.QUrl(self.database_entries[theme_name]["download"])
             )
         )
-        self.downloads[self.database_entries[theme_name]["download"]] = (
-            self.database_entries[theme_name]
-        )
+        self.downloads[
+            self.database_entries[theme_name]["download"]
+        ] = self.database_entries[theme_name]
 
     def install_theme(self, theme_name, force_install=False):
         # A higher way to install a theme than download_theme
@@ -283,7 +282,7 @@ class ThemeManager(QtCore.QObject):
                 self.database = json.loads(as_json)
                 self.database_entries = {}
 
-                version = self.database.get('meta',{}).get('format_version')
+                version = self.database.get("meta", {}).get("format_version")
 
                 if version != self.supported_version:
                     err = ""
