@@ -1,4 +1,5 @@
 """IRC-related functions and classes to be imported by irc.py"""
+
 import logging
 import base64
 

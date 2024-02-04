@@ -1,4 +1,5 @@
 """Default quirk functions that are always included with Pesterchum."""
+
 import random
 
 

@@ -27,6 +27,7 @@ the license notice included with oyoyo source files is indented here:
     # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     # THE SOFTWARE.
 """
+
 import socket
 import random
 import logging
