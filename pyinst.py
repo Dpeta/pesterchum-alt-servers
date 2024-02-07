@@ -264,32 +264,32 @@ if (_ARGUMENTS.prompts is not False) and (_ARGUMENTS.prompts != "False"):
             if package_universal_crt == "y":
                 if is_64bit:
                     crt_path = input(
-                        "Path to universal CRT: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64]: "
+                        "Path to universal CRT: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.22621.0\\ucrt\\DLLs\\x64]: "
                     )
                     if crt_path == "":
-                        # crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x64" # Default directory.
+                        # crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.22621.0\\ucrt\\DLLs\\x64" # Default directory.
                         crt_path = os.path.join(
                             "C:%s" % os.sep,
                             "Program Files (x86)",
                             "Windows Kits",
                             "10",
-                            "10.0.19041.0",
+                            "10.0.22621.0",
                             "ucrt",
                             "DLLs",
                             "x64",
                         )
                 else:
                     crt_path = input(
-                        "Path to universal CRT: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86]: "
+                        "Path to universal CRT: [C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.22621.0\\ucrt\\DLLs\\x86]: "
                     )
                     if crt_path == "":
-                        # crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.19041.0\\ucrt\\DLLs\\x86" # Default directory.
+                        # crt_path = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.22621.0\\ucrt\\DLLs\\x86" # Default directory.
                         crt_path = os.path.join(
                             "C:%s" % os.sep,
                             "Program Files (x86)",
                             "Windows Kits",
                             "10",
-                            "10.0.19041.0",
+                            "10.0.22621.0",
                             "ucrt",
                             "DLLs",
                             "x86",
@@ -315,7 +315,7 @@ else:
                 "Program Files (x86)",
                 "Windows Kits",
                 "10",
-                "10.0.19041.0",
+                "10.0.22621.0",
                 "ucrt",
                 "DLLs",
                 "x64",
@@ -326,7 +326,7 @@ else:
                 "Program Files (x86)",
                 "Windows Kits",
                 "10",
-                "10.0.19041.0",
+                "10.0.22621.0",
                 "ucrt",
                 "DLLs",
                 "x86",
