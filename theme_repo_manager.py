@@ -133,9 +133,9 @@ class ThemeManager(QtCore.QObject):
                 QtCore.QUrl(self.database_entries[theme_name]["download"])
             )
         )
-        self.downloads[
-            self.database_entries[theme_name]["download"]
-        ] = self.database_entries[theme_name]
+        self.downloads[self.database_entries[theme_name]["download"]] = (
+            self.database_entries[theme_name]
+        )
 
     def install_theme(self, theme_name, force_install=False):
         # A higher way to install a theme than download_theme
