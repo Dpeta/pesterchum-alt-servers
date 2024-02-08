@@ -1,21 +1,26 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
-## [v2.6.0] - 2024-02-02
+## [v2.6.0] - 2024-02-08
 
 ### Added
- - Theme repository integration by [mocchapi](https://github.com/mocchapi) (https://github.com/Dpeta/pesterchum-alt-servers/pull/146)
+ - Theme repository integration (by [mocchapi](https://github.com/mocchapi) https://github.com/Dpeta/pesterchum-alt-servers/pull/146)
     - Default URL is blanked for now.
  - "IRC compatibility mode" to disable most Pesterchum-specific features and be more IRC compliant. This way the client won't send random PESTERCHUM:/COLOR> commands which normal IRC clients won't process anyway.
  - Menu option to force valid initials in memos/channels.
  - Menu option to choose audio output device.
+ - Text encased by ``<alt> </alt>`` tags will show up as "Alternian". (This is just Daedric as it shows up in Homestuck)
  - Password (IRC "PASS") field for servers, you need this for twitch.
  - Twitch capability requests because yea.
+ - NickServ authentication via SASL. This isn't always used since it's only available during the initial handshake.
 
 ### Fix
  - The wrong server being picked occasionally. (now chosen based on list index)
- - Spaces in moodmsg paths not being encoded by [mocchapi](https://github.com/mocchapi) (https://github.com/Dpeta/pesterchum-alt-servers/pull/157)
- - Accessing text when no quirks selected by [trainstopperd](https://github.com/trainstopperd) (https://github.com/Dpeta/pesterchum-alt-servers/pull/133)
+ - Spaces in moodmsg paths not being encoded. (by [mocchapi](https://github.com/mocchapi) https://github.com/Dpeta/pesterchum-alt-servers/pull/157)
+ - Accessing text when no quirks selected (by [trainstopperd](https://github.com/trainstopperd) https://github.com/Dpeta/pesterchum-alt-servers/pull/133)
+ - Pesterchum's icon being horribly blurry when unscaled. (https://github.com/Dpeta/pesterchum-alt-servers/pull/126)
+ - Update random encounter after getting end of names. (https://github.com/Dpeta/pesterchum-alt-servers/pull/160)
+ - OSErrors are now caught during profile checks.
 
 ### Changed
  - Networking no longer relies on a modified oyoyo library.
@@ -23,12 +28,19 @@
  - Use isinstance() for typechecks.
  - A ton of pylint recommendations. (check .pylintrc)
  - Chain iterators and extend when excluding links from quirks. (this is faster)
+ - Certifi is considered valid for longer to stave off everything breaking from Windows soft-loading root certificates.
+ - Only QtMultimedia.QSoundEffect is used for audio now.
+ - Replaced deprecated inspect.getargspec with inspect.getfullargspec, as Python 3.11 removed inspect.getargspec.
+ - Pygame was replaced by pygame-ce, but as pygame is fully replaced by QtMultimedia now, that doesn't rly matter anymore.
+ - Removed most str() typecasts meant to convert bytes since that's no longer needed. (https://github.com/Dpeta/pesterchum-alt-servers/pull/122)
 
 ### Deprecated
  - Lua quirks because they were broken and unused, the library it used also has no Python 3 compatible release.
  - Files for cx_freeze building since these aren't really being used currently.
  - Added seccomp support and then removed it again immediately because it was a completely unnecessary feature tbh </3
  - CTCP quirk disable.
+ - Removed import option, since it was broken and it was kinda unclear what it was supposed to do.
+ - Removed the build-in console since it was unused and hard to maintain.
 
 ## [v2.5.3] - 2022-12-27
 
