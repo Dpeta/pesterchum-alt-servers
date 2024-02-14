@@ -55,6 +55,8 @@ class ThemeManager(QtCore.QObject):
     manifest_path = os.path.join(getDataDir(), "manifest.js")
     NAManager = None
 
+    supported_version = 3
+
     downloads = {}
 
     def __init__(self, config):
@@ -131,9 +133,9 @@ class ThemeManager(QtCore.QObject):
                 QtCore.QUrl(self.database_entries[theme_name]["download"])
             )
         )
-        self.downloads[
-            self.database_entries[theme_name]["download"]
-        ] = self.database_entries[theme_name]
+        self.downloads[self.database_entries[theme_name]["download"]] = (
+            self.database_entries[theme_name]
+        )
 
     def install_theme(self, theme_name, force_install=False):
         # A higher way to install a theme than download_theme
@@ -279,8 +281,24 @@ class ThemeManager(QtCore.QObject):
                 as_json = bytes(reply.readAll()).decode("utf-8")
                 self.database = json.loads(as_json)
                 self.database_entries = {}
+
+                version = self.database.get("meta", {}).get("format_version")
+
+                if version != self.supported_version:
+                    err = ""
+                    if version > self.supported_version:
+                        err = f"Theme database is too new! (got v{version} instead of supported v{self.supported_version}). Try checking if there is a new client update available!"
+                    else:
+                        err = f"Theme database is too old! (got v{version} instead of supported v{self.supported_version})."
+                    PchumLog.error(err)
+                    self.errored.emit(err)
+                    self.database = {}
+                    self.database_entries = {}
+                    return
+
                 if not self.is_database_valid():
                     self.database = {}
+                    self.database_entries = {}
                     PchumLog.error('Incorrect database format, missing "entries"')
                     self.errored.emit('Incorrect database format, missing "entries"')
                     return

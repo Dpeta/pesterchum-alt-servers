@@ -27,6 +27,7 @@ the license notice included with oyoyo source files is indented here:
     # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     # THE SOFTWARE.
 """
+
 import socket
 import random
 import logging
@@ -309,7 +310,7 @@ class PesterIRC(QtCore.QThread):
     def set_connection_broken(self):
         """Called when the connection is broken."""
         PchumLog.critical("set_connection_broken() got called, disconnecting.")
-        self.disconnectIRC()
+        self.disconnect_irc()
 
     def end_cap_negotiation(self):
         """Send CAP END to end capability negotation.
@@ -638,8 +639,12 @@ class PesterIRC(QtCore.QThread):
 
     def _error(self, *params):
         """'ERROR' message from server, the server is terminating our connection."""
-        self.stop_irc = " ".join(params).strip()
-        self.disconnectIRC()
+        self.stop_irc = ""
+        for param in params:
+            if param:
+                self.stop_irc += " " + param.strip()
+        self.stop_irc = self.stop_irc.strip()
+        self.disconnect_irc()
 
     def __ctcp(self, nick: str, chan: str, msg: str):
         """Client-to-client protocol handling.
@@ -734,6 +739,7 @@ class PesterIRC(QtCore.QThread):
         PchumLog.info('---> recv "QUIT %s: %s"', handle, reason)
         if handle == self.mainwindow.randhandler.randNick:
             self.mainwindow.randhandler.setRunning(False)
+            self.updateRandomEncounter.emit()
         server = self.mainwindow.config.server()
         baseserver = server[server.rfind(".", 0, server.rfind(".")) :]
         if reason.count(baseserver) == 2:
@@ -766,6 +772,7 @@ class PesterIRC(QtCore.QThread):
         if channel == "#pesterchum":
             if handle == self.mainwindow.randhandler.randNick:
                 self.mainwindow.randhandler.setRunning(True)
+                self.updateRandomEncounter.emit()
             self.moodUpdated.emit(handle, Mood("chummy"))
 
     def _mode(self, op, channel, mode_msg, *handles):
@@ -853,8 +860,10 @@ class PesterIRC(QtCore.QThread):
             self.get_mood(newchum)
         if oldhandle == self.mainwindow.randhandler.randNick:
             self.mainwindow.randhandler.setRunning(False)
+            self.updateRandomEncounter.emit()
         elif newnick == self.mainwindow.randhandler.randNick:
             self.mainwindow.randhandler.setRunning(True)
+            self.updateRandomEncounter.emit()
 
     def _welcome(self, _server, _nick, _msg):
         """Numeric reply 001 RPL_WELCOME, send when we've connected to the server."""
@@ -961,6 +970,7 @@ class PesterIRC(QtCore.QThread):
             self.mainwindow.randhandler.setRunning(
                 self.mainwindow.randhandler.randNick in namelist
             )
+            self.updateRandomEncounter.emit()
             chums = self.mainwindow.chumList.chums
             lesschums = []
             for chum in chums:
@@ -977,7 +987,7 @@ class PesterIRC(QtCore.QThread):
         # Server is not allowing us to connect.
         reason = "Handle is not allowed on this server.\n" + " ".join(args)
         self.stop_irc = reason.strip()
-        self.disconnectIRC()
+        self.disconnect_irc()
 
     def _nicknameinuse(self, _server, _cmd, nick, _msg):
         """Numerical reply 433 ERR_NICKNAMEINUSE, raised when changing nick to nick in use."""
@@ -1087,3 +1097,4 @@ class PesterIRC(QtCore.QThread):
     cannotSendToChan = QtCore.pyqtSignal(str, str)
     signal_forbiddenchannel = QtCore.pyqtSignal(str, str)
     cap_negotation_started = QtCore.pyqtSignal()
+    updateRandomEncounter = QtCore.pyqtSignal()

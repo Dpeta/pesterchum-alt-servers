@@ -2338,18 +2338,18 @@ class PesterWindow(MovingWindow):
         else:
             PchumLog.warning("No ping timer.")
 
-        # ~Lisanne: tell randomEncounter our preferences
-        # This does not account for the RE bot restarting while we're connected
-        # But thats rare enough that it probably does not really matter
-        try:
-            if self.randhandler.running:
-                self.randhandler.setRandomer(self.userprofile.getRandom(), force=True)
-            else:
-                PchumLog.warning(
-                    "Could not tell randomEncounter of our preferences because it is offline"
-                )
-        except Exception as e:
-            PchumLog.warning("No randomEncounter set in userconfig?")
+    @QtCore.pyqtSlot()
+    def updateRandomEncounter(self):
+        """
+        Moved this here to be called after we end of names in #pesterchum.
+        self.randhandler.running wasn't set yet if this was ran in connect()
+        """
+        if self.randhandler.running:
+            self.randhandler.setRandomer(self.userprofile.getRandom(), force=True)
+        else:
+            PchumLog.warning(
+                "Could not tell randomEncounter of our preferences because it is offline"
+            )
 
     @QtCore.pyqtSlot()
     def blockSelectedChum(self):
@@ -4185,6 +4185,7 @@ class MainProgram(QtCore.QObject):
             (irc.cannotSendToChan, widget.cannotSendToChan),
             (irc.signal_forbiddenchannel, widget.forbiddenchannel),
             (irc.cap_negotation_started, widget.capNegotationStarted),
+            (irc.updateRandomEncounter, widget.updateRandomEncounter),
         )
 
     def connectWidgets(self, irc, widget):

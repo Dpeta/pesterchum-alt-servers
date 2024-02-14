@@ -1,4 +1,5 @@
 """Provides functions for validating input from the server and other clients."""
+
 # import re
 
 # _color_rgb = re.compile(r"^\d{1,3},\d{1,3},\d{1,3}$")

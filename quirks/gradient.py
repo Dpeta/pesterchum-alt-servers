@@ -1,4 +1,5 @@
 """This file contains an example of a gradient quirk function."""
+
 import re
 import itertools
 
