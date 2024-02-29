@@ -1,12 +1,15 @@
 import os
 import io
 import json
+import time
 import zipfile
 import logging
+import hashlib
 from shutil import rmtree
 from datetime import datetime
 
 from ostools import getDataDir
+from generic import RightClickTree
 
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets, QtNetwork
@@ -26,6 +29,7 @@ except ImportError:
     _flag_selectable = QtCore.Qt.TextSelectableByMouse
     _flag_topalign = QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
 
+
 PchumLog = logging.getLogger("pchumLogger")
 themeManager = None
 
@@ -35,8 +39,21 @@ themeManager = None
 # - ThemeManagerWidget, a GUI widget that lets the user install, update, & delete repository themes
 # - ThemeManager, the class that the widget hooks up to. Handles fetching, downloading, installing, & keeps the manifest updated
 
-# Manifest is a local file that tracks the metadata of themes downloaded from the repository
-# Its a themename: {database entry} dict
+# manifest.json is a local file in the datadir that tracks the metadata of themes installed from the repository
+# Its structured as such:
+# {
+#   meta: {
+#       format_version: <format version last used>,
+#       updated_at: <timestamp when last written to>
+#   },
+#   entries: {
+#       <installed theme name>: {<theme data as seen in the database>}
+#   }
+# }
+
+
+def sha256_bytes(buff):
+    return hashlib.sha256(buff).hexdigest()
 
 
 class ThemeManager(QtCore.QObject):
@@ -48,65 +65,89 @@ class ThemeManager(QtCore.QObject):
     errored = QtCore.pyqtSignal(str)  # error_text
 
     # variables
-    manifest = {}
-    database = {}
+    manifest = {}  # In-memory version of manifest
+    database = {}  # The latest database data downloaded in full
     database_entries = {}
+
     config = None
-    manifest_path = os.path.join(getDataDir(), "manifest.js")
-    NAManager = None
+    manifest_path = os.path.join(getDataDir(), "manifest.json")
 
-    supported_version = 3
+    network_manager = None  # Does the requests
 
-    downloads = {}
+    SUPPORTED_VERSION = 4  # theme format version supported
 
     def __init__(self, config):
         super().__init__()
         with open(self.manifest_path, "r") as f:
             self.manifest = json.load(f)
-        PchumLog.debug("Manifest.js loaded with: %s", self.manifest)
+        PchumLog.debug("manifest.json loaded with: %s", self.manifest)
         self.config = config
         # TODO: maybe make seperate QNetworkAccessManagers for theme downloads, database fetches, and integrity checkfile
         # OR figure out how to connect the signal to tasks instead of the whole object
         # That way we dont have to figure out what got downloaded afterwards, and can just have a _on_reply_theme & _on_reply_database or something
-        self.NAManager = QtNetwork.QNetworkAccessManager()
-        self.NAManager.finished[QtNetwork.QNetworkReply].connect(self._on_reply)
+        self.network_manager = QtNetwork.QNetworkAccessManager()
         self.validate_manifest()
         self.refresh_database()
 
     @QtCore.pyqtSlot()
     def refresh_database(self):
         # Fetches a new copy of the theme database from the given URL
-        # The initialisation & processing of it is handled in self._on_reply
+        # The initialisation & processing of it is handled in self._on_database_reply
+        if self.config.theme_repo_url().strip() == "":
+            self._error("No theme repository db URL has been set in the Idle/Updates settings.")
+            return
+
         PchumLog.debug(
             "Refreshing theme repo database @ %s", self.config.theme_repo_url()
         )
-        promise = self.NAManager.get(
+        reply = self.network_manager.get(
             QtNetwork.QNetworkRequest(QtCore.QUrl(self.config.theme_repo_url()))
         )
+        reply.finished.connect(lambda: self._on_database_reply(reply))
 
     def delete_theme(self, theme_name):
         # TODO: check if other installed themes inherit from this to avoid broken themes
         # would require some kinda confirmation popup which i havent figure out yet
         PchumLog.info("Deleting installed repo theme %s", theme_name)
-        theme = self.manifest[theme_name]
+        theme = self.manifest['entries'][theme_name]
         directory = os.path.join(getDataDir(), "themes", theme["name"])
         if os.path.isdir(directory):
             rmtree(directory)
-        self.manifest.pop(theme_name)
+        self.manifest['entries'].pop(theme_name)
         self.save_manifest()
         self.manifest_updated.emit(self.manifest)
 
     def save_manifest(self):
+        # Writes manifest.json to datadir
+        self.manifest['meta'] = self.manifest.get('meta',{})
+        self.manifest["meta"]['updated_at'] = time.time()
+        self.manifest['meta']['format_version'] = self.database.get('meta',{}).get('format_version', self.SUPPORTED_VERSION)
+        self.manifest['entries'] = self.manifest.get('entries', {})
         with open(self.manifest_path, "w") as f:
             json.dump(self.manifest, f)
         PchumLog.debug("Saved manifes.js to %s", self.manifest_path)
 
     def validate_manifest(self):
-        # Checks if the themes the manifest claims are installed actually exists
+        # Checks if the themes the manifest claims are installed actually exists & does some structure validation
         # Removes them from the manifest if they dont
+        if not "meta" in self.manifest:
+            self.manifest["meta"] = {}
+        if not "updated_at" in self.manifest['meta']:
+            self.manifest['meta']["updated_at"] = time.time()
+        if not "format_version" in self.manifest['meta']:
+            self.manifest['meta']["format_version"] =  self.SUPPORTED_VERSION
+        if not "entries" in self.manifest:
+            self.manifest['entries'] = {}
+
+        if self.manifest['meta']['format_version'] != self.SUPPORTED_VERSION:
+            PchumLog.warning(
+                "Existing manifest version (%s) does not match supported version (%s). Was the client updated?",
+                self.manifest['meta']['format_version'],
+                self.SUPPORTED_VERSION,
+            )
         to_pop = set()
         all_themes = self.config.availableThemes()
-        for theme_name in self.manifest:
+        for theme_name in self.manifest['entries']:
             if not theme_name in all_themes:
                 PchumLog.warning(
                     "Supposedly installed theme %s from the manifest seems to have been deleted, removing from manifest now",
@@ -116,11 +157,11 @@ class ThemeManager(QtCore.QObject):
                 to_pop.add(theme_name)
 
         for theme_name in to_pop:
-            self.manifest.pop(theme_name)
+            self.manifest['entries'].pop(theme_name)
 
     def download_theme(self, theme_name):
         # Downloads the theme .zip
-        # The actual installing is handled by _on_reply when the theme is downloaded
+        # The actual installing is handled by _on_theme_reply when the theme is downloaded
         # Performs no version checks or dependency handling
         # Use install_theme() instead unless you know what you're doing
         PchumLog.info("Downloading %s", theme_name)
@@ -128,14 +169,16 @@ class ThemeManager(QtCore.QObject):
             PchumLog.error("Theme name %s does not exist in the database!", theme_name)
             return
         PchumLog.debug("(From %s)", self.database_entries[theme_name]["download"])
-        promise = self.NAManager.get(
+        reply = self.network_manager.get(
             QtNetwork.QNetworkRequest(
                 QtCore.QUrl(self.database_entries[theme_name]["download"])
             )
         )
-        self.downloads[self.database_entries[theme_name]["download"]] = (
-            self.database_entries[theme_name]
-        )
+        reply.finished.connect(lambda : self._on_theme_reply(reply, self.database_entries[theme_name]))
+
+    def _error(self, msg):
+        PchumLog.error("ThemeManager: %s", msg)
+        self.errored.emit(msg)
 
     def install_theme(self, theme_name, force_install=False):
         # A higher way to install a theme than download_theme
@@ -147,9 +190,9 @@ class ThemeManager(QtCore.QObject):
         PchumLog.info("Installing theme %s", theme_name)
         if force_install:
             PchumLog.debug("(force_install is enabled)")
+
         if not theme_name in self.database_entries:
-            PchumLog.error("Theme %s does not exist in the database!", theme_name)
-            self.errored.emit("Theme %s does not exist in the database!" % theme_name)
+            self._error("Theme %s does not exist in the database!" % theme_name)
             return
 
         all_themes = self.config.availableThemes()
@@ -196,19 +239,15 @@ class ThemeManager(QtCore.QObject):
                         theme_name["inherits"],
                     )
                 else:
-                    PchumLog.error(
-                        "Theme %s requires theme %s, which is not installed and not in the database. Cancelling install",
-                        theme_name,
-                        theme["inherits"],
-                    )
-                    self.errored.emit(
+                    # TODO: maybe make this a popup?
+                    self._error(
                         "Theme %s requires theme %s, which is not installed and not in the database. Cancelling install"
                         % (theme_name, theme["inherits"])
                     )
                     return
 
         # Check if there's no need to re-install theme
-        # This is done after the dependency check in case an inherited theme is missing two levels down
+        # This is done after the dependency check in case an inherited theme has an update or is missing two levels down
         if self.is_installed(theme_name) and not self.has_update(
             theme_name
         ):  # Theme is installed by manager, and is up-to-date
@@ -218,11 +257,7 @@ class ThemeManager(QtCore.QObject):
                     theme_name,
                 )
             else:
-                PchumLog.warning(
-                    "Theme %s is already installed, and no update is available. Cancelling install",
-                    theme_name,
-                )
-                self.errored.emit(
+                self._error(
                     "Theme %s is already installed, and no update is available. Cancelling install"
                     % theme_name
                 )
@@ -237,7 +272,7 @@ class ThemeManager(QtCore.QObject):
         # Returns False if the theme is installed manually or when the theme is up to date
         if self.is_installed(theme_name) and theme_name in self.database_entries:
             return (
-                self.manifest[theme_name]["version"]
+                self.manifest['entries'][theme_name]["version"]
                 < self.database_entries[theme_name]["version"]
             )
         return False
@@ -245,103 +280,149 @@ class ThemeManager(QtCore.QObject):
     def is_installed(self, theme_name):
         # checks if a theme is installed through the manager
         # Note that this will return False if the given name is a theme that the user installed manually!
-        return theme_name in self.manifest
+        return theme_name in self.manifest.get('entries',{})
 
     def is_database_valid(self):
         return "entries" in self.database and isinstance(
             self.database.get("entries"), list
         )
 
+    def _on_database_reply(self, reply):
+        # This is a database refresh!
+        if reply.error() != QtNetwork.QNetworkReply.NetworkError.NoError:
+            self._error(
+                "An error occured contacting the repository: %s" % reply.error()
+            )
+            return
+
+        try:
+            as_json = bytes(reply.readAll()).decode("utf-8")
+            self.database = json.loads(as_json)
+            self.database_entries = {}
+
+            version = self.database.get("meta", {}).get("format_version")
+
+            if version != self.SUPPORTED_VERSION:
+                if version == None:
+                    self._error(
+                        "Theme database is malformed! No format version specified."
+                    )
+                elif version > self.SUPPORTED_VERSION:
+                    self._error(
+                        f"Theme database is too new! (got v{version} instead of supported v{self.SUPPORTED_VERSION}). Try checking if there is a new client update available!"
+                    )
+                else:
+                    self._error(
+                        f"Theme database is too old! (got v{version} instead of supported v{self.SUPPORTED_VERSION})."
+                    )
+                self.database = {}
+                self.database_entries = {}
+                return
+
+            if not self.is_database_valid():
+                self._error('Incorrect database format, missing "entries"')
+                self.database = {}
+                self.database_entries = {}
+                return
+
+            # Filter out non-QTchum client themes, like for godot
+            for dbindex in range(
+                len(self.database["entries"]) - 1, -1, -1
+            ):  # Iterate over the database in reverse
+                dbitem = self.database["entries"][dbindex]
+                if dbitem["client"] != "pesterchum":
+                    # PchumLog.debug(
+                    #     "Removed database theme %s because it is not compatible with this client",
+                    #     dbitem["name"],
+                    # )
+                    # self.database["entries"].pop(dbindex)
+                    pass # TODO: rethink this
+                else:
+                    # Store the index in the dict to make it easier to reference
+                    dbitem["id"] = dbindex
+                    # Make an easy lookup table instead of the array we get from the DB
+                    self.database_entries[dbitem["name"]] = dbitem
+            PchumLog.info("Database refreshed")
+            self.database_refreshed.emit(self.database)
+        except KeyError as e:
+            self.database = {}
+            self.database_entries = {}
+            self._error("Vital key missing from theme database: %s" % e)
+        except json.decoder.JSONDecodeError as e:
+            self.database = {}
+            self.database_entries = {}
+            self._error("Could not decode theme database JSON: %s" % e)
+        reply.deleteLater()
+
+    def _on_theme_reply(self, reply, metadata):
+        # This is called when a theme .zip is downloaded
+        if reply.error() != QtNetwork.QNetworkReply.NetworkError.NoError:
+            self._error(
+                "An error occured contacting the repository: %s" % reply.error()
+            )
+            return
+
+        buffer = bytes(reply.readAll())
+        # Verify hash
+        PchumLog.info("Verifying hash")
+        hash = sha256_bytes(buffer)
+        if hash != metadata.get("sha256_download"):
+            self._error("Download hash does not match! calculated %s, but expected %s" % (hash, str(metadata.get("sha256_download"))))
+            return
+
+        # Install the theme
+        self._unzip_buffer(buffer, metadata["name"])
+        self.manifest['entries'][metadata["name"]] = metadata
+        self.save_manifest()
+        self.manifest_updated.emit(self.manifest)
+        PchumLog.info("Theme %s is now installed", metadata.get("name"))
+        reply.deleteLater()
+
     # using a slot decorator here raises `ERROR - <class 'TypeError'>, connect() failed between finished(QNetworkReply*) and _on_reply()``
     # maybe because of the underscore?
     # @QtCore.pyqtSlot(QtNetwork.QNetworkReply)
     def _on_reply(self, reply):
-        if reply.error() != QtNetwork.QNetworkReply.NetworkError.NoError:
-            PchumLog.error(
-                "An error occured contacting the repository: %s", reply.error()
-            )
-            self.errored.emit(
-                "An error occured contacting the repository: %s" % reply.error()
-            )
-            return
-        try:
-            original_url = reply.request().url().url()
-            # Check if zipfile or database fetch
-            if original_url in self.downloads:
-                # This is a theme zip!
-                theme = self.downloads[original_url]
-                self._handle_downloaded_zip(bytes(reply.readAll()), theme["name"])
-                self.downloads.pop(original_url)
-                self.manifest[theme["name"]] = theme
-                self.save_manifest()
-                self.manifest_updated.emit(self.manifest)
-                PchumLog.info("Theme %s is now installed", theme["name"])
-            else:
-                # This is a database refresh!
-                as_json = bytes(reply.readAll()).decode("utf-8")
-                self.database = json.loads(as_json)
-                self.database_entries = {}
+        pass
 
-                version = self.database.get("meta", {}).get("format_version")
-
-                if version != self.supported_version:
-                    err = ""
-                    if version > self.supported_version:
-                        err = f"Theme database is too new! (got v{version} instead of supported v{self.supported_version}). Try checking if there is a new client update available!"
-                    else:
-                        err = f"Theme database is too old! (got v{version} instead of supported v{self.supported_version})."
-                    PchumLog.error(err)
-                    self.errored.emit(err)
-                    self.database = {}
-                    self.database_entries = {}
-                    return
-
-                if not self.is_database_valid():
-                    self.database = {}
-                    self.database_entries = {}
-                    PchumLog.error('Incorrect database format, missing "entries"')
-                    self.errored.emit('Incorrect database format, missing "entries"')
-                    return
-
-                # Filter out non-QTchum client themes, like for godot
-                for dbindex in range(
-                    len(self.database["entries"]) - 1, -1, -1
-                ):  # Iterate over the database in reverse
-                    dbitem = self.database["entries"][dbindex]
-                    if dbitem["client"] != "pesterchum":
-                        PchumLog.debug(
-                            "Removed database theme %s because it is not compatible with this client",
-                            dbitem["name"],
-                        )
-                        self.database["entries"].pop(dbindex)
-                # Make an easy lookup table instead of the array we get from the DB
-                for dbitem in self.database["entries"]:
-                    self.database_entries[dbitem["name"]] = dbitem
-                PchumLog.info("Database refreshed")
-                self.database_refreshed.emit(self.database)
-
-        except json.decoder.JSONDecodeError as e:
-            PchumLog.error("Could not decode theme database JSON: %s", e)
-            self.errored.emit("Could not decode theme database JSON: %s" % e)
-            return
-        except KeyError as e:
-            self.database = {}
-            self.database_entries = {}
-            PchumLog.error("Vital key missing from theme database: %s", e)
-            self.errored.emit("Vital key missing from theme database: %s" % e)
-            return
-
-    def _handle_downloaded_zip(self, zip_buffer, theme_name):
-        # Unzips the downloaded theme package in-memory to datadir/themes/theme_name
-        # I dont think this runs in a thread so it may block, but its so fast i dont think it really matters
-        # But i guess if its a zip bomb itll crash
+    def _unzip_buffer(self, zip_buffer, theme_name):
+        # Unzips the downloaded theme zip in-memory & writes to datadir/themes/theme_name
+        # TODO: QThread this
         directory = os.path.join(getDataDir(), "themes", theme_name)
         with zipfile.ZipFile(io.BytesIO(zip_buffer)) as z:
-            if os.path.isdir(directory):
+            if os.path.exists(directory):
                 rmtree(directory)
-                # Deletes old files that have been removed in an update
+                # Deletes old files that may have been removed in an update
+            os.mkdir(directory)
             z.extractall(directory)
 
+
+
+
+
+
+class ThemeListItem(QtWidgets.QTreeWidgetItem):
+    name = ""
+    installed = False
+    author = ""
+    updated_at = 0
+
+    has_update = False
+    index = 0
+    def __init__(self, installed, name, author, updated_at, has_update, index):
+        self.name = name,
+        self.installed = installed,
+        self.author = author,
+        self.updated_at = updated_at
+
+        self.has_update = has_update
+        self.index = index
+        QtWidgets.QTreeWidgetItem.__init__(self, ["yes" if installed else "no", name, author, str(updated_at)])
+
+    def __lt__(self, other):
+        column = self.treeWidget().sortColumn()
+        if (self.text(column)).isdigit() and (other.text(column)).isdigit():
+            return int(self.text(column)) < int(other.text(column))
+        return self.text(column) < other.text(column)
 
 class ThemeManagerWidget(QtWidgets.QWidget):
     icons = None
@@ -381,7 +462,11 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         # [list of themes/results] | [selected theme details]
         layout_hbox_list_and_details = QtWidgets.QHBoxLayout()
         # This is the list of database themes
-        self.list_results = QtWidgets.QListWidget()
+        self.list_results = RightClickTree()
+        self.list_results.setColumnCount(4)
+        self.list_results.setIndentation(0)
+        self.list_results.setSortingEnabled(True)
+        self.list_results.setHeaderLabels(["Installed", "Name", "Author", "Updated at"])
         self.list_results.setSizePolicy(
             QtWidgets.QSizePolicy(
                 QtWidgets.QSizePolicy.Policy.Expanding,
@@ -524,8 +609,8 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         if theme["inherits"] in self.config.availableThemes():
             requires_text += " (installed)"
         self.lbl_requires.setText((requires_text) if theme["inherits"] else "")
-        last_update_text = "Released on: "
-        last_update_text += datetime.fromtimestamp(theme["updated"]).strftime(
+        last_update_text = "Latest update: "
+        last_update_text += datetime.fromtimestamp(theme["updated_at"]).strftime(
             "%d/%m/%Y, %H:%M"
         )
         self.lbl_last_update.setText(last_update_text)
@@ -535,7 +620,7 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         self.rebuild()
 
     def rebuild(self):
-        prev_selected_index = self.list_results.currentRow()
+        prev_selected_items = self.list_results.selectedItems()
         database = themeManager.database
         self.list_results.clear()
         self.lbl_error.setText("")
@@ -548,20 +633,29 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         # Repopulate the list
         for dbitem in database["entries"]:
             # Determine the suffix
-            icon = self.icons[0]
-            status = ""
-            if themeManager.is_installed(dbitem["name"]):
-                if themeManager.has_update(dbitem["name"]):
-                    status = "~ (update available)"
-                    icon = self.icons[2]
-                else:
-                    status = "~ (installed)"
-                    icon = self.icons[1]
-            text = "%s by %s %s" % (dbitem["name"], dbitem["author"], status)
-            item = QtWidgets.QListWidgetItem(icon, text)
-            self.list_results.addItem(item)
 
-        if prev_selected_index > -1:
+            # icon = self.icons[0]
+            # status = ""
+            # if themeManager.is_installed(dbitem["name"]):
+            #     if themeManager.has_update(dbitem["name"]):
+            #         status = "~ (update available)"
+            #         icon = self.icons[2]
+            #     else:
+            #         status = "~ (installed)"
+            #         icon = self.icons[1]
+            # text = "%s by %s %s" % (dbitem["name"], dbitem["author"], status)
+            item = ThemeListItem(
+                themeManager.is_installed(dbitem["name"]),
+                dbitem['name'],
+                dbitem['author'],
+                dbitem['updated_at'],
+                themeManager.has_update(dbitem["name"]),
+                dbitem['id']
+                )
+            self.list_results.addTopLevelItem(item)
+
+        if len(prev_selected_items) > 0:
+            print(prev_selected_items)
             # Re-select last item, if it was selected
             self.list_results.setCurrentRow(prev_selected_index)
             self._on_theme_selected()

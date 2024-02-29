@@ -59,7 +59,7 @@ def validateDataDir():
     # So hopefully im not plugging into an existng system on accident
 
     js_pchum = os.path.join(datadir, "pesterchum.js")
-    js_manifest = os.path.join(datadir, "manifest.js")
+    js_manifest = os.path.join(datadir, "manifest.json")
 
     dirs = [datadir, profile, quirks, logs, themes, errorlogs, backup]
     for d in dirs:
