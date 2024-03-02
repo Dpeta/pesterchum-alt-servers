@@ -18,6 +18,7 @@ from dataobjs import pesterQuirk, PesterProfile, PesterHistory
 from memos import TimeSlider, TimeInput
 from version import _pcVersion
 from convo import PesterInput, PesterText
+from user_profile import pesterTheme
 from parsetools import lexMessage
 
 _datadir = ostools.getDataDir()
@@ -1429,9 +1430,17 @@ class PesterOptions(QtWidgets.QDialog):
         layout_repo_url = QtWidgets.QHBoxLayout()
         self.repoUrlBox = QtWidgets.QLineEdit(self)
         self.repoUrlBox.setText(self.config.theme_repo_url())
+        self.repoUrlResetButton = QtWidgets.QPushButton(self)
+        self.repoUrlResetButton.setText("Reset")
+        self.repoUrlResetButton.clicked.connect(
+            lambda: self.repoUrlBox.setText(
+                "https://raw.githubusercontent.com/mocchapi/pesterchum-themes/main/db.json"
+            )
+        )
 
         layout_repo_url.addWidget(QtWidgets.QLabel("Theme repository db URL:"))
         layout_repo_url.addWidget(self.repoUrlBox)
+        layout_repo_url.addWidget(self.repoUrlResetButton)
 
         # self.updateBox = QtWidgets.QComboBox(self)
         # self.updateBox.addItem("Once a Day")
@@ -1460,10 +1469,18 @@ class PesterOptions(QtWidgets.QDialog):
             avail_themes = self.config.availableThemes()
             PchumLog.debug("Resetting themeself.themeBox")
             self.themeBox.clear()
+
             notheme = theme.name not in avail_themes
-            for i, t in enumerate(avail_themes):
-                self.themeBox.addItem(t)
-                if (not notheme and t == theme.name) or (notheme and t == "pesterchum"):
+            icons = {}
+            for i, theme_name in enumerate(avail_themes):
+                pt = pesterTheme(theme_name)
+                if pt["main/icon"] not in icons:
+                    icons[pt["main/icon"]] = QtGui.QIcon(pt["main/icon"])
+                self.themeBox.addItem(icons[pt["main/icon"]], theme_name)
+
+                if (not notheme and theme_name == theme.name) or (
+                    notheme and theme_name == "pesterchum"
+                ):
                     self.themeBox.setCurrentIndex(i)
             self.themeBox.setSizePolicy(
                 QtWidgets.QSizePolicy(
@@ -1481,7 +1498,7 @@ class PesterOptions(QtWidgets.QDialog):
                 QtWidgets.QSizePolicy.Policy.Minimum,
             )
         )
-        self.themeManager = ThemeManagerWidget(self.config)
+        self.themeManager = ThemeManagerWidget(self.config, self.theme, self)
         self.themeManager.rebuilt.connect(reset_themeBox)
         # This makes it so that the themeBox gets updated when a theme is installed or removed through the repository
         self.ghostchum = QtWidgets.QCheckBox("Pesterdunk Ghostchum!!", self)
@@ -2083,6 +2100,7 @@ class PesterMemoList(QtWidgets.QDialog):
                 0, QtGui.QBrush(QtGui.QColor(theme["main/chums/userlistcolor"]))
             )
             item.setIcon(QtGui.QIcon(theme["memos/memoicon"]))
+        self.themeManager.updateTheme(theme)
 
     @QtCore.pyqtSlot()
     def AcceptIfSelectionMade(self):
