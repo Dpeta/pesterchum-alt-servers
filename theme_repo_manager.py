@@ -73,10 +73,12 @@ def get_request(url):
     downloads.add(reply)
     return reply
 
+
 def _on_request_finished(reply):
     # Remove the reply from the downloads set to make it GC-able again
     downloads.remove(reply)
     reply.deleteLater()
+
 
 networkManager.finished.connect(_on_request_finished)
 
@@ -442,7 +444,7 @@ class ThemeManager(QtCore.QObject):
 
     def _unzip_buffer(self, zip_buffer, theme_name):
         # Unzips the downloaded theme zip in-memory & writes to datadir/themes/theme_name
-        # 
+        #
         # ~lisanne
         # This runs on the MAIN THREAD so it may freeze for a second
         # I attempted to use a QThread but that made everything excruciatingly slow. maybe i didnt implement it right though
@@ -726,7 +728,8 @@ class ThemeManagerWidget(QtWidgets.QWidget):
             # One or more installed themes depend on this one, so ask the user what to do
             msgbox = QtWidgets.QMessageBox()
             msgbox.setText(
-                "Uninstalling '%s' will break the following other themes: \n\n" % theme_name
+                "Uninstalling '%s' will break the following other themes: \n\n"
+                % theme_name
                 + "%s\n\n" % "\n".join([" • " + x for x in inheriting_themes])
                 + "It is recommended to also uninstall these, as they likely wont work correctly anymore.\n"
                 + "How would you like to proceed?"
@@ -792,9 +795,7 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         self.btn_uninstall.setVisible(themeManager.is_installed(theme_name))
 
         # Show the icon above the name
-        self.img_theme_icon.setPixmap(
-            self.get_theme_icon(theme_name).pixmap(32, 32)
-        )
+        self.img_theme_icon.setPixmap(self.get_theme_icon(theme_name).pixmap(32, 32))
         # Show the name / author / description text
         self.lbl_theme_name.setText(theme_name)
         self.lbl_author_name.setText("By %s" % theme["author"])
@@ -863,12 +864,11 @@ class ThemeManagerWidget(QtWidgets.QWidget):
             self.theme_icons[self.theme.name] = QtGui.QIcon(self.theme["main/icon"])
         default_icon = self.theme_icons[self.theme.name]
 
-
         if not theme_name in themeManager.database_entries:
             return default_icon
-        inherits = themeManager.database_entries[theme_name]['inherits']
-        
-        if inherits == 'pesterchum' or inherits == '':
+        inherits = themeManager.database_entries[theme_name]["inherits"]
+
+        if inherits in ("pesterchum", ""):
             return default_icon
         return self.get_theme_icon(inherits)
 
@@ -881,7 +881,9 @@ class ThemeManagerWidget(QtWidgets.QWidget):
                 reply.error(),
             )
             return
-        PchumLog.debug("Fetched theme %s's icon @%s", theme_name, reply.request().url().url())
+        PchumLog.debug(
+            "Fetched theme %s's icon @%s", theme_name, reply.request().url().url()
+        )
         pixmap = QtGui.QPixmap()
         pixmap.loadFromData(reply.readAll())
         icon = QtGui.QIcon(pixmap)
@@ -934,7 +936,7 @@ class ThemeManagerWidget(QtWidgets.QWidget):
                 dbitem["name"],
                 dbitem["author"],
                 dbitem["updated_at"],
-                self.get_theme_icon(dbitem['name']),
+                self.get_theme_icon(dbitem["name"]),
                 self.state_icons[int(is_installed) + int(has_update)],
                 dbitem["id"],
             )
