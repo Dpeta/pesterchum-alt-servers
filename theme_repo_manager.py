@@ -73,12 +73,10 @@ def get_request(url):
     downloads.add(reply)
     return reply
 
-
 def _on_request_finished(reply):
     # Remove the reply from the downloads set to make it GC-able again
     downloads.remove(reply)
     reply.deleteLater()
-
 
 networkManager.finished.connect(_on_request_finished)
 
@@ -444,8 +442,11 @@ class ThemeManager(QtCore.QObject):
 
     def _unzip_buffer(self, zip_buffer, theme_name):
         # Unzips the downloaded theme zip in-memory & writes to datadir/themes/theme_name
-        # TODO?: QThread this
-        # (future ~lisanne: seems alright not to dedicate an entire thread to it tbh, only seems to freeze for a split second even with multiple inherits)
+        # 
+        # ~lisanne
+        # This runs on the MAIN THREAD so it may freeze for a second
+        # I attempted to use a QThread but that made everything excruciatingly slow. maybe i didnt implement it right though
+        # Could be revisited in the future
         directory = os.path.join(getDataDir(), "themes", theme_name)
         with zipfile.ZipFile(io.BytesIO(zip_buffer)) as z:
             if os.path.exists(directory):
@@ -725,13 +726,13 @@ class ThemeManagerWidget(QtWidgets.QWidget):
             # One or more installed themes depend on this one, so ask the user what to do
             msgbox = QtWidgets.QMessageBox()
             msgbox.setText(
-                "Deleting '%s' will break the following other themes: \n\n" % theme_name
-                + "%s\n\n" % "\n".join([" - " + x for x in inheriting_themes])
-                + "It is recommended to also delete these, as they likely wont work correctly anymore.\n"
+                "Uninstalling '%s' will break the following other themes: \n\n" % theme_name
+                + "%s\n\n" % "\n".join([" • " + x for x in inheriting_themes])
+                + "It is recommended to also uninstall these, as they likely wont work correctly anymore.\n"
                 + "How would you like to proceed?"
             )
-            btn_delete_all = QtWidgets.QPushButton("Delete all (recommended)")
-            btn_delete_one = QtWidgets.QPushButton("Delete only %s" % theme_name)
+            btn_delete_all = QtWidgets.QPushButton("Uninstall all (recommended)")
+            btn_delete_one = QtWidgets.QPushButton("Uninstall only '%s'" % theme_name)
             btn_cancel = QtWidgets.QPushButton("Cancel")
 
             msgbox.addButton(
@@ -872,7 +873,6 @@ class ThemeManagerWidget(QtWidgets.QWidget):
         return self.get_theme_icon(inherits)
 
     def _on_icon_reply(self, reply, theme_name):
-        theme_name = reply.theme_name
         if reply.error() != QtNetwork.QNetworkReply.NetworkError.NoError:
             PchumLog.error(
                 "Could not fetch theme icon for %s at %s: %s",
@@ -881,6 +881,7 @@ class ThemeManagerWidget(QtWidgets.QWidget):
                 reply.error(),
             )
             return
+        PchumLog.debug("Fetched theme %s's icon @%s", theme_name, reply.request().url().url())
         pixmap = QtGui.QPixmap()
         pixmap.loadFromData(reply.readAll())
         icon = QtGui.QIcon(pixmap)
