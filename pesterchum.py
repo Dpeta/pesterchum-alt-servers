@@ -4318,6 +4318,9 @@ class MainProgram(QtCore.QObject):
 
     def uncaughtException(self, exc, value, tb):
         # Show error to end user and log.
+        if exc is KeyboardInterrupt:
+            PchumLog.info("CTRL+C goodbye :)")
+            sys.exit()
         try:
             # Log to log file
             PchumLog.error("%s, %s", exc, value)
