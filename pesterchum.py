@@ -2633,7 +2633,7 @@ class PesterWindow(MovingWindow):
         (reason, ok) = QtWidgets.QInputDialog.getText(
             self,
             "Report User",
-            "Enter the reason you are reporting this user (optional):",
+            "Enter the reason you are reporting this user:",
         )
         if ok:
             self.sendMessage.emit("REPORT {} {}".format(handle, reason), "calSprite")

@@ -1081,7 +1081,7 @@ class PesterConvo(QtWidgets.QFrame):
                 self.mainwindow.theme["main/menus/rclickchumlist/report"]
             )
         except:
-            pass
+            self.reportchum.setText("REPORT USER")
         self.textArea.changeTheme(theme)
         self.textInput.changeTheme(theme)
 
