@@ -1904,11 +1904,14 @@ class PesterMemo(PesterConvo):
         currentChum = PesterProfile((self.userlist.currentItem().text()))
         self.mainwindow.addChum(currentChum)
 
+
     @QtCore.pyqtSlot()
     def reportThisChum(self):
         if not self.userlist.currentItem():
             return
-        currentChum = PesterProfile((self.userlist.currentItem().text()))
+        # mal what the fuck were you thinking when you wrote this dawg
+        # currentChum = PesterProfile((self.userlist.currentItem().text()))
+        currentChum = self.userlist.currentItem().text()
         self.mainwindow.reportChum(currentChum)
 
     @QtCore.pyqtSlot()

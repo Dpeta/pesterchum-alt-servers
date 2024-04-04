@@ -2629,14 +2629,21 @@ class PesterWindow(MovingWindow):
     def removeChum(self, chumlisting):
         self.config.removeChum(chumlisting)
 
+
+    @QtCore.pyqtSlot(str)
     def reportChum(self, handle):
         (reason, ok) = QtWidgets.QInputDialog.getText(
             self,
             "Report User",
             "Enter the reason you are reporting this user:",
         )
-        if ok:
+        if ok and reason: 
             self.sendMessage.emit("REPORT {} {}".format(handle, reason), "calSprite")
+        else: 
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+            msgbox.setInformativeText("Please provide a reason.")
+            msgbox.exec()
 
     @QtCore.pyqtSlot(str)
     def blockChum(self, handle):
