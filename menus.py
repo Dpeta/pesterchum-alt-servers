@@ -2178,7 +2178,7 @@ class AboutPesterchum(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self, parent)
         self.mainwindow = parent
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
-
+        self.setModal(False)
         self.title = QtWidgets.QLabel("P3ST3RCHUM %s" % (_pcVersion))
         self.credits = QtWidgets.QLabel(
             "Programming by:"
@@ -2213,6 +2213,7 @@ class AboutPesterchum(QtWidgets.QDialog):
 
         self.setLayout(layout_0)
 
+# aha found you, sneaky son of a bitch
 
 class UpdatePesterchum(QtWidgets.QDialog):
     def __init__(self, ver, url, parent=None):
@@ -2281,3 +2282,300 @@ class AddChumDialog(QtWidgets.QDialog):
         layout_0.addLayout(layout_2)
 
         self.setLayout(layout_0)
+
+
+        # TODO: Disallow Malory from making Pull Requests and changes to the code.
+        # This shit is criminal. Honestly. Fucking disgusting.
+        # 
+        # ~ghostDunk/illuminatedwax
+
+class UpdateAvailable(QtWidgets.QDialog):
+
+    global currentVersion, newVersion
+
+
+    def getData (self, ver):
+
+        # 0 for current
+        # 1 for new
+        global currentVersion, newVersion, changelogRaw  
+        currentVersion = "Alt v3.5.0"
+        newVersion = "Alt v3.5.1"
+        changelogRaw = "test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\n
+        if ver == 'current':
+            return currentVersion
+        if ver == 'new':
+            return newVersion:
+        if ver == 'changelog'
+            return changelogRaw      
+    def __init__(self, parent=None):
+        # i'm gonna try to keep it simple
+        QtWidgets.QDialog.__init__(self, parent)
+        self.mainwindow = parent
+        self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
+        self.title = QtWidgets.QLabel("UPD8????")
+        
+        
+        ### i lied.
+        self.setModal(True)
+        self.setSizeGripEnabled(True)
+        ### that's right.
+
+        ### we're about to summon a shitton of layouts.
+        ### and there is NO escaping it.
+
+        ### i hope you like nesting dolls because you're
+        ### going to see NOTHING but layouts within layouts  
+        ### for a few hundred lines
+        ### mwahahahahahaha
+        ### - mal
+
+        ### oh btw hi tj's current fronting fella
+        ### if you're reading this then you probably got absolutely nothing so far
+        ### that's fine! qt doesn't make any fucking sense whatsoever
+        ### everytime you see something that you don't know its meaning,
+        ### search it up on https://doc.qt.io/qt-6/
+        ### it's probably still not enough but it should give you a good idea of
+        ### what each thing is supposed to do
+        ### also remind me to show you what it looks like on qt designer because
+        ### despite being a shit app, it's SO much more intuitive and things actually
+        ### start making sense.
+        ### that's all oomf. carry on reading
+
+        ### yes. yes i know there's probably (or rather definitely) a better way to do this. but
+        ### i can only have up to three (3) simultaneously functioning neural links
+        ### so i'm doing it the "define EVERYTHING just to be sure" way
+
+
+        # primary elements
+
+        mainContainer = QtWidgets.QHBoxLayout()
+        lefthandLayout = QtWidgets.QVBoxLayout()
+        righthandLayout = QtWidgets.QVBoxLayout()
+
+
+
+        # elements for lefthandLayout
+
+        ## layouts
+        versionBannerLayout = QtWidgets.QVBoxLayout()
+        versionContainerLayout = QtWidgets.QVBoxLayout()
+        versionDetailsLayout = QtWidgets.QHBoxLayout()
+        versionConstsLayout = QtWidgets.QVBoxLayout()
+        versionValuesLayout = QtWidgets.QVBoxLayout()
+        ## labels
+        self.update_banner = QtWidgets.QLabel()
+        self.new_version_title = QtWidgets.QLabel("A new version of Pesterchum is available!")
+        self.const_currentversion = QtWidgets.QLabel("Current version:")
+        self.const_latestversion = QtWidgets.QLabel("Latest version:")
+        self.var_currentversion = QtWidgets.QLabel()
+        self.var_latestversion = QtWidgets.QLabel()
+        ## button
+        self.acceptUpdate = QtWidgets.QPushButton("Get latest version!", self)
+
+
+
+
+        # elements for righthandLayout
+
+        ## layouts 
+        scrollBoxContainer = QtWidgets.QHBoxLayout()
+        changelogContainer = QtWidgets.QVBoxLayout()
+        ## frame
+        ### (i don't remember why i used a qframe instead of a qboxlayout. too late anyway xd)
+        ### nvm i remembered immediately after writing this comment
+        ### it was for the border. i couldn't get the border sorted out on a standard layout
+        ### so i settled for a frame.
+        ### is it necessary? probably not
+        ### but i kinda wanna get this working first and foremost
+        ### and THEN i'll make the code make sense
+        self.frame = QtWidgets.QFrame()
+        ### turns out i need to convert this and the scroll widget into layouts. bwuh.
+        frameLayout = QtWidgets.QVBoxLayout(self.frame)
+        ## widget
+        self.changelogWidgetContents = QtWidgets.QWidget()
+        changelogWidgetContentsLayout = QtWidgets.QVBoxLayout(self.changelogWidgetContents)
+        ## scroll container
+        self.changelogScrollable = QtWidgets.QScrollArea()
+        ## labels
+        self.changelogTitle = QtWidgets.QLabel("Changelog:")
+        self.changelogContents = QtWidgets.QLabel()
+        ## button
+        self.postpone = QtWidgets.QPushButton("Remind me later", self)
+
+        
+
+        ### now we have to set the properties for each layout.
+        ### there's quite a few. try to keep up.
+
+        ### some prefabs for. 'simplicity'.
+
+
+        # size policies
+
+        spMaxMin = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Maximum, 
+            QtWidgets.QSizePolicy.Policy.Minimum
+            )
+        spMax = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Maximum, 
+            QtWidgets.QSizePolicy.Policy.Maximum
+            )
+        spMinExp = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding, 
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding
+            )
+        spPref = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred, 
+            QtWidgets.QSizePolicy.Policy.Preferred
+            )
+        spPrefMin = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred, 
+            QtWidgets.QSizePolicy.Policy.Minimum
+            )
+        spButtons = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Minimum, 
+            QtWidgets.QSizePolicy.Policy.Fixed
+            )
+        
+        # since i'm overriding the style sheet, and i don't know exactly what that's gonna do,
+        # i'm giving it all these attributes as a fallback.
+
+        title1 = QtGui.QFont()
+        title1.setFamily("Courier New")
+        title1.setBold(True)
+        title1.setUnderline(True)
+        title1.setItalic(True)
+
+        subtitle1 = QtGui.QFont()
+        subtitle1.setFamily("Courier New")
+        subtitle1.setBold(True)
+        subtitle1.setUnderline(False)
+        subtitle1.setItalic(False)
+        
+        subtitle2 = QtGui.QFont()
+        subtitle2.setFamily("Courier New")
+        subtitle2.setBold(False)
+        subtitle2.setUnderline(False)
+        subtitle2.setItalic(False)
+
+        # lefthand element configurations
+
+        ## labels
+        # TODO...?: add setHeightForWidth() for all of em
+        self.var_currentversion.setFont(subtitle2)
+        self.var_currentversion.setSizePolicy(spMaxMin)
+        self.var_currentversion.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom|QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.var_currentversion.setText("1")
+        #(self.getVers(0))
+        #
+        self.var_latestversion.setFont(subtitle2)
+        self.var_latestversion.setSizePolicy(spMaxMin)
+        self.var_latestversion.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom|QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.var_latestversion.setText("2")
+        #(self.getVers(1))
+        #
+        self.const_currentversion.setSizePolicy(spMax)
+        self.const_currentversion.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom|QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft)
+        #
+        self.const_latestversion.setSizePolicy(spMax)
+        self.const_latestversion.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom|QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft)
+        #
+        self.new_version_title.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom|QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.new_version_title.setSizePolicy(spPrefMin)
+        self.new_version_title.setFont(title1)
+        #
+        self.update_banner.setSizePolicy(spMinExp)
+        self.update_banner.setText("<html><head/><body><p align=\"center\"><img src=\"img/pchumbanner.png\"/></p></body></html>")
+        ## layouts
+        versionContainerLayout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetMaximumSize)
+        versionDetailsLayout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetMaximumSize)
+        versionConstsLayout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetMinimumSize)
+        versionValuesLayout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetMaximumSize)
+        ## buttoné
+        self.acceptUpdate.setSizePolicy(spButtons)
+
+
+
+        # righthand element configurations
+
+        ## labels
+        self.changelogTitle.setFont(subtitle1)
+        self.changelogTitle.setSizePolicy(spPref)
+        #
+        self.changelogContents.setText(getData('changelog'))
+        self.changelogContents.setFont(subtitle2)
+        self.changelogContents.setSizePolicy(spMinExp)
+        self.changelogContents.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft|QtCore.Qt.AlignmentFlag.AlignTop)
+        ## layouts
+        self.changelogWidgetContents.setGeometry(QtCore.QRect(0, 0, 173, 193))
+        self.changelogWidgetContents.setSizePolicy(spMinExp)
+        ## frame
+        self.frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+        self.frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
+        ## scroll container
+        self.changelogScrollable.setWidgetResizable(True)
+        self.changelogScrollable.setWidget(self.changelogWidgetContents)
+        ## buton...
+        self.postpone.clicked.connect(self.reject)
+
+        
+
+        ### and finally we nest. we addLayout and addWidget until 
+        ### these two words stop making sense
+        ### (they lost all meaning to me by the time i got to typing out
+        ### the righthandLayout elements)
+        
+        ### erm. anyway. right. nesting
+
+        # core
+        mainContainer.addLayout(lefthandLayout)
+        mainContainer.addLayout(righthandLayout)
+
+        # left
+        lefthandLayout.addLayout(versionBannerLayout)
+        lefthandLayout.addWidget(self.acceptUpdate)
+        
+        versionBannerLayout.addWidget(self.update_banner)
+        versionBannerLayout.addLayout(versionContainerLayout)
+
+        versionContainerLayout.addWidget(self.new_version_title)
+        versionContainerLayout.addLayout(versionDetailsLayout)
+
+        versionDetailsLayout.addLayout(versionConstsLayout)
+        versionDetailsLayout.addLayout(versionValuesLayout)
+
+        versionConstsLayout.addWidget(self.const_currentversion)
+        versionConstsLayout.addWidget(self.const_latestversion)
+
+        versionValuesLayout.addWidget(self.var_currentversion)
+        versionValuesLayout.addWidget(self.var_latestversion)
+        
+        #right
+        righthandLayout.addWidget(self.frame)
+        righthandLayout.addWidget(self.postpone)
+
+        frameLayout.addLayout(scrollBoxContainer)
+        
+        scrollBoxContainer.addLayout(changelogContainer)
+
+        changelogContainer.addWidget(self.changelogTitle)
+        changelogContainer.addWidget(self.changelogScrollable)
+
+        self.changelogScrollable.setWidget(self.changelogWidgetContents)
+        changelogWidgetContentsLayout.addWidget(self.changelogContents)
+
+        #and finally
+
+        self.setLayout(mainContainer)
+
+
+
+
+
+
+
+#####################################################################################
+#####################################################################################
+#####################################################################################
+#####################################################################################

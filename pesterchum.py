@@ -34,6 +34,7 @@ from menus import (
     PesterMemoList,
     LoadingScreen,
     AboutPesterchum,
+    UpdateAvailable,
     UpdatePesterchum,
     AddChumDialog,
 )
@@ -1244,6 +1245,7 @@ class PesterWindow(MovingWindow):
         self.tabmemo = None
         self.shortcuts = {}
         self.aboutwindow = None
+        self.updateavailable = None
         self.moods = None
         self.currentMoodIcon = None
 
@@ -1431,7 +1433,7 @@ class PesterWindow(MovingWindow):
         self.chanServAction = QAction(self.theme["main/menus/help/chanserv"], self)
         self.chanServAction.triggered.connect(self.loadChanServ)
         self.aboutAction = QAction(self.theme["main/menus/help/about"], self)
-        self.aboutAction.triggered.connect(self.aboutPesterchum)
+        self.aboutAction.triggered.connect(self.aboutwindow)
 
         # Because I can't expect all themes to have this included.
         # if self.theme.has_key("main/menus/help/reportbug"):
@@ -1565,6 +1567,8 @@ class PesterWindow(MovingWindow):
             # Set no_new_privs bit.
             self.set_no_new_privs()
 
+
+    # more leftover code for updating pesterchum -
     @QtCore.pyqtSlot(str, str)
     def updateMsg(self, ver, url):
         if not hasattr(self, "updatemenu"):
@@ -3410,6 +3414,14 @@ class PesterWindow(MovingWindow):
         self.aboutwindow = AboutPesterchum(self)
         self.aboutwindow.exec()
         self.aboutwindow = None
+    
+    # TODO: setup backend for this schtick -mal
+    def updateAvailable(self):
+        if self.updateavailable:
+            return
+        self.updateavailable = UpdateAvailable(self)
+        self.updateavailable.exec()
+        self.updateavailable = None
 
     @QtCore.pyqtSlot()
     def loadCalsprite(self):
@@ -3527,7 +3539,7 @@ class PesterWindow(MovingWindow):
         msg = QtWidgets.QMessageBox(self)
         msg.setText("D: TOO MANY PEOPLE!!!")
         msg.setInformativeText(
-            "The server has hit max capacity. Please try again later."
+            "The server has hit max capacity. Sad, yes, but think about it - if you're seeing this, you\'re probably the first person to do so in years. Hooray!"
         )
         # msg.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
         msg.exec()
