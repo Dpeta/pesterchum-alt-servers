@@ -1433,7 +1433,8 @@ class PesterWindow(MovingWindow):
         self.chanServAction = QAction(self.theme["main/menus/help/chanserv"], self)
         self.chanServAction.triggered.connect(self.loadChanServ)
         self.aboutAction = QAction(self.theme["main/menus/help/about"], self)
-        self.aboutAction.triggered.connect(self.aboutwindow)
+        # self.aboutAction.triggered.connect(self.aboutwindow)
+        self.aboutAction.triggered.connect(self.updateAvailable)
 
         # Because I can't expect all themes to have this included.
         # if self.theme.has_key("main/menus/help/reportbug"):

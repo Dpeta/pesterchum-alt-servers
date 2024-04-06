@@ -2301,12 +2301,12 @@ class UpdateAvailable(QtWidgets.QDialog):
         global currentVersion, newVersion, changelogRaw  
         currentVersion = "Alt v3.5.0"
         newVersion = "Alt v3.5.1"
-        changelogRaw = "test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\n
+        changelogRaw = "test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\ntest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test\n"
         if ver == 'current':
             return currentVersion
         if ver == 'new':
-            return newVersion:
-        if ver == 'changelog'
+            return newVersion
+        if ver == 'changelog':
             return changelogRaw      
     def __init__(self, parent=None):
         # i'm gonna try to keep it simple
@@ -2503,7 +2503,7 @@ class UpdateAvailable(QtWidgets.QDialog):
         self.changelogTitle.setFont(subtitle1)
         self.changelogTitle.setSizePolicy(spPref)
         #
-        self.changelogContents.setText(getData('changelog'))
+        self.changelogContents.setText(self.getData('changelog'))
         self.changelogContents.setFont(subtitle2)
         self.changelogContents.setSizePolicy(spMinExp)
         self.changelogContents.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft|QtCore.Qt.AlignmentFlag.AlignTop)
