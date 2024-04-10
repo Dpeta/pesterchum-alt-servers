@@ -2213,7 +2213,9 @@ class AboutPesterchum(QtWidgets.QDialog):
 
         self.setLayout(layout_0)
 
+
 # aha found you, sneaky son of a bitch
+
 
 class UpdatePesterchum(QtWidgets.QDialog):
     def __init__(self, ver, url, parent=None):

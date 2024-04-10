@@ -1557,30 +1557,27 @@ class PesterWindow(MovingWindow):
         # TODO: test!!!!!!!!!!!!!
 
         # checks for updates and triggers the action AFTER everything important has loaded
-        
+
         self.checkForUpdates = QAction("UPDATE", self)
-        
+
         # atm, simply to make sure nothing breaks, what i'm gonna do is have it fetch both buildVersion
         # variables, split them up into strings, then compare each index by size, left to right
         # again. there's DEFINITELY a better way to do this. but i'm a very inexperienced programmer
         # and it's a pretty important feature that hasn't been done yet
 
-        # if you, the reader, whoever you may be, have the patience to go thru my code and fix it, 
+        # if you, the reader, whoever you may be, have the patience to go thru my code and fix it,
         # be my guest
         # -mal
-        
 
         self.checkUpdateManually = QShortcut(
-            QtGui.QKeySequence("Ctrl+Shift+Alt+z"),
-            self
+            QtGui.QKeySequence("Ctrl+Shift+Alt+z"), self
         )
-        
+
         build1 = gitfetch(pc.CURRENT_VERSION)
         build2 = gitfetch(pc.LATEST_VERSION)
 
-
-        build1.replace('\"', '')
-        build2.replace('\"', '')
+        build1.replace('"', "")
+        build2.replace('"', "")
 
         valueBuild1 = build1.split(".")
         valueBuild2 = build2.split(".")
@@ -1588,13 +1585,11 @@ class PesterWindow(MovingWindow):
         valCheck = 0
 
         self.checkUpdateManually.activated.connect(self.updateAvailable)
-        
-        while valCheck <=2:
+
+        while valCheck <= 2:
             if valueBuild1[valCheck] < valueBuild2[valCheck]:
                 self.checkForUpdates.trigger()
-            valCheck+=1
-        
-
+            valCheck += 1
 
         self.checkForUpdates.triggered.connect(self.updateAvailable)
 
@@ -1610,7 +1605,6 @@ class PesterWindow(MovingWindow):
         if ostools.isLinux():
             # Set no_new_privs bit.
             self.set_no_new_privs()
-
 
     # more leftover code for updating pesterchum -
     @QtCore.pyqtSlot(str, str)
@@ -2677,7 +2671,6 @@ class PesterWindow(MovingWindow):
     def removeChum(self, chumlisting):
         self.config.removeChum(chumlisting)
 
-
     @QtCore.pyqtSlot(str)
     def reportChum(self, handle):
         (reason, ok) = QtWidgets.QInputDialog.getText(
@@ -2685,9 +2678,9 @@ class PesterWindow(MovingWindow):
             "Report User",
             "Enter the reason you are reporting this user:",
         )
-        if ok and reason: 
+        if ok and reason:
             self.sendMessage.emit("REPORT {} {}".format(handle, reason), "calSprite")
-        else: 
+        else:
             msgbox = QtWidgets.QMessageBox()
             msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
             msgbox.setInformativeText("Please provide a reason.")
@@ -3458,7 +3451,7 @@ class PesterWindow(MovingWindow):
         self.aboutwindow = AboutPesterchum(self)
         self.aboutwindow.exec()
         self.aboutwindow = None
-    
+
     # TODO: setup backend for this schtick -mal
     def updateAvailable(self):
         if self.newversiondetected:
@@ -3583,7 +3576,7 @@ class PesterWindow(MovingWindow):
         msg = QtWidgets.QMessageBox(self)
         msg.setText("D: TOO MANY PEOPLE!!!")
         msg.setInformativeText(
-            "The server has hit max capacity. Sad, yes, but think about it - if you're seeing this, you\'re probably the first person to do so in years. Hooray!"
+            "The server has hit max capacity. Sad, yes, but think about it - if you're seeing this, you're probably the first person to do so in years. Hooray!"
         )
         # msg.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
         msg.exec()
@@ -4427,9 +4420,9 @@ class MainProgram(QtCore.QObject):
     def run(self):
         sys.exit(self.app.exec())
 
+
 class UpdateAvailable(QtWidgets.QDialog):
 
-    
     def update(self):
         QtGui.QDesktopServices.openUrl(
             QtCore.QUrl(
@@ -4437,7 +4430,7 @@ class UpdateAvailable(QtWidgets.QDialog):
                 QtCore.QUrl.ParsingMode.TolerantMode,
             )
         )
-      
+
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.mainwindow = parent
@@ -4452,7 +4445,6 @@ class UpdateAvailable(QtWidgets.QDialog):
         lefthandLayout = QtWidgets.QVBoxLayout()
         righthandLayout = QtWidgets.QVBoxLayout()
 
-
         # elements for lefthandLayout
 
         versionBannerLayout = QtWidgets.QVBoxLayout()
@@ -4461,13 +4453,14 @@ class UpdateAvailable(QtWidgets.QDialog):
         versionConstsLayout = QtWidgets.QVBoxLayout()
         versionValuesLayout = QtWidgets.QVBoxLayout()
         self.update_banner = QtWidgets.QLabel()
-        self.new_version_title = QtWidgets.QLabel("A new version of Pesterchum is available!")
+        self.new_version_title = QtWidgets.QLabel(
+            "A new version of Pesterchum is available!"
+        )
         self.const_currentversion = QtWidgets.QLabel("Current version:")
         self.const_latestversion = QtWidgets.QLabel("Latest version:")
         self.var_currentversion = QtWidgets.QLabel()
         self.var_latestversion = QtWidgets.QLabel()
         self.acceptUpdate = QtWidgets.QPushButton("Get latest version!", self)
-
 
         # elements for righthandLayout
 
@@ -4476,40 +4469,36 @@ class UpdateAvailable(QtWidgets.QDialog):
         self.frame = QtWidgets.QFrame()
         frameLayout = QtWidgets.QVBoxLayout(self.frame)
         self.changelogWidgetContents = QtWidgets.QWidget()
-        changelogWidgetContentsLayout = QtWidgets.QVBoxLayout(self.changelogWidgetContents)
+        changelogWidgetContentsLayout = QtWidgets.QVBoxLayout(
+            self.changelogWidgetContents
+        )
         self.changelogScrollable = QtWidgets.QScrollArea()
         self.changelogTitle = QtWidgets.QLabel("Changelog:")
         self.changelogContents = QtWidgets.QLabel()
         self.postpone = QtWidgets.QPushButton("Remind me later", self)
 
-
         # size policies
 
         spMaxMin = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Maximum, 
-            QtWidgets.QSizePolicy.Policy.Minimum
-            )
+            QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Minimum
+        )
         spMax = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Maximum, 
-            QtWidgets.QSizePolicy.Policy.Maximum
-            )
+            QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum
+        )
         spMinExp = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.MinimumExpanding, 
-            QtWidgets.QSizePolicy.Policy.MinimumExpanding
-            )
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+        )
         spPref = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Preferred, 
-            QtWidgets.QSizePolicy.Policy.Preferred
-            )
+            QtWidgets.QSizePolicy.Policy.Preferred,
+            QtWidgets.QSizePolicy.Policy.Preferred,
+        )
         spPrefMin = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Preferred, 
-            QtWidgets.QSizePolicy.Policy.Minimum
-            )
+            QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Minimum
+        )
         spButtons = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Minimum, 
-            QtWidgets.QSizePolicy.Policy.Fixed
-            )
-        
+            QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Fixed
+        )
 
         # since i'm overriding the style sheet, and i don't know exactly what that's gonna do,
         # i'm giving it all these attributes as a fallback.
@@ -4526,43 +4515,72 @@ class UpdateAvailable(QtWidgets.QDialog):
         subtitle1.setBold(True)
         subtitle1.setUnderline(False)
         subtitle1.setItalic(False)
-        
+
         subtitle2 = QtGui.QFont()
         subtitle2.setFamily("Courier New")
         subtitle2.setBold(False)
         subtitle2.setUnderline(False)
         subtitle2.setItalic(False)
 
-
         # lefthand element configurations
 
         self.var_currentversion.setFont(subtitle2)
         self.var_currentversion.setSizePolicy(spMaxMin)
-        self.var_currentversion.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom|QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.var_currentversion.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignBottom
+            | QtCore.Qt.AlignmentFlag.AlignLeading
+            | QtCore.Qt.AlignmentFlag.AlignLeft
+        )
         self.var_currentversion.setText(gitfetch(pc.CURRENT_VERSION))
 
         self.var_latestversion.setFont(subtitle2)
         self.var_latestversion.setSizePolicy(spMaxMin)
-        self.var_latestversion.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom|QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.var_latestversion.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignBottom
+            | QtCore.Qt.AlignmentFlag.AlignLeading
+            | QtCore.Qt.AlignmentFlag.AlignLeft
+        )
         self.var_latestversion.setText(gitfetch(pc.LATEST_VERSION))
 
         self.const_currentversion.setSizePolicy(spMax)
-        self.const_currentversion.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom|QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.const_currentversion.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignBottom
+            | QtCore.Qt.AlignmentFlag.AlignLeading
+            | QtCore.Qt.AlignmentFlag.AlignLeft
+        )
 
         self.const_latestversion.setSizePolicy(spMax)
-        self.const_latestversion.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom|QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.const_latestversion.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignBottom
+            | QtCore.Qt.AlignmentFlag.AlignLeading
+            | QtCore.Qt.AlignmentFlag.AlignLeft
+        )
 
-        self.new_version_title.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom|QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.new_version_title.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignBottom
+            | QtCore.Qt.AlignmentFlag.AlignLeading
+            | QtCore.Qt.AlignmentFlag.AlignCenter
+        )
         self.new_version_title.setSizePolicy(spPrefMin)
         self.new_version_title.setFont(title1)
 
         self.update_banner.setSizePolicy(spMinExp)
-        self.update_banner.setText("<html><head/><body><p align=\"center\"><img src=\"img/pchumbanner.png\"/></p></body></html>")
-        
-        versionContainerLayout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetMaximumSize)
-        versionDetailsLayout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetMaximumSize)
-        versionConstsLayout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetMinimumSize)
-        versionValuesLayout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetMaximumSize)
+        self.update_banner.setText(
+            '<html><head/><body><p align="center"><img src="img/pchumbanner.png"/></p></body></html>'
+        )
+
+        versionContainerLayout.setSizeConstraint(
+            QtWidgets.QLayout.SizeConstraint.SetMaximumSize
+        )
+        versionDetailsLayout.setSizeConstraint(
+            QtWidgets.QLayout.SizeConstraint.SetMaximumSize
+        )
+        versionConstsLayout.setSizeConstraint(
+            QtWidgets.QLayout.SizeConstraint.SetMinimumSize
+        )
+        versionValuesLayout.setSizeConstraint(
+            QtWidgets.QLayout.SizeConstraint.SetMaximumSize
+        )
 
         self.acceptUpdate.setSizePolicy(spButtons)
         self.acceptUpdate.clicked.connect(self.update)
@@ -4574,7 +4592,11 @@ class UpdateAvailable(QtWidgets.QDialog):
         self.changelogContents.setText(gitfetch(pc.CHANGELOG))
         self.changelogContents.setFont(subtitle2)
         self.changelogContents.setSizePolicy(spMinExp)
-        self.changelogContents.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft|QtCore.Qt.AlignmentFlag.AlignTop)
+        self.changelogContents.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignLeading
+            | QtCore.Qt.AlignmentFlag.AlignLeft
+            | QtCore.Qt.AlignmentFlag.AlignTop
+        )
         self.changelogWidgetContents.setGeometry(QtCore.QRect(0, 0, 173, 193))
         self.changelogWidgetContents.setSizePolicy(spMinExp)
 
@@ -4586,7 +4608,6 @@ class UpdateAvailable(QtWidgets.QDialog):
 
         self.postpone.clicked.connect(self.reject)
 
-
         # nesting
 
         mainContainer.addLayout(lefthandLayout)
@@ -4594,7 +4615,7 @@ class UpdateAvailable(QtWidgets.QDialog):
 
         lefthandLayout.addLayout(versionBannerLayout)
         lefthandLayout.addWidget(self.acceptUpdate)
-        
+
         versionBannerLayout.addWidget(self.update_banner)
         versionBannerLayout.addLayout(versionContainerLayout)
 
@@ -4609,12 +4630,12 @@ class UpdateAvailable(QtWidgets.QDialog):
 
         versionValuesLayout.addWidget(self.var_currentversion)
         versionValuesLayout.addWidget(self.var_latestversion)
-        
+
         righthandLayout.addWidget(self.frame)
         righthandLayout.addWidget(self.postpone)
 
         frameLayout.addLayout(scrollBoxContainer)
-        
+
         scrollBoxContainer.addLayout(changelogContainer)
 
         changelogContainer.addWidget(self.changelogTitle)
