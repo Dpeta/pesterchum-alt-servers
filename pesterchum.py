@@ -17,7 +17,7 @@ if os.path.dirname(sys.argv[0]):
 
 import ostools
 import pytwmn
-from update import gitfetch, pc
+from update import UpdateChecker
 
 from user_profile import (
     userConfig,
@@ -1546,7 +1546,7 @@ class PesterWindow(MovingWindow):
             # This way themes can change what the alternian font looks like
         )
 
-        self.pcUpdate[str, str].connect(self.updateMsg)
+        # self.pcUpdate[str, str].connect(self.updateMsg)
 
         self.mychumhandleLabel.adjustSize()  # Required so "CHUMHANDLE:" regardless of style-sheet.
         self.moodsLabel.adjustSize()  # Required so "MOOD:" regardless of style-sheet.
@@ -1557,41 +1557,20 @@ class PesterWindow(MovingWindow):
         # TODO: test!!!!!!!!!!!!!
 
         # checks for updates and triggers the action AFTER everything important has loaded
+        """
+        deprecated
 
-        self.checkForUpdates = QAction("UPDATE", self)
+        self.checkForUpdates = QAction("UPDATE", self)       
+        """
 
-        # atm, simply to make sure nothing breaks, what i'm gonna do is have it fetch both buildVersion
-        # variables, split them up into strings, then compare each index by size, left to right
-        # again. there's DEFINITELY a better way to do this. but i'm a very inexperienced programmer
-        # and it's a pretty important feature that hasn't been done yet
-
-        # if you, the reader, whoever you may be, have the patience to go thru my code and fix it,
-        # be my guest
-        # -mal
+        self.checkForUpdates = UpdateChecker()
+        self.checkForUpdates.check()
+        self.checkForUpdates.check_done.connect(self.updateAvailable)
 
         self.checkUpdateManually = QShortcut(
             QtGui.QKeySequence("Ctrl+Shift+Alt+z"), self
         )
-
-        build1 = gitfetch(pc.CURRENT_VERSION)
-        build2 = gitfetch(pc.LATEST_VERSION)
-
-        build1.replace('"', "")
-        build2.replace('"', "")
-
-        valueBuild1 = build1.split(".")
-        valueBuild2 = build2.split(".")
-
-        valCheck = 0
-
         self.checkUpdateManually.activated.connect(self.updateAvailable)
-
-        while valCheck <= 2:
-            if valueBuild1[valCheck] < valueBuild2[valCheck]:
-                self.checkForUpdates.trigger()
-            valCheck += 1
-
-        self.checkForUpdates.triggered.connect(self.updateAvailable)
 
         # Update RE bot used 2 b here but has now been moved to self.connected(), since this is too early (~lisanne)
 
@@ -1606,6 +1585,10 @@ class PesterWindow(MovingWindow):
             # Set no_new_privs bit.
             self.set_no_new_privs()
 
+    """
+    Deprecated
+
+    
     # more leftover code for updating pesterchum -
     @QtCore.pyqtSlot(str, str)
     def updateMsg(self, ver, url):
@@ -1619,8 +1602,6 @@ class PesterWindow(MovingWindow):
             self.updatemenu.raise_()
             self.updatemenu.activateWindow()
 
-    """
-    Deprecated
     
     @QtCore.pyqtSlot()
     def updatePC(self):
@@ -3452,13 +3433,14 @@ class PesterWindow(MovingWindow):
         self.aboutwindow.exec()
         self.aboutwindow = None
 
-    # TODO: setup backend for this schtick -mal
+    @QtCore.pyqtSlot()
     def updateAvailable(self):
-        if self.newversiondetected:
-            return
-        self.newversiondetected = UpdateAvailable(self)
-        self.newversiondetected.exec()
-        self.newversiondetected = None
+        if self.checkForUpdates.update_available:
+            if self.newversiondetected:
+                return
+            self.newversiondetected = UpdateAvailable(self)
+            self.newversiondetected.exec()
+            self.newversiondetected = None
 
     @QtCore.pyqtSlot()
     def loadCalsprite(self):
@@ -4423,6 +4405,7 @@ class MainProgram(QtCore.QObject):
 
 class UpdateAvailable(QtWidgets.QDialog):
 
+
     def update(self):
         QtGui.QDesktopServices.openUrl(
             QtCore.QUrl(
@@ -4433,12 +4416,20 @@ class UpdateAvailable(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
+        self.checkForUpdates = parent.checkForUpdates
         self.mainwindow = parent
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
         self.title = QtWidgets.QLabel("UPD8????")
         self.setModal(True)
         self.setSizeGripEnabled(True)
 
+        ver_curr = self.checkForUpdates.ver_curr
+        ver_latest = self.checkForUpdates.ver_latest
+        changelog = self.checkForUpdates.changelog
+
+        print(ver_curr)
+        print(ver_latest)
+        print(changelog)
         # primary elements
 
         mainContainer = QtWidgets.QHBoxLayout()
@@ -4531,7 +4522,7 @@ class UpdateAvailable(QtWidgets.QDialog):
             | QtCore.Qt.AlignmentFlag.AlignLeading
             | QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.var_currentversion.setText(gitfetch(pc.CURRENT_VERSION))
+        self.var_currentversion.setText(ver_curr)
 
         self.var_latestversion.setFont(subtitle2)
         self.var_latestversion.setSizePolicy(spMaxMin)
@@ -4540,7 +4531,7 @@ class UpdateAvailable(QtWidgets.QDialog):
             | QtCore.Qt.AlignmentFlag.AlignLeading
             | QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.var_latestversion.setText(gitfetch(pc.LATEST_VERSION))
+        self.var_latestversion.setText(ver_latest)
 
         self.const_currentversion.setSizePolicy(spMax)
         self.const_currentversion.setAlignment(
@@ -4589,10 +4580,12 @@ class UpdateAvailable(QtWidgets.QDialog):
 
         self.changelogTitle.setFont(subtitle1)
         self.changelogTitle.setSizePolicy(spPref)
-        self.changelogContents.setText(gitfetch(pc.CHANGELOG))
+        self.changelogContents.setText(changelog)
         self.changelogContents.setFont(subtitle2)
         self.changelogContents.setSizePolicy(spMinExp)
         self.changelogContents.setAlignment(
+            # i'll gwen Q my balls off before i manually check which one of these motherfucking flags
+            # is the right one. fuck you qtcreator. burn in hell.
             QtCore.Qt.AlignmentFlag.AlignLeading
             | QtCore.Qt.AlignmentFlag.AlignLeft
             | QtCore.Qt.AlignmentFlag.AlignTop
