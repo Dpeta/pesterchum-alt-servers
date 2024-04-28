@@ -14,6 +14,9 @@ except ImportError:
 # thank you mocha for putting up with my bs
 # my contributions to this project would be nil if not for u
 
+# i accidentally made a commit named "layout" and i'm NOT letting that be the name
+# of the actual final commit for this PR
+
 url_version = (
     "https://raw.githubusercontent.com/Dpeta/pesterchum-alt-servers/main/version.py"
 )
