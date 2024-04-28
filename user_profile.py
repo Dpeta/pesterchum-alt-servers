@@ -367,7 +367,9 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
             "theme_repo_url",
             "https://raw.githubusercontent.com/mocchapi/pesterchum-themes/main/db.json",
         )
-
+    def updatecheck(self):
+        return self.config.get("check_updates", True)
+    
     def force_prefix(self):
         return self.config.get("force_prefix", False)
 

@@ -1562,10 +1562,12 @@ class PesterWindow(MovingWindow):
 
         self.checkForUpdates = QAction("UPDATE", self)       
         """
+        
+        if self.config.updatecheck():
 
-        self.checkForUpdates = UpdateChecker()
-        self.checkForUpdates.check()
-        self.checkForUpdates.check_done.connect(self.updateAvailable)
+            self.checkForUpdates = UpdateChecker()
+            self.checkForUpdates.check()
+            self.checkForUpdates.check_done.connect(self.updateAvailable)
 
         self.checkUpdateManually = QShortcut(
             QtGui.QKeySequence("Ctrl+Shift+Alt+z"), self
@@ -3134,10 +3136,18 @@ class PesterWindow(MovingWindow):
             if idlesetting != curidle:
                 self.config.set("idleTime", idlesetting)
                 self.idler["threshold"] = 60 * idlesetting
+                
             # theme repo url
             repourlsetting = self.optionmenu.repoUrlBox.text()
             if repourlsetting != self.config.theme_repo_url():
                 self.config.set("theme_repo_url", repourlsetting)
+            
+            # checking for pchum updates
+            updatesetting = self.optionmenu.updatecheck.isChecked()
+            if updatesetting != self.config.updatecheck():
+                self.config.set("check_updates", updatesetting)
+
+
 
             # theme
             ghostchumsetting = self.optionmenu.ghostchum.isChecked()
@@ -3172,20 +3182,7 @@ class PesterWindow(MovingWindow):
             if animatesetting != curanimate:
                 self.config.set("animations", animatesetting)
                 self.animationSetting.emit(animatesetting)
-            # update checked
-            # updatechecksetting = self.optionmenu.updateBox.currentIndex()
-            # curupdatecheck = self.config.checkForUpdates()
-            # if updatechecksetting != curupdatecheck:
-            #    self.config.set('checkUpdates', updatechecksetting)
-            # mspa update check
-            # if ostools.isOSXLeopard():
-            #    mspachecksetting = false
-            # else:
-            #    mspachecksetting = self.optionmenu.mspaCheck.isChecked()
-            # curmspacheck = self.config.checkMSPA()
-            # if mspachecksetting != curmspacheck:
-            #    self.config.set('mspa', mspachecksetting)
-            # Taskbar blink
+            
             blinksetting = 0
             if self.optionmenu.pesterBlink.isChecked():
                 blinksetting |= self.config.PBLINK
