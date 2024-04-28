@@ -1,10 +1,13 @@
 import version
+import logging
 from theme_repo_manager import get_request
+
+PchumLog = logging.getLogger("pchumLogger")
 
 try:
     from PyQt6 import QtCore
 except ImportError:
-    print("PyQt5 fallback (update.py)")
+    PchumLog.debug("PyQt5 fallback (update.py)")
     from PyQt5 import QtCore
 
 
@@ -18,6 +21,7 @@ url_changelog = (
     "https://raw.githubusercontent.com/Dpeta/pesterchum-alt-servers/main/CHANGELOG.md"
 )
 
+
 class UpdateChecker(QtCore.QObject):
     ver_latest = ""
     ver_curr = ""
@@ -30,6 +34,7 @@ class UpdateChecker(QtCore.QObject):
     reply_changelog = None
 
     def check(self):
+        PchumLog.info("Checking for updates...")
         self.ver_latest = ""
         self.changelog = ""
         self.ver_curr = version.buildVersion
@@ -40,24 +45,26 @@ class UpdateChecker(QtCore.QObject):
         self.reply_version.finished.connect(self._on_version_reply)
         self.reply_changelog.finished.connect(self._on_changelog_reply)
 
-
     def _on_version_reply(self):
 
         version_text = bytes(self.reply_version.readAll()).decode("utf-8")
-        for line in version_text.split('\n'):
+        for line in version_text.split("\n"):
             if "buildVersion" in line:
                 temp = line.replace("buildVersion = ", "")
-                self.ver_latest = temp.strip("\"")
-        
+                self.ver_latest = temp.strip('"')
+
         self.ver_latest.replace('"', "")
         self.ver_curr.replace('"', "")
 
         buildLatest = self.ver_latest.split(".")
         buildCurrent = self.ver_curr.split(".")
+
+        buildLatest = buildLatest.replace("v", "")
+        buildCurrent = buildCurrent.replace("v", "")
         x = 0
-        for x in range(2):
+        for x in range(3):
             if buildCurrent[x] < buildLatest[x]:
-                self.update_available = True 
+                self.update_available = True
 
         if self.changelog != "":
             self.check_done.emit()
@@ -68,4 +75,3 @@ class UpdateChecker(QtCore.QObject):
 
         if self.ver_latest != "":
             self.check_done.emit()
-        

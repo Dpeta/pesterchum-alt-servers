@@ -1445,9 +1445,6 @@ class PesterOptions(QtWidgets.QDialog):
         layout_repo_url.addWidget(self.repoUrlBox)
         layout_repo_url.addWidget(self.repoUrlResetButton)
 
-        
-
-
         layout_6 = QtWidgets.QHBoxLayout()
 
         self.randomscheck = QtWidgets.QCheckBox("Receive Random Encounters")

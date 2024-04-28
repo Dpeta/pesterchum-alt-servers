@@ -1562,12 +1562,15 @@ class PesterWindow(MovingWindow):
 
         self.checkForUpdates = QAction("UPDATE", self)       
         """
-        
+
         if self.config.updatecheck():
 
             self.checkForUpdates = UpdateChecker()
             self.checkForUpdates.check()
             self.checkForUpdates.check_done.connect(self.updateAvailable)
+
+        else:
+            PchumLog.info("Checking for updates disabled, skipping...")
 
         self.checkUpdateManually = QShortcut(
             QtGui.QKeySequence("Ctrl+Shift+Alt+z"), self
@@ -3136,18 +3139,16 @@ class PesterWindow(MovingWindow):
             if idlesetting != curidle:
                 self.config.set("idleTime", idlesetting)
                 self.idler["threshold"] = 60 * idlesetting
-                
+
             # theme repo url
             repourlsetting = self.optionmenu.repoUrlBox.text()
             if repourlsetting != self.config.theme_repo_url():
                 self.config.set("theme_repo_url", repourlsetting)
-            
+
             # checking for pchum updates
             updatesetting = self.optionmenu.updatecheck.isChecked()
             if updatesetting != self.config.updatecheck():
                 self.config.set("check_updates", updatesetting)
-
-
 
             # theme
             ghostchumsetting = self.optionmenu.ghostchum.isChecked()
@@ -3182,7 +3183,7 @@ class PesterWindow(MovingWindow):
             if animatesetting != curanimate:
                 self.config.set("animations", animatesetting)
                 self.animationSetting.emit(animatesetting)
-            
+
             blinksetting = 0
             if self.optionmenu.pesterBlink.isChecked():
                 blinksetting |= self.config.PBLINK
@@ -3438,6 +3439,8 @@ class PesterWindow(MovingWindow):
             self.newversiondetected = UpdateAvailable(self)
             self.newversiondetected.exec()
             self.newversiondetected = None
+        else:
+            PchumLog.debug("No updates found")
 
     @QtCore.pyqtSlot()
     def loadCalsprite(self):
@@ -4402,7 +4405,6 @@ class MainProgram(QtCore.QObject):
 
 class UpdateAvailable(QtWidgets.QDialog):
 
-
     def update(self):
         QtGui.QDesktopServices.openUrl(
             QtCore.QUrl(
@@ -4412,6 +4414,7 @@ class UpdateAvailable(QtWidgets.QDialog):
         )
 
     def __init__(self, parent=None):
+        PchumLog.info("Newer version detected, initializing 'UpdateAvailable' ")
         QtWidgets.QDialog.__init__(self, parent)
         self.checkForUpdates = parent.checkForUpdates
         self.mainwindow = parent
@@ -4420,13 +4423,13 @@ class UpdateAvailable(QtWidgets.QDialog):
         self.setModal(True)
         self.setSizeGripEnabled(True)
 
+        PchumLog.info("Grabbing current version")
         ver_curr = self.checkForUpdates.ver_curr
+        PchumLog.info("Grabbing latest version")
         ver_latest = self.checkForUpdates.ver_latest
+        PchumLog.info("Grabbing changelog")
         changelog = self.checkForUpdates.changelog
 
-        print(ver_curr)
-        print(ver_latest)
-        print(changelog)
         # primary elements
 
         mainContainer = QtWidgets.QHBoxLayout()
