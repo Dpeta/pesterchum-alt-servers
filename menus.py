@@ -1696,7 +1696,7 @@ class PesterOptions(QtWidgets.QDialog):
         layout_idle.addLayout(layout_5)
         layout_idle.addLayout(layout_repo_url)
         layout_idle.addLayout(layout_6)
-        layout_idle.addLayout(self.updatecheck)
+        layout_idle.addWidget(self.updatecheck)
         # if not ostools.isOSXLeopard():
         #    layout_idle.addWidget(self.mspaCheck)
         self.pages.addWidget(widget)
