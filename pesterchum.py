@@ -1571,11 +1571,14 @@ class PesterWindow(MovingWindow):
 
         else:
             PchumLog.info("Checking for updates disabled, skipping...")
+        
 
-        self.checkUpdateManually = QShortcut(
-            QtGui.QKeySequence("Ctrl+Shift+Alt+z"), self
-        )
-        self.checkUpdateManually.activated.connect(self.updateAvailable)
+        # might? be worth reusing this at some point
+        #
+        # self.checkUpdateManually = QShortcut(
+        #    QtGui.QKeySequence("Ctrl+Alt+Shi"), self
+        # )
+        # self.checkUpdateManually.activated.connect(self.updateAvailable)
 
         # Update RE bot used 2 b here but has now been moved to self.connected(), since this is too early (~lisanne)
 

@@ -56,15 +56,11 @@ class UpdateChecker(QtCore.QObject):
                 temp = line.replace("buildVersion = ", "")
                 self.ver_latest = temp.strip('"')
 
-        self.ver_latest.replace('"', "")
-        self.ver_curr.replace('"', "")
 
-        buildLatest = self.ver_latest.split(".")
-        buildCurrent = self.ver_curr.split(".")
+        buildLatest = self.ver_latest.replace("v", "").split(".")
+        buildCurrent = self.ver_curr.replace("v", "").split(".")
 
-        buildLatest = buildLatest.replace("v", "")
-        buildCurrent = buildCurrent.replace("v", "")
-        x = 0
+        # x = 0
         for x in range(3):
             if buildCurrent[x] < buildLatest[x]:
                 self.update_available = True
