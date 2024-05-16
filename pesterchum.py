@@ -1571,7 +1571,6 @@ class PesterWindow(MovingWindow):
 
         else:
             PchumLog.info("Checking for updates disabled, skipping...")
-        
 
         # might? be worth reusing this at some point
         #

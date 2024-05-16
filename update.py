@@ -56,7 +56,6 @@ class UpdateChecker(QtCore.QObject):
                 temp = line.replace("buildVersion = ", "")
                 self.ver_latest = temp.strip('"')
 
-
         buildLatest = self.ver_latest.replace("v", "").split(".")
         buildCurrent = self.ver_curr.replace("v", "").split(".")
 
