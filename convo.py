@@ -14,6 +14,7 @@ except ImportError:
 from dataobjs import PesterHistory
 from parsetools import convertTags, lexMessage, mecmd, colorBegin, colorEnd, smiledict
 import parsetools
+import embeds
 
 PchumLog = logging.getLogger("pchumLogger")
 
@@ -394,6 +395,11 @@ class PesterText(QtWidgets.QTextEdit):
                 QtCore.QUrl("smilies/%s" % (smiledict[k])),
                 "smilies/%s" % (smiledict[k]),
             )
+
+        embeds.manager.embed_loading.connect(self.registerEmbed)
+        embeds.manager.embed_loaded.connect(self.showEmbed)
+        for embed in embeds.manager.get_embeds():
+            self.showEmbed(embed)
         # self.mainwindow.animationSetting[bool].connect(self.animateChanged)
 
     def addAnimation(self, url, fileName):
@@ -408,6 +414,29 @@ class PesterText(QtWidgets.QTextEdit):
         movie.setFileName(fileName)
         self.urls[movie] = url
         movie.frameChanged.connect(movie.animate)  # (int frameNumber)
+
+    def setResource(self, uri, pixmap):
+        try:
+            # PyQt6
+            resource_type = QtGui.QTextDocument.ResourceType.ImageResource.value
+        except AttributeError:
+            # PyQt5
+            resource_type = QtGui.QTextDocument.ResourceType.ImageResource
+        self.document().addResource(
+            resource_type,
+            QtCore.QUrl(uri),
+            pixmap,
+        )
+        self.setLineWrapColumnOrWidth(self.lineWrapColumnOrWidth())
+
+    def registerEmbed(self, url):
+        if embeds.manager.has_embed(url):
+            self.showEmbed(url)
+        else:
+            self.setResource(url, QtGui.QPixmap("smilies/whatpumpkin.png"))
+
+    def showEmbed(self, url):
+        self.setResource(url, embeds.manager.get_embed(url))
 
     """
     @QtCore.pyqtSlot(bool)

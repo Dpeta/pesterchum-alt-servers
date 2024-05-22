@@ -19,6 +19,8 @@ from quirks import ScriptQuirks
 from pyquirks import PythonQuirks
 from scripts.services import BOTNAMES
 
+import embeds
+
 PchumLog = logging.getLogger("pchumLogger")
 
 # I'll clean up the things that are no longer needed once the transition is
@@ -41,6 +43,12 @@ _honk = re.compile(r"(?i)\bhonk\b")
 _groupre = re.compile(r"\\([0-9]+)")
 _alternian_begin = re.compile(r"<alt>")  # Matches get set to alternian font
 _alternian_end = re.compile(r"</alt>")
+
+
+_embedre = re.compile(
+    r"(?i)(?:^|(?<=\s))(?:(?:https?):\/\/)[^\s]+(?:\.png|\.jpg|\.jpeg)(?:\?[^\s]+)?"
+)
+
 
 quirkloader = ScriptQuirks()
 _functionre = None
@@ -163,6 +171,21 @@ class formatEnd(lexercon.Chunk):
             return self.string
 
 
+class embedlink(lexercon.Chunk):
+    def __init__(self, url):
+        self.url = url
+        print("GO FETCH ", url)
+        embeds.manager.fetch_embed(url)
+
+    def convert(self, format):
+        if format == "html":
+            return "<a href='%s'>%s<img alt='%s' src='%s' width='200', height='200'></a>" % (self.url, self.url, self.url, self.url)
+        elif format == "bbcode":
+            return f"[url]{self.url}[/url]"
+        else:
+            return self.url
+
+
 class hyperlink(lexercon.Chunk):
     def __init__(self, string):
         self.string = string
@@ -212,8 +235,12 @@ class imagelink(lexercon.Chunk):
     def __init__(self, string, img):
         self.string = string
         self.img = img
+        print("Imagelinmk: ", string, img)
+        # raise Exception(f'{string} {img}')
 
     def convert(self, format):
+        # raise Exception(format)
+        print("TIME FOR ", format)
         if format == "html":
             return self.string
         elif format == "bbcode":
@@ -258,6 +285,7 @@ class smiley(lexercon.Chunk):
         self.string = string
 
     def convert(self, format):
+        print("SMILEY:: ", format)
         if format == "html":
             return "<img src='smilies/{}' alt='{}' title='{}' />".format(
                 smiledict[self.string],
@@ -318,6 +346,7 @@ def lexMessage(string: str):
         # actually use it, save for Chumdroid...which shouldn't.
         # When I change out parsers, I might add it back in.
         ##(formatBegin, _format_begin), (formatEnd, _format_end),
+        (embedlink, _embedre),
         (imagelink, _imgre),
         (hyperlink, _urlre),
         (memolex, _memore),
