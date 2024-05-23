@@ -398,6 +398,11 @@ class PesterText(QtWidgets.QTextEdit):
 
         embeds.manager.embed_loading.connect(self.registerEmbed)
         embeds.manager.embed_loaded.connect(self.showEmbed)
+        embeds.manager.embed_failed.connect(
+            lambda url, error: self.setResource(
+                url, QtGui.QPixmap("img/embed_failed.png")
+            )
+        )
         for embed in embeds.manager.get_embeds():
             self.showEmbed(embed)
         # self.mainwindow.animationSetting[bool].connect(self.animateChanged)
@@ -433,7 +438,7 @@ class PesterText(QtWidgets.QTextEdit):
         if embeds.manager.has_embed(url):
             self.showEmbed(url)
         else:
-            self.setResource(url, QtGui.QPixmap("smilies/whatpumpkin.png"))
+            self.setResource(url, QtGui.QPixmap("img/loading_embed.png"))
 
     def showEmbed(self, url):
         self.setResource(url, embeds.manager.get_embed(url))

@@ -179,7 +179,10 @@ class embedlink(lexercon.Chunk):
 
     def convert(self, format):
         if format == "html":
-            return "<a href='%s'>%s<img alt='%s' src='%s' width='200', height='200'></a>" % (self.url, self.url, self.url, self.url)
+            return (
+                "<a href='%s'>%s</a><br><a href='%s'><img alt='%s' src='%s' width=300></a>"
+                % (self.url, self.url, self.url, self.url, self.url)
+            )
         elif format == "bbcode":
             return f"[url]{self.url}[/url]"
         else:
