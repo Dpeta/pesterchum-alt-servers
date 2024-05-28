@@ -1419,6 +1419,9 @@ class PesterOptions(QtWidgets.QDialog):
         if self.config.logMemos() & self.config.STAMP:
             self.stampmemocheck.setChecked(True)
 
+        self.updatecheck = QtWidgets.QCheckBox("Check for updates on start-up", self)
+        self.updatecheck.setChecked(self.config.updatecheck())
+
         self.idleBox = QtWidgets.QSpinBox(self)
         self.idleBox.setStyleSheet("background:#FFFFFF")
         self.idleBox.setRange(1, 1440)
@@ -1442,21 +1445,7 @@ class PesterOptions(QtWidgets.QDialog):
         layout_repo_url.addWidget(self.repoUrlBox)
         layout_repo_url.addWidget(self.repoUrlResetButton)
 
-        # self.updateBox = QtWidgets.QComboBox(self)
-        # self.updateBox.addItem("Once a Day")
-        # self.updateBox.addItem("Once a Week")
-        # self.updateBox.addItem("Only on Start")
-        # self.updateBox.addItem("Never")
-        # check = self.config.checkForUpdates()
-        # if check >= 0 and check < self.updateBox.count():
-        #    self.updateBox.setCurrentIndex(check)
         layout_6 = QtWidgets.QHBoxLayout()
-        # layout_6.addWidget(QtWidgets.QLabel("Check for\nPesterchum Updates:"))
-        # layout_6.addWidget(self.updateBox)
-
-        # if not ostools.isOSXLeopard():
-        #    self.mspaCheck = QtWidgets.QCheckBox("Check for MSPA Updates", self)
-        #    self.mspaCheck.setChecked(self.config.checkMSPA())
 
         self.randomscheck = QtWidgets.QCheckBox("Receive Random Encounters")
         self.randomscheck.setChecked(parent.userprofile.randoms)
@@ -1704,6 +1693,7 @@ class PesterOptions(QtWidgets.QDialog):
         layout_idle.addLayout(layout_5)
         layout_idle.addLayout(layout_repo_url)
         layout_idle.addLayout(layout_6)
+        layout_idle.addWidget(self.updatecheck)
         # if not ostools.isOSXLeopard():
         #    layout_idle.addWidget(self.mspaCheck)
         self.pages.addWidget(widget)
@@ -2178,7 +2168,7 @@ class AboutPesterchum(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self, parent)
         self.mainwindow = parent
         self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
-
+        self.setModal(False)
         self.title = QtWidgets.QLabel("P3ST3RCHUM %s" % (_pcVersion))
         self.credits = QtWidgets.QLabel(
             "Programming by:"
@@ -2212,6 +2202,9 @@ class AboutPesterchum(QtWidgets.QDialog):
         layout_0.addWidget(self.ok)
 
         self.setLayout(layout_0)
+
+
+# aha found you, sneaky son of a bitch
 
 
 class UpdatePesterchum(QtWidgets.QDialog):

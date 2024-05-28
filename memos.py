@@ -517,6 +517,10 @@ class PesterMemo(PesterConvo):
             self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self
         )
         self.addchumAction.triggered.connect(self.addChumSlot)
+        self.reportchum = QAction(
+            self.mainwindow.theme["main/menus/rclickchumlist/report"], self
+        )
+        self.reportchum.triggered.connect(self.reportThisChum)
         self.banuserAction = QAction(
             self.mainwindow.theme["main/menus/rclickchumlist/banuser"], self
         )
@@ -535,6 +539,7 @@ class PesterMemo(PesterConvo):
         self.quirkDisableAction.triggered.connect(self.killQuirkUser)
         self.userlist.optionsMenu.addAction(self.pesterChumAction)
         self.userlist.optionsMenu.addAction(self.addchumAction)
+        self.userlist.optionsMenu.addAction(self.reportchum)
         # ban & op list added if we are op
 
         self.optionsMenu = QtWidgets.QMenu(self)
@@ -849,6 +854,7 @@ class PesterMemo(PesterConvo):
 
         self.addchumAction.setText(theme["main/menus/rclickchumlist/addchum"])
         self.banuserAction.setText(theme["main/menus/rclickchumlist/banuser"])
+        self.reportchum.setText(theme["main/menus/rclickchumlist/report"])
         self.opAction.setText(theme["main/menus/rclickchumlist/opuser"])
         self.voiceAction.setText(theme["main/menus/rclickchumlist/voiceuser"])
         self.quirkDisableAction.setText(theme["main/menus/rclickchumlist/quirkkill"])
@@ -1897,6 +1903,15 @@ class PesterMemo(PesterConvo):
             return
         currentChum = PesterProfile((self.userlist.currentItem().text()))
         self.mainwindow.addChum(currentChum)
+
+    @QtCore.pyqtSlot()
+    def reportThisChum(self):
+        if not self.userlist.currentItem():
+            return
+        # mal what the fuck were you thinking when you wrote this dawg
+        # currentChum = PesterProfile((self.userlist.currentItem().text()))
+        currentChum = self.userlist.currentItem().text()
+        self.mainwindow.reportChum(currentChum)
 
     @QtCore.pyqtSlot()
     def banSelectedUser(self):
