@@ -4160,15 +4160,6 @@ class MainProgram(QtCore.QObject):
     @QtCore.pyqtSlot()
     def trayiconShow(self):
         self.trayicon.show()
-        if self.widget.config.trayMessage():
-            self.trayicon.showMessage(
-                "Pesterchum",
-                (
-                    "Pesterchum is still running in the system tray."
-                    "\n"
-                    "Right click to close it."
-                ),
-            )
 
     @QtCore.pyqtSlot()
     def trayMessageClick(self):
