@@ -30,7 +30,6 @@ class PesterTabWindow(QtWidgets.QFrame):
         self.tabs.setTabsClosable(True)
         self.tabs.currentChanged[int].connect(self.changeTab)
         self.tabs.tabCloseRequested[int].connect(self.tabClose)
-        self.tabs.tabMoved[int, int].connect(self.tabMoved)
 
         self.shortcuts = {}
         self.shortcuts["tabNext"] = QShortcut(
@@ -318,17 +317,6 @@ class PesterTabWindow(QtWidgets.QFrame):
         self.activateWindow()
         self.raise_()
         convo.raiseChat()
-
-    @QtCore.pyqtSlot(int, int)
-    def tabMoved(self, to, fr):
-        l = self.tabIndices
-        for i in l:
-            if l[i] == fr:
-                oldpos = i
-            if l[i] == to:
-                newpos = i
-        l[oldpos] = to
-        l[newpos] = fr
 
     windowClosed = QtCore.pyqtSignal()
 
