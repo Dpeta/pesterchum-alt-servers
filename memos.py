@@ -1578,6 +1578,11 @@ class PesterMemo(PesterConvo):
 
     @QtCore.pyqtSlot(str, str, str)
     def userPresentChange(self, handle: str, channel: str, update: str):
+        # Dummy values first to appease the pylint overlords
+        # I mean this isn't a solution obv but refactoring this would be hell
+        op = 0
+        reason = ""
+
         h = handle
         c = channel
         if update[0:4] == "kick":  # yeah, i'm lazy.
@@ -1662,10 +1667,10 @@ class PesterMemo(PesterConvo):
                 return
             c = chums[0]
             chum = PesterProfile(h)
+            curtime = self.time.getTime()
             if h == self.mainwindow.profile().handle:
                 chum = self.mainwindow.profile()
                 ttracker = self.time
-                curtime = self.time.getTime()
             elif h in self.times:
                 ttracker = self.times[h]
             else:
