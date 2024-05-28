@@ -50,7 +50,9 @@ class UpdateChecker(QtCore.QObject):
 
     def _on_version_reply(self):
 
-        version_text = bytes(self.reply_version.readAll()).decode("utf-8")
+        version_text = bytes(self.reply_version.readAll()).decode(
+            "utf-8", errors="replace"
+        )
         for line in version_text.split("\n"):
             if "buildVersion" in line:
                 temp = line.replace("buildVersion = ", "")
@@ -59,17 +61,17 @@ class UpdateChecker(QtCore.QObject):
         buildLatest = self.ver_latest.replace("v", "").split(".")
         buildCurrent = self.ver_curr.replace("v", "").split(".")
 
-        # x = 0
-        for x in range(3):
-            if buildCurrent[x] < buildLatest[x]:
-                self.update_available = True
+        if buildLatest > buildCurrent:
+            self.update_available = True
 
-        if self.changelog != "":
+        if self.changelog:
             self.check_done.emit()
 
     def _on_changelog_reply(self):
 
-        self.changelog = bytes(self.reply_changelog.readAll()).decode("utf-8")
+        self.changelog = bytes(self.reply_changelog.readAll()).decode(
+            "utf-8", errors="replace"
+        )
 
-        if self.ver_latest != "":
+        if self.ver_latest:
             self.check_done.emit()

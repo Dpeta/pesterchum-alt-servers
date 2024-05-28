@@ -369,7 +369,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         )
 
     def updatecheck(self):
-        return self.config.get("check_updates", True)
+        return self.config.get("check_updates", False)
 
     def force_prefix(self):
         return self.config.get("force_prefix", False)
