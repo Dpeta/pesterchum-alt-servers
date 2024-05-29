@@ -9,6 +9,7 @@ import PyInstaller.__main__
 is_64bit = sys.maxsize > 2**32
 # is_linux = sys.platform.startswith("linux")
 exclude_modules = []
+
 add_data = [
     "quirks;quirks",
     "smilies;smilies",
@@ -36,6 +37,7 @@ data_files_linux = {
     "LICENSE": "LICENSE.txt",
     "CHANGELOG.md": "CHANGELOG.md",
 }
+
 # Some of these might not be required anymore,
 # newer versions of PyInstaller claim to exclude certain problematic DDLs automatically.
 upx_exclude = [
@@ -95,7 +97,6 @@ upx_exclude = [
 delete_builddist = ""
 upx_enabled = ""
 package_universal_crt = ""
-onefile = ""
 windowed = ""
 upx_dir = ""
 crt_path = ""
@@ -112,11 +113,6 @@ if (sys.version_info[0] > 2) and (sys.version_info[1] > 8):
     parser.add_argument(
         "--prompts",
         help="Prompt for the options below on run",
-        action=argparse.BooleanOptionalAction,
-    )
-    parser.add_argument(
-        "--onefile",
-        help="Create a one-file bundled executable.",
         action=argparse.BooleanOptionalAction,
     )
     parser.add_argument(
@@ -155,11 +151,6 @@ if (sys.version_info[0] > 2) and (sys.version_info[1] > 8):
     elif _ARGUMENTS.crt is False:
         package_universal_crt = "n"
 
-    if _ARGUMENTS.onefile:
-        onefile = "y"
-    elif _ARGUMENTS.onefile is False:
-        onefile = "n"
-
     if _ARGUMENTS.windowed:
         windowed = "y"
     elif _ARGUMENTS.windowed is False:
@@ -169,12 +160,6 @@ else:
     parser.add_argument(
         "--prompts",
         help="Prompt for the options below on run",
-        action="store",
-        choices=["True", "False"],
-    )
-    parser.add_argument(
-        "--onefile",
-        help="Create a one-file bundled executable.",
         action="store",
         choices=["True", "False"],
     )
@@ -215,10 +200,6 @@ else:
         package_universal_crt = "y"
     elif _ARGUMENTS.crt == "False":
         package_universal_crt = "n"
-    if _ARGUMENTS.onefile == "True":
-        onefile = "y"
-    elif _ARGUMENTS.onefile == "False":
-        onefile = "n"
     if _ARGUMENTS.windowed == "True":
         windowed = "y"
     elif _ARGUMENTS.windowed == "False":
@@ -296,10 +277,6 @@ if (_ARGUMENTS.prompts is not False) and (_ARGUMENTS.prompts != "False"):
                         )
                 print("crt_path = " + crt_path)
 
-        if sys.platform in ("win32", "linux"):
-            while onefile not in ("y", "n"):
-                onefile = input("Build with '--onefile'? (Y/N): ").lower()
-
     except KeyboardInterrupt:
         sys.exit("KeyboardInterrupt")
 else:
@@ -333,8 +310,6 @@ else:
             )
         print("crt_path = " + crt_path)
         package_universal_crt = "y"
-    if _ARGUMENTS.onefile is None:
-        onefile = "y"
     if _ARGUMENTS.windowed is None:
         windowed = "y"
 
@@ -374,11 +349,6 @@ if sys.platform == "win32":
         run_win32.append("--exclude-module=%s" % x)
     if windowed == "y":
         run_win32.append("--windowed")
-    if onefile == "y":
-        run_win32.append("--onefile")
-    elif onefile == "n":
-        for x in add_data:
-            run_win32.append("--add-data=%s" % x)
 
     if package_universal_crt == "y":
         run_win32.append("--paths=%s" % crt_path)
@@ -657,28 +627,17 @@ if sys.platform == "win32":
     print(run_win32)
     PyInstaller.__main__.run(run_win32)
 
-    if onefile == "y":
-        # There's more proper ways to do this, but this doesn't require changing our paths
-        for x in data_folders:
-            print(x)
-            shutil.copytree(
-                x,
-                os.path.join("dist", data_folders[x]),
-                ignore=shutil.ignore_patterns(
-                    "*.psd", "*.xcf*", "ebg2.png", "ebg1.png"
-                ),
-            )
-        for x in data_files:
-            print(x)
-            shutil.copy(x, os.path.join("dist", data_files[x]))
-
-        files = os.listdir("dist")
-        try:
-            os.mkdir(os.path.join("dist", "Pesterchum"))
-        except FileExistsError:
-            pass
-        for x in files:
-            shutil.move(os.path.join("dist", x), os.path.join("dist", "Pesterchum"))
+    # There's more proper ways to do this, but this doesn't require changing our paths
+    for x in data_folders:
+        print(x)
+        shutil.copytree(
+            x,
+            os.path.join("dist", "Pesterchum", data_folders[x]),
+            ignore=shutil.ignore_patterns("*.psd", "*.xcf*", "ebg2.png", "ebg1.png"),
+        )
+    for x in data_files:
+        print(x)
+        shutil.copy(x, os.path.join("dist", "Pesterchum", data_files[x]))
 
     # shutil.copy(os.path.join('build', 'Pesterchum', 'xref-Pesterchum.html'),
     #            os.path.join('dist', 'Pesterchum', 'xref-Pesterchum.html'))
@@ -740,43 +699,24 @@ elif sys.platform == "linux":
         run_linux.append("--noupx")
     for x in exclude_modules:
         run_linux.append("--exclude-module=%s" % x)
-    if onefile == "y":
-        run_linux.append("--onefile")
-    elif onefile == "n":
-        for x in add_data:
-            run_linux.append("--add-data=%s" % x.replace(";", ":"))
     if windowed == "y":
         run_linux.append("--windowed")
 
     print(run_linux)
     PyInstaller.__main__.run(run_linux)
 
-    if onefile == "y":
-        # There's more proper ways to do this, but this doesn't require changing our paths
-        for x in data_folders:
-            print(x)
-            shutil.copytree(
-                x,
-                os.path.join("dist", data_folders[x]),
-                ignore=shutil.ignore_patterns(
-                    "*.psd", "*.xcf*", "ebg2.png", "ebg1.png"
-                ),
-            )
-        for x in data_files_linux:
-            print(x)
-            shutil.copy(x, os.path.join("dist", data_files_linux[x]))
+    # There's more proper ways to do this, but this doesn't require changing our paths
+    for x in data_folders:
+        print(x)
+        shutil.copytree(
+            x,
+            os.path.join("dist", "Pesterchum", data_folders[x]),
+            ignore=shutil.ignore_patterns("*.psd", "*.xcf*", "ebg2.png", "ebg1.png"),
+        )
+    for x in data_files_linux:
+        print(x)
+        shutil.copy(x, os.path.join("dist", "Pesterchum", data_files_linux[x]))
 
-        files = os.listdir("dist")
-        try:
-            os.mkdir(os.path.join("dist", ".cache"))
-        except FileExistsError as e:
-            print(e)
-        for x in files:
-            try:
-                shutil.move(os.path.join("dist", x), os.path.join("dist", ".cache", x))
-            except FileExistsError as e:
-                print(e)
-        shutil.move(os.path.join("dist", ".cache"), os.path.join("dist", "Pesterchum"))
     # shutil.copy(os.path.join('build', 'Pesterchum', 'xref-Pesterchum.html'),
     #            os.path.join('dist', 'Pesterchum', 'xref-Pesterchum.html'))
     # shutil.copy(os.path.join('build', 'Pesterchum', 'Analysis-00.toc'),
