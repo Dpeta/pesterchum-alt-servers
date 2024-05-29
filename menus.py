@@ -109,8 +109,7 @@ class PesterQuirkList(QtWidgets.QTreeWidget):
     def currentQuirk(self):
         if isinstance(self.currentItem(), PesterQuirkItem):
             return self.currentItem()
-        else:
-            return None
+        return None
 
     @QtCore.pyqtSlot()
     def upShiftQuirk(self):
@@ -661,7 +660,8 @@ class PesterQuirkTypes(QtWidgets.QDialog):
 
     @QtCore.pyqtSlot()
     def nextPage(self):
-        if self.next.text() == "Finish":
+        text = self.next.text().replace("&", "")  # Qt adds "&" for hotkeys
+        if text == "Finish":
             self.accept()
             return
         cur = self.pages.currentIndex()
@@ -1758,7 +1758,8 @@ class PesterOptions(QtWidgets.QDialog):
 
     @QtCore.pyqtSlot(QtWidgets.QAbstractButton)
     def changePage(self, button):
-        self.pages.setCurrentIndex(self.tabNames.index(button.text()))
+        text = button.text().replace("&", "")  # Qt adds "&" for hotkeys sometimes
+        self.pages.setCurrentIndex(self.tabNames.index(text))
 
     @QtCore.pyqtSlot(int)
     def notifyChange(self, state):
