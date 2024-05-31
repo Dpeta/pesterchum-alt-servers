@@ -43,7 +43,7 @@ class SendIRC:
 
         try:
             PchumLog.debug("Sending: %s", command)
-            self.socket.send(outgoing_bytes)
+            self.socket.sendall(outgoing_bytes)  # sendall will fix this (no)
         except OSError:
             PchumLog.exception("Error while sending: '%s'", command.strip())
             self.socket.close()
