@@ -2,6 +2,7 @@
 
 import logging
 import base64
+import time
 
 PchumLog = logging.getLogger("pchumLogger")
 
@@ -41,12 +42,20 @@ class SendIRC:
         # UTF-8 is the prefered encoding in 2023.
         outgoing_bytes = command.encode(encoding="utf-8", errors="replace")
 
-        try:
-            PchumLog.debug("Sending: %s", command)
-            self.socket.sendall(outgoing_bytes)  # sendall will fix this (no)
-        except OSError:
-            PchumLog.exception("Error while sending: '%s'", command.strip())
-            self.socket.close()
+        tries = 0
+        while True:
+            try:
+                PchumLog.debug("Sending: %s", command)
+                self.socket.sendall(outgoing_bytes)  # sendall will fix this (no)
+                return
+            except OSError as err:
+                tries += 1
+                PchumLog.exception("Error while sending: '%s'", command.strip())
+                time.sleep(0.413)
+                if tries >= 3:
+                    PchumLog.error("Too many tries!!! killing socket")
+                    self.socket.close()
+                    raise err
 
     def ping(self, token):
         """Send PING command to server to check for connectivity."""

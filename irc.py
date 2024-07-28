@@ -28,6 +28,7 @@ the license notice included with oyoyo source files is indented here:
     # THE SOFTWARE.
 """
 
+import time
 import socket
 import random
 import logging
@@ -216,13 +217,29 @@ class PesterIRC(QtCore.QThread):
         self._send_irc.nick(profile.handle)
         self._send_irc.user("pcc31", "pcc31")
 
+    def _get_stuffs_from_socket(self):
+        """billions must die"""
+        tries = 0
+        while True:
+            try:
+                return self.socket.recv(1024)
+            except OSError as err:
+                PchumLog.error(err)
+                tries += 1
+                time.sleep(0.413)  # ...
+                if tries >= 3:
+                    raise err
+
     def _conn_generator(self):
         """Returns a generator object."""
         try:
             buffer = b""
             while not self._end:
+                if not self.socket or self.socket.fileno() == -1:
+                    self._end = True
+                    break
                 try:
-                    buffer += self.socket.recv(1024)
+                    buffer += self._get_stuffs_from_socket()
                 except OSError as socket_exception:
                     PchumLog.warning(
                         "Socket exception in conn_generator: '%s'.", socket_exception
