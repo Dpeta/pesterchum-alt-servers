@@ -6,9 +6,9 @@ jobs:
   build_ubuntu64_20:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Python 3.11 x64
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           architecture: 'x64'
@@ -24,7 +24,7 @@ jobs:
         run: python3 pyinst.py --no-prompts --onefile --no-upx --no-crt --no-clean --windowed
       - name: Create archive (.tar.xz)
         run: tar -cavf Pesterchum_linux64.tar.xz -C dist Pesterchum
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Pesterchum_linux64.tar.xz
           path: Pesterchum_linux64.tar.xz
@@ -32,9 +32,9 @@ jobs:
   build_win64_310:
     runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Python 3.11 x64
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           architecture: 'x64'
@@ -50,7 +50,7 @@ jobs:
         run: python3 pyinst.py --no-prompts --onefile --no-upx --crt --no-clean --windowed
       - name: Create archive (.zip)
         run: tar.exe -a -c -f Pesterchum_win64_py311.zip -C dist Pesterchum
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Pesterchum_win64_py311.zip
           path: Pesterchum_win64_py311.zip
@@ -58,9 +58,9 @@ jobs:
   build_win32_38:
     runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Python 3.8 x86
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.8'
           architecture: 'x86'
@@ -76,7 +76,7 @@ jobs:
         run: python3 pyinst.py --prompts False --onefile True --upx False --crt True --clean False --windowed True
       - name: Create archive (.zip)
         run: tar.exe -a -c -f Pesterchum_win32_py38.zip -C dist Pesterchum
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Pesterchum_win32_py38.zip
           path: Pesterchum_win32_py38.zip
@@ -84,9 +84,9 @@ jobs:
   build_macos64_12:
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Python 3.11 x64
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           architecture: 'x64'
@@ -102,7 +102,7 @@ jobs:
         run: python3 pyinst.py --no-prompts --onefile --no-upx --no-crt --no-clean --windowed
       - name: Create archive (.tar.xz)
         run: tar -cavf Pesterchum_macOS64.tar.xz -C dist Pesterchum.app
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Pesterchum_macOS64.tar.xz
           path: Pesterchum_macOS64.tar.xz
