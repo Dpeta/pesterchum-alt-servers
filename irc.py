@@ -941,7 +941,8 @@ class PesterIRC(QtCore.QThread):
 
     def _namreply(self, _server, _nick, _op, channel, names):
         """Numeric reply 353 RPL_NAMREPLY, part of a NAMES list of members, usually of a channel."""
-        namelist = names.split(" ")
+        namelist = names.strip().split(" ")
+        namelist = [i for i in namelist if i]  # Remove empty entries
         PchumLog.info('---> recv "NAMES %s: %s names"', channel, len(namelist))
         if not hasattr(self, "channelnames"):
             self.channelnames = {}
