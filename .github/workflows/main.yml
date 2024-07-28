@@ -81,8 +81,8 @@ jobs:
           name: Pesterchum_win32_py38.zip
           path: Pesterchum_win32_py38.zip
           
-  build_macos64_11:
-    runs-on: macos-11
+  build_macos64_12:
+    runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python 3.11 x64
