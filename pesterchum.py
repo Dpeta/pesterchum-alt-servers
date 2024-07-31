@@ -1110,7 +1110,8 @@ class trollSlum(chumArea):
         if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
             listing = self.itemAt(event.pos())
             self.setCurrentItem(listing)
-            if self.currentItem().text(0) != "":
+            curItem = self.currentItem()
+            if curItem and curItem.text(0):
                 self.optionsMenu.popup(event.globalPos())
 
     def changeTheme(self, theme):
