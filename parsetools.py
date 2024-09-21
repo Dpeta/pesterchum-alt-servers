@@ -851,6 +851,11 @@ def kxhandleInput(ctx, text=None, flavor=None, irc_compatible=False):
         msg = [m for m in msg if not isinstance(m, (lexercon.CTag, lexercon.CTagEnd))]
         # We'll also add /me to the beginning of any new messages, later.
 
+    # Set guarenteed dummy values first so pylint stops complaining
+    grammar = ""
+    initials = ""
+    colorcmd = ""
+
     # Put what's necessary in before splitting.
     # Fetch our time if we're producing this for a memo.
     if flavor == "memos":

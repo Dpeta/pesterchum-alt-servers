@@ -517,6 +517,10 @@ class PesterMemo(PesterConvo):
             self.mainwindow.theme["main/menus/rclickchumlist/addchum"], self
         )
         self.addchumAction.triggered.connect(self.addChumSlot)
+        self.reportchum = QAction(
+            self.mainwindow.theme["main/menus/rclickchumlist/report"], self
+        )
+        self.reportchum.triggered.connect(self.reportThisChum)
         self.banuserAction = QAction(
             self.mainwindow.theme["main/menus/rclickchumlist/banuser"], self
         )
@@ -535,6 +539,7 @@ class PesterMemo(PesterConvo):
         self.quirkDisableAction.triggered.connect(self.killQuirkUser)
         self.userlist.optionsMenu.addAction(self.pesterChumAction)
         self.userlist.optionsMenu.addAction(self.addchumAction)
+        self.userlist.optionsMenu.addAction(self.reportchum)
         # ban & op list added if we are op
 
         self.optionsMenu = QtWidgets.QMenu(self)
@@ -849,6 +854,7 @@ class PesterMemo(PesterConvo):
 
         self.addchumAction.setText(theme["main/menus/rclickchumlist/addchum"])
         self.banuserAction.setText(theme["main/menus/rclickchumlist/banuser"])
+        self.reportchum.setText(theme["main/menus/rclickchumlist/report"])
         self.opAction.setText(theme["main/menus/rclickchumlist/opuser"])
         self.voiceAction.setText(theme["main/menus/rclickchumlist/voiceuser"])
         self.quirkDisableAction.setText(theme["main/menus/rclickchumlist/quirkkill"])
@@ -931,6 +937,9 @@ class PesterMemo(PesterConvo):
             self.iconCrap(item)
 
     def addUser(self, handle):
+        if not handle:
+            PchumLog.warning("Empty string passed to addUser()?")
+            return
         chumdb = self.mainwindow.chumdb
         defaultcolor = QtGui.QColor("black")
         founder = False
@@ -1572,6 +1581,11 @@ class PesterMemo(PesterConvo):
 
     @QtCore.pyqtSlot(str, str, str)
     def userPresentChange(self, handle: str, channel: str, update: str):
+        # Dummy values first to appease the pylint overlords
+        # I mean this isn't a solution obv but refactoring this would be hell
+        op = 0
+        reason = ""
+
         h = handle
         c = channel
         if update[0:4] == "kick":  # yeah, i'm lazy.
@@ -1656,10 +1670,10 @@ class PesterMemo(PesterConvo):
                 return
             c = chums[0]
             chum = PesterProfile(h)
+            curtime = self.time.getTime()
             if h == self.mainwindow.profile().handle:
                 chum = self.mainwindow.profile()
                 ttracker = self.time
-                curtime = self.time.getTime()
             elif h in self.times:
                 ttracker = self.times[h]
             else:
@@ -1897,6 +1911,15 @@ class PesterMemo(PesterConvo):
             return
         currentChum = PesterProfile((self.userlist.currentItem().text()))
         self.mainwindow.addChum(currentChum)
+
+    @QtCore.pyqtSlot()
+    def reportThisChum(self):
+        if not self.userlist.currentItem():
+            return
+        # mal what the fuck were you thinking when you wrote this dawg
+        # currentChum = PesterProfile((self.userlist.currentItem().text()))
+        currentChum = self.userlist.currentItem().text()
+        self.mainwindow.reportChum(currentChum)
 
     @QtCore.pyqtSlot()
     def banSelectedUser(self):

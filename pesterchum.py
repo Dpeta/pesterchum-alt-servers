@@ -17,6 +17,7 @@ if os.path.dirname(sys.argv[0]):
 
 import ostools
 import pytwmn
+from update import UpdateChecker
 
 from user_profile import (
     userConfig,
@@ -65,7 +66,7 @@ import embeds
 
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets, QtMultimedia
-    from PyQt6.QtGui import QAction, QActionGroup
+    from PyQt6.QtGui import QAction, QActionGroup, QShortcut
 
     # Give Linux QtMultimedia warning.
     if ostools.isLinux():
@@ -78,7 +79,7 @@ try:
 except ImportError:
     print("PyQt5 fallback (pesterchum.py)")
     from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
-    from PyQt5.QtWidgets import QAction, QActionGroup
+    from PyQt5.QtWidgets import QAction, QActionGroup, QShortcut
 
 # Data directory
 ostools.validateDataDir()
@@ -1110,7 +1111,8 @@ class trollSlum(chumArea):
         if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
             listing = self.itemAt(event.pos())
             self.setCurrentItem(listing)
-            if self.currentItem().text(0) != "":
+            curItem = self.currentItem()
+            if curItem and curItem.text(0):
                 self.optionsMenu.popup(event.globalPos())
 
     def changeTheme(self, theme):
@@ -1245,6 +1247,7 @@ class PesterWindow(MovingWindow):
         self.tabmemo = None
         self.shortcuts = {}
         self.aboutwindow = None
+        self.newversiondetected = None
         self.moods = None
         self.currentMoodIcon = None
 
@@ -1547,13 +1550,38 @@ class PesterWindow(MovingWindow):
             # This way themes can change what the alternian font looks like
         )
 
-        self.pcUpdate[str, str].connect(self.updateMsg)
+        # self.pcUpdate[str, str].connect(self.updateMsg)
 
         self.mychumhandleLabel.adjustSize()  # Required so "CHUMHANDLE:" regardless of style-sheet.
         self.moodsLabel.adjustSize()  # Required so "MOOD:" regardless of style-sheet.
 
         self.chooseServerAskedToReset = False
         self.chooseServer()
+
+        # TODO: test!!!!!!!!!!!!!
+
+        # checks for updates and triggers the action AFTER everything important has loaded
+        """
+        deprecated
+
+        self.checkForUpdates = QAction("UPDATE", self)       
+        """
+
+        if self.config.updatecheck():
+
+            self.checkForUpdates = UpdateChecker()
+            self.checkForUpdates.check()
+            self.checkForUpdates.check_done.connect(self.updateAvailable)
+
+        else:
+            PchumLog.info("Checking for updates disabled, skipping...")
+
+        # might? be worth reusing this at some point
+        #
+        # self.checkUpdateManually = QShortcut(
+        #    QtGui.QKeySequence("Ctrl+Alt+Shi"), self
+        # )
+        # self.checkUpdateManually.activated.connect(self.updateAvailable)
 
         # Update RE bot used 2 b here but has now been moved to self.connected(), since this is too early (~lisanne)
 
@@ -1568,6 +1596,11 @@ class PesterWindow(MovingWindow):
             # Set no_new_privs bit.
             self.set_no_new_privs()
 
+    """
+    Deprecated
+
+    
+    # more leftover code for updating pesterchum -
     @QtCore.pyqtSlot(str, str)
     def updateMsg(self, ver, url):
         if not hasattr(self, "updatemenu"):
@@ -1580,8 +1613,6 @@ class PesterWindow(MovingWindow):
             self.updatemenu.raise_()
             self.updatemenu.activateWindow()
 
-    """
-    Deprecated
     
     @QtCore.pyqtSlot()
     def updatePC(self):
@@ -2632,14 +2663,20 @@ class PesterWindow(MovingWindow):
     def removeChum(self, chumlisting):
         self.config.removeChum(chumlisting)
 
+    @QtCore.pyqtSlot(str)
     def reportChum(self, handle):
         (reason, ok) = QtWidgets.QInputDialog.getText(
             self,
             "Report User",
-            "Enter the reason you are reporting this user (optional):",
+            "Enter the reason you are reporting this user:",
         )
-        if ok:
+        if ok and reason:
             self.sendMessage.emit("REPORT {} {}".format(handle, reason), "calSprite")
+        else:
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+            msgbox.setInformativeText("Please provide a reason.")
+            msgbox.exec()
 
     @QtCore.pyqtSlot(str)
     def blockChum(self, handle):
@@ -3117,10 +3154,16 @@ class PesterWindow(MovingWindow):
             if idlesetting != curidle:
                 self.config.set("idleTime", idlesetting)
                 self.idler["threshold"] = 60 * idlesetting
+
             # theme repo url
             repourlsetting = self.optionmenu.repoUrlBox.text()
             if repourlsetting != self.config.theme_repo_url():
                 self.config.set("theme_repo_url", repourlsetting)
+
+            # checking for pchum updates
+            updatesetting = self.optionmenu.updatecheck.isChecked()
+            if updatesetting != self.config.updatecheck():
+                self.config.set("check_updates", updatesetting)
 
             # theme
             ghostchumsetting = self.optionmenu.ghostchum.isChecked()
@@ -3155,20 +3198,7 @@ class PesterWindow(MovingWindow):
             if animatesetting != curanimate:
                 self.config.set("animations", animatesetting)
                 self.animationSetting.emit(animatesetting)
-            # update checked
-            # updatechecksetting = self.optionmenu.updateBox.currentIndex()
-            # curupdatecheck = self.config.checkForUpdates()
-            # if updatechecksetting != curupdatecheck:
-            #    self.config.set('checkUpdates', updatechecksetting)
-            # mspa update check
-            # if ostools.isOSXLeopard():
-            #    mspachecksetting = false
-            # else:
-            #    mspachecksetting = self.optionmenu.mspaCheck.isChecked()
-            # curmspacheck = self.config.checkMSPA()
-            # if mspachecksetting != curmspacheck:
-            #    self.config.set('mspa', mspachecksetting)
-            # Taskbar blink
+
             blinksetting = 0
             if self.optionmenu.pesterBlink.isChecked():
                 blinksetting |= self.config.PBLINK
@@ -3417,6 +3447,17 @@ class PesterWindow(MovingWindow):
         self.aboutwindow = None
 
     @QtCore.pyqtSlot()
+    def updateAvailable(self):
+        if self.checkForUpdates.update_available:
+            if self.newversiondetected:
+                return
+            self.newversiondetected = UpdateAvailable(self)
+            self.newversiondetected.exec()
+            self.newversiondetected = None
+        else:
+            PchumLog.debug("No updates found")
+
+    @QtCore.pyqtSlot()
     def loadCalsprite(self):
         self.newConversation("calSprite")
 
@@ -3532,7 +3573,7 @@ class PesterWindow(MovingWindow):
         msg = QtWidgets.QMessageBox(self)
         msg.setText("D: TOO MANY PEOPLE!!!")
         msg.setInformativeText(
-            "The server has hit max capacity. Please try again later."
+            "The server has hit max capacity. Sad, yes, but think about it - if you're seeing this, you're probably the first person to do so in years. Hooray!"
         )
         # msg.setStyleSheet("QMessageBox{" + self.theme["main/defaultwindow/style"] + "}")
         msg.exec()
@@ -4132,15 +4173,6 @@ class MainProgram(QtCore.QObject):
     @QtCore.pyqtSlot()
     def trayiconShow(self):
         self.trayicon.show()
-        if self.widget.config.trayMessage():
-            self.trayicon.showMessage(
-                "Pesterchum",
-                (
-                    "Pesterchum is still running in the system tray."
-                    "\n"
-                    "Right click to close it."
-                ),
-            )
 
     @QtCore.pyqtSlot()
     def trayMessageClick(self):
@@ -4375,6 +4407,243 @@ class MainProgram(QtCore.QObject):
 
     def run(self):
         sys.exit(self.app.exec())
+
+
+class UpdateAvailable(QtWidgets.QDialog):
+
+    def update(self):
+        QtGui.QDesktopServices.openUrl(
+            QtCore.QUrl(
+                "https://github.com/Dpeta/pesterchum-alt-servers/",
+                QtCore.QUrl.ParsingMode.TolerantMode,
+            )
+        )
+
+    def __init__(self, parent=None):
+        PchumLog.info("Newer version detected, initializing 'UpdateAvailable' ")
+        QtWidgets.QDialog.__init__(self, parent)
+        self.checkForUpdates = parent.checkForUpdates
+        self.mainwindow = parent
+        self.setStyleSheet(self.mainwindow.theme["main/defaultwindow/style"])
+        self.title = QtWidgets.QLabel("UPD8????")
+        self.setModal(True)
+        self.setSizeGripEnabled(True)
+
+        PchumLog.info("Grabbing current version")
+        ver_curr = self.checkForUpdates.ver_curr
+        PchumLog.info("Grabbing latest version")
+        ver_latest = self.checkForUpdates.ver_latest
+        PchumLog.info("Grabbing changelog")
+        changelog = self.checkForUpdates.changelog
+
+        # primary elements
+
+        mainContainer = QtWidgets.QHBoxLayout()
+        lefthandLayout = QtWidgets.QVBoxLayout()
+        righthandLayout = QtWidgets.QVBoxLayout()
+
+        # elements for lefthandLayout
+
+        versionBannerLayout = QtWidgets.QVBoxLayout()
+        versionContainerLayout = QtWidgets.QVBoxLayout()
+        versionDetailsLayout = QtWidgets.QHBoxLayout()
+        versionConstsLayout = QtWidgets.QVBoxLayout()
+        versionValuesLayout = QtWidgets.QVBoxLayout()
+        self.update_banner = QtWidgets.QLabel()
+        self.new_version_title = QtWidgets.QLabel(
+            "A new version of Pesterchum is available!"
+        )
+        self.const_currentversion = QtWidgets.QLabel("Current version:")
+        self.const_latestversion = QtWidgets.QLabel("Latest version:")
+        self.var_currentversion = QtWidgets.QLabel()
+        self.var_latestversion = QtWidgets.QLabel()
+        self.acceptUpdate = QtWidgets.QPushButton("Get latest version!", self)
+
+        # elements for righthandLayout
+
+        scrollBoxContainer = QtWidgets.QHBoxLayout()
+        changelogContainer = QtWidgets.QVBoxLayout()
+        self.frame = QtWidgets.QFrame()
+        frameLayout = QtWidgets.QVBoxLayout(self.frame)
+        self.changelogWidgetContents = QtWidgets.QWidget()
+        changelogWidgetContentsLayout = QtWidgets.QVBoxLayout(
+            self.changelogWidgetContents
+        )
+        self.changelogScrollable = QtWidgets.QScrollArea()
+        self.changelogTitle = QtWidgets.QLabel("Changelog:")
+        self.changelogContents = QtWidgets.QLabel()
+        self.postpone = QtWidgets.QPushButton("Remind me later", self)
+
+        # size policies
+
+        spMaxMin = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Minimum
+        )
+        spMax = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum
+        )
+        spMinExp = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+        )
+        spPref = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred,
+            QtWidgets.QSizePolicy.Policy.Preferred,
+        )
+        spPrefMin = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Minimum
+        )
+        spButtons = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Fixed
+        )
+
+        # since i'm overriding the style sheet, and i don't know exactly what that's gonna do,
+        # i'm giving it all these attributes as a fallback.
+        # TODO: replace this with actual, proper, thought-out code
+
+        title1 = QtGui.QFont()
+        title1.setFamily("Courier New")
+        title1.setBold(True)
+        title1.setUnderline(True)
+        title1.setItalic(True)
+
+        subtitle1 = QtGui.QFont()
+        subtitle1.setFamily("Courier New")
+        subtitle1.setBold(True)
+        subtitle1.setUnderline(False)
+        subtitle1.setItalic(False)
+
+        subtitle2 = QtGui.QFont()
+        subtitle2.setFamily("Courier New")
+        subtitle2.setBold(False)
+        subtitle2.setUnderline(False)
+        subtitle2.setItalic(False)
+
+        # lefthand element configurations
+
+        self.var_currentversion.setFont(subtitle2)
+        self.var_currentversion.setSizePolicy(spMaxMin)
+        self.var_currentversion.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignBottom
+            | QtCore.Qt.AlignmentFlag.AlignLeading
+            | QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        self.var_currentversion.setText(ver_curr)
+
+        self.var_latestversion.setFont(subtitle2)
+        self.var_latestversion.setSizePolicy(spMaxMin)
+        self.var_latestversion.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignBottom
+            | QtCore.Qt.AlignmentFlag.AlignLeading
+            | QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        self.var_latestversion.setText(ver_latest)
+
+        self.const_currentversion.setSizePolicy(spMax)
+        self.const_currentversion.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignBottom
+            | QtCore.Qt.AlignmentFlag.AlignLeading
+            | QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+
+        self.const_latestversion.setSizePolicy(spMax)
+        self.const_latestversion.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignBottom
+            | QtCore.Qt.AlignmentFlag.AlignLeading
+            | QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+
+        self.new_version_title.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignBottom
+            | QtCore.Qt.AlignmentFlag.AlignLeading
+            | QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        self.new_version_title.setSizePolicy(spPrefMin)
+        self.new_version_title.setFont(title1)
+
+        self.update_banner.setSizePolicy(spMinExp)
+        self.update_banner.setText(
+            '<html><head/><body><p align="center"><img src="img/pchumbanner.png"/></p></body></html>'
+        )
+
+        versionContainerLayout.setSizeConstraint(
+            QtWidgets.QLayout.SizeConstraint.SetMaximumSize
+        )
+        versionDetailsLayout.setSizeConstraint(
+            QtWidgets.QLayout.SizeConstraint.SetMaximumSize
+        )
+        versionConstsLayout.setSizeConstraint(
+            QtWidgets.QLayout.SizeConstraint.SetMinimumSize
+        )
+        versionValuesLayout.setSizeConstraint(
+            QtWidgets.QLayout.SizeConstraint.SetMaximumSize
+        )
+
+        self.acceptUpdate.setSizePolicy(spButtons)
+        self.acceptUpdate.clicked.connect(self.update)
+
+        # righthand element configurations
+
+        self.changelogTitle.setFont(subtitle1)
+        self.changelogTitle.setSizePolicy(spPref)
+        self.changelogContents.setText(changelog)
+        self.changelogContents.setFont(subtitle2)
+        self.changelogContents.setSizePolicy(spMinExp)
+        self.changelogContents.setAlignment(
+            # i'll gwen Q my balls off before i manually check which one of these motherfucking flags
+            # is the right one. fuck you qtcreator. burn in hell.
+            QtCore.Qt.AlignmentFlag.AlignLeading
+            | QtCore.Qt.AlignmentFlag.AlignLeft
+            | QtCore.Qt.AlignmentFlag.AlignTop
+        )
+        self.changelogWidgetContents.setGeometry(QtCore.QRect(0, 0, 173, 193))
+        self.changelogWidgetContents.setSizePolicy(spMinExp)
+
+        self.frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+        self.frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
+
+        self.changelogScrollable.setWidgetResizable(True)
+        self.changelogScrollable.setWidget(self.changelogWidgetContents)
+
+        self.postpone.clicked.connect(self.reject)
+
+        # nesting
+
+        mainContainer.addLayout(lefthandLayout)
+        mainContainer.addLayout(righthandLayout)
+
+        lefthandLayout.addLayout(versionBannerLayout)
+        lefthandLayout.addWidget(self.acceptUpdate)
+
+        versionBannerLayout.addWidget(self.update_banner)
+        versionBannerLayout.addLayout(versionContainerLayout)
+
+        versionContainerLayout.addWidget(self.new_version_title)
+        versionContainerLayout.addLayout(versionDetailsLayout)
+
+        versionDetailsLayout.addLayout(versionConstsLayout)
+        versionDetailsLayout.addLayout(versionValuesLayout)
+
+        versionConstsLayout.addWidget(self.const_currentversion)
+        versionConstsLayout.addWidget(self.const_latestversion)
+
+        versionValuesLayout.addWidget(self.var_currentversion)
+        versionValuesLayout.addWidget(self.var_latestversion)
+
+        righthandLayout.addWidget(self.frame)
+        righthandLayout.addWidget(self.postpone)
+
+        frameLayout.addLayout(scrollBoxContainer)
+
+        scrollBoxContainer.addLayout(changelogContainer)
+
+        changelogContainer.addWidget(self.changelogTitle)
+        changelogContainer.addWidget(self.changelogScrollable)
+
+        self.changelogScrollable.setWidget(self.changelogWidgetContents)
+        changelogWidgetContentsLayout.addWidget(self.changelogContents)
+
+        self.setLayout(mainContainer)
 
 
 if __name__ == "__main__":
