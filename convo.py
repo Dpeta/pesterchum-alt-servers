@@ -398,11 +398,7 @@ class PesterText(QtWidgets.QTextEdit):
 
         embeds.manager.embed_loading.connect(self.registerEmbed)
         embeds.manager.embed_loaded.connect(self.showEmbed)
-        embeds.manager.embed_failed.connect(
-            lambda url, error: self.setResource(
-                url, QtGui.QPixmap("img/embed_failed.png")
-            )
-        )
+        embeds.manager.embed_failed.connect(self.showEmbedError)
         for embed in embeds.manager.get_embeds():
             self.showEmbed(embed)
         # self.mainwindow.animationSetting[bool].connect(self.animateChanged)
@@ -442,6 +438,10 @@ class PesterText(QtWidgets.QTextEdit):
 
     def showEmbed(self, url):
         self.setResource(url, embeds.manager.get_embed(url))
+
+    def showEmbedError(self, url, error=None):
+        # Sets the resource to generic "wuh oh failed" image
+        self.setResource(url, QtGui.QPixmap("img/embed_failed.png"))
 
     """
     @QtCore.pyqtSlot(bool)

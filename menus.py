@@ -1384,6 +1384,63 @@ class PesterOptions(QtWidgets.QDialog):
         self.userlinkscheck.setChecked(self.config.disableUserLinks())
         self.userlinkscheck.setVisible(False)
 
+        self.label_trusteddomains = QtWidgets.QLabel("Trusted image domains:")
+        self.list_trusteddomains = QtWidgets.QListWidget()
+        self.list_trusteddomains.addItems(parent.userprofile.getTrustedDomains())
+        self.hbox_trusteddomains_buttons = QtWidgets.QHBoxLayout()
+        self.button_trusteddomains_add = QtWidgets.QPushButton("Add")
+        self.button_trusteddomains_remove = QtWidgets.QPushButton("Remove")
+        self.hbox_trusteddomains_buttons.addWidget(self.button_trusteddomains_add)
+        self.hbox_trusteddomains_buttons.addWidget(self.button_trusteddomains_remove)
+        self.label_trusteddomains_info = QtWidgets.QLabel(
+            "When an image link is sent in a conversation that belongs to one of these domains, pesterchum will embed the image alongside the message in the log"
+        )
+        self.label_trusteddomains_info.setWordWrap(True)
+
+        def _on_button_trusteddomains_remove_pressed():
+            selected_idx = self.list_trusteddomains.currentRow()
+            if selected_idx >= 0:
+                self.list_trusteddomains.takeItem(selected_idx)
+
+        def _on_button_trusteddomains_add_pressed():
+            # When "add" is pressed, open a dialog where the user can enter 1 domain
+            schema = {"label": "Domain:", "inputname": "value"}
+
+            result = MultiTextDialog("ENTER DOMAIN", self, schema).getText()
+            if result is None:
+                return
+            domain = result["value"]
+
+            if not "." in domain:
+                # No TLD (.com, .org, etc)
+                # not a valid domain
+                errbox = QtWidgets.QMessageBox(self)
+                errbox.setText("Not a valid domain!")
+                errbox.setInformativeText(
+                    "You are missing the TLD (.com, .org, etc etc)"
+                )
+                errbox.exec()
+                return
+
+            if not (domain.startswith("https://") or domain.startswith("http://")):
+                # Missing protocol, but thats fine
+                # This also means you'd need two entries for http & https version of a website
+                # but we stan https everywhere in this house so we ball
+                domain = "https://" + domain
+            if domain.count("/") < 3:
+                # append a '/' to the end if there is no '/' anywhere after the TLD
+                # this is to prevent something like `https://example.org` to also match with `https://example.org.mynefariouswebsite.com'
+                # IE, 'https://example.org' becomes 'https://example.org/', but 'https://example.org/beap' is left as-is
+                domain += "/"
+            self.list_trusteddomains.addItem(domain)
+
+        self.button_trusteddomains_add.clicked.connect(
+            _on_button_trusteddomains_add_pressed
+        )
+        self.button_trusteddomains_remove.clicked.connect(
+            _on_button_trusteddomains_remove_pressed
+        )
+
         # Will add ability to turn off groups later
         # self.groupscheck = QtGui.QCheckBox("Use Groups", self)
         # self.groupscheck.setChecked(self.config.useGroups())
@@ -1598,6 +1655,12 @@ class PesterOptions(QtWidgets.QDialog):
             layout_chat.addWidget(self.animationscheck)
             layout_chat.addWidget(animateLabel)
         layout_chat.addWidget(self.randomscheck)
+
+        layout_chat.addWidget(self.label_trusteddomains)
+        layout_chat.addWidget(self.list_trusteddomains)
+        layout_chat.addLayout(self.hbox_trusteddomains_buttons)
+        layout_chat.addWidget(self.label_trusteddomains_info)
+
         # Re-enable these when it's possible to disable User and Memo links
         # layout_chat.addWidget(hr)
         # layout_chat.addWidget(QtGui.QLabel("User and Memo Links"))

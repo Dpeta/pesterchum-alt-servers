@@ -172,17 +172,23 @@ class formatEnd(lexercon.Chunk):
 
 
 class embedlink(lexercon.Chunk):
+    domain_trusted = False
+
     def __init__(self, url):
         self.url = url
-        print("GO FETCH ", url)
-        embeds.manager.fetch_embed(url)
+        self.domain_trusted = embeds.manager.check_trustlist(self.url)
+        if self.domain_trusted:
+            embeds.manager.fetch_embed(url)
 
     def convert(self, format):
         if format == "html":
-            return (
-                "<a href='%s'>%s</a><br><a href='%s'><img alt='%s' src='%s' width=300></a>"
-                % (self.url, self.url, self.url, self.url, self.url)
-            )
+            if self.domain_trusted:
+                return (
+                    "<a href='%s'>%s</a><br><a href='%s'><img alt='%s' src='%s' width=300></a>"
+                    % (self.url, self.url, self.url, self.url, self.url)
+                )
+            else:
+                return "<a href='%s'>%s</a>" % (self.url, self.url)
         elif format == "bbcode":
             return f"[url]{self.url}[/url]"
         else:

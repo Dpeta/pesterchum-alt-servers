@@ -27,6 +27,18 @@ _datadir = ostools.getDataDir()
 PchumLog = logging.getLogger("pchumLogger")
 
 
+DEFAULT_EMBED_TRUSTLIST = [
+    "https://cdn.discordapp.com/",
+    "https://pesterchum.xyz/",
+    "https://i.imgur.com/",
+    "https://media1.tenor.com/",
+    "https://raw.githubusercontent.com/",
+    "https://i.giphy.com/",
+    "https://64.media.tumblr.com/",
+    "https://i.redd.it/",
+]
+
+
 class PesterLog:
     def __init__(self, handle, parent=None):
         global _datadir
@@ -649,6 +661,7 @@ class userProfile:
             else:
                 self.mentions = []
             self.autojoins = []
+            self.trusted_domains = DEFAULT_EMBED_TRUSTLIST
         else:
             # Trying to fix:
             #     IOError: [Errno 2]
@@ -717,6 +730,9 @@ class userProfile:
                 self.userprofile["autojoins"] = []
             self.autojoins = self.userprofile["autojoins"]
 
+            if "trusteddomains" not in self.userprofile:
+                self.userprofile["trusteddomains"] = DEFAULT_EMBED_TRUSTLIST
+            self.trusted_domains = self.userprofile["trusteddomains"]
         try:
             with open(_datadir + "passwd.js") as fp:
                 self.passwd = json.load(fp)
@@ -816,6 +832,14 @@ class userProfile:
     def setAutoJoins(self, autojoins):
         self.autojoins = autojoins
         self.userprofile["autojoins"] = self.autojoins
+        self.save()
+
+    def getTrustedDomains(self):
+        return self.trusted_domains
+
+    def setTrustedDomains(self, trusted_domains):
+        self.trusted_domains = trusted_domains
+        self.userprofile["trusteddomains"] = self.trusted_domains
         self.save()
 
     def save(self):

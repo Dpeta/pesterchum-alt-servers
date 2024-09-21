@@ -27,6 +27,8 @@ class EmbedsManager(QtCore.QObject):
     downloading = set()
     max_items = 50
 
+    main_window = None
+
     embed_loading = QtCore.pyqtSignal(str)  # when the get request starts (url: str)
     embed_loaded = QtCore.pyqtSignal(
         str
@@ -57,20 +59,37 @@ class EmbedsManager(QtCore.QObject):
     def has_embed(self, url):
         return url in self.cache
 
+    def check_trustlist(self, url):
+        for item in self.main_window.config.userprofile.getTrustedDomains():
+            print("~~", item)
+            if url.startswith(item):
+                print("yurt")
+                return True
+        print("nah")
+        return False
+
     def fetch_embed(self, url, ignore_cache=False):
         """Downloads a new embed if it does not exist yet"""
+
+        if not self.check_trustlist(url):
+            PchumLog.warning(
+                "Requested embed fetch of %s denied because it does not match te trust filter.",
+                url,
+            )
+            return
+
         if not ignore_cache and self.has_embed(url):
             PchumLog.debug(
-                "Requested embed fetch of %s, but it was already fetched" % (url,)
+                "Requested embed fetch of %s, but it was already fetched", url
             )
             return
         elif url in self.downloading:
             PchumLog.debug(
-                "Requested embed fetch of %s, but it is already being fetched" % (url,)
+                "Requested embed fetch of %s, but it is already being fetched", url
             )
             return
 
-        PchumLog.info("Fetching embed of %s" % (url,))
+        PchumLog.info("Fetching embed of %s", url)
 
         self.downloading.add(url)
         # Track which embeds are downloading so we dont do double-fetches
@@ -93,11 +112,11 @@ class EmbedsManager(QtCore.QObject):
 
             if len(self.cache) > self.max_items:
                 to_purge = list(self.cache.keys())[0]
-                PchumLog.debug("Purging embed %s" % (to_purge,))
+                PchumLog.debug("Purging embed %s", to_purge)
                 self.embed_purged.emit(to_purge)
                 del self.cache[to_purge]
         else:
-            PchumLog.error("Error fetching embed %s: %s" % (url, reply.error()))
+            PchumLog.error("Error fetching embed %s: %s", url, reply.error())
             self.embed_failed.emit(url, str(reply.error()))
 
 
