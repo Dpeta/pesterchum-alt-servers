@@ -182,7 +182,10 @@ class embedlink(lexercon.Chunk):
 
     def convert(self, format):
         if format == "html":
+            # Only add the showable image tag if the domain is trusted & thus will actually be fetched
+            # Otherwise would show "fetching embed..." forever
             if self.domain_trusted:
+                # <a> tag to make it clickable, <img> tag to make it show the image (actual image resource is added after parsing)
                 return (
                     "<a href='%s'>%s</a><br><a href='%s'><img alt='%s' src='%s' width=300></a>"
                     % (self.url, self.url, self.url, self.url, self.url)
@@ -244,12 +247,9 @@ class imagelink(lexercon.Chunk):
     def __init__(self, string, img):
         self.string = string
         self.img = img
-        print("Imagelinmk: ", string, img)
-        # raise Exception(f'{string} {img}')
 
     def convert(self, format):
         # raise Exception(format)
-        print("TIME FOR ", format)
         if format == "html":
             return self.string
         elif format == "bbcode":
@@ -294,7 +294,7 @@ class smiley(lexercon.Chunk):
         self.string = string
 
     def convert(self, format):
-        print("SMILEY:: ", format)
+        # print("SMILEY:: ", format)
         if format == "html":
             return "<img src='smilies/{}' alt='{}' title='{}' />".format(
                 smiledict[self.string],

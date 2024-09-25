@@ -61,11 +61,8 @@ class EmbedsManager(QtCore.QObject):
 
     def check_trustlist(self, url):
         for item in self.main_window.config.userprofile.getTrustedDomains():
-            print("~~", item)
             if url.startswith(item):
-                print("yurt")
                 return True
-        print("nah")
         return False
 
     def fetch_embed(self, url, ignore_cache=False):
@@ -73,7 +70,7 @@ class EmbedsManager(QtCore.QObject):
 
         if not self.check_trustlist(url):
             PchumLog.warning(
-                "Requested embed fetch of %s denied because it does not match te trust filter.",
+                "Requested embed fetch of %s denied because it does not match the trust filter.",
                 url,
             )
             return
