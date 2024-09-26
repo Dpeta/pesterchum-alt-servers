@@ -14,12 +14,10 @@ PchumLog = logging.getLogger("pchumLogger")
 
 ## embeds.py
 # system for fetching & displaying image previews for image URLs
-# has a single instance called `manager` at the bottom of this file
+# has a single instance (singleton) called `manager` at the bottom of this file
 
-## TODO:
-## - add domain filters in settings
-## - add "ignore filters" or whatever toggle in settings
-## - *verify* domain filters
+## TODO?:
+## - add "ignore filters" or whatever toggle in settings. slight security risk (leaking IP)
 
 
 class EmbedsManager(QtCore.QObject):
@@ -27,7 +25,7 @@ class EmbedsManager(QtCore.QObject):
     downloading = set()
     max_items = 50
 
-    main_window = None
+    mainwindow = None
 
     embed_loading = QtCore.pyqtSignal(str)  # when the get request starts (url: str)
     embed_loaded = QtCore.pyqtSignal(
@@ -60,7 +58,7 @@ class EmbedsManager(QtCore.QObject):
         return url in self.cache
 
     def check_trustlist(self, url):
-        for item in self.main_window.config.userprofile.getTrustedDomains():
+        for item in self.mainwindow.userprofile.getTrustedDomains():
             if url.startswith(item):
                 return True
         return False

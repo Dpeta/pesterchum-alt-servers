@@ -268,10 +268,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         return self.config.get("hideOfflineChums", False)
 
     def defaultprofile(self):
-        try:
-            return self.config["defaultprofile"]
-        except KeyError:
-            return None
+        return self.config.get("defaultprofile", None)
 
     def tabs(self):
         return self.config.get("tabs", True)

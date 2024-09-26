@@ -1261,9 +1261,12 @@ class PesterWindow(MovingWindow):
         # Part 1 :(
         try:
             if self.config.defaultprofile():
+                # "defaultprofile" config setting is set
+                # load is here
                 self.userprofile = userProfile(self.config.defaultprofile())
                 self.theme = self.userprofile.getTheme()
             else:
+                # Generate a new profile (likely this is the first-run)
                 self.userprofile = userProfile(
                     PesterProfile(
                         "pesterClient%d" % (random.randint(100, 999)),
@@ -1354,7 +1357,7 @@ class PesterWindow(MovingWindow):
 
         self.move(100, 100)
 
-        embeds.manager.main_window = self  ## We gotta get a reference to the user profile from somewhere since its not global. oh well
+        embeds.manager.mainwindow = self  ## We gotta get a reference to the user profile from somewhere since its not global. oh well
 
         talk = QAction(self.theme["main/menus/client/talk"], self)
         self.talk = talk
