@@ -27,7 +27,7 @@ _datadir = ostools.getDataDir()
 PchumLog = logging.getLogger("pchumLogger")
 
 
-DEFAULT_EMBED_TRUSTLIST = [ # Default list of trusted image embed domains
+DEFAULT_EMBED_TRUSTLIST = [  # Default list of trusted image embed domains
     "https://cdn.discordapp.com/",
     "https://pesterchum.xyz/",
     "https://i.imgur.com/",
