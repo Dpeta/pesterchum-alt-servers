@@ -1,14 +1,29 @@
 import os
 import re
+import random
 import logging
+import itertools
 
 import ostools
 from mispeller import mispeller
-from parsetools import parseRegexpFunctions
+from parsetools import parseRegexpFunctions, lexMessage, smiledict
+
 
 _datadir = ostools.getDataDir()
 PchumLog = logging.getLogger("pchumLogger")
 
+_urlre = re.compile(r"(?i)(?:^|(?<=\s))(?:(?:https?|ftp)://|magnet:)[^\s]+")
+# _url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
+_groupre = re.compile(r"\\([0-9]+)")
+_upperre = re.compile(r"upper\(([\w<>\\]+)\)")
+_lowerre = re.compile(r"lower\(([\w<>\\]+)\)")
+_scramblere = re.compile(r"scramble\(([\w<>\\]+)\)")
+_reversere = re.compile(r"reverse\(([\w<>\\]+)\)")
+_ctagre = re.compile("(</?c=?.*?>)", re.I)
+_smilere = re.compile("|".join(list(smiledict.keys())))
+_memore = re.compile(r"(\s|^)(#[A-Za-z0-9_]+)")
+_handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
+_alternian = re.compile(r"<alt>.*?</alt>")
 
 # traditional quirks
 
@@ -43,19 +58,18 @@ class PesterQuirk:
         )  ## Seems to be somethign related to the QT checkbox? QtCore.QT.CheckState
 
     def apply(self, string: str, first: bool = False, last: bool = False):
-        """string: string to operate quirk on. first: is the given substring at the very start (idx == 0) of the superstring? last: is the given substring at the very last (idx == -1) of the superstring?"""
+        """string: string to operate quirk on. first: is the given substring at the very start (is_first_string) of the superstring? last: is the given substring at the very last (idx == -1) of the superstring?"""
         if self.on:
             return self._apply(string, first, last)
         else:
             return string
 
     def _apply(self, string: str, first: bool, last: bool):
-        # Overwrite
-        raise NotImplemented()
-        return string
+        # Overwrite (return string)
+        raise NotImplementedError()
 
     def __str__(self):
-        # Overwrite
+        # Overwrite (return string)
         return "UNKNOWN QUIRK"
 
 
@@ -175,7 +189,7 @@ class MispellerPesterQuirk(PesterQuirk):
             # get random 0.0 - 1.0 number
             dice = random.random()
 
-            if not ctag.search(w) and dice < percentage:
+            if not ctag.search(word) and dice < percentage:
                 # word is not wrapped in color tags :)
                 out.append(mispeller(word))
             elif dice < percentage:
@@ -196,3 +210,153 @@ class MispellerPesterQuirk(PesterQuirk):
 
     def __str__(self):
         return "MISPELLER: %d%%" % (self.quirk["percentage"])
+
+
+# TODO: clean this up. its huge and really hard to read
+
+
+class PesterQuirkCollection:
+    def __init__(self, quirklist):
+        self.quirklist = []
+        for quirk in quirklist:
+            self.addQuirk(quirk)
+
+    def plainList(self):
+        # Returns a list of all the quirk dictionaries
+        return [quirk.quirk for quirk in self.quirklist]
+
+    def addQuirk(self, quirk):
+        """quirk: dict or a PesterQuirk"""
+        if isinstance(quirk, dict):
+            self.quirklist.append(PesterQuirkFactory(quirk))
+        elif isinstance(quirk, PesterQuirk):
+            self.quirklist.append(quirk)
+
+    def apply(self, lexed, first=False, last=False):
+        prefixes = [
+            quirk for quirk in self.quirklist if isinstance(quirk, PrefixPesterQuirk)
+        ]
+        # suffix = [q for q in self.quirklist if q.type == "suffix"]
+
+        newlist = []
+        for idx, original in enumerate(lexed):
+            is_first_string = idx == 0
+            if not isinstance(original, str):
+                if is_first_string:
+                    string = " "
+                    for prefix_quirk in prefixes:
+                        string += prefix_quirk.apply(string)
+                    newlist.append(string)
+                newlist.append(original)
+                continue
+            is_last_string = idx == len(lexed) - 1
+            string = original
+
+            for quirk in self.quirklist:
+                try:
+                    checkstate = int(quirk.checkstate)
+                except Exception:
+                    checkstate = 0
+
+                # Exclude option is checked
+                if checkstate == 2:
+                    # Check for substring that should be excluded.
+                    excludes = []
+                    # Return matches for links, smilies, handles, memos.
+                    # Chain the iterators and add to excludes list.
+                    matches = itertools.chain(
+                        re.finditer(_urlre, string),
+                        re.finditer(_smilere, string),
+                        re.finditer(_handlere, string),
+                        re.finditer(_memore, string),
+                        re.finditer(_alternian, string),
+                    )
+                    excludes.extend(matches)
+
+                    if excludes:
+                        # SORT !!!
+                        excludes.sort(key=lambda exclude: exclude.start())
+                        # Recursion check.
+                        # Strings like http://:3: require this.
+                        for n in range(0, len(excludes) - 1):
+                            if excludes[n].end() > excludes[n + 1].start():
+                                excludes.pop(n)
+                        # Seperate parts to be quirked.
+                        sendparts = []
+                        # Add string until start of exclude at index 0.
+                        until = excludes[0].start()
+                        sendparts.append(string[:until])
+                        # Add strings between excludes.
+                        for part in range(1, len(excludes)):
+                            after = excludes[part - 1].end()
+                            until = excludes[part].start()
+                            sendparts.append(string[after:until])
+                        # Add string after exclude at last index.
+                        after = excludes[-1].end()
+                        sendparts.append(string[after:])
+
+                        # Quirk to-be-quirked parts.
+                        recvparts = []
+                        for part in sendparts:
+                            # No split, apply like normal.
+                            if quirk.type in ("regexp", "random"):
+                                recvparts.append(
+                                    quirk.apply(
+                                        part,
+                                        first=(is_first_string),
+                                        last=is_last_string,
+                                    )
+                                )
+                            elif quirk.type == "prefix" and is_first_string:
+                                recvparts.append(quirk.apply(part))
+                            elif quirk.type == "suffix" and is_last_string:
+                                recvparts.append(quirk.apply(part))
+                            else:
+                                recvparts.append(quirk.apply(part))
+                        # Reconstruct and update string.
+                        string = ""
+                        # print("excludes: " + str(excludes))
+                        # print("sendparts: " + str(sendparts))
+                        # print("recvparts: " + str(recvparts))
+                        for part, exclude in enumerate(excludes):
+                            string += recvparts[part]
+                            string += exclude.group()
+                        string += recvparts[-1]
+                    else:
+                        # No split, apply like normal.
+                        if quirk.type not in ("prefix", "suffix"):
+                            if quirk.type in ("regexp", "random"):
+                                string = quirk.apply(
+                                    string, first=(is_first_string), last=is_last_string
+                                )
+                            else:
+                                string = quirk.apply(string)
+                        elif quirk.type == "prefix" and is_first_string:
+                            string = quirk.apply(string)
+                        elif quirk.type == "suffix" and is_last_string:
+                            string = quirk.apply(string)
+                else:
+                    # No split, apply like normal.
+                    if quirk.type not in ("prefix", "suffix"):
+                        if quirk.type in ("regexp", "random"):
+                            string = quirk.apply(
+                                string, first=(is_first_string), last=is_last_string
+                            )
+                        else:
+                            string = quirk.apply(string)
+                    elif quirk.type == "prefix" and is_first_string:
+                        string = quirk.apply(string)
+                    elif quirk.type == "suffix" and is_last_string:
+                        string = quirk.apply(string)
+            newlist.append(string)
+
+        final = []
+        for item in newlist:
+            if isinstance(item, str):
+                final.extend(lexMessage(item))
+            else:
+                final.append(item)
+        return final
+
+    def __iter__(self):
+        yield from self.quirklist

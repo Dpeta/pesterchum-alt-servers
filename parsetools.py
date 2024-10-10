@@ -10,13 +10,13 @@ except ImportError:
     print("PyQt5 fallback (parsetools.py)")
     from PyQt5 import QtGui, QtWidgets
 
-import dataobjs
 
 # karxi: My own contribution to this - a proper lexer.
 from pnc import lexercon
 from generic import mysteryTime
 from pyquirks import ScriptQuirks, PythonQuirks
 from scripts.services import BOTNAMES
+import quirks
 
 PchumLog = logging.getLogger("pchumLogger")
 
@@ -763,16 +763,16 @@ def kxhandleInput(ctx, text=None, flavor=None, irc_compatible=False):
     if should_quirk and not (is_action or is_ooc):
         if flavor != "menus":
             # Fetch the quirks we'll have to apply.
-            quirks = ctx.mainwindow.userprofile.quirks
+            quirk_collection = ctx.mainwindow.userprofile.quirks
         else:
             # The quirk testing window uses a different set.
-            quirks = dataobjs.pesterQuirks(ctx.parent().testquirks())
+            quirk_collection = quirks.PesterQuirkCollection(ctx.parent().testquirks())
 
         try:
             # Do quirk things. (Ugly, but it'll have to do for now.)
             # TODO: Look into the quirk system, modify/redo it.
             # Gotta encapsulate or we might parse the wrong way.
-            msg = quirks.apply([msg])
+            msg = quirk_collection.apply([msg])
         except Exception as err:
             # Tell the user we couldn't do quirk things.
             # TODO: Include the actual error...and the quirk it came from?
