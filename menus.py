@@ -14,7 +14,8 @@ import ostools
 import parsetools
 from theme_repo_manager import ThemeManagerWidget
 from generic import RightClickList, RightClickTree, MultiTextDialog
-from dataobjs import pesterQuirk, PesterProfile, PesterHistory
+from dataobjs import PesterProfile, PesterHistory
+from quirks import PesterQuirkFactory
 from memos import TimeSlider, TimeInput
 from version import _pcVersion
 from convo import PesterInput, PesterText
@@ -925,7 +926,7 @@ class PesterChooseQuirks(QtWidgets.QDialog):
                 self.quirkadd = None
                 return
 
-        quirk = pesterQuirk(vdict)
+        quirk = PesterQuirkFactory(vdict)
         if self.quirkadd.quirk is None:
             item = PesterQuirkItem(quirk)
             self.quirkList.addItem(item)

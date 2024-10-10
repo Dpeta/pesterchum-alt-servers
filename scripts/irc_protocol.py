@@ -1,8 +1,9 @@
 """IRC-related functions and classes to be imported by irc.py"""
 
-import logging
-import base64
+import ssl
 import time
+import base64
+import logging
 
 PchumLog = logging.getLogger("pchumLogger")
 
@@ -48,7 +49,7 @@ class SendIRC:
                 PchumLog.debug("Sending: %s", command)
                 self.socket.sendall(outgoing_bytes)  # sendall will fix this (no)
                 return
-            except OSError as err:
+            except (OSError, ssl.SSLEOFError) as err:
                 tries += 1
                 PchumLog.exception("Error while sending: '%s'", command.strip())
                 time.sleep(0.413)
