@@ -39,7 +39,7 @@ from menus import (
     AddChumDialog,
 )
 from mood import Mood, PesterMoodAction, PesterMoodHandler, PesterMoodButton
-from dataobjs import PesterProfile, pesterQuirk, pesterQuirks
+from dataobjs import PesterProfile, pesterQuirks
 from generic import (
     PesterIcon,
     RightClickTree,

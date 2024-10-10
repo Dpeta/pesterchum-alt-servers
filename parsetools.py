@@ -15,8 +15,7 @@ import dataobjs
 # karxi: My own contribution to this - a proper lexer.
 from pnc import lexercon
 from generic import mysteryTime
-from quirks import ScriptQuirks
-from pyquirks import PythonQuirks
+from pyquirks import ScriptQuirks, PythonQuirks
 from scripts.services import BOTNAMES
 
 PchumLog = logging.getLogger("pchumLogger")

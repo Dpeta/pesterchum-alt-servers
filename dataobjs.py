@@ -19,7 +19,7 @@ from parsetools import (
     parseRegexpFunctions,
     smiledict,
 )
-from mispeller import mispeller
+from quirks import PesterQuirkFactory, PrefixPesterQuirk, PesterQuirk
 
 _urlre = re.compile(r"(?i)(?:^|(?<=\s))(?:(?:https?|ftp)://|magnet:)[^\s]+")
 # _url2re = re.compile(r"(?i)(?<!//)\bwww\.[^\s]+?\.")
@@ -35,97 +35,97 @@ _handlere = re.compile(r"(\s|^)(@[A-Za-z0-9_]+)")
 _alternian = re.compile(r"<alt>.*?</alt>")
 
 
-class pesterQuirk:
-    def __init__(self, quirk):
-        if not isinstance(quirk, dict):
-            raise ValueError("Quirks must be given a dictionary")
-        self.quirk = quirk
-        self.type = self.quirk["type"]
-        if "on" not in self.quirk:
-            self.quirk["on"] = True
-        self.on = self.quirk["on"]
-        if "group" not in self.quirk:
-            self.quirk["group"] = "Miscellaneous"
-        self.group = self.quirk["group"]
-        try:
-            self.checkstate = self.quirk["checkstate"]
-        except KeyError:
-            pass
+# class pesterQuirk:
+#     def __init__(self, quirk):
+#         if not isinstance(quirk, dict):
+#             raise ValueError("Quirks must be given a dictionary")
+#         self.quirk = quirk
+#         self.type = self.quirk["type"]
+#         if "on" not in self.quirk:
+#             self.quirk["on"] = True
+#         self.on = self.quirk["on"]
+#         if "group" not in self.quirk:
+#             self.quirk["group"] = "Miscellaneous"
+#         self.group = self.quirk["group"]
+#         try:
+#             self.checkstate = self.quirk["checkstate"]
+#         except KeyError:
+#             pass
 
-    def apply(self, string, first=False, last=False):
-        if not self.on:
-            return string
-        elif self.type == "prefix":
-            return self.quirk["value"] + string
-        elif self.type == "suffix":
-            return string + self.quirk["value"]
-        elif self.type == "replace":
-            return string.replace(self.quirk["from"], self.quirk["to"])
-        elif self.type == "regexp":
-            fr = self.quirk["from"]
-            if not first and len(fr) > 0 and fr[0] == "^":
-                return string
-            if not last and len(fr) > 0 and fr[len(fr) - 1] == "$":
-                return string
-            to = self.quirk["to"]
-            pt = parseRegexpFunctions(to)
-            return re.sub(fr, pt.expand, string)
-        elif self.type == "random":
-            if len(self.quirk["randomlist"]) == 0:
-                return string
-            fr = self.quirk["from"]
-            if not first and len(fr) > 0 and fr[0] == "^":
-                return string
-            if not last and len(fr) > 0 and fr[len(fr) - 1] == "$":
-                return string
+#     def apply(self, string, first=False, last=False):
+#         if not self.on:
+#             return string
+#         elif self.type == "prefix":
+#             return self.quirk["value"] + string
+#         elif self.type == "suffix":
+#             return string + self.quirk["value"]
+#         elif self.type == "replace":
+#             return string.replace(self.quirk["from"], self.quirk["to"])
+#         elif self.type == "regexp":
+#             fr = self.quirk["from"]
+#             if not first and len(fr) > 0 and fr[0] == "^":
+#                 return string
+#             if not last and len(fr) > 0 and fr[len(fr) - 1] == "$":
+#                 return string
+#             to = self.quirk["to"]
+#             pt = parseRegexpFunctions(to)
+#             return re.sub(fr, pt.expand, string)
+#         elif self.type == "random":
+#             if len(self.quirk["randomlist"]) == 0:
+#                 return string
+#             fr = self.quirk["from"]
+#             if not first and len(fr) > 0 and fr[0] == "^":
+#                 return string
+#             if not last and len(fr) > 0 and fr[len(fr) - 1] == "$":
+#                 return string
 
-            def randomrep(mo):
-                choice = random.choice(self.quirk["randomlist"])
-                pt = parseRegexpFunctions(choice)
-                return pt.expand(mo)
+#             def randomrep(mo):
+#                 choice = random.choice(self.quirk["randomlist"])
+#                 pt = parseRegexpFunctions(choice)
+#                 return pt.expand(mo)
 
-            return re.sub(self.quirk["from"], randomrep, string)
-        elif self.type == "spelling":
-            percentage = self.quirk["percentage"] / 100.0
-            words = string.split(" ")
-            newl = []
-            ctag = re.compile("(</?c=?.*?>)", re.I)
-            for w in words:
-                p = random.random()
-                if not ctag.search(w) and p < percentage:
-                    newl.append(mispeller(w))
-                elif p < percentage:
-                    split = ctag.split(w)
-                    tmp = []
-                    for s in split:
-                        if s and not ctag.search(s):
-                            tmp.append(mispeller(s))
-                        else:
-                            tmp.append(s)
-                    newl.append("".join(tmp))
-                else:
-                    newl.append(w)
-            return " ".join(newl)
+#             return re.sub(self.quirk["from"], randomrep, string)
+#         elif self.type == "spelling":
+#             percentage = self.quirk["percentage"] / 100.0
+#             words = string.split(" ")
+#             newl = []
+#             ctag = re.compile("(</?c=?.*?>)", re.I)
+#             for w in words:
+#                 p = random.random()
+#                 if not ctag.search(w) and p < percentage:
+#                     newl.append(mispeller(w))
+#                 elif p < percentage:
+#                     split = ctag.split(w)
+#                     tmp = []
+#                     for s in split:
+#                         if s and not ctag.search(s):
+#                             tmp.append(mispeller(s))
+#                         else:
+#                             tmp.append(s)
+#                     newl.append("".join(tmp))
+#                 else:
+#                     newl.append(w)
+#             return " ".join(newl)
 
-    def __str__(self):
-        if self.type == "prefix":
-            return "BEGIN WITH: %s" % (self.quirk["value"])
-        elif self.type == "suffix":
-            return "END WITH: %s" % (self.quirk["value"])
-        elif self.type == "replace":
-            return "REPLACE {} WITH {}".format(self.quirk["from"], self.quirk["to"])
-        elif self.type == "regexp":
-            return "REGEXP: {} REPLACED WITH {}".format(
-                self.quirk["from"],
-                self.quirk["to"],
-            )
-        elif self.type == "random":
-            return "REGEXP: {} RANDOMLY REPLACED WITH {}".format(
-                self.quirk["from"],
-                [r for r in self.quirk["randomlist"]],
-            )
-        elif self.type == "spelling":
-            return "MISPELLER: %d%%" % (self.quirk["percentage"])
+#     def __str__(self):
+#         if self.type == "prefix":
+#             return "BEGIN WITH: %s" % (self.quirk["value"])
+#         elif self.type == "suffix":
+#             return "END WITH: %s" % (self.quirk["value"])
+#         elif self.type == "replace":
+#             return "REPLACE {} WITH {}".format(self.quirk["from"], self.quirk["to"])
+#         elif self.type == "regexp":
+#             return "REGEXP: {} REPLACED WITH {}".format(
+#                 self.quirk["from"],
+#                 self.quirk["to"],
+#             )
+#         elif self.type == "random":
+#             return "REGEXP: {} RANDOMLY REPLACED WITH {}".format(
+#                 self.quirk["from"],
+#                 [r for r in self.quirk["randomlist"]],
+#             )
+#         elif self.type == "spelling":
+#             return "MISPELLER: %d%%" % (self.quirk["percentage"])
 
 
 class pesterQuirks:
@@ -137,27 +137,30 @@ class pesterQuirks:
     def plainList(self):
         return [q.quirk for q in self.quirklist]
 
-    def addQuirk(self, q):
-        if isinstance(q, dict):
-            self.quirklist.append(pesterQuirk(q))
-        elif isinstance(q, pesterQuirk):
-            self.quirklist.append(q)
+    def addQuirk(self, quirk):
+        """quirk: dict or a quirks.PesterQuirk"""
+        if isinstance(quirk, dict):
+            self.quirklist.append(PesterQuirkFactory(quirk))
+        elif isinstance(quirk, PesterQuirk):
+            self.quirklist.append(quirk)
 
     def apply(self, lexed, first=False, last=False):
-        prefix = [q for q in self.quirklist if q.type == "prefix"]
+        prefixes = [
+            quirk for quirk in self.quirklist if isinstance(quirk, PrefixPesterQuirk)
+        ]
         # suffix = [q for q in self.quirklist if q.type == "suffix"]
 
         newlist = []
-        for i, o in enumerate(lexed):
+        for idx, o in enumerate(lexed):
             if not isinstance(o, str):
-                if i == 0:
+                if idx == 0:
                     string = " "
-                    for p in prefix:
+                    for p in prefixes:
                         string += p.apply(string)
                     newlist.append(string)
                 newlist.append(o)
                 continue
-            lastStr = i == len(lexed) - 1
+            lastStr = idx == len(lexed) - 1
             string = o
             for q in self.quirklist:
                 try:
