@@ -567,7 +567,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
                 for d in dirnames:
                     if d not in themes:
                         themes.append(d)
-        themes.sort()
+        themes.sort(key=str.casefold)
         return themes
 
     def availableProfiles(self):
