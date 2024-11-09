@@ -31,19 +31,21 @@ _alternian = re.compile(r"<alt>.*?</alt>")
 def PesterQuirkFactory(quirk: dict):
     """Returns a valid PesterQuirk object from the given quirk dictionary"""
     # This is a "factory" because a lot of old code depends on calling the old class which was all quirks rolled into 1
-    match quirk["type"]:
-        case "prefix":
-            return PrefixPesterQuirk(quirk)
-        case "suffix":
-            return SuffixPesterQuirk(quirk)
-        case "replace":
-            return ReplacePesterQuirk(quirk)
-        case "regexp":
-            return RegexpPesterQuirk(quirk)
-        case "random":
-            return RandomPesterQuirk(quirk)
-        case "spelling":
-            return MispellerPesterQuirk(quirk)
+
+    # Switch case is much nicer here but python 3.8 doesn't support it :"3
+    # TODO: change back to a switch statement when windows 7 support is dropped
+    if quirk["type"] == "prefix":
+        return PrefixPesterQuirk(quirk)
+    elif quirk["type"] == "suffix":
+        return SuffixPesterQuirk(quirk)
+    elif quirk["type"] == "replace":
+        return ReplacePesterQuirk(quirk)
+    elif quirk["type"] == "regexp":
+        return RegexpPesterQuirk(quirk)
+    elif quirk["type"] == "random":
+        return RandomPesterQuirk(quirk)
+    elif quirk["type"] == "spelling":
+        return MispellerPesterQuirk(quirk)
 
 
 class PesterQuirk:
