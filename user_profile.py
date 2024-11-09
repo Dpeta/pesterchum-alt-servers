@@ -18,9 +18,10 @@ except ImportError:
     print("PyQt5 fallback (profile.py)")
     from PyQt5 import QtCore, QtGui, QtWidgets
 
+import quirks
 import ostools
 from mood import Mood
-from dataobjs import PesterProfile, pesterQuirks
+from dataobjs import PesterProfile
 from parsetools import convertTags
 
 _datadir = ostools.getDataDir()
@@ -649,7 +650,7 @@ class userProfile:
             self.theme = pesterTheme("pesterchum")
             self.chat.mood = Mood(self.theme["main/defaultmood"])
             self.lastmood = self.chat.mood.value()
-            self.quirks = pesterQuirks([])
+            self.quirks = quirks.PesterQuirkCollection([])
             self.randoms = False
             initials = self.chat.initials()
             if len(initials) >= 2:
@@ -711,7 +712,7 @@ class userProfile:
                 QtGui.QColor(self.userprofile["color"]),
                 Mood(self.lastmood),
             )
-            self.quirks = pesterQuirks(self.userprofile["quirks"])
+            self.quirks = quirks.PesterQuirkCollection(self.userprofile["quirks"])
             if "randoms" not in self.userprofile:
                 self.userprofile["randoms"] = False
             self.randoms = self.userprofile["randoms"]

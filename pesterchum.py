@@ -39,7 +39,8 @@ from menus import (
     AddChumDialog,
 )
 from mood import Mood, PesterMoodAction, PesterMoodHandler, PesterMoodButton
-from dataobjs import PesterProfile, pesterQuirk, pesterQuirks
+from dataobjs import PesterProfile
+from quirks import PesterQuirkCollection
 from generic import (
     PesterIcon,
     RightClickTree,
@@ -2901,7 +2902,7 @@ class PesterWindow(MovingWindow):
                     item.checkState(0) == QtCore.Qt.CheckState.Checked
                 )
                 item.quirk.quirk["group"] = item.quirk.group = curgroup
-        quirks = pesterQuirks(self.quirkmenu.quirks())
+        quirks = PesterQuirkCollection(self.quirkmenu.quirks())
         self.userprofile.setQuirks(quirks)
         if hasattr(self.quirkmenu, "quirktester") and self.quirkmenu.quirktester:
             self.quirkmenu.quirktester.close()
