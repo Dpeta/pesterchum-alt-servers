@@ -4418,7 +4418,7 @@ class UpdateAvailable(QtWidgets.QDialog):
     def update(self):
         QtGui.QDesktopServices.openUrl(
             QtCore.QUrl(
-                "https://github.com/Dpeta/pesterchum-alt-servers/",
+                "https://github.com/Dpeta/pesterchum-alt-servers/releases",
                 QtCore.QUrl.ParsingMode.TolerantMode,
             )
         )
