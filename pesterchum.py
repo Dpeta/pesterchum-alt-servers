@@ -62,6 +62,7 @@ from logviewer import PesterLogUserSelect, PesterLogViewer
 from randomer import RandomHandler, RANDNICK
 from toast import PesterToastMachine, PesterToast
 from scripts.services import SERVICES, CUSTOMBOTS, BOTNAMES, translate_nickserv_msg
+import embeds
 
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets, QtMultimedia
@@ -1260,9 +1261,12 @@ class PesterWindow(MovingWindow):
         # Part 1 :(
         try:
             if self.config.defaultprofile():
+                # "defaultprofile" config setting is set
+                # load is here
                 self.userprofile = userProfile(self.config.defaultprofile())
                 self.theme = self.userprofile.getTheme()
             else:
+                # Generate a new profile (likely this is the first-run)
                 self.userprofile = userProfile(
                     PesterProfile(
                         "pesterClient%d" % (random.randint(100, 999)),
@@ -1352,6 +1356,8 @@ class PesterWindow(MovingWindow):
         self.chatlog = PesterLog(self.profile().handle, self)
 
         self.move(100, 100)
+
+        embeds.manager.mainwindow = self  ## We gotta get a reference to the user profile from somewhere since its not global. oh well
 
         talk = QAction(self.theme["main/menus/client/talk"], self)
         self.talk = talk
@@ -3096,6 +3102,15 @@ class PesterWindow(MovingWindow):
                 self.config.set("time12Format", False)
             secondssetting = self.optionmenu.secondscheck.isChecked()
             self.config.set("showSeconds", secondssetting)
+
+            # trusted domains
+            trusteddomains = []
+            for i in range(self.optionmenu.list_trusteddomains.count()):
+                trusteddomains.append(
+                    self.optionmenu.list_trusteddomains.item(i).text()
+                )
+            self.userprofile.setTrustedDomains(trusteddomains)
+
             # groups
             # groupssetting = self.optionmenu.groupscheck.isChecked()
             # self.config.set("useGroups", groupssetting)
