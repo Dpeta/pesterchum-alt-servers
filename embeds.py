@@ -97,7 +97,7 @@ class EmbedsManager(QtCore.QObject):
         """Callback, called when an embed has finished downloading"""
         self.downloading.remove(url)
         if reply.error() == QtNetwork.QNetworkReply.NetworkError.NoError:
-            PchumLog.info(f"Finished fetching embed {url}")
+            PchumLog.info("Finished fetching embed %s", url)
 
             pixmap = QtGui.QPixmap()
             pixmap.loadFromData(reply.readAll())
