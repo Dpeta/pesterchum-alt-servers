@@ -7,17 +7,17 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Python 3.11 x64
+      - name: Setup Python 3.12 x64
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           architecture: 'x64'
       - name: Update pip
         run: python -m pip install --upgrade pip
       - name: Update builds tools
         run: python -m pip install --upgrade setuptools wheel
       - name: Install dependencies
-        run: python -m pip install -r requirements.txt
+        run: python -m pip install certifi PyQt6==6.7.1
       - name: Install PyInstaller
         run: python -m pip install --upgrade PyInstaller
       - name: Run pyinst.py
@@ -33,10 +33,10 @@ jobs:
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Python 3.11 x64
+      - name: Setup Python 3.12 x64
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           architecture: 'x64'
       - name: Update pip
         run: python -m pip install --upgrade pip
@@ -81,23 +81,23 @@ jobs:
           name: Pesterchum_win32_py38.zip
           path: Pesterchum_win32_py38.zip
           
-  build_macos64_12:
-    runs-on: macos-12
+  build_macos64_13:
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Python 3.11 x64
+      - name: Setup Python 3.10 x64
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.10'
           architecture: 'x64'
       - name: Update pip
         run: python -m pip install --upgrade pip
       - name: Update builds tools
         run: python -m pip install --upgrade setuptools wheel
       - name: Install dependencies
-        run: python -m pip install -r requirements.txt
+        run: python -m pip install certifi PyQt6==6.7.1
       - name: Install PyInstaller
-        run: python -m pip install --upgrade PyInstaller
+        run: python -m pip install PyInstaller==5.7.0
       - name: Run pyinst.py
         run: python3 pyinst.py --no-prompts --onefile --no-upx --no-crt --no-clean --windowed
       - name: Create archive (.tar.xz)
