@@ -1,6 +1,21 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.7.0] - 2024-12-24
+
+### Added
+ - Theme repository works now!! woo yeah woo yeah (by [mocchapi](https://github.com/mocchapi) https://github.com/Dpeta/pesterchum-alt-servers/pull/169)
+ - Chat image embeds (by [mocchapi](https://github.com/mocchapi) https://github.com/Dpeta/pesterchum-alt-servers/pull/184)
+ - Update checker + memo report option (by [maloryware](https://github.com/maloryware) https://github.com/Dpeta/pesterchum-alt-servers/pull/170)
+ 
+### Fix
+ - Sort theme list case-insensitively (by [mocchapi](https://github.com/mocchapi) https://github.com/Dpeta/pesterchum-alt-servers/pull/185)
+ - An attempt was made to fix the socket issues but skill issue 
+ - "Pesterchum is still running message" appearing always when closing Pesterchum
+ 
+### Changed
+ - Classify pesterquirk (by [mocchapi](https://github.com/mocchapi) https://github.com/Dpeta/pesterchum-alt-servers/pull/186)
+
 ## [v2.6.0] - 2024-02-08
 
 ### Added
