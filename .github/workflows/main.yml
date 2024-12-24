@@ -3,8 +3,8 @@ name: PyInstaller builds
 on: [push, workflow_dispatch]
 
 jobs:
-  build_ubuntu64_20:
-    runs-on: ubuntu-20.04
+  build_ubuntu64_22:
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python 3.12 x64
@@ -23,11 +23,37 @@ jobs:
       - name: Run pyinst.py
         run: python3 pyinst.py --no-prompts --onefile --no-upx --no-crt --no-clean --windowed
       - name: Create archive (.tar.xz)
-        run: tar -cavf Pesterchum_linux64.tar.xz -C dist Pesterchum
+        run: tar -cavf Pesterchum_linux64_glibc2-35+.tar.xz -C dist Pesterchum
       - uses: actions/upload-artifact@v4
         with:
-          name: Pesterchum_linux64.tar.xz
-          path: Pesterchum_linux64.tar.xz
+          name: Pesterchum_linux64_glibc2-35+.tar.xz
+          path: Pesterchum_linux64_glibc2-35+.tar.xz
+
+  build_ubuntu64_24:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python 3.12 x64
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          architecture: 'x64'
+      - name: Update pip
+        run: python -m pip install --upgrade pip
+      - name: Update builds tools
+        run: python -m pip install --upgrade setuptools wheel
+      - name: Install dependencies
+        run: python -m pip install certifi PyQt6==6.7.1
+      - name: Install PyInstaller
+        run: python -m pip install --upgrade PyInstaller
+      - name: Run pyinst.py
+        run: python3 pyinst.py --no-prompts --onefile --no-upx --no-crt --no-clean --windowed
+      - name: Create archive (.tar.xz)
+        run: tar -cavf Pesterchum_linux64_glibc2-39+.tar.xz -C dist Pesterchum
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Pesterchum_linux64_glibc2-39+.tar.xz
+          path: Pesterchum_linux64_glibc2-39+.tar.xz
 
   build_win64_310:
     runs-on: windows-2019
