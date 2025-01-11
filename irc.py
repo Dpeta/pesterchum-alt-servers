@@ -589,12 +589,10 @@ class PesterIRC(QtCore.QThread):
         METADATA <Target> <Key> <Visibility> <Value>
         """
         if key.casefold() == "mood":
-            if is_valid_mood(value[0]):
-                mood = Mood(int(value[0]))
+            if is_valid_mood(value):
+                mood = Mood(int(value))
             else:
-                PchumLog.warning(
-                    "Mood index '%s' from '%s' is not valid.", value[0], nick
-                )
+                PchumLog.warning("Mood index '%s' from '%s' is not valid.", value, nick)
                 mood = Mood(0)
             self.moodUpdated.emit(nick, mood)
         elif key.casefold() == "color":
@@ -1085,7 +1083,7 @@ class PesterIRC(QtCore.QThread):
             )
 
     def _sasl_skill_issue(self, *_msg):
-        """Handles all responses from server that indicate SASL authentication failed.
+        """Handles all responses from server that indicate SASL authentication failed.
 
         Replies that indicate we can't authenticate include: 902, 904, 905.
         Aborts SASL by sending CAP END, ending capability negotiation."""
