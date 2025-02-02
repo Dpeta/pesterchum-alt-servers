@@ -854,7 +854,9 @@ class chumArea(RightClickTree):
                 QScrollBar:up-arrow { %s } \
                 QScrollBar:down-arrow { %s }"
                 % (
-                    theme["main/chums/style"], # This is kind of hacky, but without it chumrolls dont get styled when u set a scrollbar
+                    theme[
+                        "main/chums/style"
+                    ],  # This is kind of hacky, but without it chumrolls dont get styled when u set a scrollbar
                     theme["main/chums/style"],
                     theme["main/chums/scrollbar/style"],
                     theme["main/chums/scrollbar/handle"],
