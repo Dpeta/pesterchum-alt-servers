@@ -12,7 +12,9 @@
  - Sort theme list case-insensitively (by [mocchapi](https://github.com/mocchapi) https://github.com/Dpeta/pesterchum-alt-servers/pull/185)
  - An attempt was made to fix the socket issues but skill issue 
  - "Pesterchum is still running message" appearing always when closing Pesterchum
- 
+ - Wrong moods being displayed with index > 9 (by [mocchapi](https://github.com/mocchapi) https://github.com/Dpeta/pesterchum-alt-servers/pull/191)
+ - Fix "theme/item" in theme checks for theme scrollbars (by [mocchapi](https://github.com/mocchapi) https://github.com/Dpeta/pesterchum-alt-servers/pull/192)
+
 ### Changed
  - Classify pesterquirk (by [mocchapi](https://github.com/mocchapi) https://github.com/Dpeta/pesterchum-alt-servers/pull/186)
 
