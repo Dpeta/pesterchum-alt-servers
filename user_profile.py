@@ -1049,6 +1049,10 @@ class pesterTheme(dict):
             else:
                 return default
 
+    def __contains__(self, key):
+        # Allows for `"thing/other/thing" in theme` checking
+        return self.has_key(key)
+
     def has_key(self, key):
         keys = key.split("/")
         try:

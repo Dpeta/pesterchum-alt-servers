@@ -840,7 +840,8 @@ class chumArea(RightClickTree):
         self.move(*theme["main/chums/loc"])
         if "main/chums/scrollbar" in theme:
             self.setStyleSheet(
-                "QListWidget { %s } \
+                "RightClickTree { %s } \
+                QListWidget { %s } \
                 QScrollBar { %s } \
                 QScrollBar::handle { %s } \
                 QScrollBar::add-line { %s } \
@@ -848,6 +849,7 @@ class chumArea(RightClickTree):
                 QScrollBar:up-arrow { %s } \
                 QScrollBar:down-arrow { %s }"
                 % (
+                    theme["main/chums/style"], # This is kind of hacky, but without it chumrolls dont get styled when u set a scrollbar
                     theme["main/chums/style"],
                     theme["main/chums/scrollbar/style"],
                     theme["main/chums/scrollbar/handle"],
