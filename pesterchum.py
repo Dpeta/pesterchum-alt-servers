@@ -798,6 +798,7 @@ class chumArea(RightClickTree):
     def updateMood(self, handle, mood):
         hideoff = self.mainwindow.config.hideOfflineChums()
         chums = self.getChums(handle)
+        # Grab all the chums from the chumroll that matches the handle (duplicates are possible)
         oldmood = None
         if hideoff:
             if (
@@ -818,14 +819,18 @@ class chumArea(RightClickTree):
                     # self.takeItem(c)
                 chums = []
         for c in chums:
+            # For each instance of the handle on the chumroll, change their displayed mood
             if hasattr(c, "mood"):
                 oldmood = c.mood
                 c.setMood(mood)
+
         if self.mainwindow.config.sortMethod() == 1:
+            # uh. uhmm. uhh. uhhhh.
             for i in range(self.topLevelItemCount()):
                 saveCurrent = self.currentItem()
                 self.moodSort(i)
                 self.setCurrentItem(saveCurrent)
+            # yeah idk what this does ↑
         if self.mainwindow.config.showOnlineNumbers():
             self.showOnlineNumbers()
         return oldmood
@@ -1202,10 +1207,8 @@ class TrollSlumWindow(QtWidgets.QFrame):
             self, "Add Troll", "Enter Troll Handle:"
         )
         if ok:
-            if not (
-                PesterProfile.checkLength(handle)
-                and PesterProfile.checkValid(handle)[0]
-            ):
+            # TODO MAYBE: Perhaps check PesterProfile.checkValid(handle)[0] & add a confirmation witha little "you may have missed a capital letter r u sure" if its invalid
+            if not (PesterProfile.checkLength(handle)):
                 errormsg = QtWidgets.QErrorMessage(self)
                 errormsg.showMessage("THIS IS NOT A VALID CHUMTAG!")
                 self.addchumdialog = None
@@ -1901,8 +1904,10 @@ class PesterWindow(MovingWindow):
         self.chumdb.setColor(handle, color)
 
     def updateMood(self, handle, mood):
-        # updates OTHER chums' moods
-        oldmood = self.chumList.updateMood(handle, mood)
+        # updates OTHER (but also ours if we're on our own chumroll) chums' moods
+        oldmood = self.chumList.updateMood(
+            handle, mood
+        )  # This calls chumArea.updateMood
         if handle in self.convos:
             self.convos[handle].updateMood(mood, old=oldmood)
         if hasattr(self, "trollslum") and self.trollslum:
@@ -2124,9 +2129,11 @@ class PesterWindow(MovingWindow):
         if self.moods:
             self.moods.removeButtons()
         mood_list = theme["main/moods"]
-        mood_list = [{str(k): v for (k, v) in d.items()} for d in mood_list]
         self.moods = PesterMoodHandler(
-            self, *[PesterMoodButton(self, **d) for d in mood_list]
+            self,
+            [
+                PesterMoodButton(self, **mood) for mood in mood_list
+            ],  # For mood dict in mood_list, create a matching PesterMoodButton
         )
         self.moods.showButtons()
         # chum
@@ -2467,8 +2474,8 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot(str, Mood)
     def updateMoodSlot(self, handle, mood):
-        h = handle
-        self.updateMood(h, mood)
+        # Called by IRC for each handle that updates its mood, either through #pesterchum or metadata
+        self.updateMood(handle, mood)
 
     @QtCore.pyqtSlot(str, QtGui.QColor)
     def updateColorSlot(self, handle, color):
@@ -2644,10 +2651,8 @@ class PesterWindow(MovingWindow):
                 if handle in [h.handle for h in self.chumList.chums]:
                     self.addchumdialog = None
                     return
-                if not (
-                    PesterProfile.checkLength(handle)
-                    and PesterProfile.checkValid(handle)[0]
-                ):
+                # TODO MAYBE: Perhaps check PesterProfile.checkValid(handle)[0] & add a confirmation witha little "you may have missed a capital letter r u sure" if its invalid
+                if not (PesterProfile.checkLength(handle)):
                     errormsg = QtWidgets.QErrorMessage(self)
                     errormsg.showMessage("THIS IS NOT A VALID CHUMTAG!")
                     self.addchumdialog = None
@@ -2709,10 +2714,9 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot(str)
     def unblockChum(self, handle):
-        h = handle
-        self.config.delBlocklist(h)
-        if h in self.convos:
-            convo = self.convos[h]
+        self.config.delBlocklist(handle)
+        if handle in self.convos:
+            convo = self.convos[handle]
             msg = self.profile().pestermsg(
                 convo.chum,
                 QtGui.QColor(self.theme["convo/systemMsgColor"]),
@@ -2721,7 +2725,7 @@ class PesterWindow(MovingWindow):
             convo.textArea.append(convertTags(msg))
             self.chatlog.log(convo.chum.handle, msg)
             convo.updateMood(convo.chum.mood, unblocked=True)
-        chum = PesterProfile(h, chumdb=self.chumdb)
+        chum = PesterProfile(handle, chumdb=self.chumdb)
         if hasattr(self, "trollslum") and self.trollslum:
             self.trollslum.removeTroll(handle)
         self.config.addChum(chum)
