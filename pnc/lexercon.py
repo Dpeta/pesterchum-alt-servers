@@ -228,7 +228,7 @@ class ResetTag(CTagEnd, FTagEnd):
     def convert(self, format):
         text = ""
         if format == "irc":
-            return "\x0F"
+            return "\x0f"
         elif format == "pchum":
             # Later on, this one is going to be infuriatingly tricky.
             # Supporting things like bold and so on doesn't really allow for an

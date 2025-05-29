@@ -1,5 +1,6 @@
 import os
 import re
+import math
 import random
 import logging
 import itertools
@@ -46,6 +47,8 @@ def PesterQuirkFactory(quirk: dict):
         return RandomPesterQuirk(quirk)
     elif quirk["type"] == "spelling":
         return MispellerPesterQuirk(quirk)
+    elif quirk["type"] == "gradient":
+        return GradientPesterQuirk(quirk)
 
 
 class PesterQuirk:
@@ -212,6 +215,57 @@ class MispellerPesterQuirk(PesterQuirk):
 
     def __str__(self):
         return "MISPELLER: %d%%" % (self.quirk["percentage"])
+
+
+class GradientPesterQuirk(PesterQuirk):
+    def __init__(self, quirk: dict):
+        assert quirk["type"] == "gradient"
+        super().__init__(quirk)
+
+    def _do_gradient(self, string):
+        colors = self.quirk.get("colors", [])
+
+        prevcolor = colors[0]
+        output = "<c=" + prevcolor + ">"
+
+        for idx, char in enumerate(string):
+            # Transform string index to right color index
+            percentage = idx / len(string)
+            floated_index = percentage * len(colors)
+            rounded_index = min(math.floor(floated_index), len(colors) - 1)
+
+            color = colors[rounded_index]
+
+            # apply color
+            if color != prevcolor:
+                output += "</c><c=" + color + ">"
+                prevcolor = color
+            output += char
+
+        return output
+
+    def _apply(self, string: str, first: bool, last: bool):
+        # regex string
+        regex = self.quirk.get("from", "(.*)")
+        template = self.quirk.get("template", "\\1")
+
+        # Exit prematurely if the regexp is only supposed to act on the first substring of the superstring and this isnt that (^ is start of string)
+        if not first and len(regex) > 0 and regex[0] == "^":
+            return string
+        # Exit prematurely if the regexp is only supposed to act on the last substring of the superstring and this isnt that ($ is end of string)
+        if not last and len(regex) > 0 and regex[-1] == "$":
+            return string
+
+        def on_match(match):
+            text = match.expand(template)
+            return self._do_gradient(text)
+
+        return re.sub(regex, on_match, string)
+
+    def __str__(self):
+        return "REPLACE {} WITH\ngradient({}, {})".format(
+            self.quirk["from"], self.quirk["template"], self.quirk["colors"]
+        )
 
 
 # TODO: clean this up. its huge and really hard to read
