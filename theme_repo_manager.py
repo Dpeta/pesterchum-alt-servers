@@ -65,9 +65,11 @@ userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/12
 # these are here because we connect the reply finished() signal to lambdas later on
 # and APPARENTLY they get garbage collected & never trigger if your code leaves the scope before it finishes downloading
 # which is basically always unless the file is like 0.001kb. anyways. evil pyqt
-def get_request(url):
+def get_request(url, extra_headers={}):
     request = QtNetwork.QNetworkRequest(QtCore.QUrl(url))
     request.setRawHeader(b"User-Agent", userAgent.encode())
+    for name, value in extra_headers.items():
+        request.setRawHeader(str(name).encode(), str(value).encode())
     reply = networkManager.get(request)
     # Add to downloads set to prevent GC until its finished
     downloads.add(reply)

@@ -45,7 +45,7 @@ _alternian_end = re.compile(r"</alt>")
 
 
 _embedre = re.compile(
-    r"(?i)(?:^|(?<=\s))(?:(?:https?):\/\/)[^\s]+(?:\.png|\.jpg|\.jpeg)(?:\?[^\s]+)?"
+    r"(?i)(?:^|(?<=\s))(?:(?:https?):\/\/)[^\s]+(?:\.png|\.jpg|\.jpeg|\.gif|\.webp)(?:\?[^\s]+)?"
 )
 
 
