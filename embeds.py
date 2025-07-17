@@ -90,7 +90,7 @@ class EmbedsManager(QtCore.QObject):
         # Track which embeds are downloading so we dont do double-fetches
 
         self.embed_loading.emit(url)
-        reply = get_request(url)
+        reply = get_request(url, {"Accept": "image/*, */*;q=0.8"})
         reply.finished.connect(lambda: self._on_request_finished(reply, url))
 
     def _on_request_finished(self, reply, url):
