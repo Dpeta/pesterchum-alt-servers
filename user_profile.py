@@ -38,6 +38,8 @@ DEFAULT_EMBED_TRUSTLIST = [  # Default list of trusted image embed domains
     "https://i.giphy.com/",
     "https://64.media.tumblr.com/",
     "https://i.redd.it/",
+    "https://files.catbox.moe/"
+    "https://preview.redd.it/"
 ]
 
 
