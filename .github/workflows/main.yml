@@ -24,7 +24,7 @@ jobs:
         run: python3 pyinst.py --no-prompts --onefile --no-upx --no-crt --no-clean --windowed
       - name: Create archive (.tar.xz)
         run: tar -cavf Pesterchum_linux64.tar.xz -C dist Pesterchum
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Pesterchum_linux64.tar.xz
           path: Pesterchum_linux64.tar.xz
@@ -50,7 +50,7 @@ jobs:
         run: python3 pyinst.py --no-prompts --onefile --no-upx --crt --no-clean --windowed
       - name: Create archive (.zip)
         run: tar.exe -a -c -f Pesterchum_win64_py311.zip -C dist Pesterchum
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Pesterchum_win64_py311.zip
           path: Pesterchum_win64_py311.zip
@@ -76,7 +76,7 @@ jobs:
         run: python3 pyinst.py --prompts False --onefile True --upx False --crt True --clean False --windowed True
       - name: Create archive (.zip)
         run: tar.exe -a -c -f Pesterchum_win32_py38.zip -C dist Pesterchum
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Pesterchum_win32_py38.zip
           path: Pesterchum_win32_py38.zip
@@ -102,7 +102,7 @@ jobs:
         run: python3 pyinst.py --no-prompts --onefile --no-upx --no-crt --no-clean --windowed
       - name: Create archive (.tar.xz)
         run: tar -cavf Pesterchum_macOS64.tar.xz -C dist Pesterchum.app
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Pesterchum_macOS64.tar.xz
           path: Pesterchum_macOS64.tar.xz
