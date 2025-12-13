@@ -98,6 +98,7 @@ class PesterIRC(QtCore.QThread):
             "324": self._channelmodeis,
             "353": self._namreply,
             "366": self._endofnames,
+            "404": self._noexternalmessages,
             "432": self._erroneusnickname,
             "433": self._nicknameinuse,
             "436": self._nickcollision,
@@ -307,6 +308,9 @@ class PesterIRC(QtCore.QThread):
             self.socket.close()
         except OSError as exception:
             PchumLog.info("Error while closing socket, already broken? %s", exception)
+        finally:
+            self._send_irc.socket = None
+            self.socket = None
 
     def irc_connect(self):
         """Try to connect and signal for connect-anyway prompt on cert fail."""
@@ -1085,6 +1089,10 @@ class PesterIRC(QtCore.QThread):
     def _saslsuccess(self, *_msg):
         """Handle 'RPL_SASLSUCCESS' reply from server, SASL authentication succeeded! woo yeah!!"""
         self.end_cap_negotiation()
+
+    def _noexternalmessages(self, _server, _handle, channel_name, msg=""):
+        """Handle 404 ERR_CANNOTSENDTOCHAN from server"""
+        self.cannotSendToChan.emit(channel_name, msg)
 
     moodUpdated = QtCore.pyqtSignal(str, Mood)
     colorUpdated = QtCore.pyqtSignal(str, QtGui.QColor)
