@@ -4018,6 +4018,7 @@ class PesterWindow(MovingWindow):
         msgbox.setDefaultButton(QtWidgets.QMessageBox.StandardButton.No)
         ret = msgbox.exec()
         if ret == QtWidgets.QMessageBox.StandardButton.Yes:
+            self.parent.irc.stop_irc = None
             self.parent.restartIRC(verify_hostname=False)
 
     pcUpdate = QtCore.pyqtSignal(str, str)
