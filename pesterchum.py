@@ -11,9 +11,10 @@ import time
 import json
 import ctypes
 
-# Set working directory
-if os.path.dirname(sys.argv[0]):
-    os.chdir(os.path.dirname(sys.argv[0]))
+# Set working directory to script location
+working_directory = os.path.dirname(os.path.abspath(__file__))
+if working_directory:
+    os.chdir(working_directory)
 
 import ostools
 import pytwmn
