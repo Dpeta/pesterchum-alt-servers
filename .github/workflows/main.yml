@@ -47,7 +47,7 @@ jobs:
       - name: Install PyInstaller
         run: python -m pip install --upgrade PyInstaller
       - name: Run pyinst.py
-        run: python3 pyinst.py --no-prompts --onefile --no-upx --no-crt --no-clean --windowed
+        run: python3 pyinst.py --no-prompts --no-upx --no-crt --no-clean --windowed
       - name: Create archive (.tar.xz)
         run: tar -cavf Pesterchum_linux64_glibc2-39+.tar.xz -C dist Pesterchum
       - uses: actions/upload-artifact@v4
@@ -121,9 +121,9 @@ jobs:
       - name: Update builds tools
         run: python -m pip install --upgrade setuptools wheel
       - name: Install dependencies
-        run: python -m pip install certifi PyQt6==6.7.1
+        run: python -m pip install certifi PyQt6
       - name: Install PyInstaller
-        run: python -m pip install PyInstaller==5.7.0
+        run: python -m pip install PyInstaller
       - name: Run pyinst.py
         run: python3 pyinst.py --no-prompts --no-upx --no-crt --no-clean --windowed
       - name: Create archive (.tar.xz)
