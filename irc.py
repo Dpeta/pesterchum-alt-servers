@@ -31,6 +31,7 @@ the license notice included with oyoyo source files is indented here:
 import socket
 import random
 import logging
+import ssl
 from ssl import SSLCertVerificationError
 
 try:
@@ -70,9 +71,7 @@ class PesterIRC(QtCore.QThread):
         self.port = port  # Port on server to connect to.
         self.password = password  # Optional password for PASS.
         self.ssl = ssl  # Whether to connect over SSL/TLS.
-        self.verify_hostname = (
-            verify_hostname  # Whether to verify server hostname. (SSL-only)
-        )
+        self.verify_hostname = verify_hostname  # SSL cert validation toggle
 
         self._send_irc = SendIRC()
 
@@ -179,10 +178,15 @@ class PesterIRC(QtCore.QThread):
         if self.ssl:
             # Upgrade connection to use SSL/TLS if enabled
             context = get_ssl_context()
-            context.check_hostname = verify_hostname
-            self.socket = context.wrap_socket(
-                plaintext_socket, server_hostname=self.server
-            )
+            if not verify_hostname:
+                context.check_hostname = False
+                context.verify_mode = ssl.CERT_NONE
+            try:
+                self.socket = context.wrap_socket(
+                    plaintext_socket, server_hostname=self.server
+                )
+            except Exception as e:
+                raise e
         else:
             # SSL/TLS is disabled, connection is plaintext
             self.socket = plaintext_socket
