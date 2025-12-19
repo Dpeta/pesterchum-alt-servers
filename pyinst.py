@@ -745,7 +745,7 @@ else:
     for x in add_data:
         run_generic.append("--add-data=%s" % x.replace(";", ":"))
     if windowed == "y":
-        run_win32.append("--windowed")
+        run_generic.append("--windowed")
 
     print(run_generic)
 
