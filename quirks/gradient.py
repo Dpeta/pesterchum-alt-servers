@@ -85,6 +85,7 @@ def rainbow(text):
                 output += f"<c={color_and_position[0]}>"
         # Add character.
         output += char
+    output += "</c>"
     return output
 
 
