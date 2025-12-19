@@ -2291,7 +2291,12 @@ class PesterMemoList(QtWidgets.QDialog):
 
     def updateChannels(self, channels):
         for c in channels:
-            item = MemoListItem(c[0][1:], c[1])
+            if c[0] == "#":
+                item = MemoListItem(c[0][1:], c[1])
+            elif c[0] == "*":
+                item = MemoListItem("* [secret memo]", c[1])
+            else:
+                item = MemoListItem(c[0][0:], c[1])
             item.setForeground(
                 0, QtGui.QBrush(QtGui.QColor(self.theme["main/chums/userlistcolor"]))
             )
