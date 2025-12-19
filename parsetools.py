@@ -907,6 +907,10 @@ def kxhandleInput(ctx, text=None, flavor=None, irc_compatible=False):
             # NOTE: No reason to reassign for now, but...why not?
             lexmsgs[i] = lm
 
+        # Close tags (fallback)
+        if not irc_compatible:
+            lm = tag_fix(lm)
+
         # Copy the lexed result.
         # Note that memos have to separate processing here. The adds and sends
         # should be kept to the end because of that, near the emission.
@@ -938,6 +942,18 @@ def kxhandleInput(ctx, text=None, flavor=None, irc_compatible=False):
 
     # Clear the input.
     ctx.textInput.setText("")
+
+
+def tag_fix(msg: str):
+    """Add extra closing tags for unclosed color tags
+
+    Some clients don't handle unclosed tags and leak colors
+    """
+    opens = len(re.findall(_ctag_begin, msg))
+    closes = len(re.findall(_ctag_end, msg))
+    if opens > closes:
+        msg = msg + "</c>" * (opens - closes)
+    return msg
 
 
 def addTimeInitial(string, grammar):

@@ -63,10 +63,7 @@ def rainbow(text):
     for match in match_chain:
         for color_and_position in colors_and_positions:
             # color_and_position[1] is pos
-            if (
-                color_and_position[1] >= match.start()
-                and color_and_position[1] <= match.end()
-            ):
+            if match.start() <= color_and_position[1] <= match.end():
                 # Move to 1 character after link.
                 color_and_position[1] = match.end() + 1
 
