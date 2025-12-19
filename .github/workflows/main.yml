@@ -3,14 +3,14 @@ name: PyInstaller builds
 on: [push, workflow_dispatch]
 
 jobs:
-  build_ubuntu64_20:
-    runs-on: ubuntu-20.04
+  build_ubuntu64_22:
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Python 3.11 x64
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - name: Setup Python 3.13 x64
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.13'
           architecture: 'x64'
       - name: Update pip
         run: python -m pip install --upgrade pip
@@ -23,20 +23,46 @@ jobs:
       - name: Run pyinst.py
         run: python3 pyinst.py --no-prompts --no-upx --no-crt --no-clean --windowed
       - name: Create archive (.tar.xz)
-        run: tar -cavf Pesterchum_linux64.tar.xz -C dist Pesterchum
-      - uses: actions/upload-artifact@v3
+        run: tar -cavf Pesterchum_linux64_glibc2-35+.tar.xz -C dist Pesterchum
+      - uses: actions/upload-artifact@v4
         with:
-          name: Pesterchum_linux64.tar.xz
-          path: Pesterchum_linux64.tar.xz
+          name: Pesterchum_linux64_glibc2-35+.tar.xz
+          path: Pesterchum_linux64_glibc2-35+.tar.xz
+
+  build_ubuntu64_24:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python 3.13 x64
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: 'x64'
+      - name: Update pip
+        run: python -m pip install --upgrade pip
+      - name: Update builds tools
+        run: python -m pip install --upgrade setuptools wheel
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Install PyInstaller
+        run: python -m pip install --upgrade PyInstaller
+      - name: Run pyinst.py
+        run: python3 pyinst.py --no-prompts --onefile --no-upx --no-crt --no-clean --windowed
+      - name: Create archive (.tar.xz)
+        run: tar -cavf Pesterchum_linux64_glibc2-39+.tar.xz -C dist Pesterchum
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Pesterchum_linux64_glibc2-39+.tar.xz
+          path: Pesterchum_linux64_glibc2-39+.tar.xz
 
   build_win64_310:
     runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Python 3.11 x64
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - name: Setup Python 3.13 x64
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.13'
           architecture: 'x64'
       - name: Update pip
         run: python -m pip install --upgrade pip
@@ -50,7 +76,7 @@ jobs:
         run: python3 pyinst.py --no-prompts --no-upx --crt --no-clean --windowed
       - name: Create archive (.zip)
         run: tar.exe -a -c -f Pesterchum_win64_py311.zip -C dist Pesterchum
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Pesterchum_win64_py311.zip
           path: Pesterchum_win64_py311.zip
@@ -58,9 +84,9 @@ jobs:
   build_win32_38:
     runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Python 3.8 x86
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.8'
           architecture: 'x86'
@@ -76,33 +102,33 @@ jobs:
         run: python3 pyinst.py --prompts False --upx False --crt True --clean False --windowed True
       - name: Create archive (.zip)
         run: tar.exe -a -c -f Pesterchum_win32_py38.zip -C dist Pesterchum
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Pesterchum_win32_py38.zip
           path: Pesterchum_win32_py38.zip
           
-  build_macos64_11:
-    runs-on: macos-11
+  build_macos64_13:
+    runs-on: macos-13
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Python 3.11 x64
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - name: Setup Python 3.10 x64
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.10'
           architecture: 'x64'
       - name: Update pip
         run: python -m pip install --upgrade pip
       - name: Update builds tools
         run: python -m pip install --upgrade setuptools wheel
       - name: Install dependencies
-        run: python -m pip install -r requirements.txt
+        run: python -m pip install certifi PyQt6==6.7.1
       - name: Install PyInstaller
-        run: python -m pip install --upgrade PyInstaller
+        run: python -m pip install PyInstaller==5.7.0
       - name: Run pyinst.py
         run: python3 pyinst.py --no-prompts --no-upx --no-crt --no-clean --windowed
       - name: Create archive (.tar.xz)
         run: tar -cavf Pesterchum_macOS64.tar.xz -C dist Pesterchum.app
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Pesterchum_macOS64.tar.xz
           path: Pesterchum_macOS64.tar.xz

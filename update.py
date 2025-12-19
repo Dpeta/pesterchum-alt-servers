@@ -17,24 +17,26 @@ except ImportError:
 # i accidentally made a commit named "layout" and i'm NOT letting that be the name
 # of the actual final commit for this PR
 
-url_version = (
-    "https://raw.githubusercontent.com/Dpeta/pesterchum-alt-servers/main/version.py"
-)
+# I'm gonna change this to get version from the site instead
+# so I can set it independently of what's on the repo - Shou
+url_version = "https://www.pesterchum.xyz/version.txt"
 url_changelog = (
     "https://raw.githubusercontent.com/Dpeta/pesterchum-alt-servers/main/CHANGELOG.md"
 )
 
 
 class UpdateChecker(QtCore.QObject):
-    ver_latest = ""
-    ver_curr = ""
-    changelog = ""
-    update_available = False
-
     check_done = QtCore.pyqtSignal()
 
-    reply_version = None
-    reply_changelog = None
+    def __init__(self):
+        QtCore.QObject.__init__(self)
+        self.ver_latest = ""
+        self.ver_curr = ""
+        self.changelog = ""
+        self.update_available = False
+
+        self.reply_version = None
+        self.reply_changelog = None
 
     def check(self):
         PchumLog.info("Checking for updates...")
@@ -49,26 +51,20 @@ class UpdateChecker(QtCore.QObject):
         self.reply_changelog.finished.connect(self._on_changelog_reply)
 
     def _on_version_reply(self):
-
         version_text = bytes(self.reply_version.readAll()).decode(
             "utf-8", errors="replace"
         )
-        for line in version_text.split("\n"):
-            if "buildVersion" in line:
-                temp = line.replace("buildVersion = ", "")
-                self.ver_latest = temp.strip('"')
+        self.ver_latest = version_text.strip()
 
         buildLatest = self.ver_latest.replace("v", "").split(".")
         buildCurrent = self.ver_curr.replace("v", "").split(".")
 
-        if buildLatest > buildCurrent:
-            self.update_available = True
+        self.update_available = buildLatest > buildCurrent
 
         if self.changelog:
             self.check_done.emit()
 
     def _on_changelog_reply(self):
-
         self.changelog = bytes(self.reply_changelog.readAll()).decode(
             "utf-8", errors="replace"
         )

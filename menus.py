@@ -14,7 +14,8 @@ import ostools
 import parsetools
 from theme_repo_manager import ThemeManagerWidget
 from generic import RightClickList, RightClickTree, MultiTextDialog
-from dataobjs import pesterQuirk, PesterProfile, PesterHistory
+from dataobjs import PesterProfile, PesterHistory
+from quirks import PesterQuirkFactory
 from memos import TimeSlider, TimeInput
 from version import _pcVersion
 from convo import PesterInput, PesterText
@@ -435,6 +436,7 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         self.radios.append(QtWidgets.QRadioButton("Regexp Replace", self))
         self.radios.append(QtWidgets.QRadioButton("Random Replace", self))
         self.radios.append(QtWidgets.QRadioButton("Mispeller", self))
+        self.radios.append(QtWidgets.QRadioButton("Gradient", self))
 
         layout_select.addWidget(QtWidgets.QLabel("Select Quirk Type:"))
         for r in self.radios:
@@ -578,6 +580,42 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         layout_mispeller.addLayout(layout_1)
         layout_mispeller.addWidget(self.current)
 
+        # Gradient
+        widget = QtWidgets.QWidget()
+        self.pages.addWidget(widget)
+        layout_all = QtWidgets.QVBoxLayout(widget)
+        layout_intermediate = QtWidgets.QHBoxLayout(widget)
+        layout_side = QtWidgets.QVBoxLayout(widget)
+
+        self.gradient_regex_input = QtWidgets.QLineEdit("(.*)", self)
+        self.gradient_regex_template = QtWidgets.QLineEdit("\\1", self)
+        self.gradient_colorlist = QtWidgets.QListWidget(self)
+        self.gradient_upbutton = QtWidgets.QPushButton("↑", self)
+        self.gradient_downbutton = QtWidgets.QPushButton("↓", self)
+        self.gradient_addbutton = QtWidgets.QPushButton("Add", self)
+        self.gradient_editbutton = QtWidgets.QPushButton("Edit", self)
+        self.gradient_deletebutton = QtWidgets.QPushButton("Remove", self)
+
+        self.gradient_upbutton.clicked.connect(self.gradient_move_up)
+        self.gradient_addbutton.clicked.connect(self.gradient_add_item)
+        self.gradient_deletebutton.clicked.connect(self.gradient_delete_current_item)
+        self.gradient_editbutton.clicked.connect(self.gradient_edit_item)
+        self.gradient_downbutton.clicked.connect(self.gradient_move_down)
+
+        layout_all.addWidget(QtWidgets.QLabel("Regexp:"))
+        layout_all.addWidget(self.gradient_regex_input)
+        layout_all.addWidget(QtWidgets.QLabel("Replace with:"))
+        layout_all.addWidget(self.gradient_regex_template)
+        layout_all.addWidget(QtWidgets.QLabel("Colors:"))
+        layout_intermediate.addWidget(self.gradient_colorlist)
+        layout_intermediate.addLayout(layout_side)
+        layout_side.addWidget(self.gradient_upbutton)
+        layout_side.addWidget(self.gradient_addbutton)
+        layout_side.addWidget(self.gradient_editbutton)
+        layout_side.addWidget(self.gradient_deletebutton)
+        layout_side.addWidget(self.gradient_downbutton)
+        layout_all.addLayout(layout_intermediate)
+
         layout_0 = QtWidgets.QVBoxLayout()
         layout_0.addWidget(self.pages)
         layout_0.addLayout(layout_2)
@@ -592,7 +630,15 @@ class PesterQuirkTypes(QtWidgets.QDialog):
         layout_mispeller.addLayout(layout_3)
 
         if quirk:
-            types = ["prefix", "suffix", "replace", "regexp", "random", "spelling"]
+            types = [
+                "prefix",
+                "suffix",
+                "replace",
+                "regexp",
+                "random",
+                "spelling",
+                "gradient",
+            ]
             for i, r in enumerate(self.radios):
                 if i == types.index(quirk.quirk.type):
                     r.setChecked(True)
@@ -641,18 +687,110 @@ class PesterQuirkTypes(QtWidgets.QDialog):
                     )
                 except (KeyError, ValueError) as e:
                     PchumLog.exception("Exception setting spelling quirk.")
+            elif q["type"] == "gradient":
+                self.gradient_regex_input.setText(q["from"])
+                self.gradient_regex_template.setText(q["template"])
+                self.gradient_loaditems(q["colors"])
+            else:
+                # Gradient list must have at least 1 item
+                self.gradient_loaditems(["#FFFFFF"])
 
         self.setLayout(layout_0)
+
+    @QtCore.pyqtSlot()
+    def gradient_move_up(
+        self,
+    ):
+        currentIdx = self.gradient_colorlist.currentRow()
+        if currentIdx <= 0:
+            return
+        item = self.gradient_colorlist.takeItem(currentIdx)
+        self.gradient_colorlist.insertItem(currentIdx - 1, item)
+        self.gradient_colorlist.setCurrentRow(currentIdx - 1)
+
+    def _set_listitem_color(self, listwidget, color: str = ""):
+        if color == "":
+            color = listwidget.text()
+        listwidget.setBackground(QtGui.QColor(color))
+        return listwidget
+
+    def gradient_loaditems(self, items: list):
+        for item in items:
+            self.gradient_colorlist.addItem(item)
+            self._set_listitem_color(
+                self.gradient_colorlist.item(self.gradient_colorlist.count() - 1)
+            )
+
+    def gradient_add_item(
+        self,
+    ):
+        currentIdx = self.gradient_colorlist.currentRow()
+        initial = QtGui.QColor("#FFFFFF")
+        if currentIdx != -1:
+            initial = self.gradient_colorlist.item(currentIdx).background().color()
+
+        item = QtWidgets.QListWidgetItem()
+
+        colorDialog = QtWidgets.QColorDialog(self)
+        color = colorDialog.getColor(initial=initial)
+        if not color.isValid():
+            return
+        color_string = color.name()
+
+        item.setText(color_string)
+        self._set_listitem_color(item, color_string)
+
+        self.gradient_colorlist.insertItem(currentIdx + 1, item)
+        self.gradient_colorlist.setCurrentRow(currentIdx + 1)
+
+    def gradient_delete_current_item(
+        self,
+    ):
+        if self.gradient_colorlist.count() <= 1:
+            # Don't let the user delete the only item PLEASE
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setText("HEY! You can't delete the only color!")
+            msgbox.setInformativeText("bozo.")
+            msgbox.exec()
+            return
+        currentIdx = self.gradient_colorlist.currentRow()
+        self.gradient_colorlist.takeItem(currentIdx)
+
+    def gradient_edit_item(
+        self,
+    ):
+        currentIdx = self.gradient_colorlist.currentRow()
+        item = self.gradient_colorlist.item(currentIdx)
+
+        colorDialog = QtWidgets.QColorDialog(self)
+        color = colorDialog.getColor(initial=item.background().color())
+        if not color.isValid():
+            return
+        color_string = color.name()
+
+        item.setText(color_string)
+        self._set_listitem_color(item, color_string)
+
+    def gradient_move_down(
+        self,
+    ):
+        currentIdx = self.gradient_colorlist.currentRow()
+        end = max(0, self.gradient_colorlist.count() - 1)
+        if currentIdx in (-1, end):
+            return
+        item = self.gradient_colorlist.takeItem(currentIdx)
+        self.gradient_colorlist.insertItem(currentIdx + 1, item)
+        self.gradient_colorlist.setCurrentRow(currentIdx + 1)
 
     def closeEvent(self, event):
         self.parent().quirkadd = None
 
     def changePage(self, page):
-        c = self.pages.count()
-        if page >= c or page < 0:
+        pagecount = self.pages.count()
+        if page >= pagecount or page < 0:
             return
         self.back.setEnabled(page > 0)
-        if page >= 1 and page <= 6:
+        if page >= 1 and page <= pagecount:
             self.next.setText("Finish")
         else:
             self.next.setText("Next")
@@ -674,8 +812,9 @@ class PesterQuirkTypes(QtWidgets.QDialog):
 
     @QtCore.pyqtSlot()
     def backPage(self):
+        pagecount = self.pages.count()
         cur = self.pages.currentIndex()
-        if cur >= 1 and cur <= 6:
+        if cur >= 1 and cur <= pagecount:
             self.changePage(0)
 
     @QtCore.pyqtSlot(int)
@@ -823,7 +962,15 @@ class PesterChooseQuirks(QtWidgets.QDialog):
 
     @QtCore.pyqtSlot()
     def addQuirk(self):
-        types = ["prefix", "suffix", "replace", "regexp", "random", "spelling"]
+        types = [
+            "prefix",
+            "suffix",
+            "replace",
+            "regexp",
+            "random",
+            "spelling",
+            "gradient",
+        ]
         vdict = {}
         vdict["type"] = types[self.quirkadd.pages.currentIndex() - 1]
         page = self.quirkadd.pages.currentWidget().layout()
@@ -914,7 +1061,15 @@ class PesterChooseQuirks(QtWidgets.QDialog):
                 vdict["checkstate"] = str(
                     page.itemAt(3).layout().itemAt(0).widget().checkState()
                 )
-        if vdict["type"] in ("regexp", "random"):
+        elif vdict["type"] == "gradient":
+            vdict["from"] = self.quirkadd.gradient_regex_input.text()
+            vdict["template"] = self.quirkadd.gradient_regex_template.text()
+            vdict["colors"] = [
+                str(self.quirkadd.gradient_colorlist.item(i).text())
+                for i in range(0, self.quirkadd.gradient_colorlist.count())
+            ]
+
+        if vdict["type"] in ("regexp", "random", "gradient"):
             try:
                 re.compile(vdict["from"])
             except re.error as e:
@@ -925,7 +1080,7 @@ class PesterChooseQuirks(QtWidgets.QDialog):
                 self.quirkadd = None
                 return
 
-        quirk = pesterQuirk(vdict)
+        quirk = PesterQuirkFactory(vdict)
         if self.quirkadd.quirk is None:
             item = PesterQuirkItem(quirk)
             self.quirkList.addItem(item)
@@ -1384,6 +1539,63 @@ class PesterOptions(QtWidgets.QDialog):
         self.userlinkscheck.setChecked(self.config.disableUserLinks())
         self.userlinkscheck.setVisible(False)
 
+        self.label_trusteddomains = QtWidgets.QLabel("Trusted image domains:")
+        self.list_trusteddomains = QtWidgets.QListWidget()
+        self.list_trusteddomains.addItems(parent.userprofile.getTrustedDomains())
+        self.hbox_trusteddomains_buttons = QtWidgets.QHBoxLayout()
+        self.button_trusteddomains_add = QtWidgets.QPushButton("Add")
+        self.button_trusteddomains_remove = QtWidgets.QPushButton("Remove")
+        self.hbox_trusteddomains_buttons.addWidget(self.button_trusteddomains_add)
+        self.hbox_trusteddomains_buttons.addWidget(self.button_trusteddomains_remove)
+        self.label_trusteddomains_info = QtWidgets.QLabel(
+            "When an image link is sent in a conversation that belongs to one of these domains, pesterchum will embed the image alongside the message in the log"
+        )
+        self.label_trusteddomains_info.setWordWrap(True)
+
+        def _on_button_trusteddomains_remove_pressed():
+            selected_idx = self.list_trusteddomains.currentRow()
+            if selected_idx >= 0:
+                self.list_trusteddomains.takeItem(selected_idx)
+
+        def _on_button_trusteddomains_add_pressed():
+            # When "add" is pressed, open a dialog where the user can enter 1 domain
+            schema = {"label": "Domain:", "inputname": "value"}
+
+            result = MultiTextDialog("ENTER DOMAIN", self, schema).getText()
+            if result is None:
+                return
+            domain = result["value"]
+
+            if not "." in domain:
+                # No TLD (.com, .org, etc)
+                # not a valid domain
+                errbox = QtWidgets.QMessageBox(self)
+                errbox.setText("Not a valid domain!")
+                errbox.setInformativeText(
+                    "You are missing the TLD (.com, .org, etc etc)"
+                )
+                errbox.exec()
+                return
+
+            if not (domain.startswith("https://") or domain.startswith("http://")):
+                # Missing protocol, but thats fine
+                # This also means you'd need two entries for http & https version of a website
+                # but we stan https everywhere in this house so we ball
+                domain = "https://" + domain
+            if domain.count("/") < 3:
+                # append a '/' to the end if there is no '/' anywhere after the TLD
+                # this is to prevent something like `https://example.org` to also match with `https://example.org.mynefariouswebsite.com'
+                # IE, 'https://example.org' becomes 'https://example.org/', but 'https://example.org/beap' is left as-is
+                domain += "/"
+            self.list_trusteddomains.addItem(domain)
+
+        self.button_trusteddomains_add.clicked.connect(
+            _on_button_trusteddomains_add_pressed
+        )
+        self.button_trusteddomains_remove.clicked.connect(
+            _on_button_trusteddomains_remove_pressed
+        )
+
         # Will add ability to turn off groups later
         # self.groupscheck = QtGui.QCheckBox("Use Groups", self)
         # self.groupscheck.setChecked(self.config.useGroups())
@@ -1587,6 +1799,12 @@ class PesterOptions(QtWidgets.QDialog):
             layout_chat.addWidget(self.animationscheck)
             layout_chat.addWidget(animateLabel)
         layout_chat.addWidget(self.randomscheck)
+
+        layout_chat.addWidget(self.label_trusteddomains)
+        layout_chat.addWidget(self.list_trusteddomains)
+        layout_chat.addLayout(self.hbox_trusteddomains_buttons)
+        layout_chat.addWidget(self.label_trusteddomains_info)
+
         # Re-enable these when it's possible to disable User and Memo links
         # layout_chat.addWidget(hr)
         # layout_chat.addWidget(QtGui.QLabel("User and Memo Links"))

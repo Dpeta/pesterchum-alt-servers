@@ -1,7 +1,9 @@
 """IRC-related functions and classes to be imported by irc.py"""
 
-import logging
+import ssl
+import time
 import base64
+import logging
 
 PchumLog = logging.getLogger("pchumLogger")
 
@@ -9,7 +11,7 @@ PchumLog = logging.getLogger("pchumLogger")
 class SendIRC:
     """Provides functions for outgoing IRC commands.
 
-    Functions are protocol compliant but don't implement all valid uses of certain commands.
+    Functions are protocol-compliant but don't implement all valid uses of certain commands.
     """
 
     def __init__(self):
@@ -27,7 +29,7 @@ class SendIRC:
             PchumLog.error(
                 "Send attempted while disconnected, args: %s, text: %s.", args, text
             )
-            return
+            raise ConnectionError("Socket is not connected.")
 
         command = ""
         # Convert command arguments to a single string if passed.
@@ -38,15 +40,11 @@ class SendIRC:
             command += f" :{text}"
         # Add characters for end of line in IRC.
         command += "\r\n"
-        # UTF-8 is the prefered encoding in 2023.
+        # UTF-8 is the preferred encoding in 2023.
         outgoing_bytes = command.encode(encoding="utf-8", errors="replace")
 
-        try:
-            PchumLog.debug("Sending: %s", command)
-            self.socket.send(outgoing_bytes)
-        except OSError:
-            PchumLog.exception("Error while sending: '%s'", command.strip())
-            self.socket.close()
+        PchumLog.debug("Sending: %s", command)
+        self.socket.sendall(outgoing_bytes)
 
     def ping(self, token):
         """Send PING command to server to check for connectivity."""
@@ -54,7 +52,7 @@ class SendIRC:
 
     def pong(self, token):
         """Send PONG command to reply to server PING."""
-        self._send("PONG", token)
+        self._send("PONG", text=token)
 
     def pass_(self, password):
         """Send a 'connection password' to the server.
@@ -210,4 +208,4 @@ def parse_irc_line(line: str):
             break
         fused_args.append(arg)
 
-    return (tags, prefix, command, fused_args)
+    return tags, prefix, command, fused_args

@@ -10,14 +10,15 @@ except ImportError:
     print("PyQt5 fallback (parsetools.py)")
     from PyQt5 import QtGui, QtWidgets
 
-import dataobjs
 
 # karxi: My own contribution to this - a proper lexer.
 from pnc import lexercon
 from generic import mysteryTime
-from quirks import ScriptQuirks
-from pyquirks import PythonQuirks
+from pyquirks import ScriptQuirks, PythonQuirks
 from scripts.services import BOTNAMES
+import quirks
+
+import embeds
 
 PchumLog = logging.getLogger("pchumLogger")
 
@@ -41,6 +42,12 @@ _honk = re.compile(r"(?i)\bhonk\b")
 _groupre = re.compile(r"\\([0-9]+)")
 _alternian_begin = re.compile(r"<alt>")  # Matches get set to alternian font
 _alternian_end = re.compile(r"</alt>")
+
+
+_embedre = re.compile(
+    r"(?i)(?:^|(?<=\s))(?:(?:https?):\/\/)[^\s]+(?:\.png|\.jpg|\.jpeg|\.gif|\.webp)(?:\?[^\s]+)?"
+)
+
 
 quirkloader = ScriptQuirks()
 _functionre = None
@@ -163,6 +170,33 @@ class formatEnd(lexercon.Chunk):
             return self.string
 
 
+class embedlink(lexercon.Chunk):
+    domain_trusted = False
+
+    def __init__(self, url):
+        self.url = url
+        self.domain_trusted = embeds.manager.check_trustlist(self.url)
+        if self.domain_trusted:
+            embeds.manager.fetch_embed(url)
+
+    def convert(self, format):
+        if format == "html":
+            # Only add the showable image tag if the domain is trusted & thus will actually be fetched
+            # Otherwise would show "fetching embed..." forever
+            if self.domain_trusted:
+                # <a> tag to make it clickable, <img> tag to make it show the image (actual image resource is added after parsing)
+                return (
+                    "<a href='%s'>%s</a><br><a href='%s'><img alt='%s' src='%s' width=300></a>"
+                    % (self.url, self.url, self.url, self.url, self.url)
+                )
+            else:
+                return "<a href='%s'>%s</a>" % (self.url, self.url)
+        elif format == "bbcode":
+            return f"[url]{self.url}[/url]"
+        else:
+            return self.url
+
+
 class hyperlink(lexercon.Chunk):
     def __init__(self, string):
         self.string = string
@@ -214,6 +248,7 @@ class imagelink(lexercon.Chunk):
         self.img = img
 
     def convert(self, format):
+        # raise Exception(format)
         if format == "html":
             return self.string
         elif format == "bbcode":
@@ -258,6 +293,7 @@ class smiley(lexercon.Chunk):
         self.string = string
 
     def convert(self, format):
+        # print("SMILEY:: ", format)
         if format == "html":
             return "<img src='smilies/{}' alt='{}' title='{}' />".format(
                 smiledict[self.string],
@@ -318,6 +354,7 @@ def lexMessage(string: str):
         # actually use it, save for Chumdroid...which shouldn't.
         # When I change out parsers, I might add it back in.
         ##(formatBegin, _format_begin), (formatEnd, _format_end),
+        (embedlink, _embedre),
         (imagelink, _imgre),
         (hyperlink, _urlre),
         (memolex, _memore),
@@ -764,16 +801,16 @@ def kxhandleInput(ctx, text=None, flavor=None, irc_compatible=False):
     if should_quirk and not (is_action or is_ooc):
         if flavor != "menus":
             # Fetch the quirks we'll have to apply.
-            quirks = ctx.mainwindow.userprofile.quirks
+            quirk_collection = ctx.mainwindow.userprofile.quirks
         else:
             # The quirk testing window uses a different set.
-            quirks = dataobjs.pesterQuirks(ctx.parent().testquirks())
+            quirk_collection = quirks.PesterQuirkCollection(ctx.parent().testquirks())
 
         try:
             # Do quirk things. (Ugly, but it'll have to do for now.)
             # TODO: Look into the quirk system, modify/redo it.
             # Gotta encapsulate or we might parse the wrong way.
-            msg = quirks.apply([msg])
+            msg = quirk_collection.apply([msg])
         except Exception as err:
             # Tell the user we couldn't do quirk things.
             # TODO: Include the actual error...and the quirk it came from?

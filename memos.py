@@ -937,6 +937,9 @@ class PesterMemo(PesterConvo):
             self.iconCrap(item)
 
     def addUser(self, handle):
+        if not handle:
+            PchumLog.warning("Empty string passed to addUser()?")
+            return
         chumdb = self.mainwindow.chumdb
         defaultcolor = QtGui.QColor("black")
         founder = False

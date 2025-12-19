@@ -39,7 +39,8 @@ from menus import (
     AddChumDialog,
 )
 from mood import Mood, PesterMoodAction, PesterMoodHandler, PesterMoodButton
-from dataobjs import PesterProfile, pesterQuirk, pesterQuirks
+from dataobjs import PesterProfile
+from quirks import PesterQuirkCollection
 from generic import (
     PesterIcon,
     RightClickTree,
@@ -62,6 +63,7 @@ from logviewer import PesterLogUserSelect, PesterLogViewer
 from randomer import RandomHandler, RANDNICK
 from toast import PesterToastMachine, PesterToast
 from scripts.services import SERVICES, CUSTOMBOTS, BOTNAMES, translate_nickserv_msg
+import embeds
 
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets, QtMultimedia
@@ -796,6 +798,7 @@ class chumArea(RightClickTree):
     def updateMood(self, handle, mood):
         hideoff = self.mainwindow.config.hideOfflineChums()
         chums = self.getChums(handle)
+        # Grab all the chums from the chumroll that matches the handle (duplicates are possible)
         oldmood = None
         if hideoff:
             if (
@@ -816,14 +819,18 @@ class chumArea(RightClickTree):
                     # self.takeItem(c)
                 chums = []
         for c in chums:
+            # For each instance of the handle on the chumroll, change their displayed mood
             if hasattr(c, "mood"):
                 oldmood = c.mood
                 c.setMood(mood)
+
         if self.mainwindow.config.sortMethod() == 1:
+            # uh. uhmm. uhh. uhhhh.
             for i in range(self.topLevelItemCount()):
                 saveCurrent = self.currentItem()
                 self.moodSort(i)
                 self.setCurrentItem(saveCurrent)
+            # yeah idk what this does ↑
         if self.mainwindow.config.showOnlineNumbers():
             self.showOnlineNumbers()
         return oldmood
@@ -838,7 +845,8 @@ class chumArea(RightClickTree):
         self.move(*theme["main/chums/loc"])
         if "main/chums/scrollbar" in theme:
             self.setStyleSheet(
-                "QListWidget { %s } \
+                "RightClickTree { %s } \
+                QListWidget { %s } \
                 QScrollBar { %s } \
                 QScrollBar::handle { %s } \
                 QScrollBar::add-line { %s } \
@@ -846,6 +854,9 @@ class chumArea(RightClickTree):
                 QScrollBar:up-arrow { %s } \
                 QScrollBar:down-arrow { %s }"
                 % (
+                    theme[
+                        "main/chums/style"
+                    ],  # This is kind of hacky, but without it chumrolls dont get styled when u set a scrollbar
                     theme["main/chums/style"],
                     theme["main/chums/scrollbar/style"],
                     theme["main/chums/scrollbar/handle"],
@@ -1110,7 +1121,8 @@ class trollSlum(chumArea):
         if event.reason() == QtGui.QContextMenuEvent.Reason.Mouse:
             listing = self.itemAt(event.pos())
             self.setCurrentItem(listing)
-            if self.currentItem().text(0) != "":
+            curItem = self.currentItem()
+            if curItem and curItem.text(0):
                 self.optionsMenu.popup(event.globalPos())
 
     def changeTheme(self, theme):
@@ -1197,10 +1209,8 @@ class TrollSlumWindow(QtWidgets.QFrame):
             self, "Add Troll", "Enter Troll Handle:"
         )
         if ok:
-            if not (
-                PesterProfile.checkLength(handle)
-                and PesterProfile.checkValid(handle)[0]
-            ):
+            # TODO MAYBE: Perhaps check PesterProfile.checkValid(handle)[0] & add a confirmation witha little "you may have missed a capital letter r u sure" if its invalid
+            if not (PesterProfile.checkLength(handle)):
                 errormsg = QtWidgets.QErrorMessage(self)
                 errormsg.showMessage("THIS IS NOT A VALID CHUMTAG!")
                 self.addchumdialog = None
@@ -1259,9 +1269,12 @@ class PesterWindow(MovingWindow):
         # Part 1 :(
         try:
             if self.config.defaultprofile():
+                # "defaultprofile" config setting is set
+                # load is here
                 self.userprofile = userProfile(self.config.defaultprofile())
                 self.theme = self.userprofile.getTheme()
             else:
+                # Generate a new profile (likely this is the first-run)
                 self.userprofile = userProfile(
                     PesterProfile(
                         "pesterClient%d" % (random.randint(100, 999)),
@@ -1351,6 +1364,8 @@ class PesterWindow(MovingWindow):
         self.chatlog = PesterLog(self.profile().handle, self)
 
         self.move(100, 100)
+
+        embeds.manager.mainwindow = self  ## We gotta get a reference to the user profile from somewhere since its not global. oh well
 
         talk = QAction(self.theme["main/menus/client/talk"], self)
         self.talk = talk
@@ -1891,8 +1906,10 @@ class PesterWindow(MovingWindow):
         self.chumdb.setColor(handle, color)
 
     def updateMood(self, handle, mood):
-        # updates OTHER chums' moods
-        oldmood = self.chumList.updateMood(handle, mood)
+        # updates OTHER (but also ours if we're on our own chumroll) chums' moods
+        oldmood = self.chumList.updateMood(
+            handle, mood
+        )  # This calls chumArea.updateMood
         if handle in self.convos:
             self.convos[handle].updateMood(mood, old=oldmood)
         if hasattr(self, "trollslum") and self.trollslum:
@@ -1939,7 +1956,7 @@ class PesterWindow(MovingWindow):
         self.tabmemo.windowClosed.connect(self.memoTabsClosed)
 
     def newMemo(self, channel, timestr, secret=False, invite=False):
-        if channel == "#pesterchum":
+        if channel.casefold() == "#pesterchum":
             return
         if channel in self.memos:
             self.memos[channel].showChat()
@@ -2114,9 +2131,11 @@ class PesterWindow(MovingWindow):
         if self.moods:
             self.moods.removeButtons()
         mood_list = theme["main/moods"]
-        mood_list = [{str(k): v for (k, v) in d.items()} for d in mood_list]
         self.moods = PesterMoodHandler(
-            self, *[PesterMoodButton(self, **d) for d in mood_list]
+            self,
+            [
+                PesterMoodButton(self, **mood) for mood in mood_list
+            ],  # For mood dict in mood_list, create a matching PesterMoodButton
         )
         self.moods.showButtons()
         # chum
@@ -2348,6 +2367,10 @@ class PesterWindow(MovingWindow):
             for memo in self.userprofile.getAutoJoins():
                 self.newMemo(memo, "i")
 
+    def rejoin_channels(self):
+        for memo in self.memos.keys():
+            self.joinChannel.emit(memo)
+
     @QtCore.pyqtSlot()
     def connected(self):
         if self.loadingscreen:
@@ -2355,6 +2378,7 @@ class PesterWindow(MovingWindow):
         self.loadingscreen = None
 
         self.doAutoJoins()
+        self.rejoin_channels()
 
         # Start client --> server pings
         if hasattr(self, "pingtimer"):
@@ -2427,7 +2451,7 @@ class PesterWindow(MovingWindow):
                     self.theme["convo/text/ceasepester"],
                 ),
             )
-            if not self.config.irc_compatibility_mode():
+            if not self.config.irc_compatibility_mode() and self.parent.irc_alive():
                 self.convoClosed.emit(handle)
         self.chatlog.finish(h)
         del self.convos[h]
@@ -2436,7 +2460,8 @@ class PesterWindow(MovingWindow):
     def closeMemo(self, channel):
         c = channel
         self.chatlog.finish(c)
-        self.leftChannel.emit(channel)
+        if self.parent.irc_alive():
+            self.leftChannel.emit(channel)
         try:
             del self.memos[c]
         except KeyError:
@@ -2457,8 +2482,8 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot(str, Mood)
     def updateMoodSlot(self, handle, mood):
-        h = handle
-        self.updateMood(h, mood)
+        # Called by IRC for each handle that updates its mood, either through #pesterchum or metadata
+        self.updateMood(handle, mood)
 
     @QtCore.pyqtSlot(str, QtGui.QColor)
     def updateColorSlot(self, handle, color):
@@ -2634,10 +2659,8 @@ class PesterWindow(MovingWindow):
                 if handle in [h.handle for h in self.chumList.chums]:
                     self.addchumdialog = None
                     return
-                if not (
-                    PesterProfile.checkLength(handle)
-                    and PesterProfile.checkValid(handle)[0]
-                ):
+                # TODO MAYBE: Perhaps check PesterProfile.checkValid(handle)[0] & add a confirmation witha little "you may have missed a capital letter r u sure" if its invalid
+                if not (PesterProfile.checkLength(handle)):
                     errormsg = QtWidgets.QErrorMessage(self)
                     errormsg.showMessage("THIS IS NOT A VALID CHUMTAG!")
                     self.addchumdialog = None
@@ -2699,10 +2722,9 @@ class PesterWindow(MovingWindow):
 
     @QtCore.pyqtSlot(str)
     def unblockChum(self, handle):
-        h = handle
-        self.config.delBlocklist(h)
-        if h in self.convos:
-            convo = self.convos[h]
+        self.config.delBlocklist(handle)
+        if handle in self.convos:
+            convo = self.convos[handle]
             msg = self.profile().pestermsg(
                 convo.chum,
                 QtGui.QColor(self.theme["convo/systemMsgColor"]),
@@ -2711,7 +2733,7 @@ class PesterWindow(MovingWindow):
             convo.textArea.append(convertTags(msg))
             self.chatlog.log(convo.chum.handle, msg)
             convo.updateMood(convo.chum.mood, unblocked=True)
-        chum = PesterProfile(h, chumdb=self.chumdb)
+        chum = PesterProfile(handle, chumdb=self.chumdb)
         if hasattr(self, "trollslum") and self.trollslum:
             self.trollslum.removeTroll(handle)
         self.config.addChum(chum)
@@ -2894,7 +2916,7 @@ class PesterWindow(MovingWindow):
                     item.checkState(0) == QtCore.Qt.CheckState.Checked
                 )
                 item.quirk.quirk["group"] = item.quirk.group = curgroup
-        quirks = pesterQuirks(self.quirkmenu.quirks())
+        quirks = PesterQuirkCollection(self.quirkmenu.quirks())
         self.userprofile.setQuirks(quirks)
         if hasattr(self.quirkmenu, "quirktester") and self.quirkmenu.quirktester:
             self.quirkmenu.quirktester.close()
@@ -3095,6 +3117,15 @@ class PesterWindow(MovingWindow):
                 self.config.set("time12Format", False)
             secondssetting = self.optionmenu.secondscheck.isChecked()
             self.config.set("showSeconds", secondssetting)
+
+            # trusted domains
+            trusteddomains = []
+            for i in range(self.optionmenu.list_trusteddomains.count()):
+                trusteddomains.append(
+                    self.optionmenu.list_trusteddomains.item(i).text()
+                )
+            self.userprofile.setTrustedDomains(trusteddomains)
+
             # groups
             # groupssetting = self.optionmenu.groupscheck.isChecked()
             # self.config.set("useGroups", groupssetting)
@@ -3973,10 +4004,13 @@ class PesterWindow(MovingWindow):
             pass
         msgbox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
         msgbox.setText("Server certificate validation failed")
-        msgbox.setInformativeText(
-            'Reason: "{} ({})"'.format(e.verify_message, e.verify_code)
-            + "\n\nConnect anyway?"
-        )
+        if hasattr(e, "verify_message") and hasattr(e, "e.verify_code"):
+            msgbox.setInformativeText(
+                'Reason: "{} ({})"'.format(e.verify_message, e.verify_code)
+                + "\n\nConnect anyway?"
+            )
+        else:
+            msgbox.setInformativeText("\n\nConnect anyway?")
         msgbox.setStandardButtons(
             QtWidgets.QMessageBox.StandardButton.Yes
             | QtWidgets.QMessageBox.StandardButton.No
@@ -4140,18 +4174,19 @@ class MainProgram(QtCore.QObject):
         self.app.aboutToQuit.connect(self.death)
 
     def death(self):
-        """app murder in progress, kill the IRC thread if it didnt die already."""
+        """app murder in progress, kill the IRC thread if it didn't die already."""
         PchumLog.debug("death inbound")
-        if hasattr(self, "irc"):
-            if self.irc:
-                if self.irc.isRunning():
-                    PchumLog.debug("Calling exit() on IRC thread.")
-                    self.irc.exit()
+        if self.irc and self.irc.isRunning():
+            PchumLog.debug("Calling exit() on IRC thread.")
+            self.irc.exit()
 
     # def lastWindow(self):
     #    print("all windows closed")
     #    if hasattr(self, 'widget'):
     #        self.widget.killApp()
+
+    def irc_alive(self):
+        return self.irc and self.irc.isRunning() and self.irc.is_connected()
 
     @QtCore.pyqtSlot(QtWidgets.QWidget)
     def alertWindow(self, widget):
@@ -4286,20 +4321,18 @@ class MainProgram(QtCore.QObject):
             self.widget.loadingscreen.done(QtWidgets.QDialog.DialogCode.Accepted)
             self.widget.loadingscreen = None
         self.attempts += 1
-        if hasattr(self, "irc") and self.irc:
-            self.irc.disconnectIRC()
-        else:
-            self.restartIRC()
+        if self.irc_alive():
+            self.irc.disconnect_irc()
+        self.restartIRC()
 
     @QtCore.pyqtSlot()
     def restartIRC(self, verify_hostname=True):
         if hasattr(self, "irc") and self.irc:
-            self.disconnectWidgets(self.irc, self.widget)
             stop = self.irc.stop_irc
-            del self.irc
         else:
             stop = None
         if stop is None:
+            self.disconnectWidgets(self.irc, self.widget)
             self.irc = PesterIRC(
                 self.widget,
                 self.widget.config.server(),
@@ -4401,7 +4434,7 @@ class UpdateAvailable(QtWidgets.QDialog):
     def update(self):
         QtGui.QDesktopServices.openUrl(
             QtCore.QUrl(
-                "https://github.com/Dpeta/pesterchum-alt-servers/",
+                "https://github.com/Dpeta/pesterchum-alt-servers/releases",
                 QtCore.QUrl.ParsingMode.TolerantMode,
             )
         )

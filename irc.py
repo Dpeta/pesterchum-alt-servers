@@ -66,7 +66,6 @@ class PesterIRC(QtCore.QThread):
         QtCore.QThread.__init__(self)
         self.mainwindow = window
 
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = server  # Server to connect to.
         self.port = port  # Port on server to connect to.
         self.password = password  # Optional password for PASS.
@@ -99,6 +98,7 @@ class PesterIRC(QtCore.QThread):
             "324": self._channelmodeis,
             "353": self._namreply,
             "366": self._endofnames,
+            "404": self._noexternalmessages,
             "432": self._erroneusnickname,
             "433": self._nicknameinuse,
             "436": self._nickcollision,
@@ -160,6 +160,9 @@ class PesterIRC(QtCore.QThread):
                     PchumLog.debug("False Yield: %s, returning", res)
                     return
 
+    def is_connected(self):
+        return not self._end
+
     def _connect(self, verify_hostname=True):
         """Initiates the connection to the server set in self.server:self.port
         self.ssl decides whether the connection uses ssl.
@@ -216,13 +219,20 @@ class PesterIRC(QtCore.QThread):
         self._send_irc.nick(profile.handle)
         self._send_irc.user("pcc31", "pcc31")
 
+    def _get_stuffs_from_socket(self):
+        """:3"""
+        return self.socket.recv(1024)
+
     def _conn_generator(self):
         """Returns a generator object."""
         try:
             buffer = b""
             while not self._end:
+                if not self.socket or self.socket.fileno() == -1:
+                    self._end = True
+                    break
                 try:
-                    buffer += self.socket.recv(1024)
+                    buffer += self._get_stuffs_from_socket()
                 except OSError as socket_exception:
                     PchumLog.warning(
                         "Socket exception in conn_generator: '%s'.", socket_exception
@@ -233,6 +243,9 @@ class PesterIRC(QtCore.QThread):
                 else:
                     if self._end:
                         break
+                    if not buffer:  # EOF?
+                        self._close()
+                        yield False
                     split_buffer = buffer.split(b"\r\n")
                     buffer = b""
                     if split_buffer[-1]:
@@ -281,21 +294,23 @@ class PesterIRC(QtCore.QThread):
 
     def _close(self):
         """Kill the socket 'with extreme prejudice'."""
-        if self.socket:
-            PchumLog.info("_close() was called, shutting down socket.")
-            self._end = True
-            try:
-                self.socket.shutdown(socket.SHUT_RDWR)
-            except OSError as exception:
-                PchumLog.info(
-                    "Error while shutting down socket, already broken? %s", exception
-                )
-            try:
-                self.socket.close()
-            except OSError as exception:
-                PchumLog.info(
-                    "Error while closing socket, already broken? %s", exception
-                )
+        self._end = True
+        if not self.socket or self.socket.fileno() == -1:
+            return
+        PchumLog.info("_close() was called, shutting down socket.")
+        try:
+            self.socket.shutdown(socket.SHUT_RDWR)
+        except OSError as exception:
+            PchumLog.info(
+                "Error while shutting down socket, already broken? %s", exception
+            )
+        try:
+            self.socket.close()
+        except OSError as exception:
+            PchumLog.info("Error while closing socket, already broken? %s", exception)
+        finally:
+            self._send_irc.socket = None
+            self.socket = None
 
     def irc_connect(self):
         """Try to connect and signal for connect-anyway prompt on cert fail."""
@@ -540,7 +555,6 @@ class PesterIRC(QtCore.QThread):
     def disconnect_irc(self):
         """Send QUIT and close connection, slot is called from main thread."""
         self._send_irc.quit(f"{_pcVersion} <3")
-        self._end = True
         self._close()
 
     @QtCore.pyqtSlot(str)
@@ -572,12 +586,10 @@ class PesterIRC(QtCore.QThread):
         METADATA <Target> <Key> <Visibility> <Value>
         """
         if key.casefold() == "mood":
-            if is_valid_mood(value[0]):
-                mood = Mood(int(value[0]))
+            if is_valid_mood(value):
+                mood = Mood(int(value))
             else:
-                PchumLog.warning(
-                    "Mood index '%s' from '%s' is not valid.", value[0], nick
-                )
+                PchumLog.warning("Mood index '%s' from '%s' is not valid.", value, nick)
                 mood = Mood(0)
             self.moodUpdated.emit(nick, mood)
         elif key.casefold() == "color":
@@ -941,7 +953,8 @@ class PesterIRC(QtCore.QThread):
 
     def _namreply(self, _server, _nick, _op, channel, names):
         """Numeric reply 353 RPL_NAMREPLY, part of a NAMES list of members, usually of a channel."""
-        namelist = names.split(" ")
+        namelist = names.strip().split(" ")
+        namelist = [i for i in namelist if i]  # Remove empty entries
         PchumLog.info('---> recv "NAMES %s: %s names"', channel, len(namelist))
         if not hasattr(self, "channelnames"):
             self.channelnames = {}
@@ -1067,7 +1080,7 @@ class PesterIRC(QtCore.QThread):
             )
 
     def _sasl_skill_issue(self, *_msg):
-        """Handles all responses from server that indicate SASL authentication failed.
+        """Handles all responses from server that indicate SASL authentication failed.
 
         Replies that indicate we can't authenticate include: 902, 904, 905.
         Aborts SASL by sending CAP END, ending capability negotiation."""
@@ -1076,6 +1089,10 @@ class PesterIRC(QtCore.QThread):
     def _saslsuccess(self, *_msg):
         """Handle 'RPL_SASLSUCCESS' reply from server, SASL authentication succeeded! woo yeah!!"""
         self.end_cap_negotiation()
+
+    def _noexternalmessages(self, _server, _handle, channel_name, msg=""):
+        """Handle 404 ERR_CANNOTSENDTOCHAN from server"""
+        self.cannotSendToChan.emit(channel_name, msg)
 
     moodUpdated = QtCore.pyqtSignal(str, Mood)
     colorUpdated = QtCore.pyqtSignal(str, QtGui.QColor)

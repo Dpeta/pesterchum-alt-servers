@@ -18,13 +18,27 @@ except ImportError:
     print("PyQt5 fallback (profile.py)")
     from PyQt5 import QtCore, QtGui, QtWidgets
 
+import quirks
 import ostools
 from mood import Mood
-from dataobjs import PesterProfile, pesterQuirks
+from dataobjs import PesterProfile
 from parsetools import convertTags
 
 _datadir = ostools.getDataDir()
 PchumLog = logging.getLogger("pchumLogger")
+
+
+DEFAULT_EMBED_TRUSTLIST = [  # Default list of trusted image embed domains
+    "https://cdn.discordapp.com/",
+    "https://pesterchum.xyz/",
+    "https://i.imgur.com/",
+    "https://media1.tenor.com/",
+    "https://raw.githubusercontent.com/",
+    "https://gitlab.com/",
+    "https://i.giphy.com/",
+    "https://64.media.tumblr.com/",
+    "https://i.redd.it/",
+]
 
 
 class PesterLog:
@@ -256,10 +270,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
         return self.config.get("hideOfflineChums", False)
 
     def defaultprofile(self):
-        try:
-            return self.config["defaultprofile"]
-        except KeyError:
-            return None
+        return self.config.get("defaultprofile", None)
 
     def tabs(self):
         return self.config.get("tabs", True)
@@ -567,7 +578,7 @@ with a backup from: <a href='%s'>%s</a></h3></html>"
                 for d in dirnames:
                     if d not in themes:
                         themes.append(d)
-        themes.sort()
+        themes.sort(key=str.casefold)
         return themes
 
     def availableProfiles(self):
@@ -639,7 +650,7 @@ class userProfile:
             self.theme = pesterTheme("pesterchum")
             self.chat.mood = Mood(self.theme["main/defaultmood"])
             self.lastmood = self.chat.mood.value()
-            self.quirks = pesterQuirks([])
+            self.quirks = quirks.PesterQuirkCollection([])
             self.randoms = False
             initials = self.chat.initials()
             if len(initials) >= 2:
@@ -652,6 +663,7 @@ class userProfile:
             else:
                 self.mentions = []
             self.autojoins = []
+            self.trusted_domains = DEFAULT_EMBED_TRUSTLIST
         else:
             # Trying to fix:
             #     IOError: [Errno 2]
@@ -700,7 +712,7 @@ class userProfile:
                 QtGui.QColor(self.userprofile["color"]),
                 Mood(self.lastmood),
             )
-            self.quirks = pesterQuirks(self.userprofile["quirks"])
+            self.quirks = quirks.PesterQuirkCollection(self.userprofile["quirks"])
             if "randoms" not in self.userprofile:
                 self.userprofile["randoms"] = False
             self.randoms = self.userprofile["randoms"]
@@ -720,6 +732,9 @@ class userProfile:
                 self.userprofile["autojoins"] = []
             self.autojoins = self.userprofile["autojoins"]
 
+            if "trusteddomains" not in self.userprofile:
+                self.userprofile["trusteddomains"] = DEFAULT_EMBED_TRUSTLIST
+            self.trusted_domains = self.userprofile["trusteddomains"]
         try:
             with open(_datadir + "passwd.js") as fp:
                 self.passwd = json.load(fp)
@@ -819,6 +834,14 @@ class userProfile:
     def setAutoJoins(self, autojoins):
         self.autojoins = autojoins
         self.userprofile["autojoins"] = self.autojoins
+        self.save()
+
+    def getTrustedDomains(self):
+        return self.trusted_domains
+
+    def setTrustedDomains(self, trusted_domains):
+        self.trusted_domains = trusted_domains
+        self.userprofile["trusteddomains"] = self.trusted_domains
         self.save()
 
     def save(self):
@@ -1025,6 +1048,10 @@ class pesterTheme(dict):
                 return self.inheritedTheme.get(key, default)
             else:
                 return default
+
+    def __contains__(self, key):
+        # Allows for `"thing/other/thing" in theme` checking
+        return self.has_key(key)
 
     def has_key(self, key):
         keys = key.split("/")
