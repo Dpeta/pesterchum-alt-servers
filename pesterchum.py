@@ -4419,9 +4419,6 @@ class MainProgram(QtCore.QObject):
                 )
             except Exception as e:
                 print(e)
-            msgbox.setStyleSheet(
-                "background-color: red; color: black; font-size: x-large;"
-            )
             msgbox.setText(
                 "An uncaught exception occurred: %s \n%s \n%s "
                 % (exc, value, "".join(traceback.format_tb(tb)))
