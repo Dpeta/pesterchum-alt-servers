@@ -1,6 +1,19 @@
 # Changelog
 (This document uses YYYY-MM-DD)
 
+## [v2.8.0] - TBD
+
+### Added
+ - Gradient quirk (by [mocchapi](https://github.com/mocchapi) https://github.com/Dpeta/pesterchum-alt-servers/pull/195)
+ - Added info to private (+p) memos/channels. Channels which have the +p channel mode set return their names as "*".
+
+### Fix
+ - Fixed building for MacOS
+ - Connect anyway prompt when certificate validation fails
+
+### Changed
+ - Accept header for embed requests & allow webps and gifs  (by [mocchapi](https://github.com/mocchapi) https://github.com/Dpeta/pesterchum-alt-servers/pull/196)
+
 ## [v2.7.0] - 2024-12-24
 
 ### Added
