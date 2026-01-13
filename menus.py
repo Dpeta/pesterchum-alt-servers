@@ -2294,7 +2294,7 @@ class PesterMemoList(QtWidgets.QDialog):
             if c[0][0] == "#":
                 item = MemoListItem(c[0][1:], c[1])
             elif c[0] == "*":
-                item = MemoListItem("* [secret memo]", c[1])
+                item = MemoListItem("* [private memo]", c[1])
             else:
                 item = MemoListItem(c[0][0:], c[1])
             item.setForeground(

@@ -2843,7 +2843,7 @@ class PesterWindow(MovingWindow):
 
         # Join the ones on the list first
         for SelectedMemo in self.memochooser.SelectedMemos():
-            if SelectedMemo.target == "* [secret memo]":
+            if SelectedMemo.target == "* [private memo]":
                 continue
             channel = f"#{SelectedMemo.target}"
             self.newMemo(channel, time)
