@@ -90,27 +90,10 @@ def getDataDir():
         return DATADIR
 
     try:
-        if isOSX():
-            return os.path.join(
-                QStandardPaths.writableLocation(
-                    QStandardPaths.StandardLocation.AppLocalDataLocation
-                ),
-                "Pesterchum/",
-            )
-        elif isLinux():
-            return os.path.join(
-                QStandardPaths.writableLocation(
-                    QStandardPaths.StandardLocation.HomeLocation
-                ),
-                ".pesterchum/",
-            )
-        else:
-            return os.path.join(
-                QStandardPaths.writableLocation(
-                    QStandardPaths.StandardLocation.AppLocalDataLocation
-                ),
-                "pesterchum/",
-            )
+        _datadir = os.path.join(os.getcwd(), "data") + "/"
+        if not os.path.dirname(_datadir):
+            os.mkdir(_datadir)
+        return _datadir
     except UnicodeDecodeError as e:
         print(e)
         return ""
