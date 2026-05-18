@@ -252,7 +252,7 @@ class PesterTabWindow(QtWidgets.QFrame):
         self.mainwindow.waitingMessages.messageAnswered(handle)
 
     def initTheme(self, theme):
-        self.resize(*theme["convo/size"])
+        self.setFixedSize(*theme["convo/size"])
         self.setStyleSheet(theme["convo/tabwindow/style"])
         self.tabs.setShape(QtWidgets.QTabBar.Shape(theme["convo/tabs/tabstyle"]))
         self.tabs.setStyleSheet(
@@ -709,7 +709,7 @@ class PesterConvo(QtWidgets.QFrame):
         self.chum = chum
         self.mainwindow = mainwindow
         theme = self.mainwindow.theme
-        self.resize(*theme["convo/size"])
+        self.setFixedSize(*theme["convo/size"])
         self.setStyleSheet(
             "QtWidgets.QFrame#{} {{ {} }}".format(chum.handle, theme["convo/style"])
         )
@@ -1027,7 +1027,7 @@ class PesterConvo(QtWidgets.QFrame):
         self.chumopen = o
 
     def changeTheme(self, theme):
-        self.resize(*theme["convo/size"])
+        self.setFixedSize(*theme["convo/size"])
         self.setStyleSheet(
             "QtWidgets.QFrame#{} {{ {} }}".format(
                 self.chum.handle, theme["convo/style"]

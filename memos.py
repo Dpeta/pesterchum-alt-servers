@@ -773,7 +773,7 @@ class PesterMemo(PesterConvo):
         self.textArea.addMessage(text, chum)
 
     def initTheme(self, theme):
-        self.resize(*theme["memos/size"])
+        self.setFixedSize(*theme["memos/size"])
         self.setStyleSheet("QtWidgets.QFrame { %s };" % (theme["memos/style"]))
         self.setWindowIcon(PesterIcon(theme["memos/memoicon"]))
         t = Template(theme["memos/label/text"])
