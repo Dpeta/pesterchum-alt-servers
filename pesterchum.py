@@ -1169,7 +1169,7 @@ class TrollSlumWindow(QtWidgets.QFrame):
         self.setLayout(layout_0)
 
     def initTheme(self, theme):
-        self.resize(*theme["main/trollslum/size"])
+        self.setFixedSize(*theme["main/trollslum/size"])
         self.setStyleSheet(theme["main/trollslum/style"])
         self.slumlabel.setText(theme["main/trollslum/label/text"])
         self.slumlabel.setStyleSheet(theme["main/trollslum/label/style"])
@@ -2056,7 +2056,7 @@ class PesterWindow(MovingWindow):
                     fontID,
                 )
 
-        self.resize(*theme["main/size"])
+        self.setFixedSize(*theme["main/size"])
         self.setWindowIcon(PesterIcon(theme["main/icon"]))
         self.setWindowTitle(theme["main/windowtitle"])
         self.setStyleSheet("QtWidgets.QFrame#main { %s }" % (theme["main/style"]))
