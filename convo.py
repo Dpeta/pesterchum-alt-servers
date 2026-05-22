@@ -515,7 +515,7 @@ class PesterText(QtWidgets.QTextEdit):
         # consistency with PESTERCHUM:TIME. alternatively, just replace(">", " >") like we
         # already do with COLOR (see irc.py)....
         # also all this applies to CEASE as well #lmao -emilydaemon
-        if lexmsg[0].startswith("PESTERCHUM:BEGIN"):
+        if isinstance(lexmsg[0], str) and lexmsg[0].startswith("PESTERCHUM:BEGIN"):
             parent.setChumOpen(True)
             pcbegincmdsplit = lexmsg[0].split(">")
             if len(pcbegincmdsplit) == 2:
@@ -527,7 +527,7 @@ class PesterText(QtWidgets.QTextEdit):
             )
             window.chatlog.log(chum.handle, pmsg)
             self.append(convertTags(pmsg))
-        elif lexmsg[0].startswith("PESTERCHUM:CEASE"):
+        elif isinstance(lexmsg[0], str) and lexmsg[0].startswith("PESTERCHUM:CEASE"):
             parent.setChumOpen(False)
             pcceasecmdsplit = lexmsg[0].split(">")
             if len(pcceasecmdsplit) == 2:
