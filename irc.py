@@ -457,12 +457,12 @@ class PesterIRC(QtCore.QThread):
         """Send convo begin message and color, slot is called from main thread."""
         self._send_irc.privmsg(handle, f"COLOR >{self.mainwindow.profile().colorcmd()}")
         if initiated:
-            self._send_irc.privmsg(handle, "PESTERCHUM:BEGIN")
+            self._send_irc.privmsg(handle, f"PESTERCHUM:BEGIN>{self.mainwindow.theme['convo/text/beganpester']}")
 
     @QtCore.pyqtSlot(str)
     def end_convo(self, handle):
         """Send convo cease message, slot is called from main thread."""
-        self._send_irc.privmsg(handle, "PESTERCHUM:CEASE")
+        self._send_irc.privmsg(handle, f"PESTERCHUM:CEASE>{self.mainwindow.theme['convo/text/ceasepester']}")
 
     @QtCore.pyqtSlot()
     def update_mood(self):

@@ -504,17 +504,38 @@ class PesterText(QtWidgets.QTextEdit):
                 time += "] "
         else:
             time = ""
-        if lexmsg[0] == "PESTERCHUM:BEGIN":
+        # because we're using startswith here it means this will accept bullshit like
+        # "PESTERCHUM:BEGINWHATEVERNONSENSEDUMPASS". I don't think that will be a problem?
+        # if it will, it's just a matter of checking if pcbegincmdsplit[0] == "PESTERCHUM:BEGIN".
+        # HOWEVER! that might also cause problems, because there's the question of whether
+        # the > symbol is preceded by a space or not. COLOR dictates it is, but PESTERCHUM:TIME
+        # disagrees. which is it?!?
+        # for now, the code is ambiguous enough to allow both ">" and " >", but if this has to
+        # change, my opinion is that the preceding space should not be allowed to maintain
+        # consistency with PESTERCHUM:TIME. alternatively, just replace(">", " >") like we
+        # already do with COLOR (see irc.py)....
+        # also all this applies to CEASE as well #lmao -emilydaemon
+        if lexmsg[0].startswith("PESTERCHUM:BEGIN"):
             parent.setChumOpen(True)
+            pcbegincmdsplit = lexmsg[0].split(">")
+            if len(pcbegincmdsplit) == 2:
+                beganpestermsg = pcbegincmdsplit[1]
+            else:
+                beganpestermsg = window.theme["convo/text/beganpester"]
             pmsg = chum.pestermsg(
-                me, systemColor, window.theme["convo/text/beganpester"]
+                me, systemColor, beganpestermsg
             )
             window.chatlog.log(chum.handle, pmsg)
             self.append(convertTags(pmsg))
-        elif lexmsg[0] == "PESTERCHUM:CEASE":
+        elif lexmsg[0].startswith("PESTERCHUM:CEASE"):
             parent.setChumOpen(False)
+            pcceasecmdsplit = lexmsg[0].split(">")
+            if len(pcceasecmdsplit) == 2:
+                ceasepestermsg = pcceasecmdsplit[1]
+            else:
+                ceasepestermsg = window.theme["convo/text/ceasepester"]
             pmsg = chum.pestermsg(
-                me, systemColor, window.theme["convo/text/ceasepester"]
+                me, systemColor, ceasepestermsg
             )
             window.chatlog.log(chum.handle, pmsg)
             self.append(convertTags(pmsg))
