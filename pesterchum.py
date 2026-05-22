@@ -1847,7 +1847,7 @@ class PesterWindow(MovingWindow):
         # play sound here
         if self.config.soundOn():
             if self.config.chatSound() or convo.always_beep:
-                if msg in ["PESTERCHUM:CEASE", "PESTERCHUM:BLOCK"] and self.ceasesound:
+                if (msg.startswith("PESTERCHUM:CEASE") or msg == "PESTERCHUM:BLOCK") and self.ceasesound:
                     self.ceasesound.play()
                 elif self.alarm:
                     self.alarm.play()
