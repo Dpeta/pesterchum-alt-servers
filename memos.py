@@ -774,7 +774,7 @@ class PesterMemo(PesterConvo):
 
     def initTheme(self, theme):
         self.resize(*theme["memos/size"])
-        self.setStyleSheet("QtWidgets.QFrame { %s };" % (theme["memos/style"]))
+        self.setStyleSheet(theme["memos/style"])
         self.setWindowIcon(PesterIcon(theme["memos/memoicon"]))
         t = Template(theme["memos/label/text"])
         if self.mainwindow.advanced and hasattr(self, "modes"):
