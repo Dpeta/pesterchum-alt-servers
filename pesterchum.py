@@ -1238,6 +1238,7 @@ class PesterWindow(MovingWindow):
                 | QtCore.Qt.WindowType.FramelessWindowHint
             ),
         )
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground, True)
         # TODO: karxi: SO! At the end of this function it seems like that
         # object is just made into None or.../something/. Somehow, it just
         # DIES, and I haven't the slightest idea why. I've tried multiple ways
@@ -1766,16 +1767,12 @@ class PesterWindow(MovingWindow):
                     m.sendtime()
 
     def paintEvent(self, _):
-        """Argument 'event'"""
         try:
-            self.backgroundImage
-        except:
-            pass
-        else:
-            palette = QtGui.QPalette()
-            brush = QtGui.QBrush(self.backgroundImage)
-            palette.setBrush(QtGui.QPalette.ColorRole.Window, brush)
-            self.setPalette(palette)
+            img = self.backgroundImage
+        except AttributeError:
+            return
+        painter = QtGui.QPainter(self)
+        painter.drawPixmap(0, 0, img)
 
     @QtCore.pyqtSlot()
     def closeToTray(self):
