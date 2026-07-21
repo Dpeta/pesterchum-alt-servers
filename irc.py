@@ -291,7 +291,7 @@ class PesterIRC(QtCore.QThread):
             command_function(*args)
         except TypeError:
             PchumLog.exception(
-                "Failed to pass command, did the server pass an unsupported paramater?"
+                "Failed to pass command, did the server pass an unsupported parameter?"
             )
         except Exception:
             PchumLog.exception("Exception while parsing command.")
