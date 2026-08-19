@@ -119,7 +119,7 @@ class colorBegin(lexercon.Chunk):
         elif format == "bbcode":
             return "[color=%s]" % (qc.name())
         elif format == "ctag":
-            (r, g, b, a) = qc.getRgb()
+            r, g, b, a = qc.getRgb()
             return "<c={},{},{}>".format(r, g, b)
 
 
@@ -921,6 +921,26 @@ def kxhandleInput(ctx, text=None, flavor=None, irc_compatible=False):
         if irc_compatible:
             serverMsg = re.sub(_ctag_begin, "", serverMsg)
             serverMsg = re.sub(_ctag_end, "", serverMsg)
+
+        # Memo-specific processing.
+        if flavor == "memos" and not is_action and not irc_compatible:
+            # Quirks were already applied, so get the prefix/postfix stuff
+            # ready.
+            # We fetched the information outside of the loop, so just
+            # construct the messages.
+
+            clientMsg = "<c={1}>{2}{3}{4}: {0}</c>".format(
+                clientMsg, colorcmd, grammar.pcf, initials, grammar.number
+            )
+            # Not sure if this needs a space at the end...?
+            serverMsg = f"<c={colorcmd}>{initials}: {serverMsg}</c>"
+
+        ctx.addMessage(clientMsg, True)
+        if flavor != "menus":
+            # If we're not doing quirk testing, actually send.
+            ctx.messageSent.emit(serverMsg, ctx.title())
+
+        clientMsg = "Bitch."
 
         # Memo-specific processing.
         if flavor == "memos" and not is_action and not irc_compatible:
